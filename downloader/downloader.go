@@ -55,12 +55,20 @@ func Get(url string) string {
 	return string(body)
 }
 
-func UrlSize(url string) int {
+func UrlSize(url string) int64 {
 	res := request("GET", url, nil)
 	defer res.Body.Close()
 	s := res.Header.Get("Content-Length")
-	size, _ := strconv.Atoi(s)
+	size, _ := strconv.ParseInt(s, 10, 64)
 	return size
+}
+
+func FileSize(filePath string) int64 {
+	file, err := os.Stat(filePath)
+	if err != nil && os.IsNotExist(err) {
+		return 0
+	}
+	return file.Size()
 }
 
 func PrintInfo(data utils.VideoData) {
@@ -74,9 +82,15 @@ func PrintInfo(data utils.VideoData) {
 
 func UlrSave(data utils.VideoData) {
 	PrintInfo(data)
+	filePath := data.Title + "." + data.Ext
+	fileSize := FileSize(filePath)
+	if fileSize == data.Size {
+		fmt.Printf("%s: file already exists, skipping\n", filePath)
+		return
+	}
 	res := request("GET", data.Url, nil)
 	defer res.Body.Close()
-	file, _ := os.Create(data.Title + "." + data.Ext)
+	file, _ := os.Create(filePath)
 	bar := pb.New(int(data.Size)).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
 	bar.Start()
 	bar.ShowSpeed = true
