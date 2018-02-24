@@ -11,10 +11,20 @@ Title:    好冷  逢考必过
  2.63 MiB / 2.63 MiB [===================================] 100.00% 1.03 MiB/s 2s
 ```
 
+## Install
+
+To install Annie, please use `go get`, or compile yourself.
+
+```bash
+$ go get github.com/iawia002/annie
+...
+$ annie ...
+```
+
 ## Build
 
 Make sure that this folder is in `GOPATH`, then:
 
 ```bash
-go build
+$ go build
 ```
