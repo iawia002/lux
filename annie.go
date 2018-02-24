@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/utils"
 )
 
 var (
@@ -26,8 +26,8 @@ func main() {
 		fmt.Println("error")
 		return
 	}
-	videoUrl := args[0]
-	u, err := url.ParseRequestURI(videoUrl)
+	videoURL := args[0]
+	u, err := url.ParseRequestURI(videoURL)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -36,10 +36,10 @@ func main() {
 		`(com\.cn|com\.hk|` +
 		`cn|com|net|edu|gov|biz|org|info|pro|name|xxx|xyz|` +
 		`me|top|cc|tv|tt)`
-	domain := downloader.Match1(domainPattern, u.Host)[1]
+	domain := utils.Match1(domainPattern, u.Host)[1]
 	switch domain {
 	case "douyin":
-		extractors.Douyin(videoUrl)
+		extractors.Douyin(videoURL)
 	default:
 		fmt.Println("unsupported URL")
 	}

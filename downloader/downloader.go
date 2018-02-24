@@ -3,75 +3,35 @@ package downloader
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
-	"net/http"
 	"os"
-	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/cheggaaa/pb"
 
-	"github.com/iawia002/annie/extractors/utils"
+	"github.com/iawia002/annie/request"
+	"github.com/iawia002/annie/utils"
 )
 
-func Match1(pattern, text string) []string {
-	re := regexp.MustCompile(pattern)
-	value := re.FindStringSubmatch(text)
-	return value
+// VideoData data struct of video info
+type VideoData struct {
+	Site  string
+	Title string
+	URL   string
+	Size  int64
+	Ext   string
 }
 
-func request(method, url string, body io.Reader) *http.Response {
-	client := &http.Client{
-		Timeout: time.Second * 100,
-		Transport: &http.Transport{
-			DisableCompression: true,
-		},
-	}
-	req, err := http.NewRequest(method, url, body)
-	if err != nil {
-		log.Print(url)
-		log.Fatal(err)
-	}
-	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-	req.Header.Set("Accept-Charset", "UTF-8,*;q=0.5")
-	req.Header.Set("Accept-Encoding", "")
-	req.Header.Set("Accept-Language", "en-US,en;q=0.8")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0")
-	req.Header.Set("Referer", url)
-	res, err := client.Do(req)
-	if err != nil {
-		log.Print(url)
-		log.Fatal(err)
-	}
-	return res
-}
-
-func Get(url string) string {
-	res := request("GET", url, nil)
-	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
-	return string(body)
-}
-
-func UrlSize(url string) int64 {
-	res := request("GET", url, nil)
+// URLSize get size of the url
+func (data VideoData) URLSize() int64 {
+	res := request.Request("GET", data.URL, nil)
 	defer res.Body.Close()
 	s := res.Header.Get("Content-Length")
 	size, _ := strconv.ParseInt(s, 10, 64)
 	return size
 }
 
-func FileSize(filePath string) int64 {
-	file, err := os.Stat(filePath)
-	if err != nil && os.IsNotExist(err) {
-		return 0
-	}
-	return file.Size()
-}
-
-func PrintInfo(data utils.VideoData) {
+func (data VideoData) printInfo() {
 	fmt.Println()
 	fmt.Println(" Site:   ", data.Site)
 	fmt.Println("Title:   ", data.Title)
@@ -80,15 +40,16 @@ func PrintInfo(data utils.VideoData) {
 	fmt.Println()
 }
 
-func UlrSave(data utils.VideoData) {
-	PrintInfo(data)
+// URLSave save url file
+func (data VideoData) URLSave() {
+	data.printInfo()
 	filePath := data.Title + "." + data.Ext
-	fileSize := FileSize(filePath)
+	fileSize := utils.FileSize(filePath)
 	if fileSize == data.Size {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
 		return
 	}
-	res := request("GET", data.Url, nil)
+	res := request.Request("GET", data.URL, nil)
 	defer res.Body.Close()
 	file, _ := os.Create(filePath)
 	bar := pb.New(int(data.Size)).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
