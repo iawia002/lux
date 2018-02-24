@@ -1,0 +1,10 @@
+hash: 694e521a0680567a1d06ea4d1db6662c77f0133ed30401453eca1d1059f8010f
+updated: 2018-02-24T18:37:44.316342+08:00
+imports:
+- name: github.com/cheggaaa/pb
+  version: 72b964305fba1230d3d818711138195f22b9ceea
+- name: github.com/mattn/go-runewidth
+  version: 97311d9f7767e3d6f422ea06661bc2c7a19e8a5d
+- name: golang.org/x/sys/unix
+  version: 88d2dcc510266da9f7f8c7f34e1940716cab5f5c
+testImports: []

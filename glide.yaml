@@ -1,0 +1,4 @@
+package: github.com/iawia002/annie
+import:
+- package: github.com/cheggaaa/pb
+  version: v1.0.22
