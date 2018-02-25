@@ -22,13 +22,13 @@ type VideoData struct {
 	Ext   string
 }
 
-// URLSize get size of the url
-func (data VideoData) URLSize() int64 {
-	res := request.Request("GET", data.URL, nil)
+// CalculateSize get size of the url
+func (data *VideoData) CalculateSize() {
+	res := request.Request("GET", data.URL, nil, nil)
 	defer res.Body.Close()
 	s := res.Header.Get("Content-Length")
 	size, _ := strconv.ParseInt(s, 10, 64)
-	return size
+	data.Size = size
 }
 
 func (data VideoData) printInfo() {
@@ -36,7 +36,7 @@ func (data VideoData) printInfo() {
 	fmt.Println(" Site:   ", data.Site)
 	fmt.Println("Title:   ", data.Title)
 	fmt.Println(" Type:   ", data.Ext)
-	fmt.Printf(" Size:    %.2f MiB (%d Bytes)\n", float64(data.Size)/1000000.0, data.Size)
+	fmt.Printf(" Size:    %.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
 	fmt.Println()
 }
 
@@ -49,15 +49,34 @@ func (data VideoData) URLSave() {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
 		return
 	}
-	res := request.Request("GET", data.URL, nil)
-	defer res.Body.Close()
-	file, _ := os.Create(filePath)
-	bar := pb.New(int(data.Size)).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
-	bar.Start()
+	tempFilePath := filePath + ".download"
+	tempFileSize := utils.FileSize(tempFilePath)
+	var headers map[string]string
+	var file *os.File
+	bar := pb.New64(data.Size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
 	bar.ShowSpeed = true
 	bar.ShowFinalTime = true
 	bar.SetMaxWidth(1000)
+	if tempFileSize > 0 {
+		headers = map[string]string{
+			// range start from zero
+			"Range": fmt.Sprintf("bytes=%d-", tempFileSize),
+		}
+		file, _ = os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY, 0644)
+		bar.Set64(tempFileSize)
+	} else {
+		file, _ = os.Create(tempFilePath)
+	}
+	res := request.Request("GET", data.URL, nil, headers)
+	defer res.Body.Close()
+	bar.Start()
 	writer := io.MultiWriter(file, bar)
 	io.Copy(writer, res.Body)
 	bar.Finish()
+	// rename the file
+	err := os.Rename(tempFilePath, filePath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }

@@ -35,7 +35,7 @@ func Douyin(url string) downloader.VideoData {
 		URL:   dataDict.Video.RealPlayAddr,
 		Ext:   "mp4",
 	}
-	data.Size = data.URLSize()
+	data.CalculateSize()
 	data.URLSave()
 	return data
 }
