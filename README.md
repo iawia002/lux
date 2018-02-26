@@ -21,6 +21,7 @@ $ go get github.com/iawia002/annie
 $ annie ...
 ```
 
+
 ## Get Started
 
 ### Download a video
@@ -41,6 +42,14 @@ Title:    好冷  逢考必过
 You may use <kbd>Ctrl</kbd>+<kbd>C</kbd> to interrupt a download.
 
 A temporary `.download` file is kept in the output directory. Next time you run `annie` with the same arguments, the download progress will resume from the last session.
+
+
+## Supported Sites
+
+Site | URL
+--- | ---
+抖音 | <https://www.douyin.com>
+
 
 ## Build
 
