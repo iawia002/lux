@@ -32,11 +32,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	domainPattern := `([a-z0-9][-a-z0-9]{0,62})\.` +
-		`(com\.cn|com\.hk|` +
-		`cn|com|net|edu|gov|biz|org|info|pro|name|xxx|xyz|` +
-		`me|top|cc|tv|tt)`
-	domain := utils.Match1(domainPattern, u.Host)[1]
+
+	domain := utils.Domain(u.Host)
 	switch domain {
 	case "douyin":
 		extractors.Douyin(videoURL)
