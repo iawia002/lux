@@ -46,9 +46,9 @@ A temporary `.download` file is kept in the output directory. Next time you run 
 
 ## Supported Sites
 
-Site | URL
---- | ---
-抖音 | <https://www.douyin.com>
+Site | URL | Videos
+--- | --- | ------
+抖音 | <https://www.douyin.com> | ✓
 
 
 ## Build
