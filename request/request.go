@@ -1,6 +1,7 @@
 package request
 
 import (
+	"compress/gzip"
 	"io"
 	"io/ioutil"
 	"log"
@@ -44,6 +45,12 @@ func Request(
 func Get(url string) string {
 	res := Request("GET", url, nil, nil)
 	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
+	var reader io.ReadCloser
+	if res.Header.Get("Content-Encoding") == "gzip" {
+		reader, _ = gzip.NewReader(res.Body)
+	} else {
+		reader = res.Body
+	}
+	body, _ := ioutil.ReadAll(reader)
 	return string(body)
 }

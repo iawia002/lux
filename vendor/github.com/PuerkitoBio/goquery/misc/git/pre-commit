@@ -1,0 +1,37 @@
+#!/bin/sh
+
+echo ">>> golint"
+for dir in $(go list ./... | grep -v /vendor/)
+do
+    golint "${dir}"
+done
+echo "<<< golint"
+echo
+
+echo ">>> go vet"
+go vet $(go list ./... | grep -v /vendor/)
+echo "<<< go vet"
+echo
+
+echo ">>> gosimple"
+gosimple $(go list ./... | grep -v /vendor/)
+echo "<<< gosimple"
+echo
+
+# Check for gofmt problems and report if any.
+gofiles=$(git diff --cached --name-only --diff-filter=ACM | grep '.go$' | grep -v /vendor/)
+[ -z "$gofiles" ] && echo "EXIT $vetres" && exit $vetres
+
+if [ -n "$gofiles" ]; then
+    unformatted=$(gofmt -l $gofiles)
+
+    if [ -n "$unformatted" ]; then
+        # Some files are not gofmt'd.
+        echo >&2 "Go files must be formatted with gofmt. Please run:"
+        for fn in $unformatted; do
+            echo >&2 "  gofmt -w $PWD/$fn"
+        done
+    fi
+fi
+echo
+

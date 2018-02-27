@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <title>testing - The Go Programming Language</title>
+
+<link type="text/css" rel="stylesheet" href="/doc/style.css">
+<script type="text/javascript" src="/doc/godocs.js"></script>
+
+<link rel="search" type="application/opensearchdescription+xml" title="godoc" href="/opensearch.xml" />
+
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(["_setAccount", "UA-11222381-2"]);
+_gaq.push(["_trackPageview"]);
+</script>
+</head>
+<body>
+
+<div id="topbar"><div class="container wide">
+
+<form method="GET" action="/search">
+<div id="menu">
+<a href="/doc/">Documents</a>
+<a href="/ref/">References</a>
+<a href="/pkg/">Packages</a>
+<a href="/project/">The Project</a>
+<a href="/help/">Help</a>
+<input type="text" id="search" name="q" class="inactive" value="Search">
+</div>
+<div id="heading"><a href="/">The Go Programming Language</a></div>
+</form>
+
+</div></div>
+
+<div id="page" class="wide">
+
+
+  <div id="plusone"><g:plusone size="small" annotation="none"></g:plusone></div>
+  <h1>Package testing</h1>
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+
+	
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "testing"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#index">Index</a></dd>
+			
+			
+				<dd><a href="#subdirectories">Subdirectories</a></dd>
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+Package testing provides support for automated testing of Go packages.
+It is intended to be used in concert with the &ldquo;go test&rdquo; command, which automates
+execution of any function of the form
+</p>
+<pre>func TestXxx(*testing.T)
+</pre>
+<p>
+where Xxx can be any alphanumeric string (but the first letter must not be in
+[a-z]) and serves to identify the test routine.
+These TestXxx routines should be declared within the package they are testing.
+</p>
+<p>
+Functions of the form
+</p>
+<pre>func BenchmarkXxx(*testing.B)
+</pre>
+<p>
+are considered benchmarks, and are executed by the &#34;go test&#34; command when
+the -test.bench flag is provided.
+</p>
+<p>
+A sample benchmark function looks like this:
+</p>
+<pre>func BenchmarkHello(b *testing.B) {
+    for i := 0; i &lt; b.N; i++ {
+        fmt.Sprintf(&#34;hello&#34;)
+    }
+}
+</pre>
+<p>
+The benchmark package will vary b.N until the benchmark function lasts
+long enough to be timed reliably.  The output
+</p>
+<pre>testing.BenchmarkHello    10000000    282 ns/op
+</pre>
+<p>
+means that the loop ran 10000000 times at a speed of 282 ns per loop.
+</p>
+<p>
+If a benchmark needs some expensive setup before running, the timer
+may be stopped:
+</p>
+<pre>func BenchmarkBigLen(b *testing.B) {
+    b.StopTimer()
+    big := NewBig()
+    b.StartTimer()
+    for i := 0; i &lt; b.N; i++ {
+        big.Len()
+    }
+}
+</pre>
+<p>
+The package also runs and verifies example code. Example functions may
+include a concluding comment that begins with &#34;Output:&#34; and is compared with
+the standard output of the function when the tests are run, as in these
+examples of an example:
+</p>
+<pre>func ExampleHello() {
+        fmt.Println(&#34;hello&#34;)
+        // Output: hello
+}
+
+func ExampleSalutations() {
+        fmt.Println(&#34;hello, and&#34;)
+        fmt.Println(&#34;goodbye&#34;)
+        // Output:
+        // hello, and
+        // goodbye
+}
+</pre>
+<p>
+Example functions without output comments are compiled but not executed.
+</p>
+<p>
+The naming convention to declare examples for a function F, a type T and
+method M on type T are:
+</p>
+<pre>func ExampleF() { ... }
+func ExampleT() { ... }
+func ExampleT_M() { ... }
+</pre>
+<p>
+Multiple example functions for a type/function/method may be provided by
+appending a distinct suffix to the name. The suffix must start with a
+lower-case letter.
+</p>
+<pre>func ExampleF_suffix() { ... }
+func ExampleT_suffix() { ... }
+func ExampleT_M_suffix() { ... }
+</pre>
+<p>
+The entire test file is presented as the example when it contains a single
+example function, at least one other function, type, variable, or constant
+declaration, and no test or benchmark functions.
+</p>
+
+			</div>
+		</div>
+		
+	
+		<h2 id="index">Index</h2>
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+		<div id="manual-nav">
+			<dl>
+			
+			
+			
+				
+				<dd><a href="#Main">func Main(matchString func(pat, str string) (bool, error), tests []InternalTest, benchmarks []InternalBenchmark, examples []InternalExample)</a></dd>
+			
+				
+				<dd><a href="#RunBenchmarks">func RunBenchmarks(matchString func(pat, str string) (bool, error), benchmarks []InternalBenchmark)</a></dd>
+			
+				
+				<dd><a href="#RunExamples">func RunExamples(matchString func(pat, str string) (bool, error), examples []InternalExample) (ok bool)</a></dd>
+			
+				
+				<dd><a href="#RunTests">func RunTests(matchString func(pat, str string) (bool, error), tests []InternalTest) (ok bool)</a></dd>
+			
+				
+				<dd><a href="#Short">func Short() bool</a></dd>
+			
+			
+				
+				<dd><a href="#B">type B</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.Error">func (c *B) Error(args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.Errorf">func (c *B) Errorf(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.Fail">func (c *B) Fail()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.FailNow">func (c *B) FailNow()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.Failed">func (c *B) Failed() bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.Fatal">func (c *B) Fatal(args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.Fatalf">func (c *B) Fatalf(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.Log">func (c *B) Log(args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.Logf">func (c *B) Logf(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.ResetTimer">func (b *B) ResetTimer()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.SetBytes">func (b *B) SetBytes(n int64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.StartTimer">func (b *B) StartTimer()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#B.StopTimer">func (b *B) StopTimer()</a></dd>
+				
+			
+				
+				<dd><a href="#BenchmarkResult">type BenchmarkResult</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Benchmark">func Benchmark(f func(b *B)) BenchmarkResult</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#BenchmarkResult.NsPerOp">func (r BenchmarkResult) NsPerOp() int64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#BenchmarkResult.String">func (r BenchmarkResult) String() string</a></dd>
+				
+			
+				
+				<dd><a href="#InternalBenchmark">type InternalBenchmark</a></dd>
+				
+				
+			
+				
+				<dd><a href="#InternalExample">type InternalExample</a></dd>
+				
+				
+			
+				
+				<dd><a href="#InternalTest">type InternalTest</a></dd>
+				
+				
+			
+				
+				<dd><a href="#T">type T</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.Error">func (c *T) Error(args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.Errorf">func (c *T) Errorf(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.Fail">func (c *T) Fail()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.FailNow">func (c *T) FailNow()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.Failed">func (c *T) Failed() bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.Fatal">func (c *T) Fatal(args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.Fatalf">func (c *T) Fatalf(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.Log">func (c *T) Log(args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.Logf">func (c *T) Logf(format string, args ...interface{})</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#T.Parallel">func (t *T) Parallel()</a></dd>
+				
+			
+			
+		</dl>
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/pkg/testing/benchmark.go">benchmark.go</a>
+			
+				<a href="/src/pkg/testing/example.go">example.go</a>
+			
+				<a href="/src/pkg/testing/testing.go">testing.go</a>
+			
+			</span>
+			</p>
+		
+	
+		
+		
+		
+			
+			
+			<h2 id="Main">func <a href="/src/pkg/testing/testing.go?s=9750:9890#L268">Main</a></h2>
+			<pre>func Main(matchString func(pat, str string) (bool, error), tests []InternalTest, benchmarks []InternalBenchmark, examples []InternalExample)</pre>
+			<p>
+An internal function but exported because it is cross-package; part of the implementation
+of the &#34;go test&#34; command.
+</p>
+
+			
+		
+			
+			
+			<h2 id="RunBenchmarks">func <a href="/src/pkg/testing/benchmark.go?s=5365:5464#L207">RunBenchmarks</a></h2>
+			<pre>func RunBenchmarks(matchString func(pat, str string) (bool, error), benchmarks []InternalBenchmark)</pre>
+			<p>
+An internal function but exported because it is cross-package; part of the implementation
+of the &#34;go test&#34; command.
+</p>
+
+			
+		
+			
+			
+			<h2 id="RunExamples">func <a href="/src/pkg/testing/example.go?s=314:417#L12">RunExamples</a></h2>
+			<pre>func RunExamples(matchString func(pat, str string) (bool, error), examples []InternalExample) (ok bool)</pre>
+			
+			
+		
+			
+			
+			<h2 id="RunTests">func <a href="/src/pkg/testing/testing.go?s=10486:10580#L297">RunTests</a></h2>
+			<pre>func RunTests(matchString func(pat, str string) (bool, error), tests []InternalTest) (ok bool)</pre>
+			
+			
+		
+			
+			
+			<h2 id="Short">func <a href="/src/pkg/testing/testing.go?s=4859:4876#L117">Short</a></h2>
+			<pre>func Short() bool</pre>
+			<p>
+Short reports whether the -test.short flag is set.
+</p>
+
+			
+		
+		
+			
+			
+			<h2 id="B">type <a href="/src/pkg/testing/benchmark.go?s=743:872#L17">B</a></h2>
+			<pre>type B struct {
+    N int
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+B is a type passed to Benchmark functions to manage benchmark
+timing and to specify the number of iterations to run.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+				<h3 id="B.Error">func (*B) <a href="/src/pkg/testing/testing.go?s=8110:8153#L209">Error</a></h3>
+				<pre>func (c *B) Error(args ...interface{})</pre>
+				<p>
+Error is equivalent to Log() followed by Fail().
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.Errorf">func (*B) <a href="/src/pkg/testing/testing.go?s=8253:8312#L215">Errorf</a></h3>
+				<pre>func (c *B) Errorf(format string, args ...interface{})</pre>
+				<p>
+Errorf is equivalent to Logf() followed by Fail().
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.Fail">func (*B) <a href="/src/pkg/testing/testing.go?s=6270:6293#L163">Fail</a></h3>
+				<pre>func (c *B) Fail()</pre>
+				<p>
+Fail marks the function as having failed but continues execution.
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.FailNow">func (*B) <a href="/src/pkg/testing/testing.go?s=6548:6574#L170">FailNow</a></h3>
+				<pre>func (c *B) FailNow()</pre>
+				<p>
+FailNow marks the function as having failed and stops its execution.
+Execution will continue at the next test or benchmark.
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.Failed">func (*B) <a href="/src/pkg/testing/testing.go?s=6366:6396#L166">Failed</a></h3>
+				<pre>func (c *B) Failed() bool</pre>
+				<p>
+Failed returns whether the function has failed.
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.Fatal">func (*B) <a href="/src/pkg/testing/testing.go?s=8420:8463#L221">Fatal</a></h3>
+				<pre>func (c *B) Fatal(args ...interface{})</pre>
+				<p>
+Fatal is equivalent to Log() followed by FailNow().
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.Fatalf">func (*B) <a href="/src/pkg/testing/testing.go?s=8569:8628#L227">Fatalf</a></h3>
+				<pre>func (c *B) Fatalf(format string, args ...interface{})</pre>
+				<p>
+Fatalf is equivalent to Logf() followed by FailNow().
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.Log">func (*B) <a href="/src/pkg/testing/testing.go?s=7763:7804#L202">Log</a></h3>
+				<pre>func (c *B) Log(args ...interface{})</pre>
+				<p>
+Log formats its arguments using default formatting, analogous to Println(),
+and records the text in the error log.
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.Logf">func (*B) <a href="/src/pkg/testing/testing.go?s=7959:8016#L206">Logf</a></h3>
+				<pre>func (c *B) Logf(format string, args ...interface{})</pre>
+				<p>
+Logf formats its arguments according to the format, analogous to Printf(),
+and records the text in the error log.
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.ResetTimer">func (*B) <a href="/src/pkg/testing/benchmark.go?s=1503:1527#L48">ResetTimer</a></h3>
+				<pre>func (b *B) ResetTimer()</pre>
+				<p>
+ResetTimer sets the elapsed benchmark time to zero.
+It does not affect whether the timer is running.
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.SetBytes">func (*B) <a href="/src/pkg/testing/benchmark.go?s=1728:1757#L57">SetBytes</a></h3>
+				<pre>func (b *B) SetBytes(n int64)</pre>
+				<p>
+SetBytes records the number of bytes processed in a single operation.
+If this is called, the benchmark will report ns/op and MB/s.
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.StartTimer">func (*B) <a href="/src/pkg/testing/benchmark.go?s=1047:1071#L29">StartTimer</a></h3>
+				<pre>func (b *B) StartTimer()</pre>
+				<p>
+StartTimer starts timing a test.  This function is called automatically
+before a benchmark starts, but it can also used to resume timing after
+a call to StopTimer.
+</p>
+
+				
+				
+			
+				
+				<h3 id="B.StopTimer">func (*B) <a href="/src/pkg/testing/benchmark.go?s=1288:1311#L39">StopTimer</a></h3>
+				<pre>func (b *B) StopTimer()</pre>
+				<p>
+StopTimer stops timing a test.  This can be used to pause the timer
+while performing complex initialization that you don&#39;t
+want to measure.
+</p>
+
+				
+				
+			
+		
+			
+			
+			<h2 id="BenchmarkResult">type <a href="/src/pkg/testing/benchmark.go?s=4206:4391#L165">BenchmarkResult</a></h2>
+			<pre>type BenchmarkResult struct {
+    N     int           <span class="comment">// The number of iterations.</span>
+    T     time.Duration <span class="comment">// The total time taken.</span>
+    Bytes int64         <span class="comment">// Bytes processed in one iteration.</span>
+}</pre>
+			<p>
+The results of a benchmark run.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+				
+				<h3 id="Benchmark">func <a href="/src/pkg/testing/benchmark.go?s=7545:7589#L275">Benchmark</a></h3>
+				<pre>func Benchmark(f func(b *B)) BenchmarkResult</pre>
+				<p>
+Benchmark benchmarks a single function. Useful for creating
+custom benchmarks that do not use the &#34;go test&#34; command.
+</p>
+
+				
+			
+
+			
+				
+				<h3 id="BenchmarkResult.NsPerOp">func (BenchmarkResult) <a href="/src/pkg/testing/benchmark.go?s=4393:4433#L171">NsPerOp</a></h3>
+				<pre>func (r BenchmarkResult) NsPerOp() int64</pre>
+				
+				
+				
+			
+				
+				<h3 id="BenchmarkResult.String">func (BenchmarkResult) <a href="/src/pkg/testing/benchmark.go?s=4677:4717#L185">String</a></h3>
+				<pre>func (r BenchmarkResult) String() string</pre>
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="InternalBenchmark">type <a href="/src/pkg/testing/benchmark.go?s=555:618#L10">InternalBenchmark</a></h2>
+			<pre>type InternalBenchmark struct {
+    Name string
+    F    func(b *B)
+}</pre>
+			<p>
+An internal type but exported because it is cross-package; part of the implementation
+of the &#34;go test&#34; command.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="InternalExample">type <a href="/src/pkg/testing/example.go?s=236:312#L6">InternalExample</a></h2>
+			<pre>type InternalExample struct {
+    Name   string
+    F      func()
+    Output string
+}</pre>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="InternalTest">type <a href="/src/pkg/testing/testing.go?s=9065:9121#L241">InternalTest</a></h2>
+			<pre>type InternalTest struct {
+    Name string
+    F    func(*T)
+}</pre>
+			<p>
+An internal type but exported because it is cross-package; part of the implementation
+of the &#34;go test&#34; command.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="T">type <a href="/src/pkg/testing/testing.go?s=6070:6199#L156">T</a></h2>
+			<pre>type T struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+T is a type passed to Test functions to manage test state and support formatted test logs.
+Logs are accumulated during execution and dumped to standard error when done.
+</p>
+
+
+			
+
+			
+
+			
+
+			
+
+			
+				
+				<h3 id="T.Error">func (*T) <a href="/src/pkg/testing/testing.go?s=8110:8153#L209">Error</a></h3>
+				<pre>func (c *T) Error(args ...interface{})</pre>
+				<p>
+Error is equivalent to Log() followed by Fail().
+</p>
+
+				
+				
+			
+				
+				<h3 id="T.Errorf">func (*T) <a href="/src/pkg/testing/testing.go?s=8253:8312#L215">Errorf</a></h3>
+				<pre>func (c *T) Errorf(format string, args ...interface{})</pre>
+				<p>
+Errorf is equivalent to Logf() followed by Fail().
+</p>
+
+				
+				
+			
+				
+				<h3 id="T.Fail">func (*T) <a href="/src/pkg/testing/testing.go?s=6270:6293#L163">Fail</a></h3>
+				<pre>func (c *T) Fail()</pre>
+				<p>
+Fail marks the function as having failed but continues execution.
+</p>
+
+				
+				
+			
+				
+				<h3 id="T.FailNow">func (*T) <a href="/src/pkg/testing/testing.go?s=6548:6574#L170">FailNow</a></h3>
+				<pre>func (c *T) FailNow()</pre>
+				<p>
+FailNow marks the function as having failed and stops its execution.
+Execution will continue at the next test or benchmark.
+</p>
+
+				
+				
+			
+				
+				<h3 id="T.Failed">func (*T) <a href="/src/pkg/testing/testing.go?s=6366:6396#L166">Failed</a></h3>
+				<pre>func (c *T) Failed() bool</pre>
+				<p>
+Failed returns whether the function has failed.
+</p>
+
+				
+				
+			
+				
+				<h3 id="T.Fatal">func (*T) <a href="/src/pkg/testing/testing.go?s=8420:8463#L221">Fatal</a></h3>
+				<pre>func (c *T) Fatal(args ...interface{})</pre>
+				<p>
+Fatal is equivalent to Log() followed by FailNow().
+</p>
+
+				
+				
+			
+				
+				<h3 id="T.Fatalf">func (*T) <a href="/src/pkg/testing/testing.go?s=8569:8628#L227">Fatalf</a></h3>
+				<pre>func (c *T) Fatalf(format string, args ...interface{})</pre>
+				<p>
+Fatalf is equivalent to Logf() followed by FailNow().
+</p>
+
+				
+				
+			
+				
+				<h3 id="T.Log">func (*T) <a href="/src/pkg/testing/testing.go?s=7763:7804#L202">Log</a></h3>
+				<pre>func (c *T) Log(args ...interface{})</pre>
+				<p>
+Log formats its arguments using default formatting, analogous to Println(),
+and records the text in the error log.
+</p>
+
+				
+				
+			
+				
+				<h3 id="T.Logf">func (*T) <a href="/src/pkg/testing/testing.go?s=7959:8016#L206">Logf</a></h3>
+				<pre>func (c *T) Logf(format string, args ...interface{})</pre>
+				<p>
+Logf formats its arguments according to the format, analogous to Printf(),
+and records the text in the error log.
+</p>
+
+				
+				
+			
+				
+				<h3 id="T.Parallel">func (*T) <a href="/src/pkg/testing/testing.go?s=8809:8831#L234">Parallel</a></h3>
+				<pre>func (t *T) Parallel()</pre>
+				<p>
+Parallel signals that this test is to be run in parallel with (and only with)
+other parallel tests in this CPU group.
+</p>
+
+				
+				
+			
+		
+		</div>
+	
+
+	
+
+
+
+
+
+
+
+	
+	
+		<h2 id="subdirectories">Subdirectories</h2>
+	
+	<table class="dir">
+	<tr>
+	<th>Name</th>
+	<th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+	<th style="text-align: left; width: auto">Synopsis</th>
+	</tr>
+	
+		<tr>
+		<td><a href="..">..</a></td>
+		</tr>
+	
+	
+		
+			<tr>
+			<td class="name"><a href="iotest">iotest</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto">Package iotest implements Readers and Writers useful mainly for testing.</td>
+			</tr>
+		
+	
+		
+			<tr>
+			<td class="name"><a href="quick">quick</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto">Package quick implements utility functions to help with black box testing.</td>
+			</tr>
+		
+	
+	</table>
+	
+
+
+
+</div>
+
+<div id="footer">
+Build version go1.0.2.<br>
+Except as <a href="http://code.google.com/policies.html#restrictions">noted</a>,
+the content of this page is licensed under the
+Creative Commons Attribution 3.0 License,
+and code is licensed under a <a href="/LICENSE">BSD license</a>.<br>
+<a href="/doc/tos.html">Terms of Service</a> | 
+<a href="http://www.google.com/intl/en/privacy/privacy-policy.html">Privacy Policy</a>
+</div>
+
+<script type="text/javascript">
+(function() {
+  var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+  ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+  var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+</body>
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</html>
+

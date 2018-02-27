@@ -1,10 +1,21 @@
-hash: 694e521a0680567a1d06ea4d1db6662c77f0133ed30401453eca1d1059f8010f
-updated: 2018-02-24T18:37:44.316342+08:00
+hash: f2e3f4a670cc325711f78319fe331a3d2f62829b92ca4d3ac147b1837e54e549
+updated: 2018-02-27T19:30:39.352797+08:00
 imports:
+- name: github.com/andybalholm/cascadia
+  version: 901648c87902174f774fac311d7f176f8647bdaa
 - name: github.com/cheggaaa/pb
   version: 72b964305fba1230d3d818711138195f22b9ceea
 - name: github.com/mattn/go-runewidth
   version: 97311d9f7767e3d6f422ea06661bc2c7a19e8a5d
-- name: golang.org/x/sys/unix
-  version: 88d2dcc510266da9f7f8c7f34e1940716cab5f5c
+- name: github.com/PuerkitoBio/goquery
+  version: 09540e565986583836b5fc792fe951ec5fd201dd
+- name: golang.org/x/net
+  version: cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb
+  subpackages:
+  - html
+  - html/atom
+- name: golang.org/x/sys
+  version: f6cff0780e542efa0c8e864dc8fa522808f6a598
+  subpackages:
+  - unix
 testImports: []

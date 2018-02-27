@@ -44,6 +44,8 @@ func main() {
 	switch domain {
 	case "douyin":
 		extractors.Douyin(videoURL)
+	case "bilibili":
+		extractors.Bilibili(videoURL)
 	default:
 		fmt.Println("unsupported URL")
 	}
