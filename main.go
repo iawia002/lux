@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/utils"
 )
@@ -22,6 +23,12 @@ func init() {
 func main() {
 	flag.Parse()
 	args := flag.Args()
+	if version {
+		fmt.Printf(
+			"annie: version %s, A simple and clean video downloader.\n", config.VERSION,
+		)
+		return
+	}
 	if len(args) < 1 {
 		fmt.Println("error")
 		return
