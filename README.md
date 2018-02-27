@@ -49,6 +49,7 @@ A temporary `.download` file is kept in the output directory. Next time you run 
 Site | URL | Videos
 --- | --- | ------
 抖音 | <https://www.douyin.com> | ✓
+哔哩哔哩 | <https://www.bilibili.com> | ✓
 
 
 ## Build

@@ -3,7 +3,9 @@ package downloader
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -13,22 +15,18 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
+type URLData struct {
+	URL  string
+	Size int64
+}
+
 // VideoData data struct of video info
 type VideoData struct {
 	Site  string
 	Title string
-	URL   string
+	URLs  []URLData
 	Size  int64
 	Ext   string
-}
-
-// CalculateSize get size of the url
-func (data *VideoData) CalculateSize() {
-	res := request.Request("GET", data.URL, nil, nil)
-	defer res.Body.Close()
-	s := res.Header.Get("Content-Length")
-	size, _ := strconv.ParseInt(s, 10, 64)
-	data.Size = size
 }
 
 func (data VideoData) printInfo() {
@@ -40,43 +38,99 @@ func (data VideoData) printInfo() {
 	fmt.Println()
 }
 
-// URLSave save url file
-func (data VideoData) URLSave() {
-	data.printInfo()
-	filePath := data.Title + "." + data.Ext
+// CalculateSize get size of the url
+func (data *VideoData) CalculateSize(url, refer string) {
+	headers := map[string]string{
+		"Referer": refer,
+	}
+	res := request.Request("GET", url, nil, headers)
+	defer res.Body.Close()
+	s := res.Header.Get("Content-Length")
+	size, _ := strconv.ParseInt(s, 10, 64)
+	data.Size = size
+}
+
+// urlSave save url file
+func (data VideoData) urlSave(
+	urlData URLData, refer, fileName string, bar *pb.ProgressBar, parts *[]string,
+) {
+	filePath := fileName + "." + data.Ext
 	fileSize := utils.FileSize(filePath)
-	if fileSize == data.Size {
+	if parts != nil {
+		*parts = append(*parts, filePath)
+	}
+	if fileSize == urlData.Size {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
+		bar.Add64(fileSize)
 		return
 	}
 	tempFilePath := filePath + ".download"
 	tempFileSize := utils.FileSize(tempFilePath)
-	var headers map[string]string
+	headers := map[string]string{
+		"Referer": refer,
+	}
 	var file *os.File
-	bar := pb.New64(data.Size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
-	bar.ShowSpeed = true
-	bar.ShowFinalTime = true
-	bar.SetMaxWidth(1000)
 	if tempFileSize > 0 {
-		headers = map[string]string{
-			// range start from zero
-			"Range": fmt.Sprintf("bytes=%d-", tempFileSize),
-		}
+		// range start from zero
+		headers["Range"] = fmt.Sprintf("bytes=%d-", tempFileSize)
 		file, _ = os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY, 0644)
-		bar.Set64(tempFileSize)
+		bar.Add64(tempFileSize)
 	} else {
 		file, _ = os.Create(tempFilePath)
 	}
-	res := request.Request("GET", data.URL, nil, headers)
+	res := request.Request("GET", urlData.URL, nil, headers)
 	defer res.Body.Close()
-	bar.Start()
 	writer := io.MultiWriter(file, bar)
 	io.Copy(writer, res.Body)
-	bar.Finish()
 	// rename the file
 	err := os.Rename(tempFilePath, filePath)
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+}
+
+// Download download urls
+func (data VideoData) Download(refer string) {
+	data.printInfo()
+	bar := pb.New64(data.Size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
+	bar.ShowSpeed = true
+	bar.ShowFinalTime = true
+	bar.SetMaxWidth(1000)
+	bar.Start()
+	if len(data.URLs) == 1 {
+		// only one fragment
+		data.urlSave(data.URLs[0], refer, data.Title, bar, nil)
+		bar.Finish()
+	} else {
+		// multiple fragments
+		parts := &[]string{}
+		for index, url := range data.URLs {
+			data.urlSave(url, refer, fmt.Sprintf("%s[%d]", data.Title, index), bar, parts)
+		}
+		bar.Finish()
+
+		// merge
+		// write ffmpeg input file list
+		mergeFile := data.Title + "-merge.txt"
+		file, _ := os.Create(mergeFile)
+		for _, part := range *parts {
+			file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
+		}
+
+		cmd := exec.Command(
+			"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
+			"-i", mergeFile, "-c", "copy", "-bsf:a", "aac_adtstoasc",
+			data.Title+"."+data.Ext,
+		)
+		err := cmd.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+		// remove parts
+		os.Remove(mergeFile)
+		for _, part := range *parts {
+			os.Remove(part)
+		}
 	}
 }
