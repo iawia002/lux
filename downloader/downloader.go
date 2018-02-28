@@ -15,6 +15,7 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
+// URLData data struct of single URL
 type URLData struct {
 	URL  string
 	Size int64
@@ -104,9 +105,9 @@ func (data VideoData) Download(refer string) {
 		bar.Finish()
 	} else {
 		// multiple fragments
-		parts := &[]string{}
+		parts := []string{}
 		for index, url := range data.URLs {
-			data.urlSave(url, refer, fmt.Sprintf("%s[%d]", data.Title, index), bar, parts)
+			data.urlSave(url, refer, fmt.Sprintf("%s[%d]", data.Title, index), bar, &parts)
 		}
 		bar.Finish()
 
@@ -114,7 +115,7 @@ func (data VideoData) Download(refer string) {
 		// write ffmpeg input file list
 		mergeFile := data.Title + "-merge.txt"
 		file, _ := os.Create(mergeFile)
-		for _, part := range *parts {
+		for _, part := range parts {
 			file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
 		}
 
@@ -129,7 +130,7 @@ func (data VideoData) Download(refer string) {
 		}
 		// remove parts
 		os.Remove(mergeFile)
-		for _, part := range *parts {
+		for _, part := range parts {
 			os.Remove(part)
 		}
 	}
