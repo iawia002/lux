@@ -13,6 +13,14 @@ Title:    好冷  逢考必过
 
 ## Install
 
+### Prerequisites
+
+The following dependencies are required and must be installed separately.
+
+* **[FFmpeg](https://www.ffmpeg.org)**
+
+> **Note**: FFmpeg does not affect the download, only affect the final file merge.
+
 To install Annie, please use `go get`, or compile yourself.
 
 ```bash
