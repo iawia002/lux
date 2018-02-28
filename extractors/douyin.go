@@ -29,17 +29,19 @@ func Douyin(url string) downloader.VideoData {
 	var dataDict douyinData
 	json.Unmarshal([]byte(vData), &dataDict)
 
+	size := request.Size(dataDict.Video.RealPlayAddr, url)
+	urlData := downloader.URLData{
+		URL:  dataDict.Video.RealPlayAddr,
+		Size: size,
+	}
 	data := downloader.VideoData{
 		Site:  "抖音 douyin.com",
 		Title: dataDict.Desc,
 		Ext:   "mp4",
+		URLs:  []downloader.URLData{urlData},
+		Size:  size,
 	}
-	data.CalculateSize(dataDict.Video.RealPlayAddr, url)
-	urlData := downloader.URLData{
-		URL:  dataDict.Video.RealPlayAddr,
-		Size: data.Size,
-	}
-	data.URLs = []downloader.URLData{urlData}
+
 	data.Download(url)
 	return data
 }

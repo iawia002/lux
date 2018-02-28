@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/iawia002/annie/config"
@@ -53,4 +54,16 @@ func Get(url string) string {
 	}
 	body, _ := ioutil.ReadAll(reader)
 	return string(body)
+}
+
+// Size get size of the url
+func Size(url, refer string) int64 {
+	headers := map[string]string{
+		"Referer": refer,
+	}
+	res := Request("GET", url, nil, headers)
+	defer res.Body.Close()
+	s := res.Header.Get("Content-Length")
+	size, _ := strconv.ParseInt(s, 10, 64)
+	return size
 }

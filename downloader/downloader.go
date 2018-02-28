@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strconv"
 	"time"
 
 	"github.com/cheggaaa/pb"
@@ -37,18 +36,6 @@ func (data VideoData) printInfo() {
 	fmt.Println(" Type:   ", data.Ext)
 	fmt.Printf(" Size:    %.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
 	fmt.Println()
-}
-
-// CalculateSize get size of the url
-func (data *VideoData) CalculateSize(url, refer string) {
-	headers := map[string]string{
-		"Referer": refer,
-	}
-	res := request.Request("GET", url, nil, headers)
-	defer res.Body.Close()
-	s := res.Header.Get("Content-Length")
-	size, _ := strconv.ParseInt(s, 10, 64)
-	data.Size = size
 }
 
 // urlSave save url file
