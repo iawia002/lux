@@ -119,10 +119,11 @@ func (data VideoData) Download(refer string) {
 			file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
 		}
 
+		filePath := data.Title + "." + data.Ext
+		fmt.Printf("Merging video parts into %s\n", filePath)
 		cmd := exec.Command(
 			"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
-			"-i", mergeFile, "-c", "copy", "-bsf:a", "aac_adtstoasc",
-			data.Title+"."+data.Ext,
+			"-i", mergeFile, "-c", "copy", "-bsf:a", "aac_adtstoasc", filePath,
 		)
 		err := cmd.Run()
 		if err != nil {
