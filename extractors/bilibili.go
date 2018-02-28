@@ -18,31 +18,31 @@ import (
 const (
 	// BiliBili blocks keys from time to time.
 	// You can extract from the Android client or bilibiliPlayer.min.js
-	APP_KEY string = "84956560bc028eb7"
-	SEC_KEY string = "94aba54af9065f71de72f5508f1cd42e"
+	appKey string = "84956560bc028eb7"
+	secKey string = "94aba54af9065f71de72f5508f1cd42e"
 )
 
-type DURLData struct {
+type dURLData struct {
 	Size  int64  `json:"size"`
 	URL   string `json:"url"`
 	Order int    `json:"order"`
 }
 
-type BilibiliData struct {
-	DURL    []DURLData `json:"durl"`
+type bilibiliData struct {
+	DURL    []dURLData `json:"durl"`
 	Format  string     `json:"format"`
 	Quality int        `json:"quality"`
 }
 
 func getSign(params string) string {
 	sign := md5.New()
-	sign.Write([]byte(params + SEC_KEY))
+	sign.Write([]byte(params + secKey))
 	return fmt.Sprintf("%x", sign.Sum(nil))
 }
 
 func genAPI(cid string, bangumi bool) string {
 	var (
-		baseApiURL string
+		baseAPIURL string
 		params     string
 	)
 	if bangumi {
@@ -50,24 +50,24 @@ func genAPI(cid string, bangumi bool) string {
 		// qn=0 flag makes the CDN address different every time
 		params = fmt.Sprintf(
 			"appkey=%s&cid=%s&module=bangumi&otype=json&quality=0&season_type=4&type=",
-			APP_KEY, cid,
+			appKey, cid,
 		)
-		baseApiURL = config.BILIBILI_BANGUMI_API
+		baseAPIURL = config.BILIBILI_BANGUMI_API
 	} else {
 		params = fmt.Sprintf(
 			"appkey=%s&cid=%s&otype=json&quality=0&type=",
-			APP_KEY, cid,
+			appKey, cid,
 		)
-		baseApiURL = config.BILIBILI_API
+		baseAPIURL = config.BILIBILI_API
 	}
-	api := baseApiURL + params + "&sign=" + getSign(params)
+	api := baseAPIURL + params + "&sign=" + getSign(params)
 	return api
 }
 
-func genURL(durl []DURLData) ([]downloader.URLData, int64) {
+func genURL(durl []dURLData) ([]downloader.URLData, int64) {
 	var (
 		urls []downloader.URLData
-		size int64 = 0
+		size int64
 	)
 	for _, data := range durl {
 		size += data.Size
@@ -83,7 +83,7 @@ func genURL(durl []DURLData) ([]downloader.URLData, int64) {
 // Bilibili download function
 func Bilibili(url string) downloader.VideoData {
 	var (
-		bangumi bool = false
+		bangumi bool
 		cid     string
 	)
 	if strings.Contains(url, "bangumi") {
@@ -97,7 +97,7 @@ func Bilibili(url string) downloader.VideoData {
 	}
 	api := genAPI(cid, bangumi)
 	apiData := request.Get(api)
-	var dataDict BilibiliData
+	var dataDict bilibiliData
 	json.Unmarshal([]byte(apiData), &dataDict)
 
 	// get the title
