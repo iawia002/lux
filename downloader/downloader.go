@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"sync"
 	"time"
 
 	"github.com/cheggaaa/pb"
@@ -41,13 +42,10 @@ func (data VideoData) printInfo() {
 
 // urlSave save url file
 func (data VideoData) urlSave(
-	urlData URLData, refer, fileName string, bar *pb.ProgressBar, parts *[]string,
+	urlData URLData, refer, fileName string, bar *pb.ProgressBar,
 ) {
 	filePath := utils.FilePath(fileName, data.Ext)
 	fileSize := utils.FileSize(filePath)
-	if parts != nil {
-		*parts = append(*parts, filePath)
-	}
 	if fileSize == urlData.Size {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
 		bar.Add64(fileSize)
@@ -80,8 +78,7 @@ func (data VideoData) urlSave(
 	// rename the file
 	err := os.Rename(tempFilePath, filePath)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
 }
 
@@ -98,14 +95,23 @@ func (data VideoData) Download(refer string) {
 	bar.Start()
 	if len(data.URLs) == 1 {
 		// only one fragment
-		data.urlSave(data.URLs[0], refer, data.Title, bar, nil)
+		data.urlSave(data.URLs[0], refer, utils.FileName(data.Title), bar)
 		bar.Finish()
 	} else {
+		var wg sync.WaitGroup
 		// multiple fragments
 		parts := []string{}
 		for index, url := range data.URLs {
-			data.urlSave(url, refer, fmt.Sprintf("%s[%d]", data.Title, index), bar, &parts)
+			wg.Add(1)
+			partFileName := fmt.Sprintf("%s[%d]", utils.FileName(data.Title), index)
+			partFilePath := utils.FilePath(partFileName, data.Ext)
+			parts = append(parts, partFilePath)
+			go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
+				defer wg.Done()
+				data.urlSave(url, refer, fileName, bar)
+			}(url, refer, partFileName, bar)
 		}
+		wg.Wait()
 		bar.Finish()
 
 		// merge
