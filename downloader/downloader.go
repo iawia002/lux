@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/cheggaaa/pb"
@@ -43,7 +44,9 @@ func (data VideoData) printInfo() {
 func (data VideoData) urlSave(
 	urlData URLData, refer, fileName string, bar *pb.ProgressBar, parts *[]string,
 ) {
-	filePath := fileName + "." + data.Ext
+	filePath := fmt.Sprintf("%s.%s", fileName, data.Ext)
+	// FIXME(iawia002) file name can't have /
+	filePath = strings.Replace(filePath, "/", " ", -1)
 	fileSize := utils.FileSize(filePath)
 	if parts != nil {
 		*parts = append(*parts, filePath)
