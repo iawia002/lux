@@ -42,7 +42,10 @@ func FileName(name string) string {
 }
 
 // FilePath gen valid filename
-func FilePath(name, ext string) string {
+func FilePath(name, ext string, escape bool) string {
 	fileName := fmt.Sprintf("%s.%s", name, ext)
-	return FileName(fileName)
+	if escape {
+		fileName = FileName(fileName)
+	}
+	return fileName
 }

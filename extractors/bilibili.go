@@ -119,7 +119,7 @@ func Bilibili(url string) downloader.VideoData {
 	}
 	data := downloader.VideoData{
 		Site:  "哔哩哔哩 bilibili.com",
-		Title: title,
+		Title: utils.FileName(title),
 		URLs:  urls,
 		Ext:   format,
 		Size:  size,
