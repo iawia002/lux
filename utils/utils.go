@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
 
 // Match1 return result of first match
@@ -29,4 +31,18 @@ func Domain(url string) string {
 		`me|top|cc|tv|tt)`
 	domain := Match1(domainPattern, url)[1]
 	return domain
+}
+
+// FileName Converts a string to a valid filename
+func FileName(name string) string {
+	// FIXME(iawia002) file name can't have /
+	newName := strings.Replace(name, "/", " ", -1)
+	newName = strings.Replace(newName, ":", "：", -1)
+	return newName
+}
+
+// FilePath gen valid filename
+func FilePath(name, ext string) string {
+	fileName := fmt.Sprintf("%s.%s", name, ext)
+	return FileName(fileName)
 }

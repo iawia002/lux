@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/cheggaaa/pb"
@@ -44,9 +43,7 @@ func (data VideoData) printInfo() {
 func (data VideoData) urlSave(
 	urlData URLData, refer, fileName string, bar *pb.ProgressBar, parts *[]string,
 ) {
-	filePath := fmt.Sprintf("%s.%s", fileName, data.Ext)
-	// FIXME(iawia002) file name can't have /
-	filePath = strings.Replace(filePath, "/", " ", -1)
+	filePath := utils.FilePath(fileName, data.Ext)
 	fileSize := utils.FileSize(filePath)
 	if parts != nil {
 		*parts = append(*parts, filePath)
@@ -107,13 +104,13 @@ func (data VideoData) Download(refer string) {
 
 		// merge
 		// write ffmpeg input file list
-		mergeFile := data.Title + "-merge.txt"
+		mergeFile := utils.FileName(data.Title) + "-merge.txt"
 		file, _ := os.Create(mergeFile)
 		for _, part := range parts {
 			file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
 		}
 
-		filePath := data.Title + "." + data.Ext
+		filePath := utils.FilePath(data.Title, data.Ext)
 		fmt.Printf("Merging video parts into %s\n", filePath)
 		cmd := exec.Command(
 			"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
