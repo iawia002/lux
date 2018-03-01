@@ -45,11 +45,36 @@ Title:    好冷  逢考必过
  741.70 KiB / 2.63 MiB [=========>--------------------------]  27.49% 1.98 MiB/s
 ```
 
+You can also use the `-i` option to view video information, skip download.
+
 ### Resume a download
 
 You may use <kbd>Ctrl</kbd>+<kbd>C</kbd> to interrupt a download.
 
 A temporary `.download` file is kept in the output directory. Next time you run `annie` with the same arguments, the download progress will resume from the last session.
+
+### Debug Mode
+
+You can use the `-d` option to see network request message.
+
+```console
+$ annie -i -d http://www.bilibili.com/video/av20088587
+
+URL: http://www.bilibili.com/video/av20088587
+Method: GET
+Headers: map[User-Agent:[Mozilla/5.0 (Windows NT 10.0; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0] Accept:[text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8] Accept-Charset:[UTF-8,*;q=0.5] Accept-Encoding:[gzip,deflate,sdch] Accept-Language:[en-US,en;q=0.8] Referer:[http://www.bilibili.com/video/av20088587]]
+Status Code: 200
+
+URL: https://interface.bilibili.com/v2/playurl?appkey=84956560bc028eb7&cid=32782944&otype=json&quality=0&type=&sign=708701ffaea9937d4541d5cc2f1cf3b1
+Method: GET
+Headers: map[Accept:[text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8] Accept-Charset:[UTF-8,*;q=0.5] Accept-Encoding:[gzip,deflate,sdch] Accept-Language:[en-US,en;q=0.8] User-Agent:[Mozilla/5.0 (Windows NT 10.0; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0] Referer:[https://interface.bilibili.com/v2/playurl?appkey=84956560bc028eb7&cid=32782944&otype=json&quality=0&type=&sign=708701ffaea9937d4541d5cc2f1cf3b1]]
+Status Code: 200
+
+ Site:    哔哩哔哩 bilibili.com
+Title:    燃油动力的遥控奥迪R8跑赛道
+ Type:    flv
+ Size:    64.38 MiB (67504795 Bytes)
+```
 
 
 ## Supported Sites

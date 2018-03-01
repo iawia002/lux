@@ -41,6 +41,7 @@ func Request(
 		log.Fatal(err)
 	}
 	if config.Debug {
+		fmt.Println()
 		fmt.Printf("URL: %s\n", url)
 		fmt.Printf("Method: %s\n", method)
 		fmt.Printf("Headers: %s\n", req.Header)
