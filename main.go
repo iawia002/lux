@@ -10,20 +10,16 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
-var (
-	debug   bool
-	version bool
-)
-
 func init() {
-	flag.BoolVar(&debug, "d", false, "Debug mode")
-	flag.BoolVar(&version, "v", false, "Show version")
+	flag.BoolVar(&config.Debug, "d", false, "Debug mode")
+	flag.BoolVar(&config.Version, "v", false, "Show version")
+	flag.BoolVar(&config.InfoOnly, "i", false, "Info only")
 }
 
 func main() {
 	flag.Parse()
 	args := flag.Args()
-	if version {
+	if config.Version {
 		fmt.Printf(
 			"annie: version %s, A simple and clean video downloader.\n", config.VERSION,
 		)

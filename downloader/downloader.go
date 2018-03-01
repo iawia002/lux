@@ -10,6 +10,7 @@ import (
 
 	"github.com/cheggaaa/pb"
 
+	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -81,6 +82,9 @@ func (data VideoData) urlSave(
 // Download download urls
 func (data VideoData) Download(refer string) {
 	data.printInfo()
+	if config.InfoOnly {
+		return
+	}
 	bar := pb.New64(data.Size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
 	bar.ShowSpeed = true
 	bar.ShowFinalTime = true

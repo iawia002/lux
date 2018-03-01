@@ -41,7 +41,6 @@ func Douyin(url string) downloader.VideoData {
 		URLs:  []downloader.URLData{urlData},
 		Size:  size,
 	}
-
 	data.Download(url)
 	return data
 }

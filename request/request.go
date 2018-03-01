@@ -2,6 +2,7 @@ package request
 
 import (
 	"compress/gzip"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -27,7 +28,7 @@ func Request(
 		log.Print(url)
 		log.Fatal(err)
 	}
-	for k, v := range config.FAKE_HEADERS {
+	for k, v := range config.FakeHeaders {
 		req.Header.Set(k, v)
 	}
 	req.Header.Set("Referer", url)
@@ -38,6 +39,12 @@ func Request(
 	if err != nil {
 		log.Print(url)
 		log.Fatal(err)
+	}
+	if config.Debug {
+		fmt.Printf("URL: %s\n", url)
+		fmt.Printf("Method: %s\n", method)
+		fmt.Printf("Headers: %s\n", req.Header)
+		fmt.Printf("Status Code: %d\n", res.StatusCode)
 	}
 	return res
 }

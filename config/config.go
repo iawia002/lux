@@ -1,6 +1,16 @@
 package config
 
-var FAKE_HEADERS = map[string]string{
+var (
+	// Debug debug mode
+	Debug bool
+	// Version show version
+	Version bool
+	// InfoOnly info only mode
+	InfoOnly bool
+)
+
+// FakeHeaders fake http headers
+var FakeHeaders = map[string]string{
 	"Accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 	"Accept-Charset":  "UTF-8,*;q=0.5",
 	"Accept-Encoding": "gzip,deflate,sdch",
