@@ -67,10 +67,16 @@ func (data VideoData) urlSave(
 	} else {
 		file, _ = os.Create(tempFilePath)
 	}
+	defer file.Close()
 	res := request.Request("GET", urlData.URL, nil, headers)
 	defer res.Body.Close()
 	writer := io.MultiWriter(file, bar)
-	io.Copy(writer, res.Body)
+	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
+	// So don't worry about memory.
+	_, copyErr := io.Copy(writer, res.Body)
+	if copyErr != nil {
+		log.Fatal(fmt.Sprintf("Error while downloading: %s, %s", urlData.URL, copyErr))
+	}
 	// rename the file
 	err := os.Rename(tempFilePath, filePath)
 	if err != nil {
