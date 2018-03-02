@@ -53,6 +53,28 @@ You may use <kbd>Ctrl</kbd>+<kbd>C</kbd> to interrupt a download.
 
 A temporary `.download` file is kept in the output directory. Next time you run `annie` with the same arguments, the download progress will resume from the last session.
 
+### Cookies
+
+If you need to log in your account to access something (a private video or VIP only video), use the `-c` option to feed the browser cookies to `annie`.
+
+**Note:**
+
+* the formats of cookies as follow:
+
+```
+name=value; name2=value2; ...
+```
+
+cookies can be a string or a file.
+
+```console
+$ annie -c "name=value; name2=value2" https://www.bilibili.com/video/av20203945
+
+# or
+
+$ annie -c cookies.txt https://www.bilibili.com/video/av20203945
+```
+
 ### Debug Mode
 
 You can use the `-d` option to see network request message.

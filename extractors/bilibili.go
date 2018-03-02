@@ -40,7 +40,7 @@ func getSign(params string) string {
 	return fmt.Sprintf("%x", sign.Sum(nil))
 }
 
-func genAPI(cid string, bangumi bool) string {
+func genAPI(aid, cid string, bangumi bool) string {
 	var (
 		baseAPIURL string
 		params     string
@@ -48,19 +48,29 @@ func genAPI(cid string, bangumi bool) string {
 	if bangumi {
 		// The parameters need to be sorted by name
 		// qn=0 flag makes the CDN address different every time
+		// quality=116(1080P 60) is the highest quality so far
 		params = fmt.Sprintf(
-			"appkey=%s&cid=%s&module=bangumi&otype=json&quality=0&season_type=4&type=",
+			"appkey=%s&cid=%s&module=bangumi&otype=json&qn=116&quality=116&season_type=4&type=",
 			appKey, cid,
 		)
 		baseAPIURL = config.BILIBILI_BANGUMI_API
 	} else {
 		params = fmt.Sprintf(
-			"appkey=%s&cid=%s&otype=json&quality=0&type=",
+			"appkey=%s&cid=%s&otype=json&qn=116&quality=116&type=",
 			appKey, cid,
 		)
 		baseAPIURL = config.BILIBILI_API
 	}
-	api := baseAPIURL + params + "&sign=" + getSign(params)
+	utoken := ""
+	if config.Cookie != "" {
+		utoken = request.Get(fmt.Sprintf(
+			"%said=%s&cid=%s", config.BILIBILI_TOKEN_API, aid, cid,
+		))
+		utoken = utils.Match1(`"token":"(\w+)"`, utoken)[1]
+	}
+	api := fmt.Sprintf(
+		"%s%s&sign=%s&utoken=%s", baseAPIURL, params, getSign(params), utoken,
+	)
 	return api
 }
 
@@ -89,13 +99,14 @@ func Bilibili(url string) downloader.VideoData {
 	if strings.Contains(url, "bangumi") {
 		bangumi = true
 	}
+	aid := utils.Match1(`av(\d+)`, url)[1]
 	html := request.Get(url)
 	if bangumi {
 		cid = utils.Match1(`"cid":(\d+)`, html)[1]
 	} else {
 		cid = utils.Match1(`cid=(\d+)`, html)[1]
 	}
-	api := genAPI(cid, bangumi)
+	api := genAPI(aid, cid, bangumi)
 	apiData := request.Get(api)
 	var dataDict bilibiliData
 	json.Unmarshal([]byte(apiData), &dataDict)
@@ -113,15 +124,11 @@ func Bilibili(url string) downloader.VideoData {
 	}
 
 	urls, size := genURL(dataDict.DURL)
-	format := dataDict.Format
-	if format == "flv720" {
-		format = "flv"
-	}
 	data := downloader.VideoData{
 		Site:  "哔哩哔哩 bilibili.com",
 		Title: utils.FileName(title),
 		URLs:  urls,
-		Ext:   format,
+		Ext:   "flv",
 		Size:  size,
 	}
 	data.Download(url)

@@ -7,6 +7,8 @@ var (
 	Version bool
 	// InfoOnly info only mode
 	InfoOnly bool
+	// Cookie http cookies
+	Cookie string
 )
 
 // FakeHeaders fake http headers

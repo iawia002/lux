@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -32,6 +33,18 @@ func Request(
 		req.Header.Set(k, v)
 	}
 	req.Header.Set("Referer", url)
+	if config.Cookie != "" {
+		var cookie string
+		if _, fileErr := os.Stat(config.Cookie); fileErr == nil {
+			// Cookie is a file
+			data, _ := ioutil.ReadFile(config.Cookie)
+			cookie = string(data)
+		} else {
+			// Just strings
+			cookie = config.Cookie
+		}
+		req.Header.Set("Cookie", cookie)
+	}
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}

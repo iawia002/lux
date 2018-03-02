@@ -14,6 +14,7 @@ func init() {
 	flag.BoolVar(&config.Debug, "d", false, "Debug mode")
 	flag.BoolVar(&config.Version, "v", false, "Show version")
 	flag.BoolVar(&config.InfoOnly, "i", false, "Info only")
+	flag.StringVar(&config.Cookie, "c", "", "Cookie")
 }
 
 func main() {
