@@ -5,7 +5,7 @@ var (
 	Debug bool
 	// Version show version
 	Version bool
-	// InfoOnly info only mode
+	// InfoOnly Information only mode
 	InfoOnly bool
 	// Cookie http cookies
 	Cookie string

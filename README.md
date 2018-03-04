@@ -26,7 +26,7 @@ To install Annie, please use `go get`, or compile yourself.
 ```bash
 $ go get github.com/iawia002/annie
 ...
-$ annie ...
+$ annie [args] URL
 ```
 
 
@@ -96,6 +96,19 @@ Status Code: 200
 Title:    燃油动力的遥控奥迪R8跑赛道
  Type:    flv
  Size:    64.38 MiB (67504795 Bytes)
+```
+
+### All available arguments
+
+```console
+$ annie -h
+
+Usage of annie:
+  -c string
+    	Cookie
+  -d	Debug mode
+  -i	Information only
+  -v	Show version
 ```
 
 
