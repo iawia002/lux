@@ -1,3 +1,4 @@
 package config
 
-const VERSION string = "0.1.0"
+// VERSION version of annie
+const VERSION string = "0.1.1"
