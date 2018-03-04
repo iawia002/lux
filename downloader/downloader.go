@@ -26,7 +26,7 @@ type URLData struct {
 type VideoData struct {
 	Site  string
 	Title string
-	URLs  []URLData
+	URLs  []URLData // Some video files have multiple fragments
 	Size  int64
 	Ext   string
 }

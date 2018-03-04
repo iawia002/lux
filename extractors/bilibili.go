@@ -34,6 +34,18 @@ type bilibiliData struct {
 	Quality int        `json:"quality"`
 }
 
+// {"code":0,"message":"0","ttl":1,"data":{"token":"aaa"}}
+// {"code":-101,"message":"账号未登录","ttl":1}
+type tokenData struct {
+	Token string `json:"token"`
+}
+
+type token struct {
+	Code    int       `json:"code"`
+	Message string    `json:"message"`
+	Data    tokenData `json:"data"`
+}
+
 func getSign(params string) string {
 	sign := md5.New()
 	sign.Write([]byte(params + secKey))
@@ -66,7 +78,13 @@ func genAPI(aid, cid string, bangumi bool) string {
 		utoken = request.Get(fmt.Sprintf(
 			"%said=%s&cid=%s", config.BILIBILI_TOKEN_API, aid, cid,
 		))
-		utoken = utils.Match1(`"token":"(\w+)"`, utoken)[1]
+		var t token
+		json.Unmarshal([]byte(utoken), &t)
+		if t.Code != 0 {
+			log.Println(config.Cookie)
+			log.Fatal("Cookie error: ", t.Message)
+		}
+		utoken = t.Data.Token
 	}
 	api := fmt.Sprintf(
 		"%s%s&sign=%s&utoken=%s", baseAPIURL, params, getSign(params), utoken,
