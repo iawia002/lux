@@ -21,7 +21,7 @@ The following dependencies are required and must be installed separately.
 
 > **Note**: FFmpeg does not affect the download, only affect the final file merge.
 
-To install Annie, please use `go get`, or compile yourself.
+To install Annie, please use `go get`, or download the binary file in the [Releases](https://github.com/iawia002/annie/releases) page, or compile yourself.
 
 ```bash
 $ go get github.com/iawia002/annie
