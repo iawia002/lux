@@ -48,6 +48,6 @@ func main() {
 	case "pixivision":
 		extractors.Pixivision(videoURL)
 	default:
-		fmt.Println("unsupported URL")
+		extractors.Universal(videoURL)
 	}
 }

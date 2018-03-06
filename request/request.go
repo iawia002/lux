@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/iawia002/annie/config"
@@ -77,14 +78,28 @@ func Get(url string) string {
 	return string(body)
 }
 
-// Size get size of the url
-func Size(url, refer string) int64 {
+// Headers return the HTTP Headers of the url
+func Headers(url, refer string) http.Header {
 	headers := map[string]string{
 		"Referer": refer,
 	}
 	res := Request("GET", url, nil, headers)
 	defer res.Body.Close()
-	s := res.Header.Get("Content-Length")
+	return res.Header
+}
+
+// Size get size of the url
+func Size(url, refer string) int64 {
+	h := Headers(url, refer)
+	s := h.Get("Content-Length")
 	size, _ := strconv.ParseInt(s, 10, 64)
 	return size
+}
+
+// ContentType get Content-Type of the url
+func ContentType(url, refer string) string {
+	h := Headers(url, refer)
+	s := h.Get("Content-Type")
+	// handle Content-Type like this: "text/html; charset=utf-8"
+	return strings.Split(s, ";")[0]
 }

@@ -47,6 +47,23 @@ Title:    好冷  逢考必过
 
 You can also use the `-i` option to view video information, skip download.
 
+### Download anything else
+
+If you already got the URL of the exact resource you want, you can download it directly:
+
+```console
+$ annie https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg
+
+annie doesn't support this URL by now, but it will try to download it directly
+
+ Site:    Universal
+Title:    1f5a87801a0711e898b12b640777720f
+ Type:    image/jpeg
+ Size:    1.00 MiB (1051042 Bytes)
+
+ 1.00 MiB / 1.00 MiB [===================================] 100.00% 3.35 MiB/s 0s
+```
+
 ### Resume a download
 
 You may use <kbd>Ctrl</kbd>+<kbd>C</kbd> to interrupt a download.

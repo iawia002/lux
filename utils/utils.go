@@ -6,6 +6,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/iawia002/annie/request"
 )
 
 // Match1 return result of first match
@@ -68,5 +70,13 @@ func GetNameAndExt(uri string) (string, string) {
 	u, _ := url.ParseRequestURI(uri)
 	s := strings.Split(u.Path, "/")
 	filename := strings.Split(s[len(s)-1], ".")
-	return filename[0], filename[1]
+	if len(filename) > 1 {
+		return filename[0], filename[1]
+	} else {
+		// Image url like this
+		// https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg/w650
+		// has no suffix
+		contentType := request.ContentType(uri, uri)
+		return filename[0], strings.Split(contentType, "/")[1]
+	}
 }
