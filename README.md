@@ -148,3 +148,8 @@ Make sure that this folder is in `GOPATH`, then:
 ```bash
 $ go build
 ```
+
+
+## License
+
+MIT
