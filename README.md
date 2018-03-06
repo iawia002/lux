@@ -119,6 +119,7 @@ Site | URL | Videos | Images
 抖音 | <https://www.douyin.com> | ✓ | |
 哔哩哔哩 | <https://www.bilibili.com> | ✓ | |
 半次元 | <https://bcy.net> | | ✓ |
+pixivision | <https://www.pixivision.net> | | ✓ |
 
 
 ## Development

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -58,4 +59,12 @@ func StringInSlice(str string, list []string) bool {
 		}
 	}
 	return false
+}
+
+// GetNameAndExt return the name and ext of the URL
+func GetNameAndExt(uri string) (string, string) {
+	u, _ := url.ParseRequestURI(uri)
+	s := strings.Split(u.Path, "/")
+	filename := strings.Split(s[len(s)-1], ".")
+	return filename[0], filename[1]
 }

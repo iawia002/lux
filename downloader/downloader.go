@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/url"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
 	"time"
 
@@ -35,14 +33,6 @@ type VideoData struct {
 	URLs []URLData
 	Size int64
 	Type string
-}
-
-// GetNameAndExt return the name and ext of the URL
-func (data URLData) GetNameAndExt() (string, string) {
-	u, _ := url.ParseRequestURI(data.URL)
-	s := strings.Split(u.Path, "/")
-	filename := strings.Split(s[len(s)-1], ".")
-	return filename[0], filename[1]
 }
 
 func (data VideoData) printInfo() {

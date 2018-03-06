@@ -45,6 +45,8 @@ func main() {
 		extractors.Bilibili(videoURL)
 	case "bcy":
 		extractors.Bcy(videoURL)
+	case "pixivision":
+		extractors.Pixivision(videoURL)
 	default:
 		fmt.Println("unsupported URL")
 	}
