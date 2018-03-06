@@ -49,3 +49,13 @@ func FilePath(name, ext string, escape bool) string {
 	}
 	return fileName
 }
+
+// StringInSlice if a string is in the list
+func StringInSlice(str string, list []string) bool {
+	for _, a := range list {
+		if a == str {
+			return true
+		}
+	}
+	return false
+}

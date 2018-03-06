@@ -43,6 +43,8 @@ func main() {
 		extractors.Douyin(videoURL)
 	case "bilibili":
 		extractors.Bilibili(videoURL)
+	case "bcy":
+		extractors.Bcy(videoURL)
 	default:
 		fmt.Println("unsupported URL")
 	}

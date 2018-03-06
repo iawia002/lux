@@ -102,6 +102,7 @@ func genURL(durl []dURLData) ([]downloader.URLData, int64) {
 		url := downloader.URLData{
 			URL:  data.URL,
 			Size: data.Size,
+			Ext:  "flv",
 		}
 		urls = append(urls, url)
 	}
@@ -146,7 +147,7 @@ func Bilibili(url string) downloader.VideoData {
 		Site:  "哔哩哔哩 bilibili.com",
 		Title: utils.FileName(title),
 		URLs:  urls,
-		Ext:   "flv",
+		Type:  "video",
 		Size:  size,
 	}
 	data.Download(url)

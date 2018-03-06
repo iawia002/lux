@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,31 +22,51 @@ import (
 type URLData struct {
 	URL  string
 	Size int64
+	Ext  string
 }
 
 // VideoData data struct of video info
 type VideoData struct {
 	Site  string
 	Title string
-	URLs  []URLData // Some video files have multiple fragments
-	Size  int64
-	Ext   string
+	// [URLData: {URL, Size, Ext}, ...]
+	// Some video files have multiple fragments
+	// and support for downloading multiple image files at once
+	URLs []URLData
+	Size int64
+	Type string
+}
+
+// GetNameAndExt return the name and ext of the URL
+func (data URLData) GetNameAndExt() (string, string) {
+	u, _ := url.ParseRequestURI(data.URL)
+	s := strings.Split(u.Path, "/")
+	filename := strings.Split(s[len(s)-1], ".")
+	return filename[0], filename[1]
 }
 
 func (data VideoData) printInfo() {
 	fmt.Println()
 	fmt.Println(" Site:   ", data.Site)
 	fmt.Println("Title:   ", data.Title)
-	fmt.Println(" Type:   ", data.Ext)
+	fmt.Println(" Type:   ", data.Type)
 	fmt.Printf(" Size:    %.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
 	fmt.Println()
+}
+
+func (data *VideoData) calculateTotalSize() {
+	var size int64
+	for _, urlData := range data.URLs {
+		size += urlData.Size
+	}
+	data.Size = size
 }
 
 // urlSave save url file
 func (data VideoData) urlSave(
 	urlData URLData, refer, fileName string, bar *pb.ProgressBar,
 ) {
-	filePath := utils.FilePath(fileName, data.Ext, false)
+	filePath := utils.FilePath(fileName, urlData.Ext, false)
 	fileSize := utils.FileSize(filePath)
 	if fileSize == urlData.Size {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
@@ -84,6 +106,9 @@ func (data VideoData) urlSave(
 
 // Download download urls
 func (data VideoData) Download(refer string) {
+	if data.Size == 0 {
+		data.calculateTotalSize()
+	}
 	data.printInfo()
 	if config.InfoOnly {
 		return
@@ -104,7 +129,7 @@ func (data VideoData) Download(refer string) {
 		for index, url := range data.URLs {
 			wg.Add(1)
 			partFileName := fmt.Sprintf("%s[%d]", data.Title, index)
-			partFilePath := utils.FilePath(partFileName, data.Ext, false)
+			partFilePath := utils.FilePath(partFileName, url.Ext, false)
 			parts = append(parts, partFilePath)
 			go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
 				defer wg.Done()
@@ -114,6 +139,9 @@ func (data VideoData) Download(refer string) {
 		wg.Wait()
 		bar.Finish()
 
+		if data.Type != "video" {
+			return
+		}
 		// merge
 		// write ffmpeg input file list
 		mergeFile := data.Title + "-merge.txt"
@@ -122,7 +150,7 @@ func (data VideoData) Download(refer string) {
 			file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
 		}
 
-		filePath := utils.FilePath(data.Title, data.Ext, false)
+		filePath := utils.FilePath(data.Title, "mp4", false)
 		fmt.Printf("Merging video parts into %s\n", filePath)
 		cmd := exec.Command(
 			"ffmpeg", "-y", "-f", "concat", "-safe", "-1",

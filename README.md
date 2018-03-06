@@ -114,10 +114,11 @@ Usage of annie:
 
 ## Supported Sites
 
-Site | URL | Videos
---- | --- | ------
-抖音 | <https://www.douyin.com> | ✓
-哔哩哔哩 | <https://www.bilibili.com> | ✓
+Site | URL | Videos | Images
+--- | --- | ------| -----
+抖音 | <https://www.douyin.com> | ✓ | |
+哔哩哔哩 | <https://www.bilibili.com> | ✓ | |
+半次元 | <https://bcy.net> | | ✓ |
 
 
 ## Development
