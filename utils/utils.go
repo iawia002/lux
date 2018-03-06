@@ -62,6 +62,8 @@ func StringInSlice(str string, list []string) bool {
 }
 
 // GetNameAndExt return the name and ext of the URL
+// https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg ->
+// 1f5a87801a0711e898b12b640777720f, jpg
 func GetNameAndExt(uri string) (string, string) {
 	u, _ := url.ParseRequestURI(uri)
 	s := strings.Split(u.Path, "/")
