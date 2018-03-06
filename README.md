@@ -64,6 +64,27 @@ Title:    1f5a87801a0711e898b12b640777720f
  1.00 MiB / 1.00 MiB [===================================] 100.00% 3.35 MiB/s 0s
 ```
 
+### Download playlist
+
+You can use the `-p` option to tell Annie to download the whole playlist rather than a single video.
+
+```console
+$ annie -i -p https://www.bilibili.com/bangumi/play/ep198061
+
+ Site:    哔哩哔哩 bilibili.com
+Title:    Doctor X 第四季：第一集
+ Type:    video
+ Size:    845.66 MiB (886738354 Bytes)
+
+
+ Site:    哔哩哔哩 bilibili.com
+Title:    Doctor X 第四季：第二集
+ Type:    video
+ Size:    930.71 MiB (975919195 Bytes)
+
+...
+```
+
 ### Resume a download
 
 You may use <kbd>Ctrl</kbd>+<kbd>C</kbd> to interrupt a download.
@@ -125,6 +146,7 @@ Usage of annie:
     	Cookie
   -d	Debug mode
   -i	Information only
+  -p	Download playlist
   -v	Show version
 ```
 

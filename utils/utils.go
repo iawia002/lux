@@ -17,6 +17,13 @@ func Match1(pattern, text string) []string {
 	return value
 }
 
+// MatchAll return all matching results
+func MatchAll(pattern, text string) [][]string {
+	re := regexp.MustCompile(pattern)
+	value := re.FindAllStringSubmatch(text, -1)
+	return value
+}
+
 // FileSize return the file size of the specified path file
 func FileSize(filePath string) int64 {
 	file, err := os.Stat(filePath)

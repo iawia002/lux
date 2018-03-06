@@ -9,6 +9,8 @@ var (
 	InfoOnly bool
 	// Cookie http cookies
 	Cookie string
+	// Playlist download playlist
+	Playlist bool
 )
 
 // FakeHeaders fake http headers

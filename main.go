@@ -15,6 +15,7 @@ func init() {
 	flag.BoolVar(&config.Version, "v", false, "Show version")
 	flag.BoolVar(&config.InfoOnly, "i", false, "Information only")
 	flag.StringVar(&config.Cookie, "c", "", "Cookie")
+	flag.BoolVar(&config.Playlist, "p", false, "Download playlist")
 }
 
 func main() {
