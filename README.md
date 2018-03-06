@@ -1,6 +1,6 @@
 # Annie
 
-👾 A simple and clean video downloader built with Go
+👾 A fast, simple and clean video downloader built with Go
 
 ```console
  Site:    抖音 douyin.com
