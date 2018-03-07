@@ -16,6 +16,7 @@ func init() {
 	flag.BoolVar(&config.InfoOnly, "i", false, "Information only")
 	flag.StringVar(&config.Cookie, "c", "", "Cookie")
 	flag.BoolVar(&config.Playlist, "p", false, "Download playlist")
+	flag.StringVar(&config.Refer, "r", "", "Use specified Referrer")
 }
 
 func main() {

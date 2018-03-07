@@ -113,6 +113,16 @@ $ annie -c "name=value; name2=value2" https://www.bilibili.com/video/av20203945
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945
 ```
 
+### Use specified Referrer
+
+You can use the `-r` option to tell Annie to use the given Referrer to request.
+
+```console
+$ annie -r https://www.bilibili.com/video/av20383055/ http://cn-scnc1-dx.acgvideo.com/...
+
+...
+```
+
 ### Debug Mode
 
 You can use the `-d` option to see network request message.
@@ -147,6 +157,8 @@ Usage of annie:
   -d	Debug mode
   -i	Information only
   -p	Download playlist
+  -r string
+    	Use specified Referrer
   -v	Show version
 ```
 

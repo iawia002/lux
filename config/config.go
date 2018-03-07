@@ -11,6 +11,8 @@ var (
 	Cookie string
 	// Playlist download playlist
 	Playlist bool
+	// Refer use specified Referrer
+	Refer string
 )
 
 // FakeHeaders fake http headers

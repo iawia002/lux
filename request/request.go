@@ -49,6 +49,9 @@ func Request(
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
+	if config.Refer != "" {
+		req.Header.Set("Referer", config.Refer)
+	}
 	res, err := client.Do(req)
 	if err != nil {
 		log.Print(url)
