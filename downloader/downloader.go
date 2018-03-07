@@ -30,17 +30,21 @@ type VideoData struct {
 	// [URLData: {URL, Size, Ext}, ...]
 	// Some video files have multiple fragments
 	// and support for downloading multiple image files at once
-	URLs []URLData
-	Size int64
-	Type string
+	URLs    []URLData
+	Size    int64
+	Type    string
+	Quality string
 }
 
 func (data VideoData) printInfo() {
 	fmt.Println()
-	fmt.Println(" Site:   ", data.Site)
-	fmt.Println("Title:   ", data.Title)
-	fmt.Println(" Type:   ", data.Type)
-	fmt.Printf(" Size:    %.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
+	fmt.Println("   Site:   ", data.Site)
+	fmt.Println("  Title:   ", data.Title)
+	fmt.Println("   Type:   ", data.Type)
+	if data.Quality != "" {
+		fmt.Println("Quality:   ", data.Quality)
+	}
+	fmt.Printf("   Size:    %.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
 	fmt.Println()
 }
 

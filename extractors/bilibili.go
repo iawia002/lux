@@ -54,6 +54,15 @@ type bangumiData struct {
 	EpList []bangumiEpData `json:"epList"`
 }
 
+var quality = map[int]string{
+	116: "高清 1080P60",
+	74:  "高清 720P60",
+	80:  "高清 1080P",
+	64:  "高清 720P",
+	32:  "清晰 480P",
+	15:  "流畅 360P",
+}
+
 func getSign(params string) string {
 	sign := md5.New()
 	sign.Write([]byte(params + secKey))
@@ -186,11 +195,12 @@ func download(url string, bangumi bool) downloader.VideoData {
 
 	urls, size := genURL(dataDict.DURL)
 	data := downloader.VideoData{
-		Site:  "哔哩哔哩 bilibili.com",
-		Title: utils.FileName(title),
-		URLs:  urls,
-		Type:  "video",
-		Size:  size,
+		Site:    "哔哩哔哩 bilibili.com",
+		Title:   utils.FileName(title),
+		URLs:    urls,
+		Type:    "video",
+		Size:    size,
+		Quality: quality[dataDict.Quality],
 	}
 	data.Download(url)
 	return data
