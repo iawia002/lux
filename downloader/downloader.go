@@ -58,6 +58,7 @@ func (data VideoData) urlSave(
 ) {
 	filePath := utils.FilePath(fileName, urlData.Ext, false)
 	fileSize := utils.FileSize(filePath)
+	// TODO: Live video URLs will not return the size
 	if fileSize == urlData.Size {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
 		bar.Add64(fileSize)
