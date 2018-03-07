@@ -173,15 +173,10 @@ Site | URL | Videos | Images
 pixivision | <https://www.pixivision.net> | | ✓ |
 
 
-## Development
+## Contributing
+Annie is an open source project and welcome contributions 😉
 
-### Build
-
-Make sure that this folder is in `GOPATH`, then:
-
-```bash
-$ go build
-```
+Check out the [CONTRIBUTING](https://github.com/iawia002/annie/blob/master/CONTRIBUTING.md) guide to get started
 
 
 ## License
