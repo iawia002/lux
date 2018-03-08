@@ -9,6 +9,7 @@ import (
 // CheckData check the given data
 func CheckData(args Args, data downloader.VideoData) bool {
 	if args.Title == data.Title {
+		// not every video got quality information
 		if args.Quality != "" {
 			if args.Quality == data.Quality {
 				return true
