@@ -96,7 +96,7 @@ func Bilibili(url string) {
 		bangumi = true
 	}
 	if !config.Playlist {
-		download(url, bangumi)
+		bilibiliDownload(url, bangumi)
 		return
 	}
 	html := request.Get(url)
@@ -105,7 +105,7 @@ func Bilibili(url string) {
 		var data bangumiData
 		json.Unmarshal([]byte(dataString), &data)
 		for _, u := range data.EpList {
-			download(
+			bilibiliDownload(
 				fmt.Sprintf("https://www.bilibili.com/bangumi/play/ep%d", u.EpID), bangumi,
 			)
 		}
@@ -113,17 +113,17 @@ func Bilibili(url string) {
 		urls := utils.MatchAll(`<option value='(.+?)'`, html)
 		if len(urls) == 0 {
 			// this page has no playlist
-			download(url, bangumi)
+			bilibiliDownload(url, bangumi)
 			return
 		}
 		// /video/av16907446/index_1.html
 		for _, u := range urls {
-			download("https://www.bilibili.com"+u[1], bangumi)
+			bilibiliDownload("https://www.bilibili.com"+u[1], bangumi)
 		}
 	}
 }
 
-func download(url string, bangumi bool) downloader.VideoData {
+func bilibiliDownload(url string, bangumi bool) downloader.VideoData {
 	var (
 		aid, cid string
 	)
