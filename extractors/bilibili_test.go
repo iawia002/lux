@@ -36,9 +36,9 @@ func TestBilibili(t *testing.T) {
 		{
 			name: "bangumi playlist test",
 			args: test.Args{
-				URL:     "https://www.bilibili.com/bangumi/play/ep198121",
+				URL:     "https://www.bilibili.com/bangumi/play/ss5050",
 				Bangumi: true,
-				Title:   "Doctor X 第四季：第七集",
+				Title:   "一人之下：第1话 异人刀兵起，道炁携阴阳",
 				Quality: "高清 1080P",
 			},
 			playlist: true,

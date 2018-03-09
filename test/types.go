@@ -1,6 +1,6 @@
 package test
 
-// Args Arguments for tests
+// Args Arguments for extractor tests
 type Args struct {
 	URL string
 	// for bilibili
