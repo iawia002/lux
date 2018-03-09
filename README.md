@@ -6,12 +6,15 @@
 👾 A fast, simple and clean video downloader built with Go
 
 ```console
- Site:    抖音 douyin.com
-Title:    好冷  逢考必过
- Type:    mp4
- Size:    2.76 MiB (2762719 Bytes)
+$ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
 
- 2.63 MiB / 2.63 MiB [===================================] 100.00% 1.03 MiB/s 2s
+   Site:    哔哩哔哩 bilibili.com
+  Title:    【2018拜年祭单品】相遇day by day
+   Type:    video
+Quality:    高清 1080P60
+   Size:    220.65 MiB (231363071 Bytes)
+
+ 2.06 MiB / 220.65 MiB [>-----------------------------]   0.93% 1.94 MiB/s 1m52s
 ```
 
 ## Install
