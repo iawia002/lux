@@ -35,6 +35,7 @@ type bangumiData struct {
 var quality = map[int]string{
 	116: "高清 1080P60",
 	74:  "高清 720P60",
+	112: "高清 1080P+",
 	80:  "高清 1080P",
 	64:  "高清 720P",
 	32:  "清晰 480P",
