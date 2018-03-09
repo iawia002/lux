@@ -33,6 +33,7 @@ func GetImages(
 		func(i int, s *goquery.Selection) {
 			urlData.URL, _ = s.Attr("src")
 			if urlHandler != nil {
+				// Handle URL as needed
 				urlData.URL = urlHandler(urlData.URL)
 			}
 			urlData.Size = request.Size(urlData.URL, url)
