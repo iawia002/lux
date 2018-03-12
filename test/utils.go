@@ -8,17 +8,21 @@ import (
 
 // CheckData check the given data
 func CheckData(args Args, data downloader.VideoData) bool {
-	if args.Title == data.Title {
-		// not every video got quality information
-		if args.Quality != "" {
-			if args.Quality == data.Quality {
-				return true
-			}
+	if args.Title != data.Title {
+		return false
+	}
+	// not every video got quality information
+	if args.Quality != "" {
+		if args.Quality != data.Quality {
 			return false
 		}
-		return true
 	}
-	return false
+	if args.Size != 0 {
+		if args.Size != data.Size {
+			return false
+		}
+	}
+	return true
 }
 
 // Check check the result
