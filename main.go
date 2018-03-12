@@ -49,6 +49,8 @@ func main() {
 		extractors.Bcy(videoURL)
 	case "pixivision":
 		extractors.Pixivision(videoURL)
+	case "youku":
+		extractors.Youku(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}

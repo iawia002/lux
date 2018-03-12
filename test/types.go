@@ -7,4 +7,5 @@ type Args struct {
 	Bangumi bool
 	Title   string
 	Quality string
+	Size    int64
 }
