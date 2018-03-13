@@ -17,6 +17,17 @@ func Match1(pattern, text string) []string {
 	return value
 }
 
+// MatchOneOf match one of the patterns
+func MatchOneOf(patterns []string, text string) []string {
+	for _, pattern := range patterns {
+		value := Match1(pattern, text)
+		if len(value) > 0 {
+			return value
+		}
+	}
+	return nil
+}
+
 // MatchAll return all matching results
 func MatchAll(pattern, text string) [][]string {
 	re := regexp.MustCompile(pattern)
@@ -37,7 +48,7 @@ func FileSize(filePath string) int64 {
 func Domain(url string) string {
 	domainPattern := `([a-z0-9][-a-z0-9]{0,62})\.` +
 		`(com\.cn|com\.hk|` +
-		`cn|com|net|edu|gov|biz|org|info|pro|name|xxx|xyz|` +
+		`cn|com|net|edu|gov|biz|org|info|pro|name|xxx|xyz|be|` +
 		`me|top|cc|tv|tt)`
 	domain := Match1(domainPattern, url)[1]
 	return domain
