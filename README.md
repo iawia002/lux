@@ -178,6 +178,7 @@ Site | URL | Videos | Images | Playlist
 半次元 | <https://bcy.net> | | ✓ | |
 pixivision | <https://www.pixivision.net> | | ✓ | |
 优酷 | <https://www.youku.com> | ✓ | | |
+YouTube | <https://www.youtube.com> | ✓ | | |
 
 
 ## Contributing
