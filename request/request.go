@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	netURL "net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -19,11 +20,19 @@ import (
 func Request(
 	method, url string, body io.Reader, headers map[string]string,
 ) *http.Response {
+	transport := &http.Transport{
+		DisableCompression: true,
+	}
+	if config.Proxy != "" {
+		var proxy, err = netURL.Parse(config.Proxy)
+		if err != nil {
+			log.Fatal(err)
+		}
+		transport.Proxy = http.ProxyURL(proxy)
+	}
 	client := &http.Client{
-		Timeout: time.Second * 100,
-		Transport: &http.Transport{
-			DisableCompression: true,
-		},
+		Timeout:   time.Second * 100,
+		Transport: transport,
 	}
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {

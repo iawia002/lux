@@ -13,6 +13,8 @@ var (
 	Playlist bool
 	// Refer use specified Referrer
 	Refer string
+	// Proxy HTTP proxy
+	Proxy string
 )
 
 // FakeHeaders fake http headers

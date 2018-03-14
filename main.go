@@ -17,6 +17,7 @@ func init() {
 	flag.StringVar(&config.Cookie, "c", "", "Cookie")
 	flag.BoolVar(&config.Playlist, "p", false, "Download playlist")
 	flag.StringVar(&config.Refer, "r", "", "Use specified Referrer")
+	flag.StringVar(&config.Proxy, "x", "", "HTTP proxy")
 }
 
 func main() {

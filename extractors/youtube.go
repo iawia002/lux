@@ -56,11 +56,20 @@ func Youtube(uri string) downloader.VideoData {
 	stream, _ := url.ParseQuery(streams[0]) // Best quality
 	quality := stream.Get("quality")
 	ext := utils.MatchOneOf(stream.Get("type"), `video/(\w+);`)[1]
-	sig := stream.Get("sig")
-	if sig == "" {
-		sig = getSig(stream.Get("s"), youtube.Assets.JS)
+	streamURL := stream.Get("url")
+	var realURL string
+	if strings.Contains(streamURL, "&signature=") {
+		// URL itself already has a signature parameter
+		realURL = streamURL
+	} else {
+		// URL has no signature parameter
+		sig := stream.Get("sig")
+		if sig == "" {
+			// Signature need decrypt
+			sig = getSig(stream.Get("s"), youtube.Assets.JS)
+		}
+		realURL = fmt.Sprintf("%s&signature=%s", streamURL, sig)
 	}
-	realURL := fmt.Sprintf("%s&signature=%s", stream.Get("url"), sig)
 	size := request.Size(realURL, uri)
 	urlData := downloader.URLData{
 		URL:  realURL,

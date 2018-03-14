@@ -119,6 +119,16 @@ $ annie -c "name=value; name2=value2" https://www.bilibili.com/video/av20203945
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945
 ```
 
+
+### Proxy
+#### HTTP proxy
+You can specify an HTTP proxy via `-x` option:
+
+```console
+$ annie -x http://127.0.0.1:7777 -i https://www.youtube.com/watch?v=Gnbch2osEeo
+```
+
+
 ### Use specified Referrer
 
 You can use the `-r` option to tell Annie to use the given Referrer to request.
