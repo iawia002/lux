@@ -101,7 +101,7 @@ func Bilibili(url string) {
 	}
 	html := request.Get(url)
 	if bangumi {
-		dataString := utils.Match1(`window.__INITIAL_STATE__=(.+?);`, html)[1]
+		dataString := utils.MatchOneOf(html, `window.__INITIAL_STATE__=(.+?);`)[1]
 		var data bangumiData
 		json.Unmarshal([]byte(dataString), &data)
 		for _, u := range data.EpList {
@@ -110,7 +110,7 @@ func Bilibili(url string) {
 			)
 		}
 	} else {
-		urls := utils.MatchAll(`<option value='(.+?)'`, html)
+		urls := utils.MatchAll(html, `<option value='(.+?)'`)
 		if len(urls) == 0 {
 			// this page has no playlist
 			bilibiliDownload(url, bangumi)
@@ -129,11 +129,11 @@ func bilibiliDownload(url string, bangumi bool) downloader.VideoData {
 	)
 	html := request.Get(url)
 	if bangumi {
-		cid = utils.Match1(`"cid":(\d+)`, html)[1]
-		aid = utils.Match1(`"aid":(\d+)`, html)[1]
+		cid = utils.MatchOneOf(html, `"cid":(\d+)`)[1]
+		aid = utils.MatchOneOf(html, `"aid":(\d+)`)[1]
 	} else {
-		cid = utils.Match1(`cid=(\d+)`, html)[1]
-		aid = utils.Match1(`av(\d+)`, url)[1]
+		cid = utils.MatchOneOf(html, `cid=(\d+)`)[1]
+		aid = utils.MatchOneOf(url, `av(\d+)`)[1]
 	}
 	api := genAPI(aid, cid, bangumi)
 	apiData := request.Get(api)

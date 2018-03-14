@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestMatch1(t *testing.T) {
+func TestMatchOneOf(t *testing.T) {
 	type args struct {
-		pattern string
-		text    string
+		patterns []string
+		text     string
 	}
 	tests := []struct {
 		name string
@@ -18,18 +18,26 @@ func TestMatch1(t *testing.T) {
 		{
 			name: "normal test",
 			args: args{
-				pattern: `hello(\d+)`,
-				text:    "hello12345",
+				patterns: []string{`aaa(\d+)`, `hello(\d+)`},
+				text:     "hello12345",
 			},
 			want: []string{
 				"hello12345", "12345",
 			},
 		},
+		{
+			name: "normal test",
+			args: args{
+				patterns: []string{`aaa(\d+)`, `bbb(\d+)`},
+				text:     "hello12345",
+			},
+			want: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Match1(tt.args.pattern, tt.args.text); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Match1() = %v, want %v", got, tt.want)
+			if got := MatchOneOf(tt.args.text, tt.args.patterns...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MatchOneOf() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -63,7 +71,7 @@ func TestMatchAll(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := MatchAll(tt.args.pattern, tt.args.text); !reflect.DeepEqual(got, tt.want) {
+			if got := MatchAll(tt.args.text, tt.args.pattern); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MatchAll() = %v, want %v", got, tt.want)
 			}
 		})

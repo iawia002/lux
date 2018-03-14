@@ -33,13 +33,13 @@ func getSig(sig, js string) string {
 
 // Youtube download function
 func Youtube(uri string) downloader.VideoData {
-	patterns := []string{
+	vid := utils.MatchOneOf(
+		uri,
 		`watch\?v=(\w+)`,
 		`youtu\.be/([^?/]+)`,
 		`embed/([^/?]+)`,
 		`v/([^/?]+)`,
-	}
-	vid := utils.MatchOneOf(patterns, uri)
+	)
 	if vid == nil {
 		log.Fatal("Can't find vid")
 	}
@@ -48,14 +48,14 @@ func Youtube(uri string) downloader.VideoData {
 		vid[1],
 	)
 	html := request.Get(videoURL)
-	ytplayer := utils.Match1(`;ytplayer\.config\s*=\s*({.+?});`, html)[1]
+	ytplayer := utils.MatchOneOf(html, `;ytplayer\.config\s*=\s*({.+?});`)[1]
 	var youtube youtubeData
 	json.Unmarshal([]byte(ytplayer), &youtube)
 	title := youtube.Args.Title
 	streams := strings.Split(youtube.Args.Stream, ",")
 	stream, _ := url.ParseQuery(streams[0]) // Best quality
 	quality := stream.Get("quality")
-	ext := utils.Match1(`video/(\w+);`, stream.Get("type"))[1]
+	ext := utils.MatchOneOf(stream.Get("type"), `video/(\w+);`)[1]
 	sig := stream.Get("sig")
 	if sig == "" {
 		sig = getSig(stream.Get("s"), youtube.Assets.JS)
