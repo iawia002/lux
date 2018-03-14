@@ -10,17 +10,15 @@ import (
 	"github.com/iawia002/annie/request"
 )
 
-// Match1 return result of first match
-func Match1(pattern, text string) []string {
-	re := regexp.MustCompile(pattern)
-	value := re.FindStringSubmatch(text)
-	return value
-}
-
 // MatchOneOf match one of the patterns
-func MatchOneOf(patterns []string, text string) []string {
+func MatchOneOf(text string, patterns ...string) []string {
+	var (
+		re    *regexp.Regexp
+		value []string
+	)
 	for _, pattern := range patterns {
-		value := Match1(pattern, text)
+		re = regexp.MustCompile(pattern)
+		value = re.FindStringSubmatch(text)
 		if len(value) > 0 {
 			return value
 		}
@@ -29,7 +27,7 @@ func MatchOneOf(patterns []string, text string) []string {
 }
 
 // MatchAll return all matching results
-func MatchAll(pattern, text string) [][]string {
+func MatchAll(text, pattern string) [][]string {
 	re := regexp.MustCompile(pattern)
 	value := re.FindAllStringSubmatch(text, -1)
 	return value
@@ -50,7 +48,7 @@ func Domain(url string) string {
 		`(com\.cn|com\.hk|` +
 		`cn|com|net|edu|gov|biz|org|info|pro|name|xxx|xyz|be|` +
 		`me|top|cc|tv|tt)`
-	domain := Match1(domainPattern, url)[1]
+	domain := MatchOneOf(url, domainPattern)[1]
 	return domain
 }
 

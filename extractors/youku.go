@@ -50,7 +50,7 @@ func youkuUps(vid string) youkuData {
 	var data youkuData
 	headers := request.Headers("http://log.mmstat.com/eg.js", referer)
 	setCookie := headers.Get("Set-Cookie")
-	utid = utils.Match1(`cna=(.+?);`, setCookie)[1]
+	utid = utils.MatchOneOf(setCookie, `cna=(.+?);`)[1]
 	for _, ccode := range ccodes {
 		url = fmt.Sprintf(
 			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s",
@@ -104,7 +104,7 @@ func Youku(url string) downloader.VideoData {
 		log.Fatal(err)
 	}
 	title := strings.TrimSpace(doc.Find("h1").First().Text())
-	vid := utils.Match1(`id_(.+?).html`, url)[1]
+	vid := utils.MatchOneOf(url, `id_(.+?).html`)[1]
 	youkuData := youkuUps(vid)
 	if youkuData.Data.Error.Code != 0 {
 		log.Fatal(youkuData.Data.Error.Note)
