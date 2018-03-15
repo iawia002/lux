@@ -18,6 +18,7 @@ func init() {
 	flag.BoolVar(&config.Playlist, "p", false, "Download playlist")
 	flag.StringVar(&config.Refer, "r", "", "Use specified Referrer")
 	flag.StringVar(&config.Proxy, "x", "", "HTTP proxy")
+	flag.StringVar(&config.Socks5Proxy, "s", "", "SOCKS5 proxy")
 }
 
 func main() {

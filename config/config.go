@@ -15,6 +15,8 @@ var (
 	Refer string
 	// Proxy HTTP proxy
 	Proxy string
+	// Socks5Proxy SOCKS5 proxy
+	Socks5Proxy string
 )
 
 // FakeHeaders fake http headers

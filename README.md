@@ -128,6 +128,13 @@ You can specify an HTTP proxy via `-x` option:
 $ annie -x http://127.0.0.1:7777 -i https://www.youtube.com/watch?v=Gnbch2osEeo
 ```
 
+#### SOCKS5 proxy
+You can also use `-s` option to specify a SOCKS5 proxy:
+
+```console
+$ annie -s 127.0.0.1:1080 -i https://www.youtube.com/watch?v=Gnbch2osEeo
+```
+
 
 ### Use specified Referrer
 
@@ -175,7 +182,11 @@ Usage of annie:
   -p	Download playlist
   -r string
     	Use specified Referrer
+  -s string
+    	SOCKS5 proxy
   -v	Show version
+  -x string
+    	HTTP proxy
 ```
 
 
