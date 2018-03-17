@@ -2,8 +2,10 @@ package extractors
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/iawia002/annie/config"
@@ -81,53 +83,105 @@ func genURL(durl []dURLData) ([]downloader.URLData, int64) {
 	return urls, size
 }
 
+type bilibiliOptions struct {
+	Bangumi  bool
+	Subtitle string
+	Aid      string
+	Cid      string
+	HTML     string
+}
+
+func getMultiPageData(html string) (multiPage, error) {
+	var data multiPage
+	multiPageDataString := utils.MatchOneOf(
+		html, `window.__INITIAL_STATE__=(.+?);\(function`,
+	)
+	if multiPageDataString == nil {
+		return data, errors.New("This page has no playlist")
+	}
+	json.Unmarshal([]byte(multiPageDataString[1]), &data)
+	return data, nil
+}
+
 // Bilibili download function
 func Bilibili(url string) {
-	var bangumi bool
+	var options bilibiliOptions
 	if strings.Contains(url, "bangumi") {
-		bangumi = true
-	}
-	if !config.Playlist {
-		bilibiliDownload(url, bangumi)
-		return
+		options.Bangumi = true
 	}
 	html := request.Get(url)
-	if bangumi {
+	if !config.Playlist {
+		options.HTML = html
+		data, err := getMultiPageData(html)
+		if err == nil {
+			// handle URL that has a playlist
+			pageString := utils.MatchOneOf(url, `\?p=(\d+)`)
+			var p int
+			if pageString == nil {
+				// https://www.bilibili.com/video/av20827366/
+				p = 1
+			} else {
+				// https://www.bilibili.com/video/av20827366/?p=2
+				p, _ = strconv.Atoi(pageString[1])
+			}
+			page := data.VideoData.Pages[p-1]
+			options.Aid = data.Aid
+			options.Cid = strconv.Itoa(page.Cid)
+			options.Subtitle = page.Part
+		}
+		bilibiliDownload(url, options)
+		return
+	}
+	if options.Bangumi {
 		dataString := utils.MatchOneOf(html, `window.__INITIAL_STATE__=(.+?);`)[1]
 		var data bangumiData
 		json.Unmarshal([]byte(dataString), &data)
 		for _, u := range data.EpList {
 			bilibiliDownload(
-				fmt.Sprintf("https://www.bilibili.com/bangumi/play/ep%d", u.EpID), bangumi,
+				fmt.Sprintf("https://www.bilibili.com/bangumi/play/ep%d", u.EpID), options,
 			)
 		}
 	} else {
-		urls := utils.MatchAll(html, `<option value='(.+?)'`)
-		if len(urls) == 0 {
+		data, err := getMultiPageData(html)
+		if err != nil {
 			// this page has no playlist
-			bilibiliDownload(url, bangumi)
+			options.HTML = html
+			bilibiliDownload(url, options)
 			return
 		}
-		// /video/av16907446/index_1.html
-		for _, u := range urls {
-			bilibiliDownload("https://www.bilibili.com"+u[1], bangumi)
+		// https://www.bilibili.com/video/av20827366/?p=1
+		for _, u := range data.VideoData.Pages {
+			options.Aid = data.Aid
+			options.Cid = strconv.Itoa(u.Cid)
+			options.Subtitle = u.Part
+			bilibiliDownload(url, options)
 		}
 	}
 }
 
-func bilibiliDownload(url string, bangumi bool) downloader.VideoData {
+func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData {
 	var (
-		aid, cid string
+		aid, cid, html string
 	)
-	html := request.Get(url)
-	if bangumi {
-		cid = utils.MatchOneOf(html, `"cid":(\d+)`)[1]
-		aid = utils.MatchOneOf(html, `"aid":(\d+)`)[1]
+	if options.HTML != "" {
+		// reuse html string, but this can't be reused in case of playlist
+		html = options.HTML
 	} else {
-		cid = utils.MatchOneOf(html, `cid=(\d+)`)[1]
-		aid = utils.MatchOneOf(url, `av(\d+)`)[1]
+		html = request.Get(url)
 	}
-	api := genAPI(aid, cid, bangumi)
+	if options.Aid != "" && options.Cid != "" {
+		aid = options.Aid
+		cid = options.Cid
+	} else {
+		if options.Bangumi {
+			cid = utils.MatchOneOf(html, `"cid":(\d+)`)[1]
+			aid = utils.MatchOneOf(html, `"aid":(\d+)`)[1]
+		} else {
+			cid = utils.MatchOneOf(html, `cid=(\d+)`)[1]
+			aid = utils.MatchOneOf(url, `av(\d+)`)[1]
+		}
+	}
+	api := genAPI(aid, cid, options.Bangumi)
 	apiData := request.Get(api)
 	var dataDict bilibiliData
 	json.Unmarshal([]byte(apiData), &dataDict)
@@ -135,6 +189,9 @@ func bilibiliDownload(url string, bangumi bool) downloader.VideoData {
 	// get the title
 	doc := parser.GetDoc(html)
 	title := parser.Title(doc)
+	if options.Subtitle != "" {
+		title = fmt.Sprintf("%s %s", title, options.Subtitle)
+	}
 
 	urls, size := genURL(dataDict.DURL)
 	data := downloader.VideoData{

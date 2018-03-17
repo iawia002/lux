@@ -32,6 +32,22 @@ type bangumiData struct {
 	EpList []bangumiEpData `json:"epList"`
 }
 
+type videoPagesData struct {
+	Cid  int    `json:"cid"`
+	Part string `json:"part"`
+	Page int    `json:"page"`
+}
+
+type multiPageVideoData struct {
+	Title string           `json:"title"`
+	Pages []videoPagesData `json:"pages"`
+}
+
+type multiPage struct {
+	Aid       string             `json:"aid"`
+	VideoData multiPageVideoData `json:"videoData"`
+}
+
 var quality = map[int]string{
 	116: "高清 1080P60",
 	74:  "高清 720P60",
