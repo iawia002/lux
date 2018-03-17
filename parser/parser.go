@@ -26,7 +26,7 @@ func GetImages(
 	url, html, imgClass string, urlHandler func(string) string,
 ) (string, []downloader.URLData) {
 	doc := GetDoc(html)
-	title := strings.TrimSpace(doc.Find("h1").First().Text())
+	title := Title(doc)
 	urls := []downloader.URLData{}
 	urlData := downloader.URLData{}
 	doc.Find(fmt.Sprintf("img[class=\"%s\"]", imgClass)).Each(
@@ -42,4 +42,17 @@ func GetImages(
 		},
 	)
 	return title, urls
+}
+
+// Title get title
+func Title(doc *goquery.Document) string {
+	var title string
+	title = strings.Replace(
+		strings.TrimSpace(doc.Find("h1").First().Text()), "\n", "", -1,
+	)
+	if title == "" {
+		// Bilibili: Some movie page got no h1 tag
+		title, _ = doc.Find("meta[property=\"og:title\"]").Attr("content")
+	}
+	return utils.FileName(title)
 }

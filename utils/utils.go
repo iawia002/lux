@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"crypto/md5"
 	"fmt"
 	"net/url"
 	"os"
@@ -94,4 +95,31 @@ func GetNameAndExt(uri string) (string, string) {
 	// has no suffix
 	contentType := request.ContentType(uri, uri)
 	return filename[0], strings.Split(contentType, "/")[1]
+}
+
+// Md5 md5 hash
+func Md5(text string) string {
+	sign := md5.New()
+	sign.Write([]byte(text))
+	return fmt.Sprintf("%x", sign.Sum(nil))
+}
+
+// M3u8Urls get all urls from m3u8 url
+func M3u8Urls(uri string) []string {
+	html := request.Get(uri)
+	lines := strings.Split(html, "\n")
+	var urls []string
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line != "" && !strings.HasPrefix(line, "#") {
+			if strings.HasPrefix(line, "http") {
+				urls = append(urls, line)
+			} else {
+				base, _ := url.Parse(uri)
+				u, _ := url.Parse(line)
+				urls = append(urls, fmt.Sprintf("%s", base.ResolveReference(u)))
+			}
+		}
+	}
+	return urls
 }

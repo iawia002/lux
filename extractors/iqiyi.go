@@ -1,0 +1,93 @@
+package extractors
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/parser"
+	"github.com/iawia002/annie/request"
+	"github.com/iawia002/annie/utils"
+)
+
+type vidl struct {
+	M3utx      string `json:"m3utx"`
+	Vd         int    `json:"vd"` // quality number
+	ScreenSize string `json:"screenSize"`
+}
+
+type iqiyiData struct {
+	Vidl []vidl `json:"vidl"`
+}
+
+type iqiyi struct {
+	Code string    `json:"code"`
+	Data iqiyiData `json:"data"`
+}
+
+func getIqiyiData(tvid, vid string) iqiyi {
+	t := time.Now().Unix() * 1000
+	src := "76f90cbd92f94a2e925d83e8ccd22cb7"
+	key := "d5fb4bd9d50c4be6948c97edd7254b0e"
+	sc := utils.Md5(strconv.FormatInt(t, 10) + key + vid)
+	info := request.Get(fmt.Sprintf(
+		"http://cache.m.iqiyi.com/jp/tmts/%s/%s/?t=%d&sc=%s&src=%s",
+		tvid, vid, t, sc, src,
+	))
+	var data iqiyi
+	json.Unmarshal([]byte(info[len("var tvInfoJs="):]), &data)
+	return data
+}
+
+// Iqiyi download function
+func Iqiyi(url string) downloader.VideoData {
+	html := request.Get(url)
+	tvid := utils.MatchOneOf(
+		html,
+		`data-player-tvid="([^"]+)"`,
+		`param\[\'tvid\'\]\s*=\s*"(.+?)"`,
+	)[1]
+	vid := utils.MatchOneOf(
+		html,
+		`data-player-videoid="([^"]+)"`,
+		`param\[\'vid\'\]\s*=\s*"(.+?)"`,
+	)[1]
+	doc := parser.GetDoc(html)
+	title := strings.TrimSpace(doc.Find("h1 a").Text()) +
+		strings.TrimSpace(doc.Find("h1 span").Text())
+	videoDatas := getIqiyiData(tvid, vid)
+	if videoDatas.Code != "A00000" {
+		log.Fatal("Can't play this video")
+	}
+	videoData := videoDatas.Data.Vidl[0]
+	var urls []downloader.URLData
+	var urlData downloader.URLData
+	var totalSize int64
+	var size int64
+	for _, ts := range utils.M3u8Urls(videoData.M3utx) {
+		size, _ = strconv.ParseInt(
+			utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,
+		)
+		urlData = downloader.URLData{
+			URL:  ts,
+			Size: size,
+			Ext:  "ts",
+		}
+		totalSize += size
+		urls = append(urls, urlData)
+	}
+	data := downloader.VideoData{
+		Site:    "爱奇艺 iqiyi.com",
+		Title:   title,
+		Type:    "video",
+		URLs:    urls,
+		Size:    totalSize,
+		Quality: videoData.ScreenSize,
+	}
+	data.Download(url)
+	return data
+}

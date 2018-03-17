@@ -7,9 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PuerkitoBio/goquery"
-
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -99,11 +98,8 @@ func genData(youkuData data) ([]downloader.URLData, int64, string) {
 func Youku(url string) downloader.VideoData {
 	html := request.Get(url)
 	// get the title
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
-	if err != nil {
-		log.Fatal(err)
-	}
-	title := strings.TrimSpace(doc.Find("h1").First().Text())
+	doc := parser.GetDoc(html)
+	title := parser.Title(doc)
 	vid := utils.MatchOneOf(url, `id_(.+?).html`)[1]
 	youkuData := youkuUps(vid)
 	if youkuData.Data.Error.Code != 0 {
