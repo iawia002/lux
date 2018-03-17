@@ -31,6 +31,15 @@ func TestYoutube(t *testing.T) {
 				Quality: "hd720",
 			},
 		},
+		{
+			name: "normal test",
+			args: test.Args{
+				URL:     "https://www.youtube.com/watch?v=ASPku-eAZYs",
+				Title:   "怪獸與葛林戴華德的罪行 | HD首版電影預告大首播 (Fantastic Beasts： The Crimes of Grindelwald)",
+				Size:    18330678,
+				Quality: "hd720",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

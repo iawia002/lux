@@ -35,7 +35,7 @@ func getSig(sig, js string) string {
 func Youtube(uri string) downloader.VideoData {
 	vid := utils.MatchOneOf(
 		uri,
-		`watch\?v=(\w+)`,
+		`watch\?v=([^/&]+)`,
 		`youtu\.be/([^?/]+)`,
 		`embed/([^/?]+)`,
 		`v/([^/?]+)`,
