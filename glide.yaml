@@ -4,3 +4,6 @@ import:
   version: v1.0.22
 - package: github.com/PuerkitoBio/goquery
   version: v1.3.0
+- package: golang.org/x/net
+  subpackages:
+  - proxy

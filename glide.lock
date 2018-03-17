@@ -1,5 +1,5 @@
-hash: f2e3f4a670cc325711f78319fe331a3d2f62829b92ca4d3ac147b1837e54e549
-updated: 2018-02-27T19:30:39.352797+08:00
+hash: 2265a1141c16305efbcd5f359db265df05c2be5df2f770a3e2bac85c62f8077b
+updated: 2018-03-17T09:37:26.058707+08:00
 imports:
 - name: github.com/andybalholm/cascadia
   version: 901648c87902174f774fac311d7f176f8647bdaa
@@ -14,6 +14,7 @@ imports:
   subpackages:
   - html
   - html/atom
+  - proxy
 - name: golang.org/x/sys
   version: f6cff0780e542efa0c8e864dc8fa522808f6a598
   subpackages:
