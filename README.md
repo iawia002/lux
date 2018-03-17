@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/iawia002/annie.svg?branch=master)](https://travis-ci.org/iawia002/annie)
 [![codecov](https://codecov.io/gh/iawia002/annie/branch/master/graph/badge.svg)](https://codecov.io/gh/iawia002/annie)
 
-👾 A fast, simple and clean video downloader built with Go
+👾 A fast, simple and clean video downloader built with Go.
 
 ```console
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
