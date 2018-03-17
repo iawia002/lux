@@ -53,6 +53,14 @@ func TestBilibili(t *testing.T) {
 			},
 			playlist: true,
 		},
+		{
+			name: "bangumi test",
+			args: test.Args{
+				URL:     "https://www.bilibili.com/bangumi/play/ss12044",
+				Bangumi: true,
+				Title:   "你的名字。",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

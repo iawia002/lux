@@ -4,7 +4,6 @@ import (
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
 )
 
 // Bcy download function
@@ -19,7 +18,7 @@ func Bcy(url string) downloader.VideoData {
 
 	data := downloader.VideoData{
 		Site:  "半次元 bcy.net",
-		Title: utils.FileName(title),
+		Title: title,
 		Type:  "image",
 		URLs:  urls,
 		Size:  0,

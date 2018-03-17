@@ -78,7 +78,7 @@ func Youtube(uri string) downloader.VideoData {
 	}
 	data := downloader.VideoData{
 		Site:    "YouTube youtube.com",
-		Title:   title,
+		Title:   utils.FileName(title),
 		Type:    "video",
 		URLs:    []downloader.URLData{urlData},
 		Size:    size,

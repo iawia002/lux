@@ -1,16 +1,14 @@
 package extractors
 
 import (
-	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
-
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -21,12 +19,6 @@ const (
 	appKey string = "84956560bc028eb7"
 	secKey string = "94aba54af9065f71de72f5508f1cd42e"
 )
-
-func getSign(params string) string {
-	sign := md5.New()
-	sign.Write([]byte(params + secKey))
-	return fmt.Sprintf("%x", sign.Sum(nil))
-}
 
 func genAPI(aid, cid string, bangumi bool) string {
 	var (
@@ -64,7 +56,7 @@ func genAPI(aid, cid string, bangumi bool) string {
 	}
 	// bangumi utoken also need to put in params to sign, but the ordinary video doesn't need
 	api := fmt.Sprintf(
-		"%s%s&sign=%s", baseAPIURL, params, getSign(params),
+		"%s%s&sign=%s", baseAPIURL, params, utils.Md5(params+secKey),
 	)
 	if !bangumi && utoken != "" {
 		api = fmt.Sprintf("%s&utoken=%s", api, utoken)
@@ -141,21 +133,13 @@ func bilibiliDownload(url string, bangumi bool) downloader.VideoData {
 	json.Unmarshal([]byte(apiData), &dataDict)
 
 	// get the title
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
-	if err != nil {
-		log.Fatal(err)
-	}
-	var title string
-	title = strings.TrimSpace(doc.Find("h1").First().Text())
-	if title == "" {
-		// Some movie page got no h1 tag
-		title, _ = doc.Find("meta[property=\"og:title\"]").Attr("content")
-	}
+	doc := parser.GetDoc(html)
+	title := parser.Title(doc)
 
 	urls, size := genURL(dataDict.DURL)
 	data := downloader.VideoData{
 		Site:    "哔哩哔哩 bilibili.com",
-		Title:   utils.FileName(title),
+		Title:   title,
 		URLs:    urls,
 		Type:    "video",
 		Size:    size,
