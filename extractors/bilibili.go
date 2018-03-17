@@ -113,8 +113,9 @@ func Bilibili(url string) {
 	if !config.Playlist {
 		options.HTML = html
 		data, err := getMultiPageData(html)
-		if err == nil {
-			// handle URL that has a playlist
+		if err == nil && !options.Bangumi {
+			// handle URL that has a playlist, mainly for unified titles
+			// bangumi doesn't need this
 			pageString := utils.MatchOneOf(url, `\?p=(\d+)`)
 			var p int
 			if pageString == nil {

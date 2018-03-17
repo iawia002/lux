@@ -111,6 +111,7 @@ func TestBilibili(t *testing.T) {
 				Bilibili(tt.args.URL)
 				// single mode
 				config.Playlist = false
+				Bilibili(tt.args.URL)
 				data = bilibiliDownload(tt.args.URL, options)
 			} else {
 				config.Playlist = false
