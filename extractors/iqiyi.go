@@ -47,19 +47,36 @@ func getIqiyiData(tvid, vid string) iqiyi {
 func Iqiyi(url string) downloader.VideoData {
 	html := request.Get(url)
 	tvid := utils.MatchOneOf(
-		html,
-		`data-player-tvid="([^"]+)"`,
-		`param\[\'tvid\'\]\s*=\s*"(.+?)"`,
-	)[1]
+		url,
+		`#curid=(.+)_`,
+		`tvid=([^&]+)`,
+	)
+	if tvid == nil {
+		tvid = utils.MatchOneOf(
+			html,
+			`data-player-tvid="([^"]+)"`,
+			`param\['tvid'\]\s*=\s*"(.+?)"`,
+		)
+	}
 	vid := utils.MatchOneOf(
-		html,
-		`data-player-videoid="([^"]+)"`,
-		`param\[\'vid\'\]\s*=\s*"(.+?)"`,
-	)[1]
+		url,
+		`#curid=.+_(.*)$`,
+		`vid=([^&]+)`,
+	)
+	if vid == nil {
+		vid = utils.MatchOneOf(
+			html,
+			`data-player-videoid="([^"]+)"`,
+			`param\['vid'\]\s*=\s*"(.+?)"`,
+		)
+	}
 	doc := parser.GetDoc(html)
 	title := strings.TrimSpace(doc.Find("h1 a").Text()) +
 		strings.TrimSpace(doc.Find("h1 span").Text())
-	videoDatas := getIqiyiData(tvid, vid)
+	if title == "" {
+		title = doc.Find("title").Text()
+	}
+	videoDatas := getIqiyiData(tvid[1], vid[1])
 	if videoDatas.Code != "A00000" {
 		log.Fatal("Can't play this video")
 	}
