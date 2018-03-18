@@ -30,7 +30,7 @@ func Request(
 	if config.Proxy != "" {
 		var httpProxy, err = netURL.Parse(config.Proxy)
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		transport.Proxy = http.ProxyURL(httpProxy)
 	}
@@ -45,7 +45,7 @@ func Request(
 			},
 		)
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		transport.Dial = dialer.Dial
 	}
@@ -56,7 +56,7 @@ func Request(
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		log.Print(url)
-		log.Fatal(err)
+		panic(err)
 	}
 	for k, v := range config.FakeHeaders {
 		req.Header.Set(k, v)
@@ -83,7 +83,7 @@ func Request(
 	res, err := client.Do(req)
 	if err != nil {
 		log.Print(url)
-		log.Fatal(err)
+		panic(err)
 	}
 	if config.Debug {
 		fmt.Println()

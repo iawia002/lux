@@ -85,7 +85,7 @@ func getSigTokens(html string) []string {
 		`(?:a=)?%s\.(%s)\(a,(\d+)\)`, obj, strings.Join(keys, "|"),
 	))
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	results := regex.FindAllStringSubmatch(funcBody, -1)
 	var tokens []string
