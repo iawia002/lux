@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
+	"github.com/kr/pretty"
 	"golang.org/x/net/proxy"
 
 	"github.com/iawia002/annie/config"
@@ -86,11 +88,20 @@ func Request(
 		panic(err)
 	}
 	if config.Debug {
+		blue := color.New(color.FgBlue)
 		fmt.Println()
-		fmt.Printf("URL: %s\n", url)
-		fmt.Printf("Method: %s\n", method)
-		fmt.Printf("Headers: %s\n", req.Header)
-		fmt.Printf("Status Code: %d\n", res.StatusCode)
+		blue.Printf("URL:         ")
+		fmt.Printf("%s\n", url)
+		blue.Printf("Method:      ")
+		fmt.Printf("%s\n", method)
+		blue.Printf("Headers:     ")
+		pretty.Printf("%# v\n", req.Header)
+		blue.Printf("Status Code: ")
+		if res.StatusCode >= 400 {
+			color.Red("%d", res.StatusCode)
+		} else {
+			color.Green("%d", res.StatusCode)
+		}
 	}
 	return res
 }
