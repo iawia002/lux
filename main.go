@@ -59,6 +59,8 @@ func main() {
 		extractors.Youtube(videoURL)
 	case "iqiyi":
 		extractors.Iqiyi(videoURL)
+	case "mgtv":
+		extractors.Mgtv(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}
