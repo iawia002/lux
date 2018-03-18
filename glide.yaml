@@ -7,3 +7,6 @@ import:
 - package: golang.org/x/net
   subpackages:
   - proxy
+- package: github.com/kr/pretty
+- package: github.com/fatih/color
+  version: v1.6.0

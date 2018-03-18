@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb"
+	"github.com/fatih/color"
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
@@ -38,14 +39,20 @@ type VideoData struct {
 }
 
 func (data VideoData) printInfo() {
+	cyan := color.New(color.FgCyan)
 	fmt.Println()
-	fmt.Println("   Site:   ", data.Site)
-	fmt.Println("  Title:   ", data.Title)
-	fmt.Println("   Type:   ", data.Type)
+	cyan.Printf("   Site:   ")
+	fmt.Println(data.Site)
+	cyan.Printf("  Title:   ")
+	fmt.Println(data.Title)
+	cyan.Printf("   Type:   ")
+	fmt.Println(data.Type)
 	if data.Quality != "" {
-		fmt.Println("Quality:   ", data.Quality)
+		cyan.Printf("Quality:   ")
+		fmt.Println(data.Quality)
 	}
-	fmt.Printf("   Size:    %.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
+	cyan.Printf("   Size:   ")
+	fmt.Printf("%.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
 	fmt.Println()
 }
 
@@ -86,8 +93,9 @@ func (data VideoData) urlSave(
 	defer file.Close()
 	res := request.Request("GET", urlData.URL, nil, headers)
 	if res.StatusCode >= 400 {
+		red := color.New(color.FgRed)
 		log.Print(urlData.URL)
-		log.Fatal(fmt.Sprintf("HTTP error: %d", res.StatusCode))
+		log.Fatal(red.Sprintf("HTTP error: %d", res.StatusCode))
 	}
 	defer res.Body.Close()
 	writer := io.MultiWriter(file, bar)

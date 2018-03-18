@@ -1,10 +1,16 @@
-hash: 2265a1141c16305efbcd5f359db265df05c2be5df2f770a3e2bac85c62f8077b
-updated: 2018-03-17T09:37:26.058707+08:00
+hash: 7f3b32755bdb36133450459a582e32a0a992341f6aaae4f704ba405adb92c427
+updated: 2018-03-18T14:34:14.633903+08:00
 imports:
 - name: github.com/andybalholm/cascadia
   version: 901648c87902174f774fac311d7f176f8647bdaa
 - name: github.com/cheggaaa/pb
   version: 72b964305fba1230d3d818711138195f22b9ceea
+- name: github.com/fatih/color
+  version: 507f6050b8568533fb3f5504de8e5205fa62a114
+- name: github.com/kr/pretty
+  version: cfb55aafdaf3ec08f0db22699ab822c50091b1c4
+- name: github.com/kr/text
+  version: 7cafcd837844e784b526369c9bce262804aebc60
 - name: github.com/mattn/go-runewidth
   version: 97311d9f7767e3d6f422ea06661bc2c7a19e8a5d
 - name: github.com/PuerkitoBio/goquery
