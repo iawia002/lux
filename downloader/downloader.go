@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 
@@ -84,6 +85,10 @@ func (data VideoData) urlSave(
 	}
 	defer file.Close()
 	res := request.Request("GET", urlData.URL, nil, headers)
+	if res.StatusCode >= 400 {
+		log.Print(urlData.URL)
+		log.Fatal(fmt.Sprintf("HTTP error: %d", res.StatusCode))
+	}
 	defer res.Body.Close()
 	writer := io.MultiWriter(file, bar)
 	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
@@ -122,14 +127,19 @@ func (data VideoData) Download(refer string) {
 		// multiple fragments
 		parts := []string{}
 		for index, url := range data.URLs {
-			wg.Add(1)
 			partFileName := fmt.Sprintf("%s[%d]", data.Title, index)
 			partFilePath := utils.FilePath(partFileName, url.Ext, false)
 			parts = append(parts, partFilePath)
-			go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
-				defer wg.Done()
-				data.urlSave(url, refer, fileName, bar)
-			}(url, refer, partFileName, bar)
+			if strings.Contains(refer, "mgtv") {
+				// Too many threads cause mgtv to return HTTP 403 error
+				data.urlSave(url, refer, partFileName, bar)
+			} else {
+				wg.Add(1)
+				go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
+					defer wg.Done()
+					data.urlSave(url, refer, fileName, bar)
+				}(url, refer, partFileName, bar)
+			}
 		}
 		wg.Wait()
 		bar.Finish()
