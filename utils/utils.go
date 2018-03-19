@@ -104,8 +104,8 @@ func Md5(text string) string {
 	return fmt.Sprintf("%x", sign.Sum(nil))
 }
 
-// M3u8Urls get all urls from m3u8 url
-func M3u8Urls(uri string) []string {
+// M3u8URLs get all urls from m3u8 url
+func M3u8URLs(uri string) []string {
 	html := request.Get(uri)
 	lines := strings.Split(html, "\n")
 	var urls []string
