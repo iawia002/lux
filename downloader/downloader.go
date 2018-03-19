@@ -92,6 +92,7 @@ func (data VideoData) urlSave(
 	}
 
 	// defer close and rename file
+	// must be done here to avoid the following request error to cause the file can't close properly
 	defer func() {
 		file.Close()
 		err := os.Rename(tempFilePath, filePath)
