@@ -90,8 +90,8 @@ func (data VideoData) urlSave(
 	} else {
 		file, _ = os.Create(tempFilePath)
 	}
-	
-	// defer close and rename file 
+
+	// defer close and rename file
 	defer func() {
 		file.Close()
 		err := os.Rename(tempFilePath, filePath)
@@ -99,7 +99,7 @@ func (data VideoData) urlSave(
 			log.Fatal(err)
 		}
 	}()
-	
+
 	res := request.Request("GET", urlData.URL, nil, headers)
 	if res.StatusCode >= 400 {
 		red := color.New(color.FgRed)
