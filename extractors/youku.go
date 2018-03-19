@@ -40,12 +40,13 @@ type youkuData struct {
 	Data data `json:"data"`
 }
 
-var ccodes = []string{"0507", "0508", "0512", "0513", "0514"}
+var ccodes = []string{"0502", "0507", "0508", "0512", "0513", "0514"}
 var referer = "https://v.youku.com"
 
 func youkuUps(vid string) youkuData {
 	var url string
 	var utid string
+	var html string
 	var data youkuData
 	headers := request.Headers("http://log.mmstat.com/eg.js", referer)
 	setCookie := headers.Get("Set-Cookie")
@@ -55,7 +56,9 @@ func youkuUps(vid string) youkuData {
 			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s",
 			vid, ccode, time.Now().Unix(), utid,
 		)
-		html := request.Get(url)
+		html = request.Get(url)
+		// data must be emptied before reassignment, otherwise it will contain the previous value(the 'error' data)
+		data = youkuData{}
 		json.Unmarshal([]byte(html), &data)
 		if data.Data.Error.Code != -6004 {
 			return data
