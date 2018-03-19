@@ -44,7 +44,7 @@ func mgtvM3u8(url string) ([]mgtvURLInfo, int64) {
 	var data []mgtvURLInfo
 	var temp mgtvURLInfo
 	var size, totalSize int64
-	urls := utils.M3u8Urls(url)
+	urls := utils.M3u8URLs(url)
 	m3u8String := request.Get(url)
 	sizes := utils.MatchAll(m3u8String, `#EXT-MGTV-File-SIZE:(\d+)`)
 	// sizes: [[#EXT-MGTV-File-SIZE:1893724, 1893724]]
@@ -84,10 +84,10 @@ func Mgtv(url string) downloader.VideoData {
 	json.Unmarshal(
 		[]byte(request.Get(mgtvData.Data.StreamDomain[0]+video.URL)), &addr,
 	)
-	m3u8Urls, totalSize := mgtvM3u8(addr.Info)
+	m3u8URLs, totalSize := mgtvM3u8(addr.Info)
 	var urls []downloader.URLData
 	var temp downloader.URLData
-	for _, u := range m3u8Urls {
+	for _, u := range m3u8URLs {
 		temp = downloader.URLData{
 			URL:  u.URL,
 			Size: u.Size,

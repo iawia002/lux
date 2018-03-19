@@ -85,7 +85,7 @@ func Iqiyi(url string) downloader.VideoData {
 	var urlData downloader.URLData
 	var totalSize int64
 	var size int64
-	for _, ts := range utils.M3u8Urls(videoData.M3utx) {
+	for _, ts := range utils.M3u8URLs(videoData.M3utx) {
 		size, _ = strconv.ParseInt(
 			utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,
 		)
