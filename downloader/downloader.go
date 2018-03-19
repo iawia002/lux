@@ -90,7 +90,10 @@ func (data VideoData) urlSave(
 	} else {
 		file, _ = os.Create(tempFilePath)
 	}
-	defer file.Close()
+	defer func(){
+		file.Close()
+		os.Rename(tempFilePath, filePath)
+		}()
 	res := request.Request("GET", urlData.URL, nil, headers)
 	if res.StatusCode >= 400 {
 		red := color.New(color.FgRed)
@@ -104,11 +107,6 @@ func (data VideoData) urlSave(
 	_, copyErr := io.Copy(writer, res.Body)
 	if copyErr != nil {
 		log.Fatal(fmt.Sprintf("Error while downloading: %s, %s", urlData.URL, copyErr))
-	}
-	// rename the file
-	err := os.Rename(tempFilePath, filePath)
-	if err != nil {
-		log.Fatal(err)
 	}
 }
 
