@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/iawia002/annie/request"
@@ -56,9 +57,17 @@ func Domain(url string) string {
 // FileName Converts a string to a valid filename
 func FileName(name string) string {
 	// FIXME(iawia002) file name can't have /
-	newName := strings.Replace(name, "/", " ", -1)
-	newName = strings.Replace(newName, ":", "：", -1)
-	return newName
+	name = strings.Replace(name, "/", " ", -1)
+	name = strings.Replace(name, ":", "：", -1)
+	if runtime.GOOS == "windows" {
+		winSymbols := []string{
+			"\"", "'",
+		}
+		for _, symbol := range winSymbols {
+			name = strings.Replace(name, symbol, " ", -1)
+		}
+	}
+	return name
 }
 
 // FilePath gen valid filename
