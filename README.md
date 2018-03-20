@@ -53,6 +53,10 @@ Title:    好冷  逢考必过
 
 You can also use the `-i` option to view video information, skip download.
 
+> Note: if you have special characters in your URL, we recommend putting URL in quotation marks. (thanks @tonyxyl for pointing this out)
+> 
+> `$ annie 'https://...'`
+
 ### Download anything else
 
 If you already got the URL of the exact resource you want, you can download it directly:
