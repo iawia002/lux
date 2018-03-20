@@ -18,8 +18,8 @@ func TestYouku(t *testing.T) {
 			args: test.Args{
 				URL:     "http://v.youku.com/v_show/id_XMzMzMDk5MzcyNA==.html",
 				Title:   "鲜榨时尚：开口跪Jessie J歌声和造型双在线",
-				Size:    35174132,
-				Quality: "mp4hd3v2 1080x1920",
+				Size:    12568063,
+				Quality: "mp4hd2v2 720x1280",
 			},
 		},
 		{
@@ -27,8 +27,8 @@ func TestYouku(t *testing.T) {
 			args: test.Args{
 				URL:     "http://v.youku.com/v_show/id_XMzQ1MTAzNjQwNA==.html",
 				Title:   "这！就是街舞 第一季：第3期：百强“互杀”队长不忍直视",
-				Size:    1741044063,
-				Quality: "mp4hd3 1920x1080",
+				Size:    806126651,
+				Quality: "mp4hd2 1280x720",
 			},
 		},
 	}
