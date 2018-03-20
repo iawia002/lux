@@ -2,6 +2,7 @@ package extractors
 
 import (
 	"encoding/json"
+	"log"
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
@@ -33,11 +34,7 @@ func genURLData(url, referer string) (downloader.URLData, int64) {
 	return data, size
 }
 
-// Tumblr download function
-func Tumblr(url string) downloader.VideoData {
-	html := request.Get(url)
-	doc := parser.GetDoc(html)
-	title := strings.TrimSpace(doc.Find("title").Text())
+func tumblrImageDownload(url, html, title string) downloader.VideoData {
 	jsonString := utils.MatchOneOf(
 		html, `<script type="application/ld\+json">\s*(.+?)</script>`,
 	)[1]
@@ -69,4 +66,36 @@ func Tumblr(url string) downloader.VideoData {
 	}
 	data.Download(url)
 	return data
+}
+
+func tumblrVideoDownload(url, html, title string) downloader.VideoData {
+	videoURL := utils.MatchOneOf(html, `<iframe src='(.+?)'`)[1]
+	if !strings.Contains(videoURL, "tumblr.com/video") {
+		log.Fatal("annie doesn't support this URL by now")
+	}
+	videoHTML := request.Get(videoURL)
+	realURL := utils.MatchOneOf(videoHTML, `source src="(.+?)"`)[1]
+	urlData, size := genURLData(realURL, url)
+	data := downloader.VideoData{
+		Site:  "Tumblr tumblr.com",
+		Title: title,
+		Type:  "video",
+		URLs:  []downloader.URLData{urlData},
+		Size:  size,
+	}
+	data.Download(url)
+	return data
+}
+
+// Tumblr download function
+func Tumblr(url string) downloader.VideoData {
+	html := request.Get(url)
+	doc := parser.GetDoc(html)
+	title := strings.TrimSpace(doc.Find("title").Text())
+	if strings.Contains(html, "<iframe src=") {
+		// Video
+		return tumblrVideoDownload(url, html, title)
+	}
+	// Image
+	return tumblrImageDownload(url, html, title)
 }
