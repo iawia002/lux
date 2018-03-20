@@ -91,10 +91,11 @@ func (data VideoData) urlSave(
 		file, _ = os.Create(tempFilePath)
 	}
 
-	// defer close and rename file
+	// close and rename temp file at the end of this function
 	// must be done here to avoid the following request error to cause the file can't close properly
 	defer func() {
 		file.Close()
+		// must close the file before rename or it will cause `The process cannot access the file because it is being used by another process.` error.
 		err := os.Rename(tempFilePath, filePath)
 		if err != nil {
 			log.Fatal(err)
