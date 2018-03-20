@@ -5,7 +5,7 @@ from fabric.api import (
 )
 
 
-def build(args='-os="linux darwin windows" -arch="386 amd64"'):
+def build(args='-os="linux darwin windows freebsd" -arch="386 amd64"'):
     local(
         'gox {}'.format(args)
     )
