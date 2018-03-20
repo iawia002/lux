@@ -63,6 +63,8 @@ func main() {
 		extractors.Mgtv(videoURL)
 	case "tumblr":
 		extractors.Tumblr(videoURL)
+	case "vimeo":
+		extractors.Vimeo(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}

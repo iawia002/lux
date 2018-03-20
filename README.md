@@ -207,6 +207,7 @@ YouTube | <https://www.youtube.com> | ✓ | | |
 爱奇艺 | <https://www.iqiyi.com> | ✓ | | |
 芒果TV | <https://www.mgtv.com> | ✓ | | |
 Tumblr | <https://www.tumblr.com> | | ✓ | |
+Vimeo | <https://vimeo.com> | ✓ | | |
 
 
 ## Contributing
