@@ -61,6 +61,8 @@ func main() {
 		extractors.Iqiyi(videoURL)
 	case "mgtv":
 		extractors.Mgtv(videoURL)
+	case "tumblr":
+		extractors.Tumblr(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}
