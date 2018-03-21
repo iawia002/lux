@@ -210,6 +210,12 @@ Tumblr | <https://www.tumblr.com> | ✓ | ✓ | |
 Vimeo | <https://vimeo.com> | ✓ | | |
 
 
+## Known issues
+> net/http: request canceled (Client.Timeout exceeded while reading body)
+
+You may have had this problem. It's not a bug, it's the network issue. Just download it again and everything will get back.
+
+
 ## Contributing
 Annie is an open source project and welcome contributions 😉
 
