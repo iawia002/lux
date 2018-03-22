@@ -19,6 +19,16 @@ Quality:    高清 1080P60
  2.06 MiB / 220.65 MiB [>-----------------------------]   0.93% 1.94 MiB/s 1m52s
 ```
 
+
+* [Install](#install)
+* [Get Started](#get-started)
+* [Supported Sites](#supported-sites)
+* [Known issues](#known-issues)
+* [About this project](#about-this-project)
+* [Contributing](#contributing)
+* [License](#license)
+
+
 ## Install
 
 ### Prerequisites
@@ -218,6 +228,13 @@ Vimeo | <https://vimeo.com> | ✓ | | |
 > net/http: request canceled (Client.Timeout exceeded while reading body)
 
 This is a common issue. It is a network issue that can be solved by entering the download command again.
+
+
+## About this project
+
+I am just a college student and this is one of my amateur projects(I need to finish my school stuff first). I am very happy and surprised that so many people like this project, thank you all. 🙇‍♂️
+
+How far can Annie go? To be honest, I don't know, but I will do my best to maintain this project. Annie is an open source project and built on the top of open source projects, so if you are interested, welcome to contribute, let's make Annie better, together.
 
 
 ## Contributing
