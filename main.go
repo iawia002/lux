@@ -53,9 +53,7 @@ func main() {
 		extractors.Pixivision(videoURL)
 	case "youku":
 		extractors.Youku(videoURL)
-	case "youtube":
-		extractors.Youtube(videoURL)
-	case "youtu": // youtu.be
+	case "youtube", "youtu": // youtu.be
 		extractors.Youtube(videoURL)
 	case "iqiyi":
 		extractors.Iqiyi(videoURL)
