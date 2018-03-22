@@ -218,10 +218,10 @@ Vimeo | <https://vimeo.com> | ✓ | | |
 This is a common issue. It is a network issue that can be solved by entering the download command again.
 
 
-## Contributing
+## Contribution
 Annie is an open source project and welcome contributions 😉
 
-Check out the [CONTRIBUTING](https://github.com/iawia002/annie/blob/master/CONTRIBUTING.md) guide to get started
+Check out the [CONTRIBUTION GUIDE](https://github.com/iawia002/annie/blob/master/CONTRIBUTION.md)to get started
 
 
 ## License
