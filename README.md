@@ -223,7 +223,7 @@ This is a common issue. It is a network issue that can be solved by entering the
 ## Contributing
 Annie is an open source project and welcome contributions 😉
 
-Check out the [CONTRIBUTING](https://github.com/iawia002/annie/blob/master/CONTRIBUTING.md) guide to get started
+Check out the [Contributing Guide](./CONTRIBUTING.md) to get started
 
 
 ## License
