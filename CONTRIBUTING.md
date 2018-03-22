@@ -1,4 +1,4 @@
-# Contribution Guide
+# Contributing Guide
 
 ## Style Guide
 ### Code format
