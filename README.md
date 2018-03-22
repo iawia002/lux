@@ -221,7 +221,7 @@ This is a common issue. It is a network issue that can be solved by entering the
 ## Contribution
 Annie is an open source project and welcome contributions 😉
 
-Check out the [CONTRIBUTION GUIDE](https://github.com/iawia002/annie/blob/master/CONTRIBUTION.md)to get started
+Check out the [CONTRIBUTION GUIDE](./CONTRIBUTION.md) to get started
 
 
 ## License
