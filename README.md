@@ -3,7 +3,9 @@
 [![Build Status](https://travis-ci.org/iawia002/annie.svg?branch=master)](https://travis-ci.org/iawia002/annie)
 [![codecov](https://codecov.io/gh/iawia002/annie/branch/master/graph/badge.svg)](https://codecov.io/gh/iawia002/annie)
 
-👾 Annie is a fast, simple and clean video downloader built with Go. Annie helps users to download videos off supported websites, such as Youtube. With Annie, downloading videos and playlists has never been so easy!
+👾 Annie is a fast, simple and clean video downloader built with Go. 
+
+Annie helps users to download videos from supported websites, such as Youtube. With Annie, downloading videos and playlists has never been so easy!
 
 ```console
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
@@ -64,7 +66,7 @@ If you already got the URL of the exact resource you want, you can download it d
 ```console
 $ annie https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg
 
-annie doesn't support this URL right now, but it will try to download it directly
+annie doesn't support this URL by now, but it will try to download it directly
 
  Site:    Universal
 Title:    1f5a87801a0711e898b12b640777720f
