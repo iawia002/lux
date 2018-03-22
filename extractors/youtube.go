@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -32,7 +33,27 @@ func getSig(sig, js string) string {
 }
 
 // Youtube download function
-func Youtube(uri string) downloader.VideoData {
+func Youtube(uri string) {
+	if !config.Playlist {
+		youtubeDownload(uri)
+		return
+	}
+	listID := utils.MatchOneOf(uri, `(list|p)=([^/&]+)`)[2]
+	if listID == "" {
+		log.Fatal("Can't get list ID from URL")
+	}
+	html := request.Get("https://www.youtube.com/playlist?list=" + listID)
+	// "videoId":"OQxX8zgyzuM","thumbnail"
+	videoIDs := utils.MatchAll(html, `"videoId":"([^,]+?)","thumbnail"`)
+	for _, videoID := range videoIDs {
+		u := fmt.Sprintf(
+			"https://www.youtube.com/watch?v=%s&list=%s", videoID[1], listID,
+		)
+		youtubeDownload(u)
+	}
+}
+
+func youtubeDownload(uri string) downloader.VideoData {
 	vid := utils.MatchOneOf(
 		uri,
 		`watch\?v=([^/&]+)`,
@@ -58,7 +79,7 @@ func Youtube(uri string) downloader.VideoData {
 	ext := utils.MatchOneOf(stream.Get("type"), `video/(\w+);`)[1]
 	streamURL := stream.Get("url")
 	var realURL string
-	if strings.Contains(streamURL, "&signature=") {
+	if strings.Contains(streamURL, "signature=") {
 		// URL itself already has a signature parameter
 		realURL = streamURL
 	} else {
