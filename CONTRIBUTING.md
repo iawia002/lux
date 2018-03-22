@@ -15,3 +15,11 @@ Make sure that this folder is in `GOPATH`, then:
 ```bash
 $ go build
 ```
+
+## Features Requested
+There are several features requested by the community. If you have any idea, feel free to fork the repo, follow the style guide above, push and merge it after passing the test.
+
+ - [ ] enable annie to download youtube playlists
+ - [ ] enable annie to rename the downloaded file
+ - [ ] enable annie to specifiy the file format before downloading
+ - [ ] enable annie to support other sources, including facebook
