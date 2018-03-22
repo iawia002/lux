@@ -17,9 +17,4 @@ $ go build
 ```
 
 ## Features Requested
-There are several features requested by the community. If you have any idea, feel free to fork the repo, follow the style guide above, push and merge it after passing the test.
-
- - [ ] enable annie to download youtube playlists
- - [ ] enable annie to rename the downloaded file
- - [ ] enable annie to specifiy the file format before downloading
- - [ ] enable annie to support other sources, including facebook
+There are several [FEATURES](https://github.com/iawia002/annie/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-request) requested by the community. If you have any idea, feel free to fork the repo, follow the style guide above, push and merge it after passing the test. Besides, you are welcomed to propose new features through the issue.
