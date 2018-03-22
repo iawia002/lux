@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/iawia002/annie.svg?branch=master)](https://travis-ci.org/iawia002/annie)
 [![codecov](https://codecov.io/gh/iawia002/annie/branch/master/graph/badge.svg)](https://codecov.io/gh/iawia002/annie)
 
-👾 A fast, simple and clean video downloader built with Go.
+👾 Annie is a fast, simple and clean video downloader built with Go. Annie helps users to download videos off supported websites, such as Youtube. With Annie, downloading videos and playlists has never been so easy!
 
 ```console
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
@@ -25,9 +25,9 @@ The following dependencies are required and must be installed separately.
 
 * **[FFmpeg](https://www.ffmpeg.org)**
 
-> **Note**: FFmpeg does not affect the download, only affect the final file merge.
+> **Note**: FFmpeg does not affect the download, only affects the final file merge.
 
-To install Annie, please use `go get`, or download the binary file in the [Releases](https://github.com/iawia002/annie/releases) page, or compile yourself.
+To install Annie, please use `go get`, download the binary file in the [Releases](https://github.com/iawia002/annie/releases) page, or compile yourself.
 
 ```bash
 $ go get github.com/iawia002/annie
@@ -64,7 +64,7 @@ If you already got the URL of the exact resource you want, you can download it d
 ```console
 $ annie https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg
 
-annie doesn't support this URL by now, but it will try to download it directly
+annie doesn't support this URL right now, but it will try to download it directly
 
  Site:    Universal
 Title:    1f5a87801a0711e898b12b640777720f
@@ -213,7 +213,7 @@ Vimeo | <https://vimeo.com> | ✓ | | |
 ## Known issues
 > net/http: request canceled (Client.Timeout exceeded while reading body)
 
-You may have had this problem. It's not a bug, it's the network issue. Just download it again and everything will get back.
+This is a common issue. It is a network issue that can be solved by redownloading Annie.
 
 
 ## Contributing
