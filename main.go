@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"net/url"
 
 	"github.com/iawia002/annie/config"
@@ -31,7 +32,9 @@ func main() {
 		return
 	}
 	if len(args) < 1 {
-		fmt.Println("error")
+		fmt.Printf("Too few arguments \n")
+        fmt.Printf("Usage of %s: \n", os.Args[0])
+		flag.PrintDefaults()
 		return
 	}
 	videoURL := args[0]
