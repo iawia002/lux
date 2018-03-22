@@ -29,6 +29,17 @@ type iqiyi struct {
 	Data iqiyiData `json:"data"`
 }
 
+var iqiyiFormats = []int{
+	18, // 1080p
+	5,  // 1072p, 1080p
+	17, // 720p
+	4,  // 720p
+	21, // 504p
+	2,  // 480p, 504p
+	1,  // 336p, 360p
+	96, // 216p, 240p
+}
+
 func getIqiyiData(tvid, vid string) iqiyi {
 	t := time.Now().Unix() * 1000
 	src := "76f90cbd92f94a2e925d83e8ccd22cb7"
@@ -80,11 +91,22 @@ func Iqiyi(url string) downloader.VideoData {
 	if videoDatas.Code != "A00000" {
 		log.Fatal("Can't play this video")
 	}
-	videoData := videoDatas.Data.Vidl[0]
+	// get best quality
+	var videoData vidl
+	for _, quality := range iqiyiFormats {
+		for index, video := range videoDatas.Data.Vidl {
+			if video.Vd == quality {
+				videoData = videoDatas.Data.Vidl[index]
+				break
+			}
+		}
+		if videoData.M3utx != "" {
+			break
+		}
+	}
 	var urls []downloader.URLData
 	var urlData downloader.URLData
-	var totalSize int64
-	var size int64
+	var size, totalSize int64
 	for _, ts := range utils.M3u8URLs(videoData.M3utx) {
 		size, _ = strconv.ParseInt(
 			utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,

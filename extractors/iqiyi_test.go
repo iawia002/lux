@@ -45,8 +45,8 @@ func TestIqiyi(t *testing.T) {
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/a_19rrhcqtot.html#curid=958065800_03b77bd0648a6c1df86b0f7c4fd0e526",
 				Title:   "《热血街舞团》综艺专题-高清视频在线观看-爱奇艺",
-				Size:    6777024,
-				Quality: "896x504",
+				Size:    7743532,
+				Quality: "1280x720",
 			},
 		},
 	}

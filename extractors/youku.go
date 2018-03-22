@@ -40,7 +40,7 @@ type youkuData struct {
 	Data data `json:"data"`
 }
 
-var ccodes = []string{"0507", "0508", "0512", "0513", "0514", "0503", "0502"}
+var ccodes = []string{"0507", "0508", "0512", "0513", "0514", "0503", "0502", "0590"}
 var referer = "https://v.youku.com"
 
 func youkuUps(vid string) youkuData {
