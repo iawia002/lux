@@ -67,34 +67,43 @@ func youkuUps(vid string) youkuData {
 	return data
 }
 
-func genData(youkuData data) ([]downloader.URLData, int64, string) {
+func genData(youkuData data) map[string]downloader.FormatData {
 	var (
-		urls  []downloader.URLData
-		size  int64
-		index int
+		size        int64
+		bestQuality string
 	)
+	format := map[string]downloader.FormatData{}
 	// get the best quality
-	for i, s := range youkuData.Stream {
+	for _, s := range youkuData.Stream {
 		if s.Size > size {
 			size = s.Size
-			index = i
+			bestQuality = s.Type
 		}
 	}
-	stream := youkuData.Stream[index]
-	ext := strings.Split(
-		strings.Split(stream.Segs[0].URL, "?")[0],
-		".",
-	)
-	for _, data := range stream.Segs {
-		url := downloader.URLData{
-			URL:  data.URL,
-			Size: data.Size,
-			Ext:  ext[len(ext)-1],
+	for _, stream := range youkuData.Stream {
+		ext := strings.Split(
+			strings.Split(stream.Segs[0].URL, "?")[0],
+			".",
+		)
+		urls := []downloader.URLData{}
+		for _, data := range stream.Segs {
+			url := downloader.URLData{
+				URL:  data.URL,
+				Size: data.Size,
+				Ext:  ext[len(ext)-1],
+			}
+			urls = append(urls, url)
 		}
-		urls = append(urls, url)
+		quality := fmt.Sprintf("%s %dx%d", stream.Type, stream.Width, stream.Height)
+		format[stream.Type] = downloader.FormatData{
+			URLs:    urls,
+			Size:    stream.Size,
+			Quality: quality,
+		}
 	}
-	quality := fmt.Sprintf("%s %dx%d", stream.Type, stream.Width, stream.Height)
-	return urls, stream.Size, quality
+	format["default"] = format[bestQuality]
+	delete(format, bestQuality)
+	return format
 }
 
 // Youku download function
@@ -108,14 +117,12 @@ func Youku(url string) downloader.VideoData {
 	if youkuData.Data.Error.Code != 0 {
 		log.Fatal(youkuData.Data.Error.Note)
 	}
-	urls, size, quality := genData(youkuData.Data)
+	format := genData(youkuData.Data)
 	data := downloader.VideoData{
 		Site:    "优酷 youku.com",
 		Title:   title,
 		Type:    "video",
-		URLs:    urls,
-		Size:    size,
-		Quality: quality,
+		Formats: format,
 	}
 	data.Download(url)
 	return data

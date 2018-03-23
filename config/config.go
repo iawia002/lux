@@ -17,6 +17,8 @@ var (
 	Proxy string
 	// Socks5Proxy SOCKS5 proxy
 	Socks5Proxy string
+	// Format select specified format to download
+	Format string
 )
 
 // FakeHeaders fake http headers

@@ -56,35 +56,45 @@ func tumblrImageDownload(url, html, title string) downloader.VideoData {
 		totalSize = size
 		urls = append(urls, urlData)
 	}
-
-	data := downloader.VideoData{
-		Site:  "Tumblr tumblr.com",
-		Title: title,
-		Type:  "image",
-		URLs:  urls,
-		Size:  totalSize,
+	format := map[string]downloader.FormatData{
+		"default": downloader.FormatData{
+			URLs: urls,
+			Size: totalSize,
+		},
 	}
-	data.Download(url)
-	return data
+
+	extractedData := downloader.VideoData{
+		Site:    "Tumblr tumblr.com",
+		Title:   title,
+		Type:    "image",
+		Formats: format,
+	}
+	extractedData.Download(url)
+	return extractedData
 }
 
 func tumblrVideoDownload(url, html, title string) downloader.VideoData {
 	videoURL := utils.MatchOneOf(html, `<iframe src='(.+?)'`)[1]
 	if !strings.Contains(videoURL, "tumblr.com/video") {
-		log.Fatal("annie doesn't support this URL by now")
+		log.Fatal("annie doesn't support this URL right now")
 	}
 	videoHTML := request.Get(videoURL)
 	realURL := utils.MatchOneOf(videoHTML, `source src="(.+?)"`)[1]
 	urlData, size := genURLData(realURL, url)
-	data := downloader.VideoData{
-		Site:  "Tumblr tumblr.com",
-		Title: title,
-		Type:  "video",
-		URLs:  []downloader.URLData{urlData},
-		Size:  size,
+	format := map[string]downloader.FormatData{
+		"default": downloader.FormatData{
+			URLs: []downloader.URLData{urlData},
+			Size: size,
+		},
 	}
-	data.Download(url)
-	return data
+	extractedData := downloader.VideoData{
+		Site:    "Tumblr tumblr.com",
+		Title:   title,
+		Type:    "video",
+		Formats: format,
+	}
+	extractedData.Download(url)
+	return extractedData
 }
 
 // Tumblr download function

@@ -91,6 +91,30 @@ func Iqiyi(url string) downloader.VideoData {
 	if videoDatas.Code != "A00000" {
 		log.Fatal("Can't play this video")
 	}
+	format := map[string]downloader.FormatData{}
+	var urlData downloader.URLData
+	var size, totalSize int64
+	for _, video := range videoDatas.Data.Vidl {
+		urls := []downloader.URLData{}
+		totalSize = 0
+		for _, ts := range utils.M3u8URLs(video.M3utx) {
+			size, _ = strconv.ParseInt(
+				utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,
+			)
+			urlData = downloader.URLData{
+				URL:  ts,
+				Size: size,
+				Ext:  "ts",
+			}
+			totalSize += size
+			urls = append(urls, urlData)
+		}
+		format[strconv.Itoa(video.Vd)] = downloader.FormatData{
+			URLs:    urls,
+			Size:    totalSize,
+			Quality: video.ScreenSize,
+		}
+	}
 	// get best quality
 	var videoData vidl
 	for _, quality := range iqiyiFormats {
@@ -104,29 +128,15 @@ func Iqiyi(url string) downloader.VideoData {
 			break
 		}
 	}
-	var urls []downloader.URLData
-	var urlData downloader.URLData
-	var size, totalSize int64
-	for _, ts := range utils.M3u8URLs(videoData.M3utx) {
-		size, _ = strconv.ParseInt(
-			utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,
-		)
-		urlData = downloader.URLData{
-			URL:  ts,
-			Size: size,
-			Ext:  "ts",
-		}
-		totalSize += size
-		urls = append(urls, urlData)
-	}
-	data := downloader.VideoData{
+	format["default"] = format[strconv.Itoa(videoData.Vd)]
+	delete(format, strconv.Itoa(videoData.Vd))
+
+	extractedData := downloader.VideoData{
 		Site:    "爱奇艺 iqiyi.com",
 		Title:   title,
 		Type:    "video",
-		URLs:    urls,
-		Size:    totalSize,
-		Quality: videoData.ScreenSize,
+		Formats: format,
 	}
-	data.Download(url)
-	return data
+	extractedData.Download(url)
+	return extractedData
 }

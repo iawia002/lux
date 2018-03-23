@@ -15,14 +15,18 @@ func Bcy(url string) downloader.VideoData {
 			return u[:len(u)-5]
 		},
 	)
-
-	data := downloader.VideoData{
-		Site:  "半次元 bcy.net",
-		Title: title,
-		Type:  "image",
-		URLs:  urls,
-		Size:  0,
+	format := map[string]downloader.FormatData{
+		"default": downloader.FormatData{
+			URLs: urls,
+			Size: 0,
+		},
 	}
-	data.Download(url)
-	return data
+	extractedData := downloader.VideoData{
+		Site:    "半次元 bcy.net",
+		Title:   title,
+		Type:    "image",
+		Formats: format,
+	}
+	extractedData.Download(url)
+	return extractedData
 }

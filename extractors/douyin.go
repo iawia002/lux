@@ -35,13 +35,18 @@ func Douyin(url string) downloader.VideoData {
 		Size: size,
 		Ext:  "mp4",
 	}
-	data := downloader.VideoData{
-		Site:  "抖音 douyin.com",
-		Title: utils.FileName(dataDict.Desc),
-		Type:  "video",
-		URLs:  []downloader.URLData{urlData},
-		Size:  size,
+	format := map[string]downloader.FormatData{
+		"default": downloader.FormatData{
+			URLs: []downloader.URLData{urlData},
+			Size: size,
+		},
 	}
-	data.Download(url)
-	return data
+	extractedData := downloader.VideoData{
+		Site:    "抖音 douyin.com",
+		Title:   utils.FileName(dataDict.Desc),
+		Type:    "video",
+		Formats: format,
+	}
+	extractedData.Download(url)
+	return extractedData
 }
