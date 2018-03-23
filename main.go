@@ -33,7 +33,7 @@ func main() {
 	}
 	if len(args) < 1 {
 		fmt.Printf("Too few arguments \n")
-        fmt.Printf("Usage of %s: \n", os.Args[0])
+		fmt.Printf("Usage of %s: \n", os.Args[0])
 		flag.PrintDefaults()
 		return
 	}
