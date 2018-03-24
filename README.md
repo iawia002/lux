@@ -5,7 +5,7 @@
 
 👾 Annie is a fast, simple and clean video downloader built with Go. 
 
-Annie helps users to download videos from supported websites, such as Youtube. With Annie, downloading videos and playlists has never been so easy!
+Annie allows users to download videos and playlists from supported websites like Youtube.
 
 ```console
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
@@ -39,7 +39,7 @@ The following dependencies are required and must be installed separately.
 
 > **Note**: FFmpeg does not affect the download, only affects the final file merge.
 
-To install Annie, please use `go get`, download the binary file in the [Releases](https://github.com/iawia002/annie/releases) page, or compile yourself.
+To install Annie, use `go get`, download the binary file in the [Releases](https://github.com/iawia002/annie/releases) page, or compile yourself.
 
 ```bash
 $ go get github.com/iawia002/annie
@@ -63,17 +63,17 @@ Title:    好冷  逢考必过
  741.70 KiB / 2.63 MiB [=========>--------------------------]  27.49% 1.98 MiB/s
 ```
 
-You can also use the `-i` option to view video information, skip download.
+The `-i` option displays video information without downloading.
 
-> Note: if you have special characters in your URL, we recommend putting URL in quotation marks. (thanks @tonyxyl for pointing this out)
+> Note: wrap the URL in quotation marks if it contains special characters. (thanks @tonyxyl for pointing this out)
 > 
 > `$ annie 'https://...'`
 
-Annie does not support selecting specific video format to download, Annie will download the highest quality video that can be obtained.
+Annie does not support selecting specific video format to download. Annie will download the highest quality video available.
 
 ### Download anything else
 
-If you already got the URL of the exact resource you want, you can download it directly:
+If Annie is provided the URL of a specific resource, it will be downloaded directly:
 
 ```console
 $ annie https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg
@@ -90,7 +90,7 @@ Title:    1f5a87801a0711e898b12b640777720f
 
 ### Download playlist
 
-You can use the `-p` option to tell Annie to download the whole playlist rather than a single video.
+The `-p` option downloads an entire playlist instead of a single video.
 
 ```console
 $ annie -i -p https://www.bilibili.com/bangumi/play/ep198061
@@ -111,17 +111,17 @@ Title:    Doctor X 第四季：第二集
 
 ### Resume a download
 
-You may use <kbd>Ctrl</kbd>+<kbd>C</kbd> to interrupt a download.
+<kbd>Ctrl</kbd>+<kbd>C</kbd> interrupts a download.
 
-A temporary `.download` file is kept in the output directory. Next time you run `annie` with the same arguments, the download progress will resume from the last session.
+A temporary `.download` file is kept in the output directory. If `annie` is run with the same arguments, the download progress will resume from the last session.
 
 ### Cookies
 
-If you need to log in your account to access something (a private video or VIP only video), use the `-c` option to feed the browser cookies to `annie`.
+Cookies can be provided to `annie` with the `-c` option if they are required for accessing the video.
 
 **Note:**
 
-* the formats of cookies as follow:
+* cookies must match the following format:
 
 ```
 name=value; name2=value2; ...
@@ -140,14 +140,16 @@ $ annie -c cookies.txt https://www.bilibili.com/video/av20203945
 
 ### Proxy
 #### HTTP proxy
-You can specify an HTTP proxy via `-x` option:
+
+An HTTP proxy can be specified with the `-x` option:
 
 ```console
 $ annie -x http://127.0.0.1:7777 -i https://www.youtube.com/watch?v=Gnbch2osEeo
 ```
 
 #### SOCKS5 proxy
-You can also use `-s` option to specify a SOCKS5 proxy:
+
+A SOCKS5 proxy can be specified with the `-s` option:
 
 ```console
 $ annie -s 127.0.0.1:1080 -i https://www.youtube.com/watch?v=Gnbch2osEeo
@@ -156,7 +158,8 @@ $ annie -s 127.0.0.1:1080 -i https://www.youtube.com/watch?v=Gnbch2osEeo
 
 ### Use specified Referrer
 
-You can use the `-r` option to tell Annie to use the given Referrer to request.
+A Referrer can be used for the request with the `-r` option:
+
 
 ```console
 $ annie -r https://www.bilibili.com/video/av20383055/ http://cn-scnc1-dx.acgvideo.com/...
@@ -166,7 +169,7 @@ $ annie -r https://www.bilibili.com/video/av20383055/ http://cn-scnc1-dx.acgvide
 
 ### Debug Mode
 
-You can use the `-d` option to see network request message.
+The `-d` option enables network request messages:
 
 ```console
 $ annie -i -d http://www.bilibili.com/video/av20088587
