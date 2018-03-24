@@ -78,8 +78,7 @@ If Annie is provided the URL of a specific resource, it will be downloaded direc
 ```console
 $ annie https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg
 
-Annie doesn't support this URL natively, but it will try to download the image directly
-
+ -annie doesn't support this URL by now, but it will try to download it directly 
  Site:    Universal
 Title:    1f5a87801a0711e898b12b640777720f
  Type:    image/jpeg
