@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -57,15 +58,25 @@ func (data FormatData) urlSave(
 	urlData URLData, refer, fileName string, bar *pb.ProgressBar,
 ) {
 	filePath := utils.FilePath(fileName, urlData.Ext, false)
-	fileSize := utils.FileSize(filePath)
+	fileSize, exists := utils.FileSize(filePath)
 	// TODO: Live video URLs will not return the size
 	if fileSize == urlData.Size {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
 		bar.Add64(fileSize)
 		return
 	}
+	if exists && fileSize != urlData.Size {
+		// files with the same name but different size
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Printf("%s: file already exists, overwriting? [y/n]", filePath)
+		overwriting, _ := reader.ReadString('\n')
+		overwriting = strings.Replace(overwriting, "\n", "", -1)
+		if overwriting != "y" {
+			return
+		}
+	}
 	tempFilePath := filePath + ".download"
-	tempFileSize := utils.FileSize(tempFilePath)
+	tempFileSize, _ := utils.FileSize(tempFilePath)
 	headers := map[string]string{
 		"Referer": refer,
 	}
