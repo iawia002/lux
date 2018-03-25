@@ -54,23 +54,60 @@ $ annie [args] URL
 ### Download a video
 
 ```console
-$ annie https://www.douyin.com/share/video/6509219899754155272
+$ annie -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
 
- Site:    抖音 douyin.com
-Title:    好冷  逢考必过
- Type:    mp4
- Size:    2.63 MiB (2762719 Bytes)
+ Site:      YouTube youtube.com
+ Title:     Multifandom Mashup 2017
+ Type:      video
+ Stream:
+     [default]  -------------------
+     Quality:         hd720
+     Size:            57.97 MiB (60785404 Bytes)
+     # download with: annie -f default "URL"
 
- 741.70 KiB / 2.63 MiB [=========>--------------------------]  27.49% 1.98 MiB/s
+ 11.93 MiB / 57.97 MiB [======>-------------------------]  20.57% 19.03 MiB/s 2s
 ```
-
-The `-i` option displays video information without downloading.
 
 > Note: wrap the URL in quotation marks if it contains special characters. (thanks @tonyxyl for pointing this out)
 > 
 > `$ annie 'https://...'`
 
-Annie does not support selecting specific video format to download. Annie will download the highest quality video available.
+The `-i` option displays all available formats information without downloading.
+
+```console
+annie -i -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
+
+ Site:      YouTube youtube.com
+ Title:     Multifandom Mashup 2017
+ Type:      video
+ Streams:   # All available quality
+     [43]  -------------------
+     Quality:         medium
+     Size:            31.95 MiB (33505824 Bytes)
+     # download with: annie -f 43 "URL"
+
+     [18]  -------------------
+     Quality:         medium
+     Size:            24.81 MiB (26011062 Bytes)
+     # download with: annie -f 18 "URL"
+
+     [36]  -------------------
+     Quality:         small
+     Size:            8.67 MiB (9088579 Bytes)
+     # download with: annie -f 36 "URL"
+
+     [17]  -------------------
+     Quality:         small
+     Size:            3.10 MiB (3248257 Bytes)
+     # download with: annie -f 17 "URL"
+
+     [default]  -------------------
+     Quality:         hd720
+     Size:            57.97 MiB (60785404 Bytes)
+     # download with: annie -f default "URL"
+```
+
+Use `annie -f format "URL"` to download a specific format.
 
 ### Download anything else
 
@@ -200,6 +237,8 @@ Usage of annie:
   -c string
     	Cookie
   -d	Debug mode
+  -f string
+    	Select specific format to download
   -i	Information only
   -p	Download playlist
   -r string
