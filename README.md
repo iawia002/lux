@@ -26,6 +26,7 @@ Quality:    高清 1080P60
 * [Known issues](#known-issues)
 * [About this project](#about-this-project)
 * [Contributing](#contributing)
+* [Similar projects](#similar-projects)
 * [License](#license)
 
 
@@ -244,6 +245,12 @@ How far can Annie go? To be honest, I don't know, but I will do my best to maint
 Annie is an open source project and welcome contributions 😉
 
 Check out the [Contributing Guide](./CONTRIBUTING.md) to get started
+
+
+## Similar projects
+
+* [youtube-dl](https://github.com/rg3/youtube-dl)
+* [you-get](https://github.com/soimort/you-get)
 
 
 ## License
