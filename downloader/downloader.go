@@ -124,7 +124,7 @@ func printStream(k string, data FormatData) {
 	fmt.Println()
 }
 
-func (v VideoData) printInfo() {
+func (v VideoData) printInfo(format string) {
 	cyan := color.New(color.FgCyan)
 	fmt.Println()
 	cyan.Printf(" Site:      ")
@@ -133,15 +133,16 @@ func (v VideoData) printInfo() {
 	fmt.Println(v.Title)
 	cyan.Printf(" Type:      ")
 	fmt.Println(v.Type)
-	cyan.Printf(" Streams:   ")
 	if config.InfoOnly {
+		cyan.Printf(" Streams:   ")
 		fmt.Println("# All available quality")
 		for k, data := range v.Formats {
 			printStream(k, data)
 		}
 	} else {
+		cyan.Printf(" Stream:   ")
 		fmt.Println()
-		printStream("default", v.Formats["default"])
+		printStream(format, v.Formats[format])
 	}
 }
 
@@ -160,7 +161,7 @@ func (v VideoData) Download(refer string) {
 	if data.Size == 0 {
 		data.calculateTotalSize()
 	}
-	v.printInfo()
+	v.printInfo(format)
 	if config.InfoOnly {
 		return
 	}
