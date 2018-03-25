@@ -2,6 +2,7 @@ package extractors
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
@@ -34,18 +35,6 @@ type vimeo struct {
 	Video   vimeoVideo   `json:"video"`
 }
 
-func bestQuality(progressives []vimeoProgressive) vimeoProgressive {
-	var highestProfile int
-	var data vimeoProgressive
-	for _, progressive := range progressives {
-		if progressive.Profile > highestProfile {
-			highestProfile = progressive.Profile
-			data = progressive
-		}
-	}
-	return data
-}
-
 // Vimeo download function
 func Vimeo(url string) downloader.VideoData {
 	var html string
@@ -59,22 +48,35 @@ func Vimeo(url string) downloader.VideoData {
 	jsonString := utils.MatchOneOf(html, `{var a=(.+?);`)[1]
 	var vimeoData vimeo
 	json.Unmarshal([]byte(jsonString), &vimeoData)
-	video := bestQuality(vimeoData.Request.Files.Progressive)
-
-	size := request.Size(video.URL, url)
-	urlData := downloader.URLData{
-		URL:  video.URL,
-		Size: size,
-		Ext:  "mp4",
+	format := map[string]downloader.FormatData{}
+	var size int64
+	var urlData downloader.URLData
+	var highestProfile int
+	for _, video := range vimeoData.Request.Files.Progressive {
+		if video.Profile > highestProfile {
+			highestProfile = video.Profile
+		}
+		size = request.Size(video.URL, url)
+		urlData = downloader.URLData{
+			URL:  video.URL,
+			Size: size,
+			Ext:  "mp4",
+		}
+		format[strconv.Itoa(video.Profile)] = downloader.FormatData{
+			URLs:    []downloader.URLData{urlData},
+			Size:    size,
+			Quality: video.Quality,
+		}
 	}
-	data := downloader.VideoData{
+	format["default"] = format[strconv.Itoa(highestProfile)]
+	delete(format, strconv.Itoa(highestProfile))
+
+	extractedData := downloader.VideoData{
 		Site:    "Vimeo vimeo.com",
 		Title:   vimeoData.Video.Title,
 		Type:    "video",
-		URLs:    []downloader.URLData{urlData},
-		Size:    size,
-		Quality: video.Quality,
+		Formats: format,
 	}
-	data.Download(url)
-	return data
+	extractedData.Download(url)
+	return extractedData
 }

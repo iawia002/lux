@@ -20,6 +20,7 @@ func init() {
 	flag.StringVar(&config.Refer, "r", "", "Use specified Referrer")
 	flag.StringVar(&config.Proxy, "x", "", "HTTP proxy")
 	flag.StringVar(&config.Socks5Proxy, "s", "", "SOCKS5 proxy")
+	flag.StringVar(&config.Format, "f", "", "Select specified format to download")
 }
 
 func main() {

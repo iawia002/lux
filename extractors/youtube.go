@@ -74,37 +74,49 @@ func youtubeDownload(uri string) downloader.VideoData {
 	json.Unmarshal([]byte(ytplayer), &youtube)
 	title := youtube.Args.Title
 	streams := strings.Split(youtube.Args.Stream, ",")
-	stream, _ := url.ParseQuery(streams[0]) // Best quality
-	quality := stream.Get("quality")
-	ext := utils.MatchOneOf(stream.Get("type"), `video/(\w+);`)[1]
-	streamURL := stream.Get("url")
-	var realURL string
-	if strings.Contains(streamURL, "signature=") {
-		// URL itself already has a signature parameter
-		realURL = streamURL
-	} else {
-		// URL has no signature parameter
-		sig := stream.Get("sig")
-		if sig == "" {
-			// Signature need decrypt
-			sig = getSig(stream.Get("s"), youtube.Assets.JS)
+
+	format := map[string]downloader.FormatData{}
+	for _, s := range streams {
+		stream, _ := url.ParseQuery(s)
+		quality := stream.Get("quality")
+		ext := utils.MatchOneOf(stream.Get("type"), `video/(\w+);`)[1]
+		streamURL := stream.Get("url")
+		itag := stream.Get("itag")
+		var realURL string
+		if strings.Contains(streamURL, "signature=") {
+			// URL itself already has a signature parameter
+			realURL = streamURL
+		} else {
+			// URL has no signature parameter
+			sig := stream.Get("sig")
+			if sig == "" {
+				// Signature need decrypt
+				sig = getSig(stream.Get("s"), youtube.Assets.JS)
+			}
+			realURL = fmt.Sprintf("%s&signature=%s", streamURL, sig)
 		}
-		realURL = fmt.Sprintf("%s&signature=%s", streamURL, sig)
+		size := request.Size(realURL, uri)
+		urlData := downloader.URLData{
+			URL:  realURL,
+			Size: size,
+			Ext:  ext,
+		}
+		format[itag] = downloader.FormatData{
+			URLs:    []downloader.URLData{urlData},
+			Size:    size,
+			Quality: quality,
+		}
 	}
-	size := request.Size(realURL, uri)
-	urlData := downloader.URLData{
-		URL:  realURL,
-		Size: size,
-		Ext:  ext,
-	}
-	data := downloader.VideoData{
+	stream, _ := url.ParseQuery(streams[0]) // Best quality
+	format["default"] = format[stream.Get("itag")]
+	delete(format, stream.Get("itag"))
+
+	extractedData := downloader.VideoData{
 		Site:    "YouTube youtube.com",
 		Title:   utils.FileName(title),
 		Type:    "video",
-		URLs:    []downloader.URLData{urlData},
-		Size:    size,
-		Quality: quality,
+		Formats: format,
 	}
-	data.Download(uri)
-	return data
+	extractedData.Download(uri)
+	return extractedData
 }
