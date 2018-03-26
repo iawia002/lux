@@ -309,13 +309,12 @@ This is a common issue. It is a network issue that can be solved by entering the
 
 I am just a college student and this is one of my amateur projects(I need to finish my school stuff first). I am very happy and surprised that so many people like this project, thank you all. 🙇‍♂️
 
-How far can Annie go? To be honest, I don't know, but I will do my best to maintain this project. Annie is an open source project and built on the top of open source projects, so if you are interested, welcome to contribute, let's make Annie better, together.
-
 
 ## Contributing
-Annie is an open source project and welcome contributions 😉
 
-Check out the [Contributing Guide](./CONTRIBUTING.md) to get started
+Annie is an open source project and built on the top of open source projects. If you are interested, welcome to contribute, let's make Annie better, together 💪
+
+Check out the [Contributing Guide](./CONTRIBUTING.md) to get started.
 
 
 ## Similar projects
