@@ -5,7 +5,7 @@
 
 👾 Annie is a fast, simple and clean video downloader built with Go. 
 
-Annie allows users to download videos and playlists from supported websites like Bilibili.
+Annie allows users to download videos and playlists from supported websites like Bilibili:
 
 ```console
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
