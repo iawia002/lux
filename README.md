@@ -10,13 +10,16 @@ Annie allows users to download videos and playlists from supported websites like
 ```console
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
 
-   Site:    哔哩哔哩 bilibili.com
-  Title:    【2018拜年祭单品】相遇day by day
-   Type:    video
-Quality:    高清 1080P60
-   Size:    220.65 MiB (231363071 Bytes)
+ Site:      哔哩哔哩 bilibili.com
+ Title:     【2018拜年祭单品】相遇day by day
+ Type:      video
+ Stream:
+     [default]  -------------------
+     Quality:         高清 1080P60
+     Size:            220.65 MiB (231363071 Bytes)
+     # download with: annie -f default "URL"
 
- 2.06 MiB / 220.65 MiB [>-----------------------------]   0.93% 1.94 MiB/s 1m52s
+ 16.03 MiB / 220.65 MiB [==>----------------------------]   7.26% 9.65 MiB/s 19s
 ```
 
 
