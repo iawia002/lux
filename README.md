@@ -219,6 +219,14 @@ $ annie -r https://www.bilibili.com/video/av20383055/ http://cn-scnc1-dx.acgvide
 ...
 ```
 
+### Specify the output path and name
+
+The `-o` option sets the path, and `-O` option sets the name of the downloaded file:
+
+```console
+$ annie -o ../ -O "hello" https://...
+```
+
 ### Debug Mode
 
 The `-d` option enables network request messages:
@@ -266,12 +274,16 @@ Status Code: 200
 $ annie -h
 
 Usage of annie:
+  -O string
+    	Specify the output file name
   -c string
     	Cookie
   -d	Debug mode
   -f string
     	Select specific format to download
   -i	Information only
+  -o string
+    	Specify the output path
   -p	Download playlist
   -r string
     	Use specified Referrer

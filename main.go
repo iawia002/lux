@@ -21,6 +21,8 @@ func init() {
 	flag.StringVar(&config.Proxy, "x", "", "HTTP proxy")
 	flag.StringVar(&config.Socks5Proxy, "s", "", "SOCKS5 proxy")
 	flag.StringVar(&config.Format, "f", "", "Select specific format to download")
+	flag.StringVar(&config.OutputPath, "o", "", "Specify the output path")
+	flag.StringVar(&config.OutputName, "O", "", "Specify the output file name")
 }
 
 func main() {

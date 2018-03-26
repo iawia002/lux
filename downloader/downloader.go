@@ -159,7 +159,12 @@ func (v VideoData) printInfo(format string) {
 
 // Download download urls
 func (v VideoData) Download(refer string) {
-	var format string
+	var format, title string
+	if config.OutputName == "" {
+		title = v.Title
+	} else {
+		title = utils.FileName(config.OutputName)
+	}
 	if config.Format == "" {
 		format = "default"
 	} else {
@@ -183,14 +188,14 @@ func (v VideoData) Download(refer string) {
 	bar.Start()
 	if len(data.URLs) == 1 {
 		// only one fragment
-		data.urlSave(data.URLs[0], refer, v.Title, bar)
+		data.urlSave(data.URLs[0], refer, title, bar)
 		bar.Finish()
 	} else {
 		var wg sync.WaitGroup
 		// multiple fragments
 		parts := []string{}
 		for index, url := range data.URLs {
-			partFileName := fmt.Sprintf("%s[%d]", v.Title, index)
+			partFileName := fmt.Sprintf("%s[%d]", title, index)
 			partFilePath := utils.FilePath(partFileName, url.Ext, false)
 			parts = append(parts, partFilePath)
 			if strings.Contains(refer, "mgtv") {
@@ -212,13 +217,13 @@ func (v VideoData) Download(refer string) {
 		}
 		// merge
 		// write ffmpeg input file list
-		mergeFile := v.Title + "-merge.txt"
+		mergeFile := title + ".txt" // merge list file should be in the current directory
 		file, _ := os.Create(mergeFile)
 		for _, part := range parts {
 			file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
 		}
 
-		filePath := utils.FilePath(v.Title, "mp4", false)
+		filePath := utils.FilePath(title, "mp4", false)
 		fmt.Printf("Merging video parts into %s\n", filePath)
 		cmd := exec.Command(
 			"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
