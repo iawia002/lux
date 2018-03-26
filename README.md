@@ -5,7 +5,7 @@
 
 👾 Annie is a fast, simple and clean video downloader built with Go. 
 
-Annie allows users to download videos and playlists from supported websites like Youtube.
+Annie allows users to download videos and playlists from supported websites like Bilibili.
 
 ```console
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
@@ -78,7 +78,7 @@ $ annie -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
 The `-i` option displays all available formats information without downloading.
 
 ```console
-annie -i -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
+$ annie -i -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
 
  Site:      YouTube youtube.com
  Title:     Multifandom Mashup 2017
@@ -119,14 +119,17 @@ If Annie is provided the URL of a specific resource, it will be downloaded direc
 ```console
 $ annie https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg
 
-annie doesn't support this URL by now, but it will try to download it directly
+annie doesn't support this URL right now, but it will try to download it directly
 
- Site:    Universal
-Title:    1f5a87801a0711e898b12b640777720f
- Type:    image/jpeg
- Size:    1.00 MiB (1051042 Bytes)
+ Site:      Universal
+ Title:     1f5a87801a0711e898b12b640777720f
+ Type:      image/jpeg
+ Stream:
+     [default]  -------------------
+     Size:            1.00 MiB (1051042 Bytes)
+     # download with: annie -f default "URL"
 
- 1.00 MiB / 1.00 MiB [===================================] 100.00% 3.35 MiB/s 0s
+ 1.00 MiB / 1.00 MiB [===================================] 100.00% 1.21 MiB/s 0s
 ```
 
 ### Download playlist
@@ -136,18 +139,26 @@ The `-p` option downloads an entire playlist instead of a single video.
 ```console
 $ annie -i -p https://www.bilibili.com/bangumi/play/ep198061
 
- Site:    哔哩哔哩 bilibili.com
-Title:    Doctor X 第四季：第一集
- Type:    video
- Size:    845.66 MiB (886738354 Bytes)
+ Site:      哔哩哔哩 bilibili.com
+ Title:     Doctor X 第四季：第一集
+ Type:      video
+ Streams:   # All available quality
+     [default]  -------------------
+     Quality:         高清 1080P
+     Size:            845.66 MiB (886738354 Bytes)
+     # download with: annie -f default "URL"
 
 
- Site:    哔哩哔哩 bilibili.com
-Title:    Doctor X 第四季：第二集
- Type:    video
- Size:    930.71 MiB (975919195 Bytes)
+ Site:      哔哩哔哩 bilibili.com
+ Title:     Doctor X 第四季：第二集
+ Type:      video
+ Streams:   # All available quality
+     [default]  -------------------
+     Quality:         高清 1080P
+     Size:            930.71 MiB (975919195 Bytes)
+     # download with: annie -f default "URL"
 
-...
+......
 ```
 
 ### Resume a download
@@ -215,20 +226,38 @@ The `-d` option enables network request messages:
 ```console
 $ annie -i -d http://www.bilibili.com/video/av20088587
 
-URL: http://www.bilibili.com/video/av20088587
-Method: GET
-Headers: map[User-Agent:[Mozilla/5.0 (Windows NT 10.0; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0] Accept:[text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8] Accept-Charset:[UTF-8,*;q=0.5] Accept-Encoding:[gzip,deflate,sdch] Accept-Language:[en-US,en;q=0.8] Referer:[http://www.bilibili.com/video/av20088587]]
+URL:         http://www.bilibili.com/video/av20088587
+Method:      GET
+Headers:     http.Header{
+    "Referer":         {"http://www.bilibili.com/video/av20088587"},
+    "Accept":          {"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
+    "Accept-Charset":  {"UTF-8,*;q=0.5"},
+    "Accept-Encoding": {"gzip,deflate,sdch"},
+    "Accept-Language": {"en-US,en;q=0.8"},
+    "User-Agent":      {"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.146 Safari/537.36"},
+}
 Status Code: 200
 
-URL: https://interface.bilibili.com/v2/playurl?appkey=84956560bc028eb7&cid=32782944&otype=json&quality=0&type=&sign=708701ffaea9937d4541d5cc2f1cf3b1
-Method: GET
-Headers: map[Accept:[text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8] Accept-Charset:[UTF-8,*;q=0.5] Accept-Encoding:[gzip,deflate,sdch] Accept-Language:[en-US,en;q=0.8] User-Agent:[Mozilla/5.0 (Windows NT 10.0; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0] Referer:[https://interface.bilibili.com/v2/playurl?appkey=84956560bc028eb7&cid=32782944&otype=json&quality=0&type=&sign=708701ffaea9937d4541d5cc2f1cf3b1]]
+URL:         https://interface.bilibili.com/v2/playurl?appkey=84956560bc028eb7&cid=32782944&otype=json&qn=116&quality=116&type=&sign=fb2e3f261fec398652f96d358517e535
+Method:      GET
+Headers:     http.Header{
+    "Accept-Charset":  {"UTF-8,*;q=0.5"},
+    "Accept-Encoding": {"gzip,deflate,sdch"},
+    "Accept-Language": {"en-US,en;q=0.8"},
+    "User-Agent":      {"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.146 Safari/537.36"},
+    "Referer":         {"https://interface.bilibili.com/v2/playurl?appkey=84956560bc028eb7&cid=32782944&otype=json&qn=116&quality=116&type=&sign=fb2e3f261fec398652f96d358517e535"},
+    "Accept":          {"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
+}
 Status Code: 200
 
- Site:    哔哩哔哩 bilibili.com
-Title:    燃油动力的遥控奥迪R8跑赛道
- Type:    flv
- Size:    64.38 MiB (67504795 Bytes)
+ Site:      哔哩哔哩 bilibili.com
+ Title:     燃油动力的遥控奥迪R8跑赛道
+ Type:      video
+ Streams:   # All available quality
+     [default]  -------------------
+     Quality:         高清 1080P
+     Size:            64.38 MiB (67504795 Bytes)
+     # download with: annie -f default "URL"
 ```
 
 ### All available arguments
