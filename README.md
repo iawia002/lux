@@ -311,12 +311,6 @@ Tumblr | <https://www.tumblr.com> | ✓ | ✓ | |
 Vimeo | <https://vimeo.com> | ✓ | | |
 
 
-## Known issues
-> net/http: request canceled (Client.Timeout exceeded while reading body)
-
-This is a common issue. It is a network issue that can be solved by entering the download command again.
-
-
 ## About this project
 
 I am just a college student and this is one of my amateur projects(I need to finish my school stuff first). I am very happy and surprised that so many people like this project, thank you all. 🙇‍♂️
