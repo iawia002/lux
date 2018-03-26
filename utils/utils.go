@@ -3,12 +3,15 @@ package utils
 import (
 	"crypto/md5"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
 
+	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
 )
 
@@ -72,13 +75,21 @@ func FileName(name string) string {
 	return name
 }
 
-// FilePath gen valid filename
+// FilePath gen valid file path
 func FilePath(name, ext string, escape bool) string {
+	var outputPath string
+	if config.OutputPath != "" {
+		_, err := os.Stat(config.OutputPath)
+		if err != nil && os.IsNotExist(err) {
+			log.Fatal(err)
+		}
+	}
 	fileName := fmt.Sprintf("%s.%s", name, ext)
 	if escape {
 		fileName = FileName(fileName)
 	}
-	return fileName
+	outputPath = filepath.Join(config.OutputPath, fileName)
+	return outputPath
 }
 
 // StringInSlice if a string is in the list
