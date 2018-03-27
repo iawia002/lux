@@ -338,3 +338,5 @@ Special thanks to [@Yasujizr](https://github.com/Yasujizr) who designed the amaz
 ## License
 
 MIT
+
+Copyright (c) 2018-present, iawia002
