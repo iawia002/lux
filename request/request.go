@@ -52,7 +52,6 @@ func Request(
 		transport.Dial = dialer.Dial
 	}
 	client := &http.Client{
-		Timeout:   time.Second * 100,
 		Transport: transport,
 	}
 	req, err := http.NewRequest(method, url, body)

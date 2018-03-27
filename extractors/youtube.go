@@ -27,9 +27,16 @@ type youtubeData struct {
 	Assets assets `json:"assets"`
 }
 
+var tokensCache = make(map[string][]string)
+
 func getSig(sig, js string) string {
-	html := request.Get(fmt.Sprintf("https://www.youtube.com%s", js))
-	return decipherTokens(getSigTokens(html), sig)
+	url:= fmt.Sprintf("https://www.youtube.com%s", js)
+	tokens, ok := tokensCache[url]
+	if !ok {
+		tokens = getSigTokens(request.Get(url))
+		tokensCache[url] = tokens
+	}
+	return decipherTokens(tokens, sig)
 }
 
 // Youtube download function

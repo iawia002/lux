@@ -312,9 +312,6 @@ Vimeo | <https://vimeo.com> | ✓ | | |
 
 
 ## Known issues
-> net/http: request canceled (Client.Timeout exceeded while reading body)
-
-This is a common issue. It is a network issue that can be solved by entering the download command again.
 
 
 ## About this project
