@@ -1,4 +1,4 @@
-package extractors
+package bilibili
 
 import (
 	"testing"
@@ -108,10 +108,10 @@ func TestBilibili(t *testing.T) {
 			if tt.playlist {
 				// playlist mode
 				config.Playlist = true
-				Bilibili(tt.args.URL)
+				Download(tt.args.URL)
 				// single mode
 				config.Playlist = false
-				Bilibili(tt.args.URL)
+				Download(tt.args.URL)
 				data = bilibiliDownload(tt.args.URL, options)
 			} else {
 				config.Playlist = false

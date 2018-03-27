@@ -1,4 +1,4 @@
-package extractors
+package bilibili
 
 type dURLData struct {
 	Size  int64  `json:"size"`
