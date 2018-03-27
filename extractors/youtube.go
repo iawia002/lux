@@ -16,6 +16,7 @@ import (
 type args struct {
 	Title  string `json:"title"`
 	Stream string `json:"url_encoded_fmt_stream_map"`
+	Audio  string `json:"adaptive_fmts"`
 }
 
 type assets struct {
@@ -30,7 +31,7 @@ type youtubeData struct {
 var tokensCache = make(map[string][]string)
 
 func getSig(sig, js string) string {
-	url:= fmt.Sprintf("https://www.youtube.com%s", js)
+	url := fmt.Sprintf("https://www.youtube.com%s", js)
 	tokens, ok := tokensCache[url]
 	if !ok {
 		tokens = getSigTokens(request.Get(url))
@@ -112,6 +113,25 @@ func youtubeDownload(uri string) downloader.VideoData {
 			URLs:    []downloader.URLData{urlData},
 			Size:    size,
 			Quality: quality,
+		}
+	}
+	// Audio only file
+	for _, s := range strings.Split(youtube.Args.Audio, ",") {
+		stream, _ := url.ParseQuery(s)
+		if strings.HasPrefix(stream.Get("type"), "audio/mp4") {
+			audioURL := stream.Get("url") + "&ratebypass=yes"
+			size := request.Size(audioURL, uri)
+			urlData := downloader.URLData{
+				URL:  audioURL,
+				Size: size,
+				Ext:  "m4a",
+			}
+			format["audio"] = downloader.FormatData{
+				URLs:    []downloader.URLData{urlData},
+				Size:    size,
+				Quality: stream.Get("type"),
+			}
+			break
 		}
 	}
 	stream, _ := url.ParseQuery(streams[0]) // Best quality
