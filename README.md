@@ -309,6 +309,7 @@ YouTube | <https://www.youtube.com> | ✓ | | ✓ |
 芒果TV | <https://www.mgtv.com> | ✓ | | |
 Tumblr | <https://www.tumblr.com> | ✓ | ✓ | |
 Vimeo | <https://vimeo.com> | ✓ | | |
+Facebook | <https://facebook.com> | ✓ | | |
 
 
 ## Known issues
