@@ -8,6 +8,7 @@ import (
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/bilibili"
 	"github.com/iawia002/annie/utils"
 )
 
@@ -52,7 +53,7 @@ func main() {
 	case "douyin":
 		extractors.Douyin(videoURL)
 	case "bilibili":
-		extractors.Bilibili(videoURL)
+		bilibili.Download(videoURL)
 	case "bcy":
 		extractors.Bcy(videoURL)
 	case "pixivision":

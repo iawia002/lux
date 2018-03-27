@@ -1,4 +1,4 @@
-package extractors
+package bilibili
 
 import (
 	"encoding/json"
@@ -103,8 +103,8 @@ func getMultiPageData(html string) (multiPage, error) {
 	return data, nil
 }
 
-// Bilibili download function
-func Bilibili(url string) {
+// Download bilibili main download function
+func Download(url string) {
 	var options bilibiliOptions
 	if strings.Contains(url, "bangumi") {
 		options.Bangumi = true
