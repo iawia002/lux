@@ -1,4 +1,4 @@
-# Annie
+<p align="center"><img src="static/logo.png" alt="Annie" height="100px"></p>
 
 [![Build Status](https://travis-ci.org/iawia002/annie.svg?branch=master)](https://travis-ci.org/iawia002/annie)
 [![codecov](https://codecov.io/gh/iawia002/annie/branch/master/graph/badge.svg)](https://codecov.io/gh/iawia002/annie)
@@ -324,6 +324,8 @@ I am just a college student and this is one of my amateur projects(I need to fin
 Annie is an open source project and built on the top of open source projects. If you are interested, welcome to contribute, let's make Annie better, together 💪
 
 Check out the [Contributing Guide](./CONTRIBUTING.md) to get started.
+
+Special thanks to [@Yasujizr](https://github.com/Yasujizr) who designed the amazing logo!
 
 
 ## Similar projects
