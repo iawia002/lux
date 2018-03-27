@@ -69,6 +69,8 @@ func main() {
 		extractors.Tumblr(videoURL)
 	case "vimeo":
 		extractors.Vimeo(videoURL)
+	case "facebook":
+		extractors.Facebook(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}
