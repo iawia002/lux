@@ -1,4 +1,4 @@
-package extractors
+package youtube
 
 import (
 	"testing"
@@ -57,10 +57,10 @@ func TestYoutube(t *testing.T) {
 			if tt.playlist {
 				// playlist mode
 				config.Playlist = true
-				Youtube(tt.args.URL)
+				Download(tt.args.URL)
 				// single mode
 				config.Playlist = false
-				Youtube(tt.args.URL)
+				Download(tt.args.URL)
 			} else {
 				data := youtubeDownload(tt.args.URL)
 				test.Check(t, tt.args, data)

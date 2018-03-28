@@ -1,4 +1,4 @@
-package extractors
+package youtube
 
 import (
 	"encoding/json"
@@ -40,8 +40,8 @@ func getSig(sig, js string) string {
 	return decipherTokens(tokens, sig)
 }
 
-// Youtube download function
-func Youtube(uri string) {
+// Download YouTube main download function
+func Download(uri string) {
 	if !config.Playlist {
 		youtubeDownload(uri)
 		return

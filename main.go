@@ -9,6 +9,7 @@ import (
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/extractors/bilibili"
+	"github.com/iawia002/annie/extractors/youtube"
 	"github.com/iawia002/annie/utils"
 )
 
@@ -61,7 +62,7 @@ func main() {
 	case "youku":
 		extractors.Youku(videoURL)
 	case "youtube", "youtu": // youtu.be
-		extractors.Youtube(videoURL)
+		youtube.Download(videoURL)
 	case "iqiyi":
 		extractors.Iqiyi(videoURL)
 	case "mgtv":
