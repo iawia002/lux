@@ -40,6 +40,23 @@ func getSig(sig, js string) string {
 	return decipherTokens(tokens, sig)
 }
 
+func genSignedURL(streamURL string, stream url.Values, js string) string {
+	var realURL, sig string
+	if strings.Contains(streamURL, "signature=") {
+		// URL itself already has a signature parameter
+		realURL = streamURL
+	} else {
+		// URL has no signature parameter
+		sig = stream.Get("sig")
+		if sig == "" {
+			// Signature need decrypt
+			sig = getSig(stream.Get("s"), js)
+		}
+		realURL = fmt.Sprintf("%s&signature=%s", streamURL, sig)
+	}
+	return realURL
+}
+
 // Download YouTube main download function
 func Download(uri string) {
 	if !config.Playlist {
@@ -90,19 +107,7 @@ func youtubeDownload(uri string) downloader.VideoData {
 		ext := utils.MatchOneOf(stream.Get("type"), `video/(\w+);`)[1]
 		streamURL := stream.Get("url")
 		itag := stream.Get("itag")
-		var realURL string
-		if strings.Contains(streamURL, "signature=") {
-			// URL itself already has a signature parameter
-			realURL = streamURL
-		} else {
-			// URL has no signature parameter
-			sig := stream.Get("sig")
-			if sig == "" {
-				// Signature need decrypt
-				sig = getSig(stream.Get("s"), youtube.Assets.JS)
-			}
-			realURL = fmt.Sprintf("%s&signature=%s", streamURL, sig)
-		}
+		realURL := genSignedURL(streamURL, stream, youtube.Assets.JS)
 		size := request.Size(realURL, uri)
 		urlData := downloader.URLData{
 			URL:  realURL,
@@ -119,7 +124,7 @@ func youtubeDownload(uri string) downloader.VideoData {
 	for _, s := range strings.Split(youtube.Args.Audio, ",") {
 		stream, _ := url.ParseQuery(s)
 		if strings.HasPrefix(stream.Get("type"), "audio/mp4") {
-			audioURL := stream.Get("url") + "&ratebypass=yes"
+			audioURL := genSignedURL(stream.Get("url"), stream, youtube.Assets.JS) + "&ratebypass=yes"
 			size := request.Size(audioURL, uri)
 			urlData := downloader.URLData{
 				URL:  audioURL,
