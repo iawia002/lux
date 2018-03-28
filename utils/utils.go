@@ -11,6 +11,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/fatih/color"
+
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
 )
@@ -144,4 +146,15 @@ func M3u8URLs(uri string) []string {
 		}
 	}
 	return urls
+}
+
+// PrintVersion print version information
+func PrintVersion() {
+	blue := color.New(color.FgBlue)
+	cyan := color.New(color.FgCyan)
+	fmt.Printf(
+		"\n%s: version %s, A fast, simple and clean video downloader.\n\n",
+		cyan.Sprintf("annie"),
+		blue.Sprintf(config.VERSION),
+	)
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 
@@ -31,10 +32,11 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 	if config.Version {
-		fmt.Printf(
-			"annie: version %s, A simple and clean video downloader.\n", config.VERSION,
-		)
+		utils.PrintVersion()
 		return
+	}
+	if config.Debug {
+		utils.PrintVersion()
 	}
 	if len(args) < 1 {
 		fmt.Printf("Too few arguments \n")
@@ -45,8 +47,7 @@ func main() {
 	videoURL := args[0]
 	u, err := url.ParseRequestURI(videoURL)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
 
 	domain := utils.Domain(u.Host)
