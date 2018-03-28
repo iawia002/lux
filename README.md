@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/iawia002/annie.svg?branch=master)](https://travis-ci.org/iawia002/annie)
 [![codecov](https://codecov.io/gh/iawia002/annie/branch/master/graph/badge.svg)](https://codecov.io/gh/iawia002/annie)
 
-👾 Annie is a fast, simple and clean video downloader built with Go. 
+👾 Annie is a fast, simple and clean video downloader built with Go.
 
 Annie allows users to download videos and playlists from supported websites like Bilibili:
 
@@ -72,7 +72,7 @@ $ annie -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
 ```
 
 > Note: wrap the URL in quotation marks if it contains special characters. (thanks @tonyxyl for pointing this out)
-> 
+>
 > `$ annie 'https://...'`
 
 The `-i` option displays all available formats information without downloading.
@@ -310,6 +310,7 @@ YouTube | <https://www.youtube.com> | ✓ | | ✓ |
 Tumblr | <https://www.tumblr.com> | ✓ | ✓ | |
 Vimeo | <https://vimeo.com> | ✓ | | |
 Facebook | <https://facebook.com> | ✓ | | |
+斗鱼视频 | <https://v.douyu.com> | ✓ | | |
 
 
 ## Known issues
