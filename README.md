@@ -6,26 +6,8 @@
 
 👾 Annie is a fast, simple and clean video downloader built with Go.
 
-Annie allows users to download videos and playlists from supported websites like Bilibili:
-
-```console
-$ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
-
- Site:      哔哩哔哩 bilibili.com
- Title:     【2018拜年祭单品】相遇day by day
- Type:      video
- Stream:
-     [default]  -------------------
-     Quality:         高清 1080P60
-     Size:            220.65 MiB (231363071 Bytes)
-     # download with: annie -f default "URL"
-
- 16.03 MiB / 220.65 MiB [==>----------------------------]   7.26% 9.65 MiB/s 19s
-```
-
-
-* [Install](#install)
-* [Get Started](#get-started)
+* [Installation](#installation)
+* [Getting Started](#getting-started)
 * [Supported Sites](#supported-sites)
 * [Known issues](#known-issues)
 * [About this project](#about-this-project)
@@ -34,7 +16,7 @@ $ annie -c cookies.txt https://www.bilibili.com/video/av20203945/
 * [License](#license)
 
 
-## Install
+## Installation
 
 ### Prerequisites
 
@@ -46,21 +28,22 @@ The following dependencies are required and must be installed separately.
 
 ### Install via `go get`
 
-To install Annie, use `go get`, or download the binary file in the [Releases](https://github.com/iawia002/annie/releases) page.
+To install Annie, use `go get`, or download the binary file from [Releases](https://github.com/iawia002/annie/releases) page.
 
 ```bash
 $ go get github.com/iawia002/annie
-...
-$ annie [args] URL
 ```
+### Arch Linux
+
+For Arch Users [AUR](https://aur.archlinux.org/packages/annie) package is available
 
 
-## Get Started
+## Getting Started
 
 ### Download a video
 
 ```console
-$ annie -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
+$ annie https://youtu.be/Gnbch2osEeo
 
  Site:      YouTube youtube.com
  Title:     Multifandom Mashup 2017
@@ -78,7 +61,7 @@ $ annie -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
 >
 > `$ annie 'https://...'`
 
-The `-i` option displays all available formats information without downloading.
+The `-i` option displays all available formats, information without downloading.
 
 ```console
 $ annie -i -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
@@ -353,7 +336,7 @@ I am just a college student and this is one of my amateur projects(I need to fin
 
 ## Contributing
 
-Annie is an open source project and built on the top of open source projects. If you are interested, welcome to contribute, let's make Annie better, together 💪
+Annie is an open source project and built on the top of open source projects. If you are interested, you are welcome to contribute, let's make Annie better, together 💪
 
 Check out the [Contributing Guide](./CONTRIBUTING.md) to get started.
 
