@@ -201,7 +201,7 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 
 	urls, size := genURL(dataDict.DURL)
 	format := map[string]downloader.FormatData{
-		"default": downloader.FormatData{
+		"default": {
 			URLs:    urls,
 			Size:    size,
 			Quality: quality[dataDict.Quality],

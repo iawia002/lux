@@ -11,7 +11,7 @@ func Pixivision(url string) downloader.VideoData {
 	html := request.Get(url)
 	title, urls := parser.GetImages(url, html, "am__work__illust  ", nil)
 	format := map[string]downloader.FormatData{
-		"default": downloader.FormatData{
+		"default": {
 			URLs: urls,
 			Size: 0,
 		},

@@ -68,7 +68,7 @@ func Douyu(url string) downloader.VideoData {
 	}
 
 	format := map[string]downloader.FormatData{
-		"default": downloader.FormatData{
+		"default": {
 			URLs: urls,
 			Size: totalSize,
 		},

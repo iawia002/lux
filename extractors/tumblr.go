@@ -57,7 +57,7 @@ func tumblrImageDownload(url, html, title string) downloader.VideoData {
 		urls = append(urls, urlData)
 	}
 	format := map[string]downloader.FormatData{
-		"default": downloader.FormatData{
+		"default": {
 			URLs: urls,
 			Size: totalSize,
 		},
@@ -82,7 +82,7 @@ func tumblrVideoDownload(url, html, title string) downloader.VideoData {
 	realURL := utils.MatchOneOf(videoHTML, `source src="(.+?)"`)[1]
 	urlData, size := genURLData(realURL, url)
 	format := map[string]downloader.FormatData{
-		"default": downloader.FormatData{
+		"default": {
 			URLs: []downloader.URLData{urlData},
 			Size: size,
 		},

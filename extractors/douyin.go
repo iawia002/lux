@@ -36,7 +36,7 @@ func Douyin(url string) downloader.VideoData {
 		Ext:  "mp4",
 	}
 	format := map[string]downloader.FormatData{
-		"default": downloader.FormatData{
+		"default": {
 			URLs: []downloader.URLData{urlData},
 			Size: size,
 		},

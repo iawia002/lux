@@ -21,7 +21,7 @@ func Universal(url string) downloader.VideoData {
 		Ext:  ext,
 	}
 	format := map[string]downloader.FormatData{
-		"default": downloader.FormatData{
+		"default": {
 			URLs: []downloader.URLData{urlData},
 			Size: size,
 		},

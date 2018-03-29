@@ -16,7 +16,7 @@ func Bcy(url string) downloader.VideoData {
 		},
 	)
 	format := map[string]downloader.FormatData{
-		"default": downloader.FormatData{
+		"default": {
 			URLs: urls,
 			Size: 0,
 		},
