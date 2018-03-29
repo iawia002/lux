@@ -128,7 +128,12 @@ func Download(url string) {
 			page := data.VideoData.Pages[p-1]
 			options.Aid = data.Aid
 			options.Cid = strconv.Itoa(page.Cid)
-			options.Subtitle = page.Part
+			// "part":"" or "part":"Untitled"
+			if page.Part == "Untitled" {
+				options.Subtitle = ""
+			} else {
+				options.Subtitle = page.Part
+			}
 		}
 		bilibiliDownload(url, options)
 		return

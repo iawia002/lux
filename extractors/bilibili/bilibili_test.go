@@ -23,16 +23,16 @@ func TestBilibili(t *testing.T) {
 				Title:   "【2018拜年祭单品】相遇day by day",
 				Quality: "高清 1080P",
 			},
+			playlist: true,
 		},
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:     "https://www.bilibili.com/video/av20203945/",
-				Bangumi: false,
-				Title:   "【2018拜年祭单品】相遇day by day",
+				URL:     "https://www.bilibili.com/video/av21303653/",
+				Title:   "【Fate远坂凛声线配音版】某红衣女子偷电瓶车被抓后竟然......【UP主自配】",
+				Size:    81997145,
 				Quality: "高清 1080P",
 			},
-			playlist: true,
 		},
 		{
 			name: "bangumi test",
