@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -159,6 +160,11 @@ func (v VideoData) printInfo(format string) {
 
 // Download download urls
 func (v VideoData) Download(refer string) {
+	if config.ExtractedData {
+		jsonData, _ := json.MarshalIndent(v, "", "    ")
+		fmt.Printf("%s\n", jsonData)
+		return
+	}
 	var format, title string
 	if config.OutputName == "" {
 		title = v.Title

@@ -268,6 +268,32 @@ Status Code: 200
      # download with: annie -f default "URL"
 ```
 
+### Reuse extracted data
+
+The `-j` option will print the extracted data in JSON format.
+
+```console
+$ annie -j https://www.bilibili.com/video/av20203945
+{
+    "Site": "哔哩哔哩 bilibili.com",
+    "Title": "【2018拜年祭单品】相遇day by day",
+    "Type": "video",
+    "Formats": {
+        "default": {
+            "URLs": [
+                {
+                    "URL": "http://cn-jszj-dx-v-11.acgvideo.com/vg1/upgcxcode/60/93/32989360/32989360-1-80.flv?expires=1522325400\u0026platform=pc\u0026ssig=5x0f9tkmvOrQBavICgRElA\u0026oi=3063167823\u0026nfa=wjcs6MVDpr+CJX9KAl+nbw==\u0026dynamic=1\u0026hfa=2022678329\u0026hfb=Yjk5ZmZjM2M1YzY4ZjAwYTMzMTIzYmIyNWY4ODJkNWI=\u0026trid=c2de1496db7646e8917f6a556668b5a9",
+                    "Size": 121735559,
+                    "Ext": "flv"
+                }
+            ],
+            "Quality": "高清 1080P",
+            "Size": 121735559
+        }
+    }
+}
+```
+
 ### All available arguments
 
 ```console
@@ -282,6 +308,7 @@ Usage of annie:
   -f string
     	Select specific format to download
   -i	Information only
+  -j	Print extracted data
   -o string
     	Specify the output path
   -p	Download playlist

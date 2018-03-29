@@ -23,6 +23,8 @@ var (
 	OutputPath string
 	// OutputName output file name
 	OutputName string
+	// ExtractedData print extracted data
+	ExtractedData bool
 )
 
 // FakeHeaders fake http headers
