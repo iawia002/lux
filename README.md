@@ -1,7 +1,8 @@
 <p align="center"><img src="static/logo.png" alt="Annie" height="100px"></p>
 
-[![Build Status](https://travis-ci.org/iawia002/annie.svg?branch=master)](https://travis-ci.org/iawia002/annie)
 [![codecov](https://codecov.io/gh/iawia002/annie/branch/master/graph/badge.svg)](https://codecov.io/gh/iawia002/annie)
+[![Build Status](https://travis-ci.org/iawia002/annie.svg?branch=master)](https://travis-ci.org/iawia002/annie)
+[![Go Report Card](https://goreportcard.com/badge/github.com/iawia002/annie)](https://goreportcard.com/report/github.com/iawia002/annie)
 
 👾 Annie is a fast, simple and clean video downloader built with Go.
 
