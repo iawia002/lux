@@ -8,7 +8,6 @@
 
 * [Installation](#installation)
 * [Getting Started](#getting-started)
-* [Usage](#usage)
 * [Supported Sites](#supported-sites)
 * [Known issues](#known-issues)
 * [About this project](#about-this-project)
@@ -34,6 +33,9 @@ To install Annie, use `go get`, or download the binary file from [Releases](http
 ```bash
 $ go get github.com/iawia002/annie
 ```
+### Arch Linux
+
+For Arch Users [AUR](https://aur.archlinux.org/packages/annie) package is available
 
 
 ## Getting Started
@@ -41,26 +43,23 @@ $ go get github.com/iawia002/annie
 ### Download a video
 
 ```console
-$ annie 'https://www.youtube.com/watch?v=v-Dur3uXXCQ'
+$ annie https://youtu.be/Gnbch2osEeo
 
-Site:      YouTube youtube.com
- Title:     Kesha - Praying (Official Video)
+ Site:      YouTube youtube.com
+ Title:     Multifandom Mashup 2017
  Type:      video
- Stream:   
+ Stream:
      [default]  -------------------
      Quality:         hd720
-     Size:            50.62 MiB (53080675 Bytes)
+     Size:            57.97 MiB (60785404 Bytes)
      # download with: annie -f default "URL"
 
-
- 11.93 MiB / 50.627 MiB [=======>------------------------]  23.6% 18.53 MiB/s 2s
+ 11.93 MiB / 57.97 MiB [======>-------------------------]  20.57% 19.03 MiB/s 2s
 ```
 
 > Note: wrap the URL in quotation marks if it contains special characters. (thanks @tonyxyl for pointing this out)
 >
 > `$ annie 'https://...'`
-
-## Usage
 
 The `-i` option displays all available formats, information without downloading.
 
