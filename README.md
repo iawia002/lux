@@ -64,7 +64,7 @@ $ annie https://youtu.be/Gnbch2osEeo
 The `-i` option displays all available formats, information without downloading.
 
 ```console
-$ annie -i -s 127.0.0.1:1080 https://youtu.be/Gnbch2osEeo
+$ annie -i https://youtu.be/Gnbch2osEeo
 
  Site:      YouTube youtube.com
  Title:     Multifandom Mashup 2017
