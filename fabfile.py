@@ -10,5 +10,5 @@ def build():
         'gox -os="darwin windows" -arch="386 amd64"'
     )
     local(
-        'gox -os="linux freebsd" -arch="386 amd64 arm"'
+        'gox -os="linux freebsd" -arch="386 amd64 arm arm64"'
     )
