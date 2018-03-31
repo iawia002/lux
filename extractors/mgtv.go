@@ -46,7 +46,7 @@ func mgtvM3u8(url string) ([]mgtvURLInfo, int64) {
 	var temp mgtvURLInfo
 	var size, totalSize int64
 	urls := utils.M3u8URLs(url)
-	m3u8String := request.Get(url)
+	m3u8String := request.Get(url, url)
 	sizes := utils.MatchAll(m3u8String, `#EXT-MGTV-File-SIZE:(\d+)`)
 	// sizes: [[#EXT-MGTV-File-SIZE:1893724, 1893724]]
 	for index, u := range urls {
@@ -63,7 +63,7 @@ func mgtvM3u8(url string) ([]mgtvURLInfo, int64) {
 
 // Mgtv download function
 func Mgtv(url string) downloader.VideoData {
-	html := request.Get(url)
+	html := request.Get(url, url)
 	vid := utils.MatchOneOf(
 		url,
 		`https?://www.mgtv.com/(?:b|l)/\d+/(\d+).html`,
@@ -72,7 +72,9 @@ func Mgtv(url string) downloader.VideoData {
 	if vid == nil {
 		vid = utils.MatchOneOf(html, `vid: (\d+),`)
 	}
-	dataString := request.Get("https://pcweb.api.mgtv.com/player/video?video_id=" + vid[1])
+	dataString := request.Get(
+		"https://pcweb.api.mgtv.com/player/video?video_id="+vid[1], url,
+	)
 	var mgtvData mgtv
 	json.Unmarshal([]byte(dataString), &mgtvData)
 	title := strings.TrimSpace(
@@ -85,7 +87,7 @@ func Mgtv(url string) downloader.VideoData {
 		// real download address
 		addr = mgtvVideoAddr{}
 		json.Unmarshal(
-			[]byte(request.Get(mgtvData.Data.StreamDomain[0]+stream.URL)), &addr,
+			[]byte(request.Get(mgtvData.Data.StreamDomain[0]+stream.URL, url)), &addr,
 		)
 		m3u8URLs, totalSize := mgtvM3u8(addr.Info)
 		urls := []downloader.URLData{}

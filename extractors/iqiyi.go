@@ -40,15 +40,20 @@ var iqiyiFormats = []int{
 	96, // 216p, 240p
 }
 
+const iqiyiReferer = "https://www.iqiyi.com"
+
 func getIqiyiData(tvid, vid string) iqiyi {
 	t := time.Now().Unix() * 1000
 	src := "76f90cbd92f94a2e925d83e8ccd22cb7"
 	key := "d5fb4bd9d50c4be6948c97edd7254b0e"
 	sc := utils.Md5(strconv.FormatInt(t, 10) + key + vid)
-	info := request.Get(fmt.Sprintf(
-		"http://cache.m.iqiyi.com/jp/tmts/%s/%s/?t=%d&sc=%s&src=%s",
-		tvid, vid, t, sc, src,
-	))
+	info := request.Get(
+		fmt.Sprintf(
+			"http://cache.m.iqiyi.com/jp/tmts/%s/%s/?t=%d&sc=%s&src=%s",
+			tvid, vid, t, sc, src,
+		),
+		iqiyiReferer,
+	)
 	var data iqiyi
 	json.Unmarshal([]byte(info[len("var tvInfoJs="):]), &data)
 	return data
@@ -56,7 +61,7 @@ func getIqiyiData(tvid, vid string) iqiyi {
 
 // Iqiyi download function
 func Iqiyi(url string) downloader.VideoData {
-	html := request.Get(url)
+	html := request.Get(url, iqiyiReferer)
 	tvid := utils.MatchOneOf(
 		url,
 		`#curid=(.+)_`,

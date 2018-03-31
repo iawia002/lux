@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	netURL "net/url"
 	"strings"
 	"time"
 
@@ -40,23 +41,27 @@ type youkuData struct {
 	Data data `json:"data"`
 }
 
-var ccodes = []string{"0507", "0508", "0512", "0513", "0514", "0503", "0502", "0590"}
-var referer = "https://v.youku.com"
+const youkuReferer = "https://v.youku.com"
+
+var ccodes = []string{"0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
 
 func youkuUps(vid string) youkuData {
 	var url string
 	var utid string
 	var html string
 	var data youkuData
-	headers := request.Headers("http://log.mmstat.com/eg.js", referer)
+	headers := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
 	setCookie := headers.Get("Set-Cookie")
 	utid = utils.MatchOneOf(setCookie, `cna=(.+?);`)[1]
+	// http://g.alicdn.com/player/ykplayer/0.5.28/youku-player.min.js
+	// grep -oE '"[0-9a-zA-Z+/=]{256}"' youku-player.min.js
+	ckey := "DIl58SLFxFNndSV1GFNnMQVYkx1PP5tKe1siZu/86PR1u/Wh1Ptd+WOZsHHWxysSfAOhNJpdVWsdVJNsfJ8Sxd8WKVvNfAS8aS8fAOzYARzPyPc3JvtnPHjTdKfESTdnuTW6ZPvk2pNDh4uFzotgdMEFkzQ5wZVXl2Pf1/Y6hLK0OnCNxBj3+nb0v72gZ6b0td+WOZsHHWxysSo/0y9D2K42SaB8Y/+aD2K42SaB8Y/+ahU+WOZsHcrxysooUeND"
 	for _, ccode := range ccodes {
 		url = fmt.Sprintf(
-			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s",
-			vid, ccode, time.Now().Unix(), utid,
+			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s&ckey=%s",
+			vid, ccode, time.Now().Unix()/1000, netURL.QueryEscape(utid), netURL.QueryEscape(ckey),
 		)
-		html = request.Get(url)
+		html = request.Get(url, youkuReferer)
 		// data must be emptied before reassignment, otherwise it will contain the previous value(the 'error' data)
 		data = youkuData{}
 		json.Unmarshal([]byte(html), &data)
@@ -108,7 +113,7 @@ func genData(youkuData data) map[string]downloader.FormatData {
 
 // Youku download function
 func Youku(url string) downloader.VideoData {
-	html := request.Get(url)
+	html := request.Get(url, youkuReferer)
 	// get the title
 	doc := parser.GetDoc(html)
 	title := parser.Title(doc)
