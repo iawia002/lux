@@ -124,7 +124,7 @@ func Md5(text string) string {
 
 // M3u8URLs get all urls from m3u8 url
 func M3u8URLs(uri string) []string {
-	html := request.Get(uri)
+	html := request.Get(uri, "")
 	lines := strings.Split(html, "\n")
 	var urls []string
 	for _, line := range lines {

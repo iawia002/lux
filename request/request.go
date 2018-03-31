@@ -106,8 +106,12 @@ func Request(
 }
 
 // Get get request
-func Get(url string) string {
-	res := Request("GET", url, nil, nil)
+func Get(url, refer string) string {
+	headers := map[string]string{}
+	if refer != "" {
+		headers["Referer"] = refer
+	}
+	res := Request("GET", url, nil, headers)
 	defer res.Body.Close()
 	var reader io.ReadCloser
 	if res.Header.Get("Content-Encoding") == "gzip" {

@@ -78,7 +78,7 @@ func tumblrVideoDownload(url, html, title string) downloader.VideoData {
 	if !strings.Contains(videoURL, "tumblr.com/video") {
 		log.Fatal("annie doesn't support this URL right now")
 	}
-	videoHTML := request.Get(videoURL)
+	videoHTML := request.Get(videoURL, url)
 	realURL := utils.MatchOneOf(videoHTML, `source src="(.+?)"`)[1]
 	urlData, size := genURLData(realURL, url)
 	format := map[string]downloader.FormatData{
@@ -99,7 +99,7 @@ func tumblrVideoDownload(url, html, title string) downloader.VideoData {
 
 // Tumblr download function
 func Tumblr(url string) downloader.VideoData {
-	html := request.Get(url)
+	html := request.Get(url, url)
 	doc := parser.GetDoc(html)
 	title := strings.TrimSpace(doc.Find("title").Text())
 	if strings.Contains(html, "<iframe src=") {

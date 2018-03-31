@@ -22,6 +22,8 @@ const (
 	secKey string = "94aba54af9065f71de72f5508f1cd42e"
 )
 
+const referer = "https://www.bilibili.com"
+
 func genAPI(aid, cid string, bangumi bool) string {
 	var (
 		baseAPIURL string
@@ -29,9 +31,10 @@ func genAPI(aid, cid string, bangumi bool) string {
 	)
 	utoken := ""
 	if config.Cookie != "" {
-		utoken = request.Get(fmt.Sprintf(
-			"%said=%s&cid=%s", config.BILIBILI_TOKEN_API, aid, cid,
-		))
+		utoken = request.Get(
+			fmt.Sprintf("%said=%s&cid=%s", config.BILIBILI_TOKEN_API, aid, cid),
+			referer,
+		)
 		var t token
 		json.Unmarshal([]byte(utoken), &t)
 		if t.Code != 0 {
@@ -109,7 +112,7 @@ func Download(url string) {
 	if strings.Contains(url, "bangumi") {
 		options.Bangumi = true
 	}
-	html := request.Get(url)
+	html := request.Get(url, referer)
 	if !config.Playlist {
 		options.HTML = html
 		data, err := getMultiPageData(html)
@@ -173,7 +176,7 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 		// reuse html string, but this can't be reused in case of playlist
 		html = options.HTML
 	} else {
-		html = request.Get(url)
+		html = request.Get(url, referer)
 	}
 	if options.Aid != "" && options.Cid != "" {
 		aid = options.Aid
@@ -188,7 +191,7 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 		}
 	}
 	api := genAPI(aid, cid, options.Bangumi)
-	apiData := request.Get(api)
+	apiData := request.Get(api, referer)
 	var dataDict bilibiliData
 	json.Unmarshal([]byte(apiData), &dataDict)
 
