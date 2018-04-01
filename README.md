@@ -99,7 +99,7 @@ $ annie -i https://youtu.be/Gnbch2osEeo
      # download with: annie -f default "URL"
 ```
 
-Use `annie -f format "URL"` to download a specific format listed in the output of ` -i ` option.
+Use `annie -f format "URL"` to download a specific format listed in the output of `-i` option.
 
 ### Download anything else
 
