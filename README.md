@@ -64,7 +64,7 @@ $ annie https://youtu.be/Gnbch2osEeo
 >
 > `$ annie 'https://...'`
 
-The `-i` option displays all information of video in the supplied link without downloading.
+The `-i` option displays all available quality and formats of video in the supplied link without downloading.
 
 ```console
 $ annie -i https://youtu.be/Gnbch2osEeo
@@ -99,7 +99,7 @@ $ annie -i https://youtu.be/Gnbch2osEeo
      # download with: annie -f default "URL"
 ```
 
-Use `annie -f format "URL"` to download a specific format listed in the output of ' -i ' option.
+Use `annie -f format "URL"` to download a specific format listed in the output of ` -i ` option.
 
 ### Download anything else
 
@@ -162,7 +162,7 @@ Cookies can be provided to `annie` with the `-c` option if they are required for
 
 Cookies can be a string or a text file.
 
-Supply cookies in one of the two following formats:
+Supply cookies in one of the two following ways
 
 As a string:
 
@@ -174,7 +174,12 @@ As a text file:
 ```console
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945
 ```
+**Note:**
+cookies must match the following format: 
 
+```console
+name=value; name2=value2; 
+```
 
 ### Proxy
 #### HTTP proxy
