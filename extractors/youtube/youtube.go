@@ -139,10 +139,10 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 	extractAll := utils.ExtractAllURLS()
 
 	bestQualityURL, _ := url.ParseQuery(streams[0])
-	bQiTag := bestQualityURL.Get("itag")
+	bestQualityItag := bestQualityURL.Get("itag")
 
-	for i := 0; i < len(streams); i++ {
-		stream, _ := url.ParseQuery(streams[i])
+	for _, s := range streams {
+		stream, _ := url.ParseQuery(s)
 		itag := stream.Get("itag")
 
 		if !extractAll {
@@ -150,7 +150,7 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 				if itag != config.Format {
 					continue
 				}
-			} else if itag != bQiTag {
+			} else if itag != bestQualityItag {
 				continue
 			}
 		}
@@ -172,7 +172,7 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 		}
 	}
 
-	format["default"] = format[bQiTag]
-	delete(format, bQiTag)
+	format["default"] = format[bestQualityItag]
+	delete(format, bestQualityItag)
 	return format
 }
