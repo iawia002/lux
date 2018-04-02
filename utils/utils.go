@@ -152,3 +152,8 @@ func PrintVersion() {
 		blue.Sprintf(config.VERSION),
 	)
 }
+
+// ExtractAllURLS returns true, if we need to extract all urls
+func ExtractAllURLS() bool {
+	return config.InfoOnly || config.ExtractedData
+}

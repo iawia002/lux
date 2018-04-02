@@ -102,26 +102,8 @@ func youtubeDownload(uri string) downloader.VideoData {
 	title := youtube.Args.Title
 	streams := strings.Split(youtube.Args.Stream, ",")
 
-	format := map[string]downloader.FormatData{}
-	for _, s := range streams {
-		stream, _ := url.ParseQuery(s)
-		quality := stream.Get("quality")
-		ext := utils.MatchOneOf(stream.Get("type"), `video/(\w+);`)[1]
-		streamURL := stream.Get("url")
-		itag := stream.Get("itag")
-		realURL := genSignedURL(streamURL, stream, youtube.Assets.JS)
-		size := request.Size(realURL, uri)
-		urlData := downloader.URLData{
-			URL:  realURL,
-			Size: size,
-			Ext:  ext,
-		}
-		format[itag] = downloader.FormatData{
-			URLs:    []downloader.URLData{urlData},
-			Size:    size,
-			Quality: quality,
-		}
-	}
+	format := extractVideoURLS(streams, uri, youtube.Assets.JS)
+
 	// Audio only file
 	for _, s := range strings.Split(youtube.Args.Audio, ",") {
 		stream, _ := url.ParseQuery(s)
@@ -141,9 +123,6 @@ func youtubeDownload(uri string) downloader.VideoData {
 			break
 		}
 	}
-	stream, _ := url.ParseQuery(streams[0]) // Best quality
-	format["default"] = format[stream.Get("itag")]
-	delete(format, stream.Get("itag"))
 
 	extractedData := downloader.VideoData{
 		Site:    "YouTube youtube.com",
@@ -153,4 +132,47 @@ func youtubeDownload(uri string) downloader.VideoData {
 	}
 	extractedData.Download(uri)
 	return extractedData
+}
+
+func extractVideoURLS(streams []string, referer, assest string) map[string]downloader.FormatData {
+	format := map[string]downloader.FormatData{}
+	extractAll := utils.ExtractAllURLS()
+
+	bestQualityURL, _ := url.ParseQuery(streams[0])
+	bestQualityItag := bestQualityURL.Get("itag")
+
+	for _, s := range streams {
+		stream, _ := url.ParseQuery(s)
+		itag := stream.Get("itag")
+
+		if !extractAll {
+			if config.Format != "" {
+				if itag != config.Format {
+					continue
+				}
+			} else if itag != bestQualityItag {
+				continue
+			}
+		}
+
+		quality := stream.Get("quality")
+		ext := utils.MatchOneOf(stream.Get("type"), `video/(\w+);`)[1]
+		streamURL := stream.Get("url")
+		realURL := genSignedURL(streamURL, stream, assest)
+		size := request.Size(realURL, referer)
+		urlData := downloader.URLData{
+			URL:  realURL,
+			Size: size,
+			Ext:  ext,
+		}
+		format[itag] = downloader.FormatData{
+			URLs:    []downloader.URLData{urlData},
+			Size:    size,
+			Quality: quality,
+		}
+	}
+
+	format["default"] = format[bestQualityItag]
+	delete(format, bestQualityItag)
+	return format
 }
