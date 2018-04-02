@@ -36,9 +36,10 @@ To install Annie, use `go get`, or download the binary file from [Releases](http
 ```bash
 $ go get github.com/iawia002/annie
 ```
+
 ### Arch Linux
 
-For Arch Users [AUR](https://aur.archlinux.org/packages/annie) package is available
+For Arch Users [AUR](https://aur.archlinux.org/packages/annie) package is available.
 
 
 ## Getting Started
@@ -160,9 +161,13 @@ A temporary `.download` file is kept in the output directory. If `annie` is run 
 
 Cookies can be provided to `annie` with the `-c` option if they are required for accessing the video.
 
-Cookies can be a string or a text file.
+**Note: cookies must match the following format:**
 
-Supply cookies in one of the two following ways
+```console
+name=value; name2=value2; ...
+```
+
+Cookies can be a string or a text file, supply cookies in one of the two following ways.
 
 As a string:
 
@@ -171,14 +176,9 @@ $ annie -c "name=value; name2=value2" https://www.bilibili.com/video/av20203945
 ```
 
 As a text file:
-```console
-$ annie -c cookies.txt https://www.bilibili.com/video/av20203945
-```
-**Note:**
-cookies must match the following format: 
 
 ```console
-name=value; name2=value2; 
+$ annie -c cookies.txt https://www.bilibili.com/video/av20203945
 ```
 
 ### Proxy
