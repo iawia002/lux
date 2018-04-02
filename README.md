@@ -64,7 +64,7 @@ $ annie https://youtu.be/Gnbch2osEeo
 >
 > `$ annie 'https://...'`
 
-The `-i` option displays all available formats, information without downloading.
+The `-i` option displays all available quality and formats of video in the supplied link without downloading.
 
 ```console
 $ annie -i https://youtu.be/Gnbch2osEeo
@@ -99,7 +99,7 @@ $ annie -i https://youtu.be/Gnbch2osEeo
      # download with: annie -f default "URL"
 ```
 
-Use `annie -f format "URL"` to download a specific format.
+Use `annie -f format "URL"` to download a specific format listed in the output of `-i` option.
 
 ### Download anything else
 
@@ -160,24 +160,26 @@ A temporary `.download` file is kept in the output directory. If `annie` is run 
 
 Cookies can be provided to `annie` with the `-c` option if they are required for accessing the video.
 
-**Note:**
+Cookies can be a string or a text file.
 
-* cookies must match the following format:
+Supply cookies in one of the two following ways
 
-```
-name=value; name2=value2; ...
-```
-
-cookies can be a string or a file.
+As a string:
 
 ```console
 $ annie -c "name=value; name2=value2" https://www.bilibili.com/video/av20203945
-
-# or
-
-$ annie -c cookies.txt https://www.bilibili.com/video/av20203945
 ```
 
+As a text file:
+```console
+$ annie -c cookies.txt https://www.bilibili.com/video/av20203945
+```
+**Note:**
+cookies must match the following format: 
+
+```console
+name=value; name2=value2; 
+```
 
 ### Proxy
 #### HTTP proxy
@@ -218,7 +220,7 @@ $ annie -o ../ -O "hello" https://...
 
 ### Debug Mode
 
-The `-d` option enables network request messages:
+The `-d` option outputs network request messages:
 
 ```console
 $ annie -i -d http://www.bilibili.com/video/av20088587
