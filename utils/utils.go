@@ -24,6 +24,9 @@ func MatchOneOf(text string, patterns ...string) []string {
 		value []string
 	)
 	for _, pattern := range patterns {
+		// (?flags): set flags within current group; non-capturing
+		// s: let . match \n (default false)
+		// https://github.com/google/re2/wiki/Syntax
 		re = regexp.MustCompile(pattern)
 		value = re.FindStringSubmatch(text)
 		if len(value) > 0 {

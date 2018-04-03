@@ -54,5 +54,8 @@ func Title(doc *goquery.Document) string {
 		// Bilibili: Some movie page got no h1 tag
 		title, _ = doc.Find("meta[property=\"og:title\"]").Attr("content")
 	}
+	if title == "" {
+		title = doc.Find("title").Text()
+	}
 	return utils.FileName(title)
 }
