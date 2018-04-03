@@ -136,7 +136,6 @@ func youtubeDownload(uri string) downloader.VideoData {
 
 func extractVideoURLS(streams []string, referer, assest string) map[string]downloader.FormatData {
 	format := map[string]downloader.FormatData{}
-	extractAll := utils.ExtractAllURLS()
 
 	bestQualityURL, _ := url.ParseQuery(streams[0])
 	bestQualityItag := bestQualityURL.Get("itag")
@@ -145,14 +144,8 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 		stream, _ := url.ParseQuery(s)
 		itag := stream.Get("itag")
 
-		if !extractAll {
-			if config.Format != "" {
-				if itag != config.Format {
-					continue
-				}
-			} else if itag != bestQualityItag {
-				continue
-			}
+		if !utils.NeedExtract(itag, bestQualityItag) {
+			continue
 		}
 
 		quality := stream.Get("quality")

@@ -156,7 +156,18 @@ func PrintVersion() {
 	)
 }
 
-// ExtractAllURLS returns true, if we need to extract all urls
-func ExtractAllURLS() bool {
-	return config.InfoOnly || config.ExtractedData
+// NeedExtract returns true, if we need to extract this format
+func NeedExtract(format, bestQuality string) bool {
+	extractAll := config.InfoOnly || config.ExtractedData
+	if extractAll {
+		return true
+	}
+	if config.Format != "" {
+		if format != config.Format {
+			return false
+		}
+	} else if format != bestQuality {
+		return false
+	}
+	return true
 }
