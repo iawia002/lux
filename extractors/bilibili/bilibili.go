@@ -16,10 +16,16 @@ import (
 )
 
 const (
+	bilibiliAPI        = "https://interface.bilibili.com/v2/playurl?"
+	bilibiliBangumiAPI = "https://bangumi.bilibili.com/player/web_api/v2/playurl?"
+	bilibiliTokenAPI   = "https://api.bilibili.com/x/player/playurl/token?"
+)
+
+const (
 	// BiliBili blocks keys from time to time.
 	// You can extract from the Android client or bilibiliPlayer.min.js
-	appKey string = "84956560bc028eb7"
-	secKey string = "94aba54af9065f71de72f5508f1cd42e"
+	appKey = "84956560bc028eb7"
+	secKey = "94aba54af9065f71de72f5508f1cd42e"
 )
 
 const referer = "https://www.bilibili.com"
@@ -32,7 +38,7 @@ func genAPI(aid, cid string, bangumi bool) string {
 	utoken := ""
 	if config.Cookie != "" {
 		utoken = request.Get(
-			fmt.Sprintf("%said=%s&cid=%s", config.BILIBILI_TOKEN_API, aid, cid),
+			fmt.Sprintf("%said=%s&cid=%s", bilibiliTokenAPI, aid, cid),
 			referer,
 		)
 		var t token
@@ -51,13 +57,13 @@ func genAPI(aid, cid string, bangumi bool) string {
 			"appkey=%s&cid=%s&module=bangumi&otype=json&qn=116&quality=116&season_type=4&type=&utoken=%s",
 			appKey, cid, utoken,
 		)
-		baseAPIURL = config.BILIBILI_BANGUMI_API
+		baseAPIURL = bilibiliBangumiAPI
 	} else {
 		params = fmt.Sprintf(
 			"appkey=%s&cid=%s&otype=json&qn=116&quality=116&type=",
 			appKey, cid,
 		)
-		baseAPIURL = config.BILIBILI_API
+		baseAPIURL = bilibiliAPI
 	}
 	// bangumi utoken also need to put in params to sign, but the ordinary video doesn't need
 	api := fmt.Sprintf(
