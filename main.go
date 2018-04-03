@@ -79,6 +79,8 @@ func main() {
 		extractors.Douyu(videoURL)
 	case "miaopai":
 		extractors.Miaopai(videoURL)
+	case "weibo":
+		extractors.Weibo(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}
