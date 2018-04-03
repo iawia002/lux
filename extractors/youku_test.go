@@ -27,7 +27,7 @@ func TestYouku(t *testing.T) {
 			args: test.Args{
 				URL:     "http://v.youku.com/v_show/id_XMzQ1MTAzNjQwNA==.html",
 				Title:   "这！就是街舞 第一季：第3期：百强“互杀”队长不忍直视",
-				Size:    1436851912,
+				Size:    1419459808,
 				Quality: "mp4hd3v2 1920x1080",
 			},
 		},
