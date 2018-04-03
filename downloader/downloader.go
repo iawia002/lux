@@ -196,53 +196,53 @@ func (v VideoData) Download(refer string) {
 		// only one fragment
 		data.urlSave(data.URLs[0], refer, title, bar)
 		bar.Finish()
-	} else {
-		var wg sync.WaitGroup
-		// multiple fragments
-		parts := []string{}
-		for index, url := range data.URLs {
-			partFileName := fmt.Sprintf("%s[%d]", title, index)
-			partFilePath := utils.FilePath(partFileName, url.Ext, false)
-			parts = append(parts, partFilePath)
-			if strings.Contains(refer, "mgtv") {
-				// Too many threads cause mgtv to return HTTP 403 error
-				data.urlSave(url, refer, partFileName, bar)
-			} else {
-				wg.Add(1)
-				go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
-					defer wg.Done()
-					data.urlSave(url, refer, fileName, bar)
-				}(url, refer, partFileName, bar)
-			}
+		return
+	}
+	var wg sync.WaitGroup
+	// multiple fragments
+	parts := []string{}
+	for index, url := range data.URLs {
+		partFileName := fmt.Sprintf("%s[%d]", title, index)
+		partFilePath := utils.FilePath(partFileName, url.Ext, false)
+		parts = append(parts, partFilePath)
+		if strings.Contains(refer, "mgtv") {
+			// Too many threads cause mgtv to return HTTP 403 error
+			data.urlSave(url, refer, partFileName, bar)
+		} else {
+			wg.Add(1)
+			go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
+				defer wg.Done()
+				data.urlSave(url, refer, fileName, bar)
+			}(url, refer, partFileName, bar)
 		}
-		wg.Wait()
-		bar.Finish()
+	}
+	wg.Wait()
+	bar.Finish()
 
-		if v.Type != "video" {
-			return
-		}
-		// merge
-		// write ffmpeg input file list
-		mergeFile := title + ".txt" // merge list file should be in the current directory
-		file, _ := os.Create(mergeFile)
-		for _, part := range parts {
-			file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
-		}
+	if v.Type != "video" {
+		return
+	}
+	// merge
+	// write ffmpeg input file list
+	mergeFile := title + ".txt" // merge list file should be in the current directory
+	file, _ := os.Create(mergeFile)
+	for _, part := range parts {
+		file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
+	}
 
-		filePath := utils.FilePath(title, "mp4", false)
-		fmt.Printf("Merging video parts into %s\n", filePath)
-		cmd := exec.Command(
-			"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
-			"-i", mergeFile, "-c", "copy", "-bsf:a", "aac_adtstoasc", filePath,
-		)
-		err := cmd.Run()
-		if err != nil {
-			log.Fatal(err)
-		}
-		// remove parts
-		os.Remove(mergeFile)
-		for _, part := range parts {
-			os.Remove(part)
-		}
+	filePath := utils.FilePath(title, "mp4", false)
+	fmt.Printf("Merging video parts into %s\n", filePath)
+	cmd := exec.Command(
+		"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
+		"-i", mergeFile, "-c", "copy", "-bsf:a", "aac_adtstoasc", filePath,
+	)
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// remove parts
+	os.Remove(mergeFile)
+	for _, part := range parts {
+		os.Remove(part)
 	}
 }
