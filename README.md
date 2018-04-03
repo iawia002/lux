@@ -329,6 +329,7 @@ Tumblr | <https://www.tumblr.com> | ✓ | ✓ | |
 Vimeo | <https://vimeo.com> | ✓ | | |
 Facebook | <https://facebook.com> | ✓ | | |
 斗鱼视频 | <https://v.douyu.com> | ✓ | | |
+秒拍 | <https://www.miaopai.com> | ✓ | | |
 
 
 ## Known issues

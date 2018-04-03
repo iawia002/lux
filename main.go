@@ -77,6 +77,8 @@ func main() {
 		extractors.Facebook(videoURL)
 	case "douyu":
 		extractors.Douyu(videoURL)
+	case "miaopai":
+		extractors.Miaopai(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}
