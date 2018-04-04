@@ -156,8 +156,8 @@ func PrintVersion() {
 	)
 }
 
-// NeedExtract returns true, if we need to extract this format
-func NeedExtract(format, bestQuality string) bool {
+// ShouldExtract returns true, if we need to extract this format
+func ShouldExtract(format, bestQuality string) bool {
 	extractAll := config.InfoOnly || config.ExtractedData
 	if extractAll {
 		return true

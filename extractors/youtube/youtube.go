@@ -144,7 +144,7 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 		stream, _ := url.ParseQuery(s)
 		itag := stream.Get("itag")
 
-		if !utils.NeedExtract(itag, bestQualityItag) {
+		if !utils.ShouldExtract(itag, bestQualityItag) {
 			continue
 		}
 
