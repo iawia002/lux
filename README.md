@@ -104,7 +104,7 @@ Use `annie -f format "URL"` to download a specific format listed in the output o
 
 ### Download anything else
 
-If Annie is provided the URL of a specific resource, it will be downloaded directly:
+If Annie is provided the URL of a specific resource, then it will be downloaded directly:
 
 ```console
 $ annie https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg
@@ -155,7 +155,7 @@ $ annie -i -p https://www.bilibili.com/bangumi/play/ep198061
 
 <kbd>Ctrl</kbd>+<kbd>C</kbd> interrupts a download.
 
-A temporary `.download` file is kept in the output directory. If `annie` is run with the same arguments, the download progress will resume from the last session.
+A temporary `.download` file is kept in the output directory. If `annie` is ran with the same arguments, then the download progress will resume from the last session.
 
 ### Cookies
 
@@ -343,7 +343,7 @@ I am just a college student and this is one of my amateur projects(I need to fin
 
 ## Contributing
 
-Annie is an open source project and built on the top of open source projects. If you are interested, you are welcome to contribute, let's make Annie better, together 💪
+Annie is an open source project and built on the top of open-source projects. If you are interested, then you are welcome to contribute. Let's make Annie better, together. 💪
 
 Check out the [Contributing Guide](./CONTRIBUTING.md) to get started.
 
