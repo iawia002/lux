@@ -7,7 +7,7 @@
 [![](https://img.shields.io/badge/telegram-join%20chat-green.svg)](https://t.me/anniedev)
 
 
-👾 Annie is a fast, simple and clean video downloader built with Go.
+👾 Annie is a fast, simple and convenient video downloader built with Go.
 
 * [Installation](#installation)
 * [Getting Started](#getting-started)
@@ -167,7 +167,7 @@ Cookies can be provided to `annie` with the `-c` option if they are required for
 name=value; name2=value2; ...
 ```
 
-Cookies can be a string or a text file, supply cookies in one of the two following ways.
+Cookies can be a string or a text file. Supply cookies in one of the two following ways:
 
 As a string:
 
@@ -343,7 +343,7 @@ I am just a college student and this is one of my amateur projects(I need to fin
 
 ## Contributing
 
-Annie is an open source project and built on the top of open source projects. If you are interested, you are welcome to contribute, let's make Annie better, together 💪
+Annie is an open source project that consist of other open source projects. If you are interested, you are welcome to contribute, let's make Annie better, together 💪
 
 Check out the [Contributing Guide](./CONTRIBUTING.md) to get started.
 
