@@ -37,9 +37,25 @@ To install Annie, use `go get`, or download the binary file from [Releases](http
 $ go get github.com/iawia002/annie
 ```
 
+### Homebrew (macOS only)
+
+For macOS users, you can install `annie` via:
+
+```bash
+$ brew install annie
+```
+
 ### Arch Linux
 
 For Arch Users [AUR](https://aur.archlinux.org/packages/annie) package is available.
+
+### Void Linux
+
+For Void linux users, you can install `annie` via:
+
+```
+$ xbps-install -S annie
+```
 
 
 ## Getting Started
