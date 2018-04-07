@@ -1,10 +1,11 @@
 <p align="center"><img src="static/logo.png" alt="Annie" height="100px"></p>
 
-[![codecov](https://codecov.io/gh/iawia002/annie/branch/master/graph/badge.svg)](https://codecov.io/gh/iawia002/annie)
-[![Build Status](https://travis-ci.org/iawia002/annie.svg?branch=master)](https://travis-ci.org/iawia002/annie)
-[![Go Report Card](https://goreportcard.com/badge/github.com/iawia002/annie)](https://goreportcard.com/report/github.com/iawia002/annie)
-[![GitHub release](https://img.shields.io/github/release/iawia002/annie.svg)](https://github.com/iawia002/annie/releases)
-[![](https://img.shields.io/badge/telegram-join%20chat-green.svg)](https://t.me/anniedev)
+
+[![Codecov](https://img.shields.io/codecov/c/github/iawia002/annie.svg?style=flat-square)](https://codecov.io/gh/iawia002/annie)
+[![Build Status](https://img.shields.io/travis/iawia002/annie.svg?style=flat-square)](https://travis-ci.org/iawia002/annie)
+[![Go Report Card](https://goreportcard.com/badge/github.com/iawia002/annie?style=flat-square)](https://goreportcard.com/report/github.com/iawia002/annie)
+[![GitHub release](https://img.shields.io/github/release/iawia002/annie.svg?style=flat-square)](https://github.com/iawia002/annie/releases)
+[![](https://img.shields.io/badge/telegram-join%20chat-green.svg?longCache=true&style=flat-square)](https://t.me/anniedev)
 
 
 👾 Annie is a fast, simple and clean video downloader built with Go.
