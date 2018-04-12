@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -223,22 +224,40 @@ func (v VideoData) Download(refer string) {
 		return
 	}
 	// merge
-	// write ffmpeg input file list
 	mergeFile := title + ".txt" // merge list file should be in the current directory
-	file, _ := os.Create(mergeFile)
-	for _, part := range parts {
-		file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
-	}
-
 	filePath := utils.FilePath(title, "mp4", false)
 	fmt.Printf("Merging video parts into %s\n", filePath)
-	cmd := exec.Command(
-		"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
-		"-i", mergeFile, "-c", "copy", "-bsf:a", "aac_adtstoasc", filePath,
-	)
+	var cmd *exec.Cmd
+	if strings.Contains(v.Site, "youtube") {
+		// merge audio and video
+		cmds := []string{
+			"-y",
+		}
+		for _, part := range parts {
+			cmds = append(cmds, "-i", part)
+		}
+		cmds = append(
+			cmds, "-c:v", "copy", "-c:a", "aac", "-strict", "experimental",
+			filePath,
+		)
+		cmd = exec.Command("ffmpeg", cmds...)
+	} else {
+		// write ffmpeg input file list
+		file, _ := os.Create(mergeFile)
+		for _, part := range parts {
+			file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
+		}
+
+		cmd = exec.Command(
+			"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
+			"-i", mergeFile, "-c", "copy", "-bsf:a", "aac_adtstoasc", filePath,
+		)
+	}
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 	err := cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Sprint(err) + "\n" + stderr.String())
 	}
 	// remove parts
 	os.Remove(mergeFile)

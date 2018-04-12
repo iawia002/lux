@@ -16,10 +16,10 @@ func TestYouku(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:     "http://v.youku.com/v_show/id_XMzMzMDk5MzcyNA==.html",
-				Title:   "鲜榨时尚：开口跪Jessie J歌声和造型双在线",
-				Size:    35174132,
-				Quality: "mp4hd3v2 1080x1920",
+				URL:     "http://v.youku.com/v_show/id_XMzUzMjE3NDczNg==.html",
+				Title:   "车事儿：智能汽车已经不在遥远 东风风光iX5发布",
+				Size:    45185427,
+				Quality: "mp4hd3v2 1920x1080",
 			},
 		},
 		{
