@@ -224,7 +224,7 @@ func (v VideoData) Download(refer string) {
 		return
 	}
 	// merge
-	mergeFile := title + ".txt" // merge list file should be in the current directory
+	mergeFileName := title + ".txt" // merge list file should be in the current directory
 	filePath := utils.FilePath(title, "mp4", false)
 	fmt.Printf("Merging video parts into %s\n", filePath)
 	var cmd *exec.Cmd
@@ -243,14 +243,15 @@ func (v VideoData) Download(refer string) {
 		cmd = exec.Command("ffmpeg", cmds...)
 	} else {
 		// write ffmpeg input file list
-		file, _ := os.Create(mergeFile)
+		mergeFile, _ := os.Create(mergeFileName)
 		for _, part := range parts {
-			file.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
+			mergeFile.Write([]byte(fmt.Sprintf("file '%s'\n", part)))
 		}
+		mergeFile.Close()
 
 		cmd = exec.Command(
 			"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
-			"-i", mergeFile, "-c", "copy", "-bsf:a", "aac_adtstoasc", filePath,
+			"-i", mergeFileName, "-c", "copy", "-bsf:a", "aac_adtstoasc", filePath,
 		)
 	}
 	var stderr bytes.Buffer
@@ -260,7 +261,7 @@ func (v VideoData) Download(refer string) {
 		log.Fatal(fmt.Sprint(err) + "\n" + stderr.String())
 	}
 	// remove parts
-	os.Remove(mergeFile)
+	os.Remove(mergeFileName)
 	for _, part := range parts {
 		os.Remove(part)
 	}
