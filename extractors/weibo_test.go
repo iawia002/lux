@@ -29,6 +29,14 @@ func TestWeibo(t *testing.T) {
 				Size:  438757,
 			},
 		},
+		{
+			name: "normal test",
+			args: test.Args{
+				URL:   "https://m.weibo.cn/status/4226449584043915",
+				Title: "荷兰弟根本不知道跟谁演的对手戏 via@谷大白话",
+				Size:  30429685,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
