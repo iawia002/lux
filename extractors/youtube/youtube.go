@@ -165,6 +165,10 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 	format["default"] = format[bestQualityItag]
 	delete(format, bestQualityItag)
 
+	// Unlike `url_encoded_fmt_stream_map`, all videos in `adaptive_fmts` have no sound,
+	// we need download video and audio both and then merge them.
+	// Another problem is that even if we add `ratebypass=yes`, the download speed still slow sometimes.
+
 	// All videos here have no sound and need to be added separately
 	for itag, f := range format {
 		if strings.Contains(f.Quality, "video/") {
