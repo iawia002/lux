@@ -13,8 +13,7 @@ type douyinVideoURLData struct {
 }
 
 type douyinVideoData struct {
-	PlayAddr     douyinVideoURLData `json:"play_addr"`
-	RealPlayAddr string             `json:"real_play_addr"`
+	PlayAddr douyinVideoURLData `json:"play_addr"`
 }
 
 type douyinData struct {
@@ -29,9 +28,10 @@ func Douyin(url string) downloader.VideoData {
 	var dataDict douyinData
 	json.Unmarshal([]byte(vData), &dataDict)
 
-	size := request.Size(dataDict.Video.RealPlayAddr, url)
+	realURL := dataDict.Video.PlayAddr.URLList[0]
+	size := request.Size(realURL, url)
 	urlData := downloader.URLData{
-		URL:  dataDict.Video.RealPlayAddr,
+		URL:  realURL,
 		Size: size,
 		Ext:  "mp4",
 	}
