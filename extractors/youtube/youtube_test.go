@@ -19,8 +19,8 @@ func TestYoutube(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.youtube.com/watch?v=Gnbch2osEeo",
 				Title:   "Multifandom Mashup 2017",
-				Size:    60785404,
-				Quality: "hd720",
+				Size:    60808458,
+				Quality: `720p video/mp4; codecs="avc1.4d401f"`,
 			},
 		},
 		{
@@ -28,8 +28,8 @@ func TestYoutube(t *testing.T) {
 			args: test.Args{
 				URL:     "https://youtu.be/z8eFzkfto2w",
 				Title:   "Circle Of Love - Rudy Mancuso",
-				Size:    27183162,
-				Quality: "hd720",
+				Size:    37244990,
+				Quality: `1080p video/mp4; codecs="avc1.640028"`,
 			},
 		},
 		{
@@ -37,8 +37,8 @@ func TestYoutube(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.youtube.com/watch?v=ASPku-eAZYs",
 				Title:   "怪獸與葛林戴華德的罪行 - HD首版電影預告大首播 (Fantastic Beasts：The Crimes of Grindelwald)",
-				Size:    18330678,
-				Quality: "hd720",
+				Size:    31655118,
+				Quality: `1080p video/mp4; codecs="avc1.640028"`,
 			},
 		},
 		{
@@ -46,8 +46,8 @@ func TestYoutube(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.youtube.com/watch?v=x2nKigmfzLQ&list=PLfyyPldyYFapPfxZOay2AoCCaNE1Ezd4_",
 				Title:   "【仔細看看】《羅根》黑白版-漫畫電影新高峰?! - 超粒方",
-				Size:    108941976,
-				Quality: "hd720",
+				Size:    180227347,
+				Quality: `1080p video/mp4; codecs="avc1.640028"`,
 			},
 			playlist: true,
 		},
