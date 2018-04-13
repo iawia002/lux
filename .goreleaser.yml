@@ -1,0 +1,42 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+project_name: annie
+builds:
+- env:
+  - CGO_ENABLED=0
+  binary: annie
+  goos:
+    - windows
+    - darwin
+    - linux
+    - freebsd
+  goarch:
+    - 386
+    - amd64
+    - arm
+    - arm64
+  ignore:
+    - goos: freebsd
+      goarch: arm
+      goarm: 6
+  hooks:
+    # Please install upx first, https://github.com/upx/upx/releases
+    # post: compress.bat
+    post: ./compress.sh
+archive:
+  name_template: '{{ .ProjectName }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}'
+  format: tar.gz
+  format_overrides:
+    - goos: windows
+      format: zip
+  replacements:
+    amd64: 64-bit
+    386: 32-bit
+    arm: ARM
+    arm64: ARM64
+    darwin: macOS
+    linux: Linux
+    windows: Windows
+    openbsd: OpenBSD
+    netbsd: NetBSD
+    freebsd: FreeBSD

@@ -13,3 +13,6 @@
 
 # Python
 *.pyc
+dist/
+github_token
+.github_token
