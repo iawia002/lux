@@ -173,7 +173,7 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 	for itag, f := range format {
 		if strings.Contains(f.Quality, "video/") {
 			f.Size += audio.Size
-			f.URLs = append(format[itag].URLs, audio)
+			f.URLs = append(f.URLs, audio)
 			format[itag] = f
 		}
 	}
