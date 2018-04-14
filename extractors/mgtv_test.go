@@ -31,6 +31,15 @@ func TestMgtv(t *testing.T) {
 				Quality: "超清",
 			},
 		},
+		{
+			name: "vip test",
+			args: test.Args{
+				URL:     "https://www.mgtv.com/b/322865/4352046.html",
+				Title:   "向往的生活 第二季 何炅黄磊回归质朴生活",
+				Size:    425531232,
+				Quality: "超清",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
