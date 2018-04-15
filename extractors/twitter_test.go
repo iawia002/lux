@@ -5,5 +5,5 @@ import (
 )
 
 func TestTwitter(t *testing.T) {
-	Twitter("https://twitter.com/twitter/statuses/984047634611560449")
+	Twitter("https://twitter.com/twitter/statuses/984828878060335109")
 }

@@ -77,6 +77,8 @@ func download(videoURL string) {
 		extractors.Weibo(videoURL)
 	case "instagram":
 		extractors.Instagram(videoURL)
+	case "twitter":
+		extractors.Twitter(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}
