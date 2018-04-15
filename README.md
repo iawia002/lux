@@ -332,22 +332,22 @@ Usage of annie:
 
 ## Supported Sites
 
-Site | URL | 🎬 Videos | 🌁 Images | 📚 Playlist
---- | --- | ---------| -------- | ---------
-抖音 | <https://www.douyin.com> | ✓ | | |
-哔哩哔哩 | <https://www.bilibili.com> | ✓ | | ✓ |
-半次元 | <https://bcy.net> | | ✓ | |
-pixivision | <https://www.pixivision.net> | | ✓ | |
-优酷 | <https://www.youku.com> | ✓ | | |
-YouTube | <https://www.youtube.com> | ✓ | | ✓ |
-爱奇艺 | <https://www.iqiyi.com> | ✓ | | |
-芒果TV | <https://www.mgtv.com> | ✓ | | |
-Tumblr | <https://www.tumblr.com> | ✓ | ✓ | |
-Vimeo | <https://vimeo.com> | ✓ | | |
-Facebook | <https://facebook.com> | ✓ | | |
-斗鱼视频 | <https://v.douyu.com> | ✓ | | |
-秒拍 | <https://www.miaopai.com> | ✓ | | |
-微博 | <https://weibo.com> | ✓ | | |
+Site | URL | 🎬 Videos | 🌁 Images | 📚 Playlist | 🍪 VIP adaptation
+--- | --- | ---------| -------- | -------- | --------------
+抖音 | <https://www.douyin.com> | ✓ | | | |
+哔哩哔哩 | <https://www.bilibili.com> | ✓ | | ✓ | ✓ |
+半次元 | <https://bcy.net> | | ✓ | | |
+pixivision | <https://www.pixivision.net> | | ✓ | | |
+优酷 | <https://www.youku.com> | ✓ | | | ✓ |
+YouTube | <https://www.youtube.com> | ✓ | | ✓ | |
+爱奇艺 | <https://www.iqiyi.com> | ✓ | | | |
+芒果TV | <https://www.mgtv.com> | ✓ | | | |
+Tumblr | <https://www.tumblr.com> | ✓ | ✓ | | |
+Vimeo | <https://vimeo.com> | ✓ | | | |
+Facebook | <https://facebook.com> | ✓ | | | |
+斗鱼视频 | <https://v.douyu.com> | ✓ | | | |
+秒拍 | <https://www.miaopai.com> | ✓ | | | |
+微博 | <https://weibo.com> | ✓ | | | |
 
 
 ## Known issues
