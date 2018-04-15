@@ -2,10 +2,7 @@ package extractors
 
 import (
 	"encoding/json"
-	"fmt"
 	"html"
-	"log"
-	"net/url"
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
@@ -19,20 +16,17 @@ type twitter struct {
 	VideoUrl string `json:"video_url"`
 }
 
+type twitterURLInfo struct {
+	URL  string
+	Size int64
+}
+
 // Twitter download function
-func Twitter(uri string) {
+func Twitter(uri string) downloader.VideoData {
 	videoURI := getVideoURI(uri)
-	vu, err := url.Parse(videoURI)
-	if err != nil {
-		log.Println(err)
-	}
-	ep := vu.EscapedPath()
-	switch {
-	case strings.HasSuffix(ep, "m3u8"):
-		fmt.Println(utils.M3u8URLs(videoURI))
-	case strings.HasSuffix(ep, "mp4"):
-		download(videoURI, uri)
-	}
+	e := download(videoURI, uri)
+	e.Download(uri)
+	return e
 }
 
 func getVideoURI(uri string) string {
@@ -48,16 +42,37 @@ func getVideoURI(uri string) string {
 	return twitterData.VideoUrl
 }
 
-func download(directURI, uri string) {
-	size := request.Size(directURI, uri)
-	urlData := downloader.URLData{
-		URL:  directURI,
-		Size: size,
-		Ext:  "mp4",
+func download(directURI, uri string) downloader.VideoData {
+	var size int64
+	var urls []downloader.URLData
+	switch {
+	case strings.HasSuffix(directURI, "m3u8"):
+		var m3u8URLs []twitterURLInfo
+		m3u8URLs, size = twitterM3u8(directURI)
+
+		var temp downloader.URLData
+		for _, u := range m3u8URLs {
+			temp = downloader.URLData{
+				URL:  u.URL,
+				Size: u.Size,
+				Ext:  "ts",
+			}
+			urls = append(urls, temp)
+		}
+
+	case strings.HasSuffix(directURI, "mp4"):
+		size = request.Size(directURI, uri)
+		urlData := downloader.URLData{
+			URL:  directURI,
+			Size: size,
+			Ext:  "mp4",
+		}
+		urls = []downloader.URLData{urlData}
+
 	}
 	format := map[string]downloader.FormatData{
 		"default": {
-			URLs: []downloader.URLData{urlData},
+			URLs: urls,
 			Size: size,
 		},
 	}
@@ -67,5 +82,26 @@ func download(directURI, uri string) {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(uri)
+	return extractedData
+}
+
+func twitterM3u8(uri string) ([]twitterURLInfo, int64) {
+	var data []twitterURLInfo
+	var temp twitterURLInfo
+	var size, totalSize int64
+	m3u8urls := utils.M3u8URLs(uri)
+	var tsurls []string
+	for _, u := range m3u8urls {
+		tsurls = append(tsurls, utils.M3u8URLs(u)...)
+	}
+	for _, u := range tsurls {
+		size = request.Size(u, uri)
+		totalSize += size
+		temp = twitterURLInfo{
+			URL:  u,
+			Size: size,
+		}
+		data = append(data, temp)
+	}
+	return data, totalSize
 }
