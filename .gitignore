@@ -13,6 +13,8 @@
 
 # Python
 *.pyc
+
+.vscode
 dist/
 github_token
 .github_token
