@@ -100,8 +100,9 @@ func tumblrVideoDownload(url, html, title string) downloader.VideoData {
 // Tumblr download function
 func Tumblr(url string) downloader.VideoData {
 	html := request.Get(url, url)
+	// get the title
 	doc := parser.GetDoc(html)
-	title := strings.TrimSpace(doc.Find("title").Text())
+	title := parser.Title(doc)
 	if strings.Contains(html, "<iframe src=") {
 		// Video
 		return tumblrVideoDownload(url, html, title)
