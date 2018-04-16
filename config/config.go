@@ -25,6 +25,8 @@ var (
 	OutputName string
 	// ExtractedData print extracted data
 	ExtractedData bool
+	// The number of download thread
+	ThreadNumber int
 )
 
 // FakeHeaders fake http headers
