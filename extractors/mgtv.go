@@ -2,7 +2,6 @@ package extractors
 
 import (
 	"encoding/json"
-	// "fmt"
 	"strconv"
 	"strings"
 
@@ -84,6 +83,9 @@ func Mgtv(url string) downloader.VideoData {
 	var addr mgtvVideoAddr
 	format := map[string]downloader.FormatData{}
 	for _, stream := range streams {
+		if stream.URL == "" {
+			continue
+		}
 		// real download address
 		addr = mgtvVideoAddr{}
 		json.Unmarshal(

@@ -1,5 +1,3 @@
-# This is an example goreleaser.yaml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
 project_name: annie
 builds:
 - env:
@@ -23,8 +21,16 @@ builds:
     # Please install upx first, https://github.com/upx/upx/releases
     # post: compress.bat
     post: ./compress.sh
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs'
+      - '^tests'
+      - Merge pull request
+      - Merge branch
 archive:
-  name_template: '{{ .ProjectName }}_{{.Version}}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}'
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}'
   format: tar.gz
   format_overrides:
     - goos: windows
