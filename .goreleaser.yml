@@ -21,6 +21,8 @@ builds:
     # Please install upx first, https://github.com/upx/upx/releases
     # post: compress.bat
     post: ./compress.sh
+env_files:
+  github_token: ./github_token
 changelog:
   sort: asc
   filters:
