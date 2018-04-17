@@ -5,6 +5,7 @@
 [![Build Status](https://img.shields.io/travis/iawia002/annie.svg?style=flat-square)](https://travis-ci.org/iawia002/annie)
 [![Go Report Card](https://goreportcard.com/badge/github.com/iawia002/annie?style=flat-square)](https://goreportcard.com/report/github.com/iawia002/annie)
 [![GitHub release](https://img.shields.io/github/release/iawia002/annie.svg?style=flat-square)](https://github.com/iawia002/annie/releases)
+![homebrew](https://img.shields.io/homebrew/v/annie.svg?style=flat-square)
 [![](https://img.shields.io/badge/telegram-join%20chat-green.svg?longCache=true&style=flat-square)](https://t.me/anniedev)
 
 
@@ -14,8 +15,8 @@
 * [Getting Started](#getting-started)
 * [Supported Sites](#supported-sites)
 * [Known issues](#known-issues)
-* [About this project](#about-this-project)
 * [Contributing](#contributing)
+* [Authors](#authors)
 * [Similar projects](#similar-projects)
 * [License](#license)
 
@@ -216,6 +217,13 @@ $ annie -s 127.0.0.1:1080 -i https://www.youtube.com/watch?v=Gnbch2osEeo
 ```
 
 
+### Multi-Thread
+
+Use `-n` option to set the number of download threads(default is 10, only works for multiple-parts video).
+
+> **Special Tips:** Use too many threads in **mgtv** download will cause HTTP 403 error, we recommend setting the number of threads to **1**.
+
+
 ### Use specified Referrer
 
 A Referrer can be used for the request with the `-r` option:
@@ -355,11 +363,6 @@ Facebook | <https://facebook.com> | ✓ | | | |
 ## Known issues
 
 
-## About this project
-
-I am just a college student and this is one of my amateur projects(I need to finish my school stuff first). I am very happy and surprised that so many people like this project, thank you all. 🙇‍♂️
-
-
 ## Contributing
 
 Annie is an open source project and built on the top of open-source projects. If you are interested, then you are welcome to contribute. Let's make Annie better, together. 💪
@@ -367,6 +370,11 @@ Annie is an open source project and built on the top of open-source projects. If
 Check out the [Contributing Guide](./CONTRIBUTING.md) to get started.
 
 Special thanks to [@Yasujizr](https://github.com/Yasujizr) who designed the amazing logo!
+
+
+## Authors
+
+Code with ❤️ by [iawia002](https://github.com/iawia002) and lovely [contributors](https://github.com/iawia002/annie/graphs/contributors)
 
 
 ## Similar projects
