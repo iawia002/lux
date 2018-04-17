@@ -27,7 +27,7 @@ func init() {
 	flag.StringVar(&config.OutputPath, "o", "", "Specify the output path")
 	flag.StringVar(&config.OutputName, "O", "", "Specify the output file name")
 	flag.BoolVar(&config.ExtractedData, "j", false, "Print extracted data")
-	flag.IntVar(&config.ThreadNumber, "n", 100, "The number of download thread")
+	flag.IntVar(&config.ThreadNumber, "n", 10, "The number of download thread")
 }
 
 func main() {

@@ -318,7 +318,7 @@ Usage of annie:
   -i	Information only
   -j	Print extracted data
   -n int
-        The number of download thread (default 100)
+        The number of download thread (default 10)
   -o string
     	Specify the output path
   -p	Download playlist

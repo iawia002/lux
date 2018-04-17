@@ -10,7 +10,7 @@ func TestWaitGroupPool(t *testing.T) {
 
 	var total uint32
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100; i++ {
 		wgp.Add()
 		go func(total *uint32) {
 			defer wgp.Done()
@@ -19,7 +19,7 @@ func TestWaitGroupPool(t *testing.T) {
 	}
 	wgp.Wait()
 
-	if total != 1000 {
+	if total != 100 {
 		t.Fatalf("The size '%d' of the pool did not meet expectations.", total)
 	}
 }
