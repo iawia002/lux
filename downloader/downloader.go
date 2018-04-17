@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cheggaaa/pb"
@@ -199,25 +198,22 @@ func (v VideoData) Download(refer string) {
 		bar.Finish()
 		return
 	}
-	var wg sync.WaitGroup
+	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
 	// multiple fragments
 	parts := []string{}
 	for index, url := range data.URLs {
 		partFileName := fmt.Sprintf("%s[%d]", title, index)
 		partFilePath := utils.FilePath(partFileName, url.Ext, false)
 		parts = append(parts, partFilePath)
-		if strings.Contains(refer, "mgtv") {
-			// Too many threads cause mgtv to return HTTP 403 error
-			data.urlSave(url, refer, partFileName, bar)
-		} else {
-			wg.Add(1)
-			go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
-				defer wg.Done()
-				data.urlSave(url, refer, fileName, bar)
-			}(url, refer, partFileName, bar)
-		}
+
+		wgp.Add()
+		go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
+			defer wgp.Done()
+			data.urlSave(url, refer, fileName, bar)
+		}(url, refer, partFileName, bar)
+
 	}
-	wg.Wait()
+	wgp.Wait()
 	bar.Finish()
 
 	if v.Type != "video" {
