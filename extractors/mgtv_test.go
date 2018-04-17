@@ -36,7 +36,7 @@ func TestMgtv(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.mgtv.com/b/322865/4352046.html",
 				Title:   "向往的生活 第二季 先导片：何炅黄磊回归质朴生活",
-				Size:    425531232,
+				Size:    453246944,
 				Quality: "超清",
 			},
 		},
