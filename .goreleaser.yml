@@ -34,6 +34,9 @@ changelog:
 archive:
   name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}'
   format: tar.gz
+  files:
+    - none*
+  wrap_in_directory: false
   format_overrides:
     - goos: windows
       format: zip
