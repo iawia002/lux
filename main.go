@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/extractors"
@@ -30,23 +29,7 @@ func init() {
 	flag.IntVar(&config.ThreadNumber, "n", 10, "The number of download thread")
 }
 
-func main() {
-	flag.Parse()
-	args := flag.Args()
-	if config.Version {
-		utils.PrintVersion()
-		return
-	}
-	if config.Debug {
-		utils.PrintVersion()
-	}
-	if len(args) < 1 {
-		fmt.Printf("Too few arguments \n")
-		fmt.Printf("Usage of %s: \n", os.Args[0])
-		flag.PrintDefaults()
-		return
-	}
-	videoURL := args[0]
+func download(videoURL string) {
 	u, err := url.ParseRequestURI(videoURL)
 	if err != nil {
 		log.Fatal(err)
@@ -84,5 +67,26 @@ func main() {
 		extractors.Weibo(videoURL)
 	default:
 		extractors.Universal(videoURL)
+	}
+}
+
+func main() {
+	flag.Parse()
+	args := flag.Args()
+	if config.Version {
+		utils.PrintVersion()
+		return
+	}
+	if config.Debug {
+		utils.PrintVersion()
+	}
+	if len(args) < 1 {
+		fmt.Println("Too few arguments")
+		fmt.Println("Usage: annie [args] URLs...")
+		flag.PrintDefaults()
+		return
+	}
+	for _, videoURL := range args {
+		download(videoURL)
 	}
 }
