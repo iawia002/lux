@@ -387,6 +387,7 @@ Facebook | <https://facebook.com> | ✓ | | | |
 斗鱼视频 | <https://v.douyu.com> | ✓ | | | |
 秒拍 | <https://www.miaopai.com> | ✓ | | | |
 微博 | <https://weibo.com> | ✓ | | | |
+Instagram | <https://www.instagram.com> | ✓ | ✓ | | |
 
 
 ## Known issues
