@@ -30,12 +30,17 @@ func init() {
 }
 
 func download(videoURL string) {
-	u, err := url.ParseRequestURI(videoURL)
-	if err != nil {
-		log.Fatal(err)
+	var domain string
+	if utils.MatchOneOf(videoURL, `^av\d+`) != nil {
+		domain = "bilibili"
+		videoURL = "https://www.bilibili.com/video/" + videoURL
+	} else {
+		u, err := url.ParseRequestURI(videoURL)
+		if err != nil {
+			log.Fatal(err)
+		}
+		domain = utils.Domain(u.Host)
 	}
-
-	domain := utils.Domain(u.Host)
 	switch domain {
 	case "douyin":
 		extractors.Douyin(videoURL)
