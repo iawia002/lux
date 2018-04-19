@@ -169,6 +169,35 @@ $ annie -i -p https://www.bilibili.com/bangumi/play/ep198061
 ......
 ```
 
+### Multiple inputs
+
+You can also download multiple URLs at once:
+
+```console
+$ annie -i https://www.bilibili.com/video/av21877586 https://www.bilibili.com/video/av21990740
+
+ Site:      哔哩哔哩 bilibili.com
+ Title:     【莓机会了】甜到虐哭的13集单集MAD「我现在什么都不想干,更不想看14集」
+ Type:      video
+ Streams:   # All available quality
+     [default]  -------------------
+     Quality:         高清 1080P
+     Size:            51.88 MiB (54403767 Bytes)
+     # download with: annie -f default "URL"
+
+
+ Site:      哔哩哔哩 bilibili.com
+ Title:     【莓救了】甜到虐哭！！！国家队单集MAD-当熟悉的bgm响起，眼泪从脸颊滑下
+ Type:      video
+ Streams:   # All available quality
+     [default]  -------------------
+     Quality:         高清 1080P
+     Size:            77.63 MiB (81404093 Bytes)
+     # download with: annie -f default "URL"
+```
+
+These URLs will be downloaded one by one.
+
 ### Resume a download
 
 <kbd>Ctrl</kbd>+<kbd>C</kbd> interrupts a download.
