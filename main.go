@@ -70,6 +70,8 @@ func download(videoURL string) {
 		extractors.Miaopai(videoURL)
 	case "weibo":
 		extractors.Weibo(videoURL)
+	case "instagram":
+		extractors.Instagram(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}
