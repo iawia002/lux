@@ -14,6 +14,9 @@ const prefix = "https://twitter.com/i/videos/tweet/"
 
 type twitter struct {
 	VideoURL string `json:"video_url"`
+	Status   struct {
+		Text string `json:"text"`
+	} `json:"status"`
 }
 
 type twitterURLInfo struct {
@@ -23,36 +26,60 @@ type twitterURLInfo struct {
 
 // Twitter download function
 func Twitter(uri string) downloader.VideoData {
-	videoURI := getVideoURI(uri)
-	e := download(videoURI, uri)
-	e.Download(uri)
-	return e
+	twitterData := getVideoURI(uri)
+	extractedData := download(twitterData.VideoURL, uri, twitterData.Status.Text)
+	extractedData.Download(uri)
+	return extractedData
 }
 
-func getVideoURI(uri string) string {
+func getVideoURI(uri string) twitter {
 	//extract tweet id from url
-	tweetID := strings.Split(uri, "/")[5]
+	tweetID := utils.MatchOneOf(uri, `/(\d+)`)[1]
 	webplayerURL := prefix + tweetID
 	h := request.Get(webplayerURL, uri)
 	//get dataconfig attribute
-	jsonString := html.UnescapeString(utils.MatchOneOf(h, "data-config=\"({.+})")[1])
+	jsonString := html.UnescapeString(utils.MatchOneOf(h, `data-config="({.+})`)[1])
 	var twitterData twitter
 	//unmarshal
 	json.Unmarshal([]byte(jsonString), &twitterData)
-	return twitterData.VideoURL
+	waste := utils.MatchOneOf(twitterData.Status.Text, `https://t.co/\S+$`)[0]
+	// twitterData.Status.Text has video url at end of the text. delete it!
+	twitterData.Status.Text = twitterData.Status.Text[:len(twitterData.Status.Text)-len(waste)]
+	//Sometimes, twitterData.Status.Text has newline character(\n). It prevent FFMPEG from merging files,so replace it with "".
+	twitterData.Status.Text = strings.Replace(twitterData.Status.Text, "\n", "", -1)
+	//if tweet has video only
+	if twitterData.Status.Text == "" {
+		twitterData.Status.Text = "twitter_video"
+	} else {
+		twitterData.Status.Text = twitterData.Status.Text[:len(twitterData.Status.Text)-1]
+	}
+	return twitterData
 }
 
 //download func
-func download(directURI, uri string) downloader.VideoData {
+func download(directURI, uri, title string) downloader.VideoData {
 	var size int64
 	var format = make(map[string]downloader.FormatData)
 	switch {
 	//if video file is m3u8 and ts
 	case strings.HasSuffix(directURI, "m3u8"):
-		vInfo := UnifyVideoFiles(directURI)
+		var vInfo []twitterURLInfo
+		m3u8urls := utils.M3u8URLs(directURI)
+		for _, u := range m3u8urls {
+			var totalSize int64
+			ts := utils.M3u8URLs(u)
+			for _, i := range ts {
+				size := request.Size(i, directURI)
+				totalSize += size
+			}
+			temp := twitterURLInfo{
+				URLs: ts,
+				Size: totalSize,
+			}
+			vInfo = append(vInfo, temp)
+		}
 		vInfoNum := len(vInfo)
-		counter := 1
-		for _, u := range vInfo {
+		for index, u := range vInfo {
 			var urls []downloader.URLData
 			for _, i := range u.URLs {
 				temp := downloader.URLData{
@@ -63,12 +90,11 @@ func download(directURI, uri string) downloader.VideoData {
 				urls = append(urls, temp)
 			}
 			quality := strings.Split(u.URLs[0], "/")[9]
-			if counter == vInfoNum {
+			if index+1 == vInfoNum {
 				format["default"] = downloader.FormatData{Quality: quality, URLs: urls, Size: u.Size}
 			} else {
 				format[quality] = downloader.FormatData{Quality: quality, URLs: urls, Size: u.Size}
 			}
-			counter++
 		}
 
 		//if video file is mp4
@@ -84,29 +110,9 @@ func download(directURI, uri string) downloader.VideoData {
 
 	extractedData := downloader.VideoData{
 		Site:    "Twitter twitter.com",
-		Title:   "twitter_video",
+		Title:   utils.FileName(title),
 		Type:    "video",
 		Formats: format,
 	}
 	return extractedData
-}
-
-//UnifyVideoFiles unify files infomation
-func UnifyVideoFiles(uri string) []twitterURLInfo {
-	var data []twitterURLInfo
-	m3u8urls := utils.M3u8URLs(uri)
-	for _, u := range m3u8urls {
-		var totalSize int64
-		ts := utils.M3u8URLs(u)
-		for _, i := range ts {
-			size := request.Size(i, uri)
-			totalSize += size
-		}
-		temp := twitterURLInfo{
-			URLs: ts,
-			Size: totalSize,
-		}
-		data = append(data, temp)
-	}
-	return data
 }
