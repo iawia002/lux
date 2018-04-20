@@ -252,6 +252,33 @@ Use `-n` option to set the number of download threads(default is 10, only works 
 
 > **Special Tips:** Use too many threads in **mgtv** download will cause HTTP 403 error, we recommend setting the number of threads to **1**.
 
+### Short link
+#### bilibili
+
+You can just use `av` or `ep` number to download bilibili's video:
+
+```console
+$ annie -i ep198381 av21877586
+
+ Site:      哔哩哔哩 bilibili.com
+ Title:     狐妖小红娘：第79话 南国公主的吃货本色
+ Type:      video
+ Streams:   # All available quality
+     [default]  -------------------
+     Quality:         高清 1080P
+     Size:            485.23 MiB (508798478 Bytes)
+     # download with: annie -f default "URL"
+
+
+ Site:      哔哩哔哩 bilibili.com
+ Title:     【莓机会了】甜到虐哭的13集单集MAD「我现在什么都不想干,更不想看14集」
+ Type:      video
+ Streams:   # All available quality
+     [default]  -------------------
+     Quality:         高清 1080P
+     Size:            51.88 MiB (54403767 Bytes)
+     # download with: annie -f default "URL"
+```
 
 ### Use specified Referrer
 
