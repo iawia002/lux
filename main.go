@@ -31,9 +31,14 @@ func init() {
 
 func download(videoURL string) {
 	var domain string
-	if utils.MatchOneOf(videoURL, `^av\d+`) != nil {
+	bilibiliShortLink := utils.MatchOneOf(videoURL, `^(av|ep)\d+`)
+	if bilibiliShortLink != nil {
+		bilibiliURL := map[string]string{
+			"av": "https://www.bilibili.com/video/",
+			"ep": "https://www.bilibili.com/bangumi/play/",
+		}
 		domain = "bilibili"
-		videoURL = "https://www.bilibili.com/video/" + videoURL
+		videoURL = bilibiliURL[bilibiliShortLink[1]] + videoURL
 	} else {
 		u, err := url.ParseRequestURI(videoURL)
 		if err != nil {
