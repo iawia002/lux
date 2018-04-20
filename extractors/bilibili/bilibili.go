@@ -30,7 +30,7 @@ const (
 
 const referer = "https://www.bilibili.com"
 
-func genAPI(aid, cid string, bangumi bool) string {
+func genAPI(aid, cid string, bangumi bool, seasonType string) string {
 	var (
 		baseAPIURL string
 		params     string
@@ -54,8 +54,8 @@ func genAPI(aid, cid string, bangumi bool) string {
 		// qn=0 flag makes the CDN address different every time
 		// quality=116(1080P 60) is the highest quality so far
 		params = fmt.Sprintf(
-			"appkey=%s&cid=%s&module=bangumi&otype=json&qn=116&quality=116&season_type=4&type=&utoken=%s",
-			appKey, cid, utoken,
+			"appkey=%s&cid=%s&module=bangumi&otype=json&qn=116&quality=116&season_type=%s&type=&utoken=%s",
+			appKey, cid, seasonType, utoken,
 		)
 		baseAPIURL = bilibiliBangumiAPI
 	} else {
@@ -124,6 +124,7 @@ func Download(url string) {
 		data, err := getMultiPageData(html)
 		if err == nil && !options.Bangumi {
 			// handle URL that has a playlist, mainly for unified titles
+			// <h1> tag does not include subtitles
 			// bangumi doesn't need this
 			pageString := utils.MatchOneOf(url, `\?p=(\d+)`)
 			var p int
@@ -196,7 +197,11 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 			aid = utils.MatchOneOf(url, `av(\d+)`)[1]
 		}
 	}
-	api := genAPI(aid, cid, options.Bangumi)
+	var seasonType string
+	if options.Bangumi {
+		seasonType = utils.MatchOneOf(html, `"season_type":(\d+)`)[1]
+	}
+	api := genAPI(aid, cid, options.Bangumi, seasonType)
 	apiData := request.Get(api, referer)
 	var dataDict bilibiliData
 	json.Unmarshal([]byte(apiData), &dataDict)
