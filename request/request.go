@@ -81,10 +81,21 @@ func Request(
 	if config.Refer != "" {
 		req.Header.Set("Referer", config.Refer)
 	}
-	res, err := client.Do(req)
-	if err != nil {
-		log.Print(url)
-		panic(err)
+	retryTimes := 3
+	var (
+		res          *http.Response
+		requestError error
+	)
+	for i := 0; i < retryTimes; i++ {
+		res, requestError = client.Do(req)
+		if requestError == nil {
+			break
+		}
+		if requestError != nil && i+1 == retryTimes {
+			log.Print(url)
+			panic(requestError)
+		}
+		time.Sleep(1 * time.Second)
 	}
 	if config.Debug {
 		blue := color.New(color.FgBlue)
