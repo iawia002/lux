@@ -6,8 +6,6 @@ import (
 	"log"
 	"net/url"
 
-	ex "github.com/s3pt3mb3r/annie/extractors"
-
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/extractors/bilibili"
@@ -80,7 +78,7 @@ func download(videoURL string) {
 	case "instagram":
 		extractors.Instagram(videoURL)
 	case "twitter":
-		ex.Twitter(videoURL)
+		extractors.Twitter(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}

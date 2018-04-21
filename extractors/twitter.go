@@ -2,7 +2,9 @@ package extractors
 
 import (
 	"encoding/json"
+	"fmt"
 	"html"
+	"strconv"
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
@@ -12,105 +14,86 @@ import (
 
 const prefix = "https://twitter.com/i/videos/tweet/"
 
-type twitter struct {
-	VideoURL string `json:"video_url"`
-	Status   struct {
-		Text string `json:"text"`
-	} `json:"status"`
+type twitterUser struct {
+	Name string `json:"name"`
 }
 
-type twitterURLInfo struct {
-	URLs []string
-	Size int64
+type twitter struct {
+	VideoURL string      `json:"video_url"`
+	TweetID  string      `json:"tweet_id"`
+	User     twitterUser `json:"user"`
 }
 
 // Twitter download function
 func Twitter(uri string) downloader.VideoData {
 	twitterData := getVideoURI(uri)
-	extractedData := download(twitterData.VideoURL, uri, twitterData.Status.Text)
+	extractedData := download(twitterData, uri)
 	extractedData.Download(uri)
 	return extractedData
 }
 
 func getVideoURI(uri string) twitter {
-	//extract tweet id from url
-	tweetID := utils.MatchOneOf(uri, `/(\d+)`)[1]
-	webplayerURL := prefix + tweetID
-	h := request.Get(webplayerURL, uri)
-	//get dataconfig attribute
+	// extract tweet id from url
+	tweetID := utils.MatchOneOf(uri, `(status|statuses)/(\d+)`)[2]
+	webPlayerURL := prefix + tweetID
+	h := request.Get(webPlayerURL, uri)
+	// get dataconfig attribute
 	jsonString := html.UnescapeString(utils.MatchOneOf(h, `data-config="({.+})`)[1])
 	var twitterData twitter
-	//unmarshal
 	json.Unmarshal([]byte(jsonString), &twitterData)
-	waste := utils.MatchOneOf(twitterData.Status.Text, `https://t.co/\S+$`)[0]
-	// twitterData.Status.Text has video url at end of the text. delete it!
-	twitterData.Status.Text = twitterData.Status.Text[:len(twitterData.Status.Text)-len(waste)]
-	//Sometimes, twitterData.Status.Text has newline character(\n). It prevent FFMPEG from merging files,so replace it with "".
-	twitterData.Status.Text = strings.Replace(twitterData.Status.Text, "\n", "", -1)
-	//if tweet has video only
-	if twitterData.Status.Text == "" {
-		twitterData.Status.Text = "twitter_video"
-	} else {
-		twitterData.Status.Text = twitterData.Status.Text[:len(twitterData.Status.Text)-1]
-	}
 	return twitterData
 }
 
-//download func
-func download(directURI, uri, title string) downloader.VideoData {
+func download(data twitter, uri string) downloader.VideoData {
 	var size int64
 	var format = make(map[string]downloader.FormatData)
 	switch {
-	//if video file is m3u8 and ts
-	case strings.HasSuffix(directURI, "m3u8"):
-		var vInfo []twitterURLInfo
-		m3u8urls := utils.M3u8URLs(directURI)
-		for _, u := range m3u8urls {
+	// if video file is m3u8 and ts
+	case strings.HasSuffix(data.VideoURL, "m3u8"):
+		m3u8urls := utils.M3u8URLs(data.VideoURL)
+		for index, m3u8 := range m3u8urls {
 			var totalSize int64
-			ts := utils.M3u8URLs(u)
-			for _, i := range ts {
-				size := request.Size(i, directURI)
-				totalSize += size
-			}
-			temp := twitterURLInfo{
-				URLs: ts,
-				Size: totalSize,
-			}
-			vInfo = append(vInfo, temp)
-		}
-		vInfoNum := len(vInfo)
-		for index, u := range vInfo {
 			var urls []downloader.URLData
-			for _, i := range u.URLs {
+			ts := utils.M3u8URLs(m3u8)
+			for _, i := range ts {
+				size := request.Size(i, uri)
 				temp := downloader.URLData{
 					URL:  i,
-					Size: u.Size,
+					Size: size,
 					Ext:  "ts",
 				}
+				totalSize += size
 				urls = append(urls, temp)
 			}
-			quality := strings.Split(u.URLs[0], "/")[9]
-			if index+1 == vInfoNum {
-				format["default"] = downloader.FormatData{Quality: quality, URLs: urls, Size: u.Size}
-			} else {
-				format[quality] = downloader.FormatData{Quality: quality, URLs: urls, Size: u.Size}
+			qualityString := utils.MatchOneOf(m3u8, `/(\d+x\d+)/`)[1]
+			quality := strconv.Itoa(index + 1)
+			if index+1 == len(m3u8urls) {
+				quality = "default"
+			}
+			format[quality] = downloader.FormatData{
+				Quality: qualityString,
+				URLs:    urls,
+				Size:    totalSize,
 			}
 		}
 
-		//if video file is mp4
-	case strings.HasSuffix(directURI, "mp4"):
-		size = request.Size(directURI, uri)
+	// if video file is mp4
+	case strings.HasSuffix(data.VideoURL, "mp4"):
+		size = request.Size(data.VideoURL, uri)
 		urlData := downloader.URLData{
-			URL:  directURI,
+			URL:  data.VideoURL,
 			Size: size,
 			Ext:  "mp4",
 		}
-		format["default"] = downloader.FormatData{URLs: []downloader.URLData{urlData}, Size: size}
+		format["default"] = downloader.FormatData{
+			URLs: []downloader.URLData{urlData},
+			Size: size,
+		}
 	}
 
 	extractedData := downloader.VideoData{
 		Site:    "Twitter twitter.com",
-		Title:   utils.FileName(title),
+		Title:   fmt.Sprintf("%s %s", data.User.Name, data.TweetID),
 		Type:    "video",
 		Formats: format,
 	}
