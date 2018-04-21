@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -32,9 +31,15 @@ type stream struct {
 	Type   string `json:"stream_type"`
 }
 
+type youkuVideo struct {
+	Title    string `json:"title"`
+	UserName string `json:"username"`
+}
+
 type data struct {
-	Error  errorData `json:"error"`
-	Stream []stream  `json:"stream"`
+	Error  errorData  `json:"error"`
+	Stream []stream   `json:"stream"`
+	Video  youkuVideo `json:"video"`
 }
 
 type youkuData struct {
@@ -113,10 +118,6 @@ func genData(youkuData data) map[string]downloader.FormatData {
 
 // Youku download function
 func Youku(url string) downloader.VideoData {
-	html := request.Get(url, youkuReferer)
-	// get the title
-	doc := parser.GetDoc(html)
-	title := parser.Title(doc)
 	vid := utils.MatchOneOf(url, `id_(.+?).html`)[1]
 	youkuData := youkuUps(vid)
 	if youkuData.Data.Error.Code != 0 {
@@ -124,8 +125,10 @@ func Youku(url string) downloader.VideoData {
 	}
 	format := genData(youkuData.Data)
 	data := downloader.VideoData{
-		Site:    "优酷 youku.com",
-		Title:   title,
+		Site: "优酷 youku.com",
+		Title: utils.FileName(
+			fmt.Sprintf("%s %s", youkuData.Data.Video.UserName, youkuData.Data.Video.Title),
+		),
 		Type:    "video",
 		Formats: format,
 	}
