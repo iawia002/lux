@@ -415,6 +415,7 @@ Facebook | <https://facebook.com> | ✓ | | | |
 秒拍 | <https://www.miaopai.com> | ✓ | | | |
 微博 | <https://weibo.com> | ✓ | | | |
 Instagram | <https://www.instagram.com> | ✓ | ✓ | | |
+Twitter | <https://twitter.com> | ✓ | | | |
 
 
 ## Known issues
