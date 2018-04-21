@@ -18,7 +18,7 @@ func TestTwitter(t *testing.T) {
 			args: test.Args{
 				URL:     "https://twitter.com/justinbieber/status/898217160060698624",
 				Title:   "Justin Bieber 898217160060698624",
-				Size:    1733172,
+				Size:    1733736,
 				Quality: "720x1280",
 			},
 		},
