@@ -14,9 +14,10 @@ import (
 )
 
 type args struct {
-	Title string `json:"title"`
-	// Stream string `json:"url_encoded_fmt_stream_map"`
+	Title  string `json:"title"`
 	Stream string `json:"adaptive_fmts"`
+	// not every page has `adaptive_fmts` field https://youtu.be/DNaOZovrSVo
+	Stream2 string `json:"url_encoded_fmt_stream_map"`
 }
 
 type assets struct {
@@ -100,9 +101,8 @@ func youtubeDownload(uri string) downloader.VideoData {
 	var youtube youtubeData
 	json.Unmarshal([]byte(ytplayer), &youtube)
 	title := youtube.Args.Title
-	streams := strings.Split(youtube.Args.Stream, ",")
 
-	format := extractVideoURLS(streams, uri, youtube.Assets.JS)
+	format := extractVideoURLS(youtube, uri)
 
 	extractedData := downloader.VideoData{
 		Site:    "YouTube youtube.com",
@@ -114,7 +114,11 @@ func youtubeDownload(uri string) downloader.VideoData {
 	return extractedData
 }
 
-func extractVideoURLS(streams []string, referer, assest string) map[string]downloader.FormatData {
+func extractVideoURLS(data youtubeData, referer string) map[string]downloader.FormatData {
+	streams := strings.Split(data.Args.Stream, ",")
+	if data.Args.Stream == "" {
+		streams = strings.Split(data.Args.Stream2, ",")
+	}
 	var ext string
 	var audio downloader.URLData
 	format := map[string]downloader.FormatData{}
@@ -133,6 +137,9 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 		}
 
 		quality := stream.Get("quality_label")
+		if quality == "" {
+			quality = stream.Get("quality") // for url_encoded_fmt_stream_map
+		}
 		if quality != "" {
 			quality = fmt.Sprintf("%s %s", quality, streamType)
 		} else {
@@ -144,7 +151,10 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 		} else {
 			ext = utils.MatchOneOf(streamType, `(\w+)/(\w+);`)[2]
 		}
-		realURL := genSignedURL(stream.Get("url"), stream, assest) + "&ratebypass=yes"
+		realURL := genSignedURL(stream.Get("url"), stream, data.Assets.JS)
+		if !strings.Contains(realURL, "ratebypass=yes") {
+			realURL += "&ratebypass=yes"
+		}
 		size := request.Size(realURL, referer)
 		urlData := downloader.URLData{
 			URL:  realURL,
@@ -164,6 +174,10 @@ func extractVideoURLS(streams []string, referer, assest string) map[string]downl
 
 	format["default"] = format[bestQualityItag]
 	delete(format, bestQualityItag)
+
+	if data.Args.Stream == "" {
+		return format
+	}
 
 	// Unlike `url_encoded_fmt_stream_map`, all videos in `adaptive_fmts` have no sound,
 	// we need download video and audio both and then merge them.

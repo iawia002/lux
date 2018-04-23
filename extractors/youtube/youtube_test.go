@@ -51,6 +51,15 @@ func TestYoutube(t *testing.T) {
 			},
 			playlist: true,
 		},
+		{
+			name: "url_encoded_fmt_stream_map test",
+			args: test.Args{
+				URL:     "https://youtu.be/DNaOZovrSVo",
+				Title:   "QNAP Success Story - Scorptec",
+				Size:    16839256,
+				Quality: `hd720 video/mp4; codecs="avc1.64001F, mp4a.40.2"`,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
