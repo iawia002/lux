@@ -13,13 +13,13 @@ func TestDouyin(t *testing.T) {
 		name string
 		args test.Args
 	}{
-		// {
-		// 	name: "normal test",
-		// 	args: test.Args{
-		// 		URL:   "https://www.douyin.com/share/video/6509219899754155272",
-		// 		Title: "好冷  逢考必过",
-		// 	},
-		// },
+		{
+			name: "normal test",
+			args: test.Args{
+				URL:   "https://www.douyin.com/share/video/6509219899754155272",
+				Title: "好冷  逢考必过",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
