@@ -150,6 +150,13 @@ func TestDomain(t *testing.T) {
 			},
 			want: "aa",
 		},
+		{
+			name: "Universal test",
+			args: args{
+				url: "http://aa",
+			},
+			want: "Universal",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

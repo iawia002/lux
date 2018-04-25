@@ -58,8 +58,11 @@ func Domain(url string) string {
 		`(com\.cn|com\.hk|` +
 		`cn|com|net|edu|gov|biz|org|info|pro|name|xxx|xyz|be|` +
 		`me|top|cc|tv|tt)`
-	domain := MatchOneOf(url, domainPattern)[1]
-	return domain
+	domain := MatchOneOf(url, domainPattern)
+	if domain != nil {
+		return domain[1]
+	}
+	return "Universal"
 }
 
 // FileName Converts a string to a valid filename
