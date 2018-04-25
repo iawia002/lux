@@ -175,6 +175,7 @@ func extractVideoURLS(data youtubeData, referer string) map[string]downloader.Fo
 	format["default"] = format[bestQualityItag]
 	delete(format, bestQualityItag)
 
+	// `url_encoded_fmt_stream_map`
 	if data.Args.Stream == "" {
 		return format
 	}

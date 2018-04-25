@@ -3,6 +3,8 @@ package utils
 import (
 	"reflect"
 	"testing"
+
+	"github.com/iawia002/annie/config"
 )
 
 func TestMatchOneOf(t *testing.T) {
@@ -331,6 +333,88 @@ func TestMd5(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Md5(tt.args.text); got != tt.want {
 				t.Errorf("Md5() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPrintVersion(t *testing.T) {
+	PrintVersion()
+}
+
+func TestShouldExtract(t *testing.T) {
+	type args struct {
+		format      string
+		bestQuality string
+	}
+	tests := []struct {
+		name          string
+		args          args
+		want          bool
+		infoOnly      bool
+		extractedData bool
+		format        string
+	}{
+		{
+			name: "InfoOnly test",
+			args: args{
+				format:      "1",
+				bestQuality: "2",
+			},
+			want:     true,
+			infoOnly: true,
+		},
+		{
+			name: "ExtractedData test",
+			args: args{
+				format:      "1",
+				bestQuality: "2",
+			},
+			want:          true,
+			extractedData: true,
+		},
+		{
+			name: "Format test",
+			args: args{
+				format:      "bd",
+				bestQuality: "bd2",
+			},
+			want:   true,
+			format: "bd",
+		},
+		{
+			name: "Format test2",
+			args: args{
+				format:      "bd2",
+				bestQuality: "bd2",
+			},
+			want:   false,
+			format: "bd",
+		},
+		{
+			name: "bestQuality test",
+			args: args{
+				format:      "bd2",
+				bestQuality: "bd2",
+			},
+			want: true,
+		},
+		{
+			name: "bestQuality test2",
+			args: args{
+				format:      "bd",
+				bestQuality: "bd2",
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			config.ExtractedData = tt.extractedData
+			config.InfoOnly = tt.infoOnly
+			config.Format = tt.format
+			if got := ShouldExtract(tt.args.format, tt.args.bestQuality); got != tt.want {
+				t.Errorf("ShouldExtract() = %v, want %v", got, tt.want)
 			}
 		})
 	}
