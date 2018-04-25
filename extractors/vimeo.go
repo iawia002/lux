@@ -45,7 +45,7 @@ func Vimeo(url string) downloader.VideoData {
 		vid = utils.MatchOneOf(url, `vimeo\.com/(\d+)`)[1]
 		html = request.Get("https://player.vimeo.com/video/"+vid, url)
 	}
-	jsonString := utils.MatchOneOf(html, `{var a=(.+?);`)[1]
+	jsonString := utils.MatchOneOf(html, `{var a=({.+?});`)[1]
 	var vimeoData vimeo
 	json.Unmarshal([]byte(jsonString), &vimeoData)
 	format := map[string]downloader.FormatData{}
