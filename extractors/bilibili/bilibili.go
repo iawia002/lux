@@ -30,13 +30,14 @@ const (
 
 const referer = "https://www.bilibili.com"
 
-func genAPI(aid, cid string, bangumi bool, seasonType string) string {
+var utoken string
+
+func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) string {
 	var (
 		baseAPIURL string
 		params     string
 	)
-	utoken := ""
-	if config.Cookie != "" {
+	if config.Cookie != "" && utoken == "" {
 		utoken = request.Get(
 			fmt.Sprintf("%said=%s&cid=%s", bilibiliTokenAPI, aid, cid),
 			referer,
@@ -54,14 +55,14 @@ func genAPI(aid, cid string, bangumi bool, seasonType string) string {
 		// qn=0 flag makes the CDN address different every time
 		// quality=116(1080P 60) is the highest quality so far
 		params = fmt.Sprintf(
-			"appkey=%s&cid=%s&module=bangumi&otype=json&qn=116&quality=116&season_type=%s&type=",
-			appKey, cid, seasonType,
+			"appkey=%s&cid=%s&module=bangumi&otype=json&qn=%s&quality=%s&season_type=%s&type=",
+			appKey, cid, quality, quality, seasonType,
 		)
 		baseAPIURL = bilibiliBangumiAPI
 	} else {
 		params = fmt.Sprintf(
-			"appkey=%s&cid=%s&otype=json&qn=116&quality=116&type=",
-			appKey, cid,
+			"appkey=%s&cid=%s&otype=json&qn=%s&quality=%s&type=",
+			appKey, cid, quality, quality,
 		)
 		baseAPIURL = bilibiliAPI
 	}
@@ -201,25 +202,35 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 	if options.Bangumi {
 		seasonType = utils.MatchOneOf(html, `"season_type":(\d+)`)[1]
 	}
-	api := genAPI(aid, cid, options.Bangumi, seasonType)
-	apiData := request.Get(api, referer)
-	var dataDict bilibiliData
-	json.Unmarshal([]byte(apiData), &dataDict)
+
+	format := map[string]downloader.FormatData{}
+	var defaultQuality string
+	for _, q := range []string{"15", "32", "64", "80", "112", "74", "116"} {
+		apiURL := genAPI(aid, cid, options.Bangumi, q, seasonType)
+		jsonString := request.Get(apiURL, referer)
+		var data bilibiliData
+		json.Unmarshal([]byte(jsonString), &data)
+
+		if _, ok := format[strconv.Itoa(data.Quality)]; ok {
+			continue
+		}
+
+		urls, size := genURL(data.DURL)
+		format[q] = downloader.FormatData{
+			URLs:    urls,
+			Size:    size,
+			Quality: quality[data.Quality],
+		}
+		defaultQuality = q // last one is the best quality
+	}
+	format["default"] = format[defaultQuality]
+	delete(format, defaultQuality)
 
 	// get the title
 	doc := parser.GetDoc(html)
 	title := parser.Title(doc)
 	if options.Subtitle != "" {
 		title = fmt.Sprintf("%s %s", title, options.Subtitle)
-	}
-
-	urls, size := genURL(dataDict.DURL)
-	format := map[string]downloader.FormatData{
-		"default": {
-			URLs:    urls,
-			Size:    size,
-			Quality: quality[dataDict.Quality],
-		},
 	}
 	extractedData := downloader.VideoData{
 		Site:    "哔哩哔哩 bilibili.com",
