@@ -1,13 +1,15 @@
 project_name: annie
 builds:
 - env:
-  - CGO_ENABLED=0
+    - CGO_ENABLED=0
   binary: annie
   goos:
     - windows
     - darwin
     - linux
     - freebsd
+    - openbsd
+    - netbsd
   goarch:
     - 386
     - amd64
@@ -17,10 +19,13 @@ builds:
     - goos: freebsd
       goarch: arm
       goarm: 6
-  hooks:
+    - goos: openbsd
+      goarch: arm
+      goarm: 6
+  # hooks:
     # Please install upx first, https://github.com/upx/upx/releases
     # post: compress.bat
-    post: ./compress.sh
+    # post: ./compress.sh
 env_files:
   github_token: ./github_token
 changelog:
@@ -34,12 +39,12 @@ changelog:
 archive:
   name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}'
   format: tar.gz
-  files:
-    - none*
-  wrap_in_directory: false
   format_overrides:
     - goos: windows
       format: zip
+  files:
+    - none*
+  wrap_in_directory: false
   replacements:
     amd64: 64-bit
     386: 32-bit
@@ -51,3 +56,5 @@ archive:
     openbsd: OpenBSD
     netbsd: NetBSD
     freebsd: FreeBSD
+release:
+  draft: true
