@@ -25,7 +25,7 @@ var (
 	OutputName string
 	// ExtractedData print extracted data
 	ExtractedData bool
-	// The number of download thread
+	// ThreadNumber the number of download thread
 	ThreadNumber int
 )
 
