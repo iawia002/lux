@@ -6,7 +6,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/iawia002/annie?style=flat-square)](https://goreportcard.com/report/github.com/iawia002/annie)
 [![GitHub release](https://img.shields.io/github/release/iawia002/annie.svg?style=flat-square)](https://github.com/iawia002/annie/releases)
 ![homebrew](https://img.shields.io/homebrew/v/annie.svg?style=flat-square)
-[![](https://img.shields.io/badge/telegram-join%20chat-green.svg?longCache=true&style=flat-square)](https://t.me/anniedev)
+[![](https://img.shields.io/badge/telegram-join%20chat-0088cc.svg?longCache=true&style=flat-square)](https://t.me/anniedev)
 
 
 👾 Annie is a fast, simple and clean video downloader built with Go.
