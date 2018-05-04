@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/extractors"
@@ -27,6 +29,7 @@ func init() {
 	flag.StringVar(&config.OutputName, "O", "", "Specify the output file name")
 	flag.BoolVar(&config.ExtractedData, "j", false, "Print extracted data")
 	flag.IntVar(&config.ThreadNumber, "n", 10, "The number of download thread")
+	flag.StringVar(&config.File, "F", "", "URLs file")
 }
 
 func download(videoURL string) {
@@ -93,6 +96,20 @@ func main() {
 	}
 	if config.Debug {
 		utils.PrintVersion()
+	}
+	if config.File != "" {
+		file, err := os.Open(config.File)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			if scanner.Text() == "" {
+				continue
+			}
+			args = append(args, scanner.Text())
+		}
 	}
 	if len(args) < 1 {
 		fmt.Println("Too few arguments")

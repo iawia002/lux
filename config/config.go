@@ -27,6 +27,8 @@ var (
 	ExtractedData bool
 	// ThreadNumber the number of download thread
 	ThreadNumber int
+	// File URLs file
+	File string
 )
 
 // FakeHeaders fake http headers

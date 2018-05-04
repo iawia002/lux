@@ -198,6 +198,24 @@ $ annie -i https://www.bilibili.com/video/av21877586 https://www.bilibili.com/vi
 
 These URLs will be downloaded one by one.
 
+You can also use the `-F` option to read URLs from file:
+
+```console
+$ annie -F ~/Desktop/u.txt
+
+ Site:      微博 weibo.com
+ Title:     在Google，我们设计什么？ via@阑夕
+ Type:      video
+ Stream:
+     [default]  -------------------
+     Size:            19.19 MiB (20118196 Bytes)
+     # download with: annie -f default "URL"
+
+ 19.19 MiB / 19.19 MiB [=================================] 100.00% 9.69 MiB/s 1s
+
+......
+```
+
 ### Resume a download
 
 <kbd>Ctrl</kbd>+<kbd>C</kbd> interrupts a download.
@@ -372,6 +390,8 @@ $ annie -j https://www.bilibili.com/video/av20203945
 $ annie -h
 
 Usage of annie:
+  -F string
+    	URLs file
   -O string
     	Specify the output file name
   -c string
@@ -382,7 +402,7 @@ Usage of annie:
   -i	Information only
   -j	Print extracted data
   -n int
-        The number of download thread (default 10)
+    	The number of download thread (default 10)
   -o string
     	Specify the output path
   -p	Download playlist
