@@ -60,6 +60,7 @@ func (data FormatData) urlSave(
 ) {
 	filePath := utils.FilePath(fileName, urlData.Ext, false)
 	fileSize, exists := utils.FileSize(filePath)
+	// Skip segment file
 	// TODO: Live video URLs will not return the size
 	if fileSize == urlData.Size {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
@@ -185,6 +186,14 @@ func (v VideoData) Download(refer string) {
 	}
 	v.printInfo(format)
 	if config.InfoOnly {
+		return
+	}
+	// Skip the complete file that has been merged
+	mergedFilePath := utils.FilePath(title, "mp4", false)
+	_, mergedFileExists := utils.FileSize(mergedFilePath)
+	// After the merge, the file size has changed, so we do not check whether the size matches
+	if mergedFileExists {
+		fmt.Printf("%s: file already exists, skipping\n", mergedFilePath)
 		return
 	}
 	bar := pb.New64(data.Size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
