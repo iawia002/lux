@@ -106,8 +106,9 @@ func Iqiyi(url string) downloader.VideoData {
 			size, _ = strconv.ParseInt(
 				utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,
 			)
+			// http://dx.data.video.qiyi.com -> http://data.video.qiyi.com
 			urlData = downloader.URLData{
-				URL:  ts,
+				URL:  strings.Replace(ts, "dx.data.video.qiyi.com", "data.video.qiyi.com", 1),
 				Size: size,
 				Ext:  "ts",
 			}
