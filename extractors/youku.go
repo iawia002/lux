@@ -70,7 +70,7 @@ func youkuUps(vid string) youkuData {
 		// data must be emptied before reassignment, otherwise it will contain the previous value(the 'error' data)
 		data = youkuData{}
 		json.Unmarshal([]byte(html), &data)
-		if data.Data.Error.Code != -6004 {
+		if data.Data.Error == (errorData{}) {
 			return data
 		}
 	}
