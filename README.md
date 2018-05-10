@@ -2,7 +2,7 @@
 
 
 [![Codecov](https://img.shields.io/codecov/c/github/iawia002/annie.svg?style=flat-square)](https://codecov.io/gh/iawia002/annie)
-[![Build Status](https://img.shields.io/travis/iawia002/annie.svg?style=flat-square)](https://travis-ci.org/iawia002/annie)
+[![Build Status](https://img.shields.io/travis/iawia002/annie.svg?style=flat-square)](https://travis-ci.com/iawia002/annie)
 [![Go Report Card](https://goreportcard.com/badge/github.com/iawia002/annie?style=flat-square)](https://goreportcard.com/report/github.com/iawia002/annie)
 [![GitHub release](https://img.shields.io/github/release/iawia002/annie.svg?style=flat-square)](https://github.com/iawia002/annie/releases)
 ![homebrew](https://img.shields.io/homebrew/v/annie.svg?style=flat-square)
