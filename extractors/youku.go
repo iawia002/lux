@@ -32,14 +32,18 @@ type stream struct {
 }
 
 type youkuVideo struct {
-	Title    string `json:"title"`
-	UserName string `json:"username"`
+	Title string `json:"title"`
+}
+
+type youkuShow struct {
+	Title string `json:"title"`
 }
 
 type data struct {
 	Error  errorData  `json:"error"`
 	Stream []stream   `json:"stream"`
 	Video  youkuVideo `json:"video"`
+	Show   youkuShow  `json:"show"`
 }
 
 type youkuData struct {
@@ -124,11 +128,15 @@ func Youku(url string) downloader.VideoData {
 		log.Fatal(youkuData.Data.Error.Note)
 	}
 	format := genData(youkuData.Data)
+	var title string
+	if youkuData.Data.Show.Title == "" {
+		title = youkuData.Data.Video.Title
+	} else {
+		title = fmt.Sprintf("%s %s", youkuData.Data.Show.Title, youkuData.Data.Video.Title)
+	}
 	data := downloader.VideoData{
-		Site: "优酷 youku.com",
-		Title: utils.FileName(
-			fmt.Sprintf("%s %s", youkuData.Data.Video.UserName, youkuData.Data.Video.Title),
-		),
+		Site:    "优酷 youku.com",
+		Title:   utils.FileName(title),
 		Type:    "video",
 		Formats: format,
 	}
