@@ -234,7 +234,7 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 	}
 	extractedData := downloader.VideoData{
 		Site:    "哔哩哔哩 bilibili.com",
-		Title:   title,
+		Title:   utils.FileName(title),
 		Type:    "video",
 		Formats: format,
 	}
