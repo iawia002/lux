@@ -67,7 +67,7 @@ func Domain(url string) string {
 
 // FileName Converts a string to a valid filename
 func FileName(name string) string {
-	rep := strings.NewReplacer("\n", " ", "/", " ", "|", "-", ": ", "：", ":", "：")
+	rep := strings.NewReplacer("\n", " ", "/", " ", "|", "-", ": ", "：", ":", "：", "'", "’")
 	name = rep.Replace(name)
 	if runtime.GOOS == "windows" {
 		rep = strings.NewReplacer("\"", " ", "?", " ", "*", " ", "\\", " ", "<", " ", ">", " ")
