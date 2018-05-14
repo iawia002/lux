@@ -52,7 +52,9 @@ type youkuData struct {
 
 const youkuReferer = "https://v.youku.com"
 
-var ccodes = []string{"0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
+// var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
+
+var ccodes = []string{"0510"}
 
 func youkuUps(vid string) youkuData {
 	var url string
