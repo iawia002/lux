@@ -52,6 +52,9 @@ type youkuData struct {
 
 const youkuReferer = "https://v.youku.com"
 
+// http://g.alicdn.com/player/ykplayer/0.5.28/youku-player.min.js
+// {"0505":"interior","050F":"interior","0501":"interior","0502":"interior","0503":"interior","0510":"adshow","0512":"BDskin","0590":"BDskin"}
+
 // var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
 
 var ccodes = []string{"0510"}
