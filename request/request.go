@@ -2,6 +2,7 @@ package request
 
 import (
 	"compress/gzip"
+	"compress/zlib"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -123,13 +124,17 @@ func Get(url, refer string) string {
 		headers["Referer"] = refer
 	}
 	res := Request("GET", url, nil, headers)
-	defer res.Body.Close()
 	var reader io.ReadCloser
-	if res.Header.Get("Content-Encoding") == "gzip" {
+	switch res.Header.Get("Content-Encoding") {
+	case "gzip":
 		reader, _ = gzip.NewReader(res.Body)
-	} else {
+	case "deflate":
+		reader, _ = zlib.NewReader(res.Body)
+	default:
 		reader = res.Body
 	}
+	defer res.Body.Close()
+	defer reader.Close()
 	body, _ := ioutil.ReadAll(reader)
 	return string(body)
 }
@@ -140,7 +145,6 @@ func Headers(url, refer string) http.Header {
 		"Referer": refer,
 	}
 	res := Request("GET", url, nil, headers)
-	defer res.Body.Close()
 	return res.Header
 }
 
