@@ -179,6 +179,7 @@ func (v VideoData) Download(refer string) {
 	}
 	data, ok := v.Formats[format]
 	if !ok {
+		log.Println(v)
 		log.Fatal("No format named " + format)
 	}
 	if data.Size == 0 {
