@@ -115,7 +115,7 @@ func (data FormatData) urlSave(
 	// So don't worry about memory.
 	_, copyErr := io.Copy(writer, res.Body)
 	if copyErr != nil {
-		log.Fatal(fmt.Sprintf("Error while downloading: %s, %s", urlData.URL, copyErr))
+		log.Fatal(fmt.Sprintf("file copy error: %s", copyErr))
 	}
 }
 
