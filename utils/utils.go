@@ -17,6 +17,9 @@ import (
 	"github.com/iawia002/annie/request"
 )
 
+// MAXLENGTH Maximum length of file name
+const MAXLENGTH = 80
+
 // MatchOneOf match one of the patterns
 func MatchOneOf(text string, patterns ...string) []string {
 	var (
@@ -47,7 +50,10 @@ func MatchAll(text, pattern string) [][]string {
 func FileSize(filePath string) (int64, bool) {
 	file, err := os.Stat(filePath)
 	if err != nil {
-		return 0, false
+		if os.IsNotExist(err) {
+			return 0, false
+		}
+		log.Fatal(err)
 	}
 	return file.Size(), true
 }
@@ -65,6 +71,16 @@ func Domain(url string) string {
 	return "Universal"
 }
 
+// LimitLength Handle overly long strings
+func LimitLength(s string, length int) string {
+	const ELLIPSES = "..."
+	str := []rune(s)
+	if len(str) > length {
+		return string(str[:length-len(ELLIPSES)]) + ELLIPSES
+	}
+	return s
+}
+
 // FileName Converts a string to a valid filename
 func FileName(name string) string {
 	rep := strings.NewReplacer("\n", " ", "/", " ", "|", "-", ": ", "：", ":", "：", "'", "’")
@@ -73,7 +89,7 @@ func FileName(name string) string {
 		rep = strings.NewReplacer("\"", " ", "?", " ", "*", " ", "\\", " ", "<", " ", ">", " ")
 		name = rep.Replace(name)
 	}
-	return name
+	return LimitLength(name, MAXLENGTH)
 }
 
 // FilePath gen valid file path

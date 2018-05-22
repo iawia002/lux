@@ -95,6 +95,7 @@ func genURL(durl []dURLData) ([]downloader.URLData, int64) {
 
 type bilibiliOptions struct {
 	Bangumi  bool
+	P        int
 	Subtitle string
 	Aid      string
 	Cid      string
@@ -136,6 +137,7 @@ func Download(url string) {
 				// https://www.bilibili.com/video/av20827366/?p=2
 				p, _ = strconv.Atoi(pageString[1])
 			}
+			options.P = p
 			page := data.VideoData.Pages[p-1]
 			options.Aid = data.Aid
 			options.Cid = strconv.Itoa(page.Cid)
@@ -171,6 +173,7 @@ func Download(url string) {
 			options.Aid = data.Aid
 			options.Cid = strconv.Itoa(u.Cid)
 			options.Subtitle = u.Part
+			options.P = u.Page
 			bilibiliDownload(url, options)
 		}
 	}
@@ -230,7 +233,11 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 	doc := parser.GetDoc(html)
 	title := parser.Title(doc)
 	if options.Subtitle != "" {
-		title = fmt.Sprintf("%s %s", title, options.Subtitle)
+		tempTitle := fmt.Sprintf("%s %s", title, options.Subtitle)
+		if len([]rune(tempTitle)) > utils.MAXLENGTH {
+			tempTitle = fmt.Sprintf("%s P%d %s", title, options.P, options.Subtitle)
+		}
+		title = tempTitle
 	}
 	extractedData := downloader.VideoData{
 		Site:    "哔哩哔哩 bilibili.com",
