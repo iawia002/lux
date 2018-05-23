@@ -145,7 +145,7 @@ func Md5(text string) string {
 
 // M3u8URLs get all urls from m3u8 url
 func M3u8URLs(uri string) []string {
-	html := request.Get(uri, "")
+	html := request.Get(uri, "", nil)
 	lines := strings.Split(html, "\n")
 	var urls []string
 	for _, line := range lines {
@@ -188,4 +188,13 @@ func ShouldExtract(format, bestQuality string) bool {
 		return false
 	}
 	return true
+}
+
+// Reverse Reverse a string
+func Reverse(s string) string {
+	runes := []rune(s)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
+	}
+	return string(runes)
 }

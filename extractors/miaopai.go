@@ -9,7 +9,7 @@ import (
 
 // Miaopai download function
 func Miaopai(url string) downloader.VideoData {
-	html := request.Get(url, url)
+	html := request.Get(url, url, nil)
 	doc := parser.GetDoc(html)
 	title := parser.Title(doc)
 

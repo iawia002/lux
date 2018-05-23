@@ -8,7 +8,7 @@ import (
 
 // Pixivision download function
 func Pixivision(url string) downloader.VideoData {
-	html := request.Get(url, url)
+	html := request.Get(url, url, nil)
 	title, urls := parser.GetImages(url, html, "am__work__illust  ", nil)
 	format := map[string]downloader.FormatData{
 		"default": {

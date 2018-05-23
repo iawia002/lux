@@ -40,10 +40,10 @@ func Vimeo(url string) downloader.VideoData {
 	var html string
 	var vid string
 	if strings.Contains(url, "player.vimeo.com") {
-		html = request.Get(url, url)
+		html = request.Get(url, url, nil)
 	} else {
 		vid = utils.MatchOneOf(url, `vimeo\.com/(\d+)`)[1]
-		html = request.Get("https://player.vimeo.com/video/"+vid, url)
+		html = request.Get("https://player.vimeo.com/video/"+vid, url, nil)
 	}
 	jsonString := utils.MatchOneOf(html, `{var a=({.+?});`)[1]
 	var vimeoData vimeo

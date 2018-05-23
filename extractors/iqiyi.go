@@ -53,6 +53,7 @@ func getIqiyiData(tvid, vid string) iqiyi {
 			tvid, vid, t, sc, src,
 		),
 		iqiyiReferer,
+		nil,
 	)
 	var data iqiyi
 	json.Unmarshal([]byte(info[len("var tvInfoJs="):]), &data)
@@ -61,7 +62,7 @@ func getIqiyiData(tvid, vid string) iqiyi {
 
 // Iqiyi download function
 func Iqiyi(url string) downloader.VideoData {
-	html := request.Get(url, iqiyiReferer)
+	html := request.Get(url, iqiyiReferer, nil)
 	tvid := utils.MatchOneOf(
 		url,
 		`#curid=(.+)_`,

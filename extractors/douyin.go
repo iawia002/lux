@@ -23,7 +23,7 @@ type douyinData struct {
 
 // Douyin download function
 func Douyin(url string) downloader.VideoData {
-	html := request.Get(url, url)
+	html := request.Get(url, url, nil)
 	vData := utils.MatchOneOf(html, `var data = \[(.*?)\];`)[1]
 	var dataDict douyinData
 	json.Unmarshal([]byte(vData), &dataDict)
