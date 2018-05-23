@@ -41,6 +41,7 @@ func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) st
 		utoken = request.Get(
 			fmt.Sprintf("%said=%s&cid=%s", bilibiliTokenAPI, aid, cid),
 			referer,
+			nil,
 		)
 		var t token
 		json.Unmarshal([]byte(utoken), &t)
@@ -120,7 +121,7 @@ func Download(url string) {
 	if strings.Contains(url, "bangumi") {
 		options.Bangumi = true
 	}
-	html := request.Get(url, referer)
+	html := request.Get(url, referer, nil)
 	if !config.Playlist {
 		options.HTML = html
 		data, err := getMultiPageData(html)
@@ -187,7 +188,7 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 		// reuse html string, but this can't be reused in case of playlist
 		html = options.HTML
 	} else {
-		html = request.Get(url, referer)
+		html = request.Get(url, referer, nil)
 	}
 	if options.Aid != "" && options.Cid != "" {
 		aid = options.Aid
@@ -210,7 +211,7 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 	var defaultQuality string
 	for _, q := range []string{"15", "32", "64", "80", "112", "74", "116"} {
 		apiURL := genAPI(aid, cid, options.Bangumi, q, seasonType)
-		jsonString := request.Get(apiURL, referer)
+		jsonString := request.Get(apiURL, referer, nil)
 		var data bilibiliData
 		json.Unmarshal([]byte(jsonString), &data)
 

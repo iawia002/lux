@@ -14,7 +14,7 @@ func Weibo(url string) downloader.VideoData {
 		statusID := utils.MatchOneOf(url, `weibo\.com/tv/v/([^\?/]+)`)[1]
 		url = "https://m.weibo.cn/status/" + statusID
 	}
-	html := request.Get(url, url)
+	html := request.Get(url, url, nil)
 	title := utils.MatchOneOf(html, `"content2": "(.+?)",`)[1]
 	realURL := utils.MatchOneOf(
 		html, `"stream_url_hd": "(.+?)"`, `"stream_url": "(.+?)"`,

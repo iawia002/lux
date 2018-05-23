@@ -1,7 +1,8 @@
 package extractors
 
 import (
-	"encoding/json"
+	// "encoding/json"
+	"strings"
 
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/request"
@@ -23,12 +24,10 @@ type douyinData struct {
 
 // Douyin download function
 func Douyin(url string) downloader.VideoData {
-	html := request.Get(url, url)
-	vData := utils.MatchOneOf(html, `var data = \[(.*?)\];`)[1]
-	var dataDict douyinData
-	json.Unmarshal([]byte(vData), &dataDict)
-
-	realURL := dataDict.Video.PlayAddr.URLList[0]
+	html := request.Get(url, url, nil)
+	title := utils.MatchOneOf(html, `<p class="desc">(.+?)</p>`)[1]
+	realURL := utils.MatchOneOf(html, `playAddr: "(.+?)"`)[1]
+	realURL = strings.Replace(realURL, "/playwm/", "/play/", 1)
 	size := request.Size(realURL, url)
 	urlData := downloader.URLData{
 		URL:  realURL,
@@ -43,7 +42,7 @@ func Douyin(url string) downloader.VideoData {
 	}
 	extractedData := downloader.VideoData{
 		Site:    "抖音 douyin.com",
-		Title:   utils.FileName(dataDict.Desc),
+		Title:   utils.FileName(title),
 		Type:    "video",
 		Formats: format,
 	}

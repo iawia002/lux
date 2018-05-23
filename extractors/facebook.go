@@ -10,7 +10,7 @@ import (
 
 // Facebook download function
 func Facebook(url string) downloader.VideoData {
-	html := request.Get(url, url)
+	html := request.Get(url, url, nil)
 	title := utils.MatchOneOf(html, `<title id="pageTitle">(.+)</title>`)[1]
 
 	format := map[string]downloader.FormatData{}

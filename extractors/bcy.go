@@ -8,7 +8,7 @@ import (
 
 // Bcy download function
 func Bcy(url string) downloader.VideoData {
-	html := request.Get(url, url)
+	html := request.Get(url, url, nil)
 	title, urls := parser.GetImages(
 		url, html, "detail_std detail_clickable", func(u string) string {
 			// https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg/w650

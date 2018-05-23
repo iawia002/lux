@@ -14,7 +14,7 @@ func TestTumblr(t *testing.T) {
 		args test.Args
 	}{
 		{
-			name: "image test",
+			name: "image test 1",
 			args: test.Args{
 				URL:   "http://fuckyeah-fx.tumblr.com/post/170392654141/180202-%E5%AE%8B%E8%8C%9C",
 				Title: "f(x)",
@@ -22,7 +22,7 @@ func TestTumblr(t *testing.T) {
 			},
 		},
 		{
-			name: "image test",
+			name: "image test 2",
 			args: test.Args{
 				URL:   "http://therealautoblog.tumblr.com/post/171623222197/paganis-new-projects-huayra-successor-with",
 				Title: "Autoblog • Pagani’s new projects：Huayra successor with...",
@@ -30,7 +30,7 @@ func TestTumblr(t *testing.T) {
 			},
 		},
 		{
-			name: "image test",
+			name: "image test 3",
 			args: test.Args{
 				URL:   "https://outdoorspastelnature.tumblr.com/post/170380315768/feel-at-peace",
 				Title: "Pastel Nature",
@@ -40,9 +40,9 @@ func TestTumblr(t *testing.T) {
 		{
 			name: "video test",
 			args: test.Args{
-				URL:   "https://vernot-today.tumblr.com/post/171963191024/ten-aint-playin-around-anymore",
-				Title: "Some Random K-Pop Blog",
-				Size:  5758939,
+				URL:   "https://boomgoestheprower.tumblr.com/post/174127507696",
+				Title: "See, that’s what the app is perfect for.",
+				Size:  1570028,
 			},
 		},
 	}

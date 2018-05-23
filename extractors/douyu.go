@@ -47,11 +47,11 @@ func Douyu(url string) downloader.VideoData {
 		log.Fatal("暂不支持斗鱼直播")
 	}
 
-	html := request.Get(url, url)
+	html := request.Get(url, url, nil)
 	title := utils.MatchOneOf(html, `<title>(.*?)</title>`)[1]
 
 	vid := utils.MatchOneOf(url, `https?://v.douyu.com/show/(\S+)`)[1]
-	dataString := request.Get("http://vmobile.douyu.com/video/getInfo?vid="+vid, url)
+	dataString := request.Get("http://vmobile.douyu.com/video/getInfo?vid="+vid, url, nil)
 	var dataDict douyuData
 	json.Unmarshal([]byte(dataString), &dataDict)
 

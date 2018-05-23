@@ -64,6 +64,9 @@ func Request(
 		req.Header.Set(k, v)
 	}
 	req.Header.Set("Referer", url)
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
 	if config.Cookie != "" {
 		var cookie string
 		if _, fileErr := os.Stat(config.Cookie); fileErr == nil {
@@ -75,9 +78,6 @@ func Request(
 			cookie = config.Cookie
 		}
 		req.Header.Set("Cookie", cookie)
-	}
-	for k, v := range headers {
-		req.Header.Set(k, v)
 	}
 	if config.Refer != "" {
 		req.Header.Set("Referer", config.Refer)
@@ -118,8 +118,10 @@ func Request(
 }
 
 // Get get request
-func Get(url, refer string) string {
-	headers := map[string]string{}
+func Get(url, refer string, headers map[string]string) string {
+	if headers == nil {
+		headers = map[string]string{}
+	}
 	if refer != "" {
 		headers["Referer"] = refer
 	}

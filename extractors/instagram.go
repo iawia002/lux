@@ -45,7 +45,7 @@ type instagram struct {
 
 // Instagram download function
 func Instagram(url string) downloader.VideoData {
-	html := request.Get(url, url)
+	html := request.Get(url, url, nil)
 	// get the title
 	doc := parser.GetDoc(html)
 	title := parser.Title(doc)

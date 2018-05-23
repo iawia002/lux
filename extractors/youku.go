@@ -75,7 +75,7 @@ func youkuUps(vid string) youkuData {
 			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s&ckey=%s",
 			vid, ccode, time.Now().Unix()/1000, netURL.QueryEscape(utid), netURL.QueryEscape(ckey),
 		)
-		html = request.Get(url, youkuReferer)
+		html = request.Get(url, youkuReferer, nil)
 		// data must be emptied before reassignment, otherwise it will contain the previous value(the 'error' data)
 		data = youkuData{}
 		json.Unmarshal([]byte(html), &data)

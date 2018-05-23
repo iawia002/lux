@@ -469,3 +469,29 @@ func TestShouldExtract(t *testing.T) {
 		})
 	}
 }
+
+func TestReverse(t *testing.T) {
+	type args struct {
+		text string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "normal test",
+			args: args{
+				text: "123456",
+			},
+			want: "654321",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Reverse(tt.args.text); got != tt.want {
+				t.Errorf("Reverse() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

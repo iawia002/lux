@@ -37,7 +37,7 @@ func getSig(sig, js string) string {
 	url := fmt.Sprintf("https://www.youtube.com%s", js)
 	tokens, ok := tokensCache[url]
 	if !ok {
-		tokens = getSigTokens(request.Get(url, referer))
+		tokens = getSigTokens(request.Get(url, referer, nil))
 		tokensCache[url] = tokens
 	}
 	return decipherTokens(tokens, sig)
@@ -70,7 +70,7 @@ func Download(uri string) {
 	if listID == "" {
 		log.Fatal("Can't get list ID from URL")
 	}
-	html := request.Get("https://www.youtube.com/playlist?list="+listID, referer)
+	html := request.Get("https://www.youtube.com/playlist?list="+listID, referer, nil)
 	// "videoId":"OQxX8zgyzuM","thumbnail"
 	videoIDs := utils.MatchAll(html, `"videoId":"([^,]+?)","thumbnail"`)
 	for _, videoID := range videoIDs {
@@ -96,7 +96,7 @@ func youtubeDownload(uri string) downloader.VideoData {
 		"https://www.youtube.com/watch?v=%s&gl=US&hl=en&has_verified=1&bpctr=9999999999",
 		vid[1],
 	)
-	html := request.Get(videoURL, referer)
+	html := request.Get(videoURL, referer, nil)
 	ytplayer := utils.MatchOneOf(html, `;ytplayer\.config\s*=\s*({.+?});`)[1]
 	var youtube youtubeData
 	json.Unmarshal([]byte(ytplayer), &youtube)

@@ -36,7 +36,7 @@ func getVideoURI(uri string) twitter {
 	// extract tweet id from url
 	tweetID := utils.MatchOneOf(uri, `(status|statuses)/(\d+)`)[2]
 	webPlayerURL := prefix + tweetID
-	h := request.Get(webPlayerURL, uri)
+	h := request.Get(webPlayerURL, uri, nil)
 	// get dataconfig attribute
 	jsonString := html.UnescapeString(utils.MatchOneOf(h, `data-config="({.+})`)[1])
 	var twitterData twitter
