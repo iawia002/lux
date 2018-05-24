@@ -119,6 +119,16 @@ func StringInSlice(str string, list []string) bool {
 	return false
 }
 
+// IntInSlice if a number is in the list
+func IntInSlice(i int, list []int) bool {
+	for _, a := range list {
+		if a == i {
+			return true
+		}
+	}
+	return false
+}
+
 // GetNameAndExt return the name and ext of the URL
 // https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg ->
 // 1f5a87801a0711e898b12b640777720f, jpg
@@ -174,22 +184,6 @@ func PrintVersion() {
 	)
 }
 
-// ShouldExtract returns true, if we need to extract this format
-func ShouldExtract(format, bestQuality string) bool {
-	extractAll := config.InfoOnly || config.ExtractedData
-	if extractAll {
-		return true
-	}
-	if config.Format != "" {
-		if format != config.Format {
-			return false
-		}
-	} else if format != bestQuality {
-		return false
-	}
-	return true
-}
-
 // Reverse Reverse a string
 func Reverse(s string) string {
 	runes := []rune(s)
@@ -197,4 +191,13 @@ func Reverse(s string) string {
 		runes[i], runes[j] = runes[j], runes[i]
 	}
 	return string(runes)
+}
+
+// Range generate a sequence of numbers by range
+func Range(min, max int) []int {
+	items := make([]int, max-min+1)
+	for index := range items {
+		items[index] = min + index
+	}
+	return items
 }

@@ -73,7 +73,11 @@ func Download(uri string) {
 	html := request.Get("https://www.youtube.com/playlist?list="+listID, referer, nil)
 	// "videoId":"OQxX8zgyzuM","thumbnail"
 	videoIDs := utils.MatchAll(html, `"videoId":"([^,]+?)","thumbnail"`)
-	for _, videoID := range videoIDs {
+	needDownloadItems := utils.NeedDownloadList(len(videoIDs))
+	for index, videoID := range videoIDs {
+		if !utils.IntInSlice(index+1, needDownloadItems) {
+			continue
+		}
 		u := fmt.Sprintf(
 			"https://www.youtube.com/watch?v=%s&list=%s", videoID[1], listID,
 		)

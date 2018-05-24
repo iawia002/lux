@@ -156,7 +156,11 @@ func Download(url string) {
 		dataString := utils.MatchOneOf(html, `window.__INITIAL_STATE__=(.+?);`)[1]
 		var data bangumiData
 		json.Unmarshal([]byte(dataString), &data)
-		for _, u := range data.EpList {
+		needDownloadItems := utils.NeedDownloadList(len(data.EpList))
+		for index, u := range data.EpList {
+			if !utils.IntInSlice(index+1, needDownloadItems) {
+				continue
+			}
 			bilibiliDownload(
 				fmt.Sprintf("https://www.bilibili.com/bangumi/play/ep%d", u.EpID), options,
 			)
@@ -170,7 +174,11 @@ func Download(url string) {
 			return
 		}
 		// https://www.bilibili.com/video/av20827366/?p=1
-		for _, u := range data.VideoData.Pages {
+		needDownloadItems := utils.NeedDownloadList(len(data.VideoData.Pages))
+		for index, u := range data.VideoData.Pages {
+			if !utils.IntInSlice(index+1, needDownloadItems) {
+				continue
+			}
 			options.Aid = data.Aid
 			options.Cid = strconv.Itoa(u.Cid)
 			options.Subtitle = u.Part

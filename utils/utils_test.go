@@ -3,8 +3,6 @@ package utils
 import (
 	"reflect"
 	"testing"
-
-	"github.com/iawia002/annie/config"
 )
 
 func TestMatchOneOf(t *testing.T) {
@@ -322,6 +320,42 @@ func TestStringInSlice(t *testing.T) {
 	}
 }
 
+func TestIntInSlice(t *testing.T) {
+	type args struct {
+		i    int
+		list []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "normal test",
+			args: args{
+				i:    1,
+				list: []int{1, 2},
+			},
+			want: true,
+		},
+		{
+			name: "normal test",
+			args: args{
+				i:    1,
+				list: []int{2, 3},
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IntInSlice(tt.args.i, tt.args.list); got != tt.want {
+				t.Errorf("IntInSlice() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestGetNameAndExt(t *testing.T) {
 	type args struct {
 		uri string
@@ -392,84 +426,6 @@ func TestPrintVersion(t *testing.T) {
 	PrintVersion()
 }
 
-func TestShouldExtract(t *testing.T) {
-	type args struct {
-		format      string
-		bestQuality string
-	}
-	tests := []struct {
-		name          string
-		args          args
-		want          bool
-		infoOnly      bool
-		extractedData bool
-		format        string
-	}{
-		{
-			name: "InfoOnly test",
-			args: args{
-				format:      "1",
-				bestQuality: "2",
-			},
-			want:     true,
-			infoOnly: true,
-		},
-		{
-			name: "ExtractedData test",
-			args: args{
-				format:      "1",
-				bestQuality: "2",
-			},
-			want:          true,
-			extractedData: true,
-		},
-		{
-			name: "Format test",
-			args: args{
-				format:      "bd",
-				bestQuality: "bd2",
-			},
-			want:   true,
-			format: "bd",
-		},
-		{
-			name: "Format test2",
-			args: args{
-				format:      "bd2",
-				bestQuality: "bd2",
-			},
-			want:   false,
-			format: "bd",
-		},
-		{
-			name: "bestQuality test",
-			args: args{
-				format:      "bd2",
-				bestQuality: "bd2",
-			},
-			want: true,
-		},
-		{
-			name: "bestQuality test2",
-			args: args{
-				format:      "bd",
-				bestQuality: "bd2",
-			},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			config.ExtractedData = tt.extractedData
-			config.InfoOnly = tt.infoOnly
-			config.Format = tt.format
-			if got := ShouldExtract(tt.args.format, tt.args.bestQuality); got != tt.want {
-				t.Errorf("ShouldExtract() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestReverse(t *testing.T) {
 	type args struct {
 		text string
@@ -491,6 +447,42 @@ func TestReverse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Reverse(tt.args.text); got != tt.want {
 				t.Errorf("Reverse() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRange(t *testing.T) {
+	type args struct {
+		min int
+		max int
+	}
+	tests := []struct {
+		name string
+		args args
+		want []int
+	}{
+		{
+			name: "normal test",
+			args: args{
+				min: 1,
+				max: 3,
+			},
+			want: []int{1, 2, 3},
+		},
+		{
+			name: "normal test",
+			args: args{
+				min: 2,
+				max: 2,
+			},
+			want: []int{2},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Range(tt.args.min, tt.args.max); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Range() = %v, want %v", got, tt.want)
 			}
 		})
 	}

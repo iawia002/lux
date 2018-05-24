@@ -29,6 +29,12 @@ var (
 	ThreadNumber int
 	// File URLs file
 	File string
+	// PlaylistStart Playlist video to start at
+	PlaylistStart int
+	// PlaylistEnd Playlist video to end at
+	PlaylistEnd int
+	// PlaylistItems Playlist video items to download. Separated by commas like: 1,5,6
+	PlaylistItems string
 )
 
 // FakeHeaders fake http headers
