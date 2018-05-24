@@ -30,6 +30,12 @@ func init() {
 	flag.BoolVar(&config.ExtractedData, "j", false, "Print extracted data")
 	flag.IntVar(&config.ThreadNumber, "n", 10, "The number of download thread")
 	flag.StringVar(&config.File, "F", "", "URLs file")
+	flag.IntVar(&config.PlaylistStart, "start", 1, "Playlist video to start at")
+	flag.IntVar(&config.PlaylistEnd, "end", 0, "Playlist video to end at")
+	flag.StringVar(
+		&config.PlaylistItems, "items", "",
+		"Playlist video items to download. Separated by commas like: 1,5,6",
+	)
 }
 
 func download(videoURL string) {

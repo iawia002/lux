@@ -169,6 +169,17 @@ $ annie -i -p https://www.bilibili.com/bangumi/play/ep198061
 ......
 ```
 
+You can use the `-start`, `-end` or `-items` option to specify the download range of the list:
+
+```
+-start
+    	Playlist video to start at (default 1)
+-end
+    	Playlist video to end at (default is last)
+-items
+    	Playlist video items to download. Separated by commas like: 1,5,6
+```
+
 ### Multiple inputs
 
 You can also download multiple URLs at once:
@@ -397,9 +408,13 @@ Usage of annie:
   -c string
     	Cookie
   -d	Debug mode
+  -end int
+    	Playlist video to end at
   -f string
     	Select specific format to download
   -i	Information only
+  -items string
+    	Playlist video items to download. Separated by commas like: 1,5,6
   -j	Print extracted data
   -n int
     	The number of download thread (default 10)
@@ -410,6 +425,8 @@ Usage of annie:
     	Use specified Referrer
   -s string
     	SOCKS5 proxy
+  -start int
+    	Playlist video to start at (default 1)
   -v	Show version
   -x string
     	HTTP proxy
