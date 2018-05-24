@@ -18,7 +18,7 @@ func Facebook(url string) downloader.VideoData {
 	for _, quality := range []string{"sd", "hd"} {
 		tag = quality
 		u := utils.MatchOneOf(
-			html, fmt.Sprintf(`%s_src_no_ratelimit:"(.+?)"`, quality),
+			html, fmt.Sprintf(`%s_src:"(.+?)"`, quality),
 		)[1]
 		size := request.Size(u, url)
 		urlData := downloader.URLData{
