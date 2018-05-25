@@ -158,7 +158,7 @@ func Download(url string) {
 		json.Unmarshal([]byte(dataString), &data)
 		needDownloadItems := utils.NeedDownloadList(len(data.EpList))
 		for index, u := range data.EpList {
-			if !utils.IntInSlice(index+1, needDownloadItems) {
+			if !utils.ItemInSlice(index+1, needDownloadItems) {
 				continue
 			}
 			bilibiliDownload(
@@ -176,7 +176,7 @@ func Download(url string) {
 		// https://www.bilibili.com/video/av20827366/?p=1
 		needDownloadItems := utils.NeedDownloadList(len(data.VideoData.Pages))
 		for index, u := range data.VideoData.Pages {
-			if !utils.IntInSlice(index+1, needDownloadItems) {
+			if !utils.ItemInSlice(index+1, needDownloadItems) {
 				continue
 			}
 			options.Aid = data.Aid

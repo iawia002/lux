@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"runtime"
 	"strings"
@@ -109,21 +110,24 @@ func FilePath(name, ext string, escape bool) string {
 	return outputPath
 }
 
-// StringInSlice if a string is in the list
-func StringInSlice(str string, list []string) bool {
-	for _, a := range list {
-		if a == str {
-			return true
+// ItemInSlice if a item is in the list
+func ItemInSlice(item, list interface{}) bool {
+	v1 := reflect.ValueOf(item)
+	v2 := reflect.ValueOf(list)
+	for i := 0; i < v2.Len(); i++ {
+		indexType := v2.Index(i).Type().String()
+		if v1.Type().String() != indexType {
+			continue
 		}
-	}
-	return false
-}
-
-// IntInSlice if a number is in the list
-func IntInSlice(i int, list []int) bool {
-	for _, a := range list {
-		if a == i {
-			return true
+		switch indexType {
+		case "int":
+			if v1.Int() == v2.Index(i).Int() {
+				return true
+			}
+		case "string":
+			if v1.String() == v2.Index(i).String() {
+				return true
+			}
 		}
 	}
 	return false
