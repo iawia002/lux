@@ -280,10 +280,10 @@ func TestFilePath(t *testing.T) {
 	}
 }
 
-func TestStringInSlice(t *testing.T) {
+func TestItemInSlice(t *testing.T) {
 	type args struct {
-		str  string
-		list []string
+		i    interface{}
+		list interface{}
 	}
 	tests := []struct {
 		name string
@@ -291,47 +291,7 @@ func TestStringInSlice(t *testing.T) {
 		want bool
 	}{
 		{
-			name: "normal test",
-			args: args{
-				str: "hello",
-				list: []string{
-					"hello", "abc",
-				},
-			},
-			want: true,
-		},
-		{
-			name: "normal test",
-			args: args{
-				str: "123",
-				list: []string{
-					"hello", "abc",
-				},
-			},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := StringInSlice(tt.args.str, tt.args.list); got != tt.want {
-				t.Errorf("StringInSlice() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestIntInSlice(t *testing.T) {
-	type args struct {
-		i    int
-		list []int
-	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{
-			name: "normal test",
+			name: "int in slice test 1",
 			args: args{
 				i:    1,
 				list: []int{1, 2},
@@ -339,18 +299,34 @@ func TestIntInSlice(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "normal test",
+			name: "int in slice test 2",
 			args: args{
 				i:    1,
 				list: []int{2, 3},
 			},
 			want: false,
 		},
+		{
+			name: "string test 1",
+			args: args{
+				i:    "hello",
+				list: []string{"2", "hello"},
+			},
+			want: true,
+		},
+		{
+			name: "mix test 1",
+			args: args{
+				i:    3,
+				list: []string{"2", "3"},
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IntInSlice(tt.args.i, tt.args.list); got != tt.want {
-				t.Errorf("IntInSlice() = %v, want %v", got, tt.want)
+			if got := ItemInSlice(tt.args.i, tt.args.list); got != tt.want {
+				t.Errorf("ItemInSlice() = %v, want %v", got, tt.want)
 			}
 		})
 	}

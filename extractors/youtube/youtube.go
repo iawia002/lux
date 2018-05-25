@@ -75,7 +75,7 @@ func Download(uri string) {
 	videoIDs := utils.MatchAll(html, `"videoId":"([^,]+?)","thumbnail"`)
 	needDownloadItems := utils.NeedDownloadList(len(videoIDs))
 	for index, videoID := range videoIDs {
-		if !utils.IntInSlice(index+1, needDownloadItems) {
+		if !utils.ItemInSlice(index+1, needDownloadItems) {
 			continue
 		}
 		u := fmt.Sprintf(
