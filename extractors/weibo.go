@@ -33,7 +33,7 @@ func Weibo(url string) downloader.VideoData {
 	}
 	extractedData := downloader.VideoData{
 		Site:    "微博 weibo.com",
-		Title:   title,
+		Title:   utils.FileName(title),
 		Type:    "video",
 		Formats: format,
 	}

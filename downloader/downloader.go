@@ -83,13 +83,17 @@ func (data FormatData) urlSave(
 		"Referer": refer,
 	}
 	var file *os.File
+	var fileError error
 	if tempFileSize > 0 {
 		// range start from zero
 		headers["Range"] = fmt.Sprintf("bytes=%d-", tempFileSize)
-		file, _ = os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY, 0644)
+		file, fileError = os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY, 0644)
 		bar.Add64(tempFileSize)
 	} else {
-		file, _ = os.Create(tempFilePath)
+		file, fileError = os.Create(tempFilePath)
+	}
+	if fileError != nil {
+		log.Fatal(fileError)
 	}
 
 	// close and rename temp file at the end of this function
