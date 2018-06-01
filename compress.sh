@@ -1,5 +1,3 @@
 #!/bin/sh
 # Please install upx first, https://github.com/upx/upx/releases
-for line in $(find . -iname 'annie*'); do
-     upx --best "$line"
-done
+find ./ -xdev -maxdepth 1 -type f -iname 'annie*' -executable -exec upx --best --brute --ultra-brute {} \;
