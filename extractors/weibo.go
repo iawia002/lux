@@ -11,8 +11,12 @@ import (
 // Weibo download function
 func Weibo(url string) downloader.VideoData {
 	if !strings.Contains(url, "m.weibo.cn") {
-		statusID := utils.MatchOneOf(url, `weibo\.com/tv/v/([^\?/]+)`)[1]
-		url = "https://m.weibo.cn/status/" + statusID
+		statusID := utils.MatchOneOf(url, `weibo\.com/tv/v/([^\?/]+)`)
+		if statusID != nil {
+			url = "https://m.weibo.cn/status/" + statusID[1]
+		} else {
+			url = strings.Replace(url, "weibo.com", "m.weibo.cn", 1)
+		}
 	}
 	html := request.Get(url, url, nil)
 	title := utils.MatchOneOf(html, `"content2": "(.+?)",`)[1]
