@@ -3,7 +3,6 @@ package extractors
 import (
 	"encoding/json"
 	"fmt"
-	"html"
 	"strconv"
 	"strings"
 
@@ -12,36 +11,33 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
-const prefix = "https://twitter.com/i/videos/tweet/"
-
-type twitterUser struct {
-	Name string `json:"name"`
-}
-
 type twitter struct {
-	VideoURL string      `json:"video_url"`
-	TweetID  string      `json:"tweet_id"`
-	User     twitterUser `json:"user"`
+	Track struct {
+		URL string `json:"playbackUrl"`
+	} `json:"track"`
+	TweetID  string
+	Username string
 }
 
 // Twitter download function
 func Twitter(uri string) downloader.VideoData {
-	twitterData := getVideoURI(uri)
+	html := request.Get(uri, uri, nil)
+	username := utils.MatchOneOf(html, `property="og:title"\s+content="(.+)"`)[1]
+	tweetID := utils.MatchOneOf(uri, `(status|statuses)/(\d+)`)[2]
+	api := fmt.Sprintf(
+		"https://api.twitter.com/1.1/videos/tweet/config/%s.json", tweetID,
+	)
+	headers := map[string]string{
+		"Authorization": "Bearer AAAAAAAAAAAAAAAAAAAAAIK1zgAAAAAA2tUWuhGZ2JceoId5GwYWU5GspY4%3DUq7gzFoCZs1QfwGoVdvSac3IniczZEYXIcDyumCauIXpcAPorE",
+	}
+	jsonString := request.Get(api, uri, headers)
+	var twitterData twitter
+	json.Unmarshal([]byte(jsonString), &twitterData)
+	twitterData.TweetID = tweetID
+	twitterData.Username = username
 	extractedData := download(twitterData, uri)
 	extractedData.Download(uri)
 	return extractedData
-}
-
-func getVideoURI(uri string) twitter {
-	// extract tweet id from url
-	tweetID := utils.MatchOneOf(uri, `(status|statuses)/(\d+)`)[2]
-	webPlayerURL := prefix + tweetID
-	h := request.Get(webPlayerURL, uri, nil)
-	// get dataconfig attribute
-	jsonString := html.UnescapeString(utils.MatchOneOf(h, `data-config="({.+})`)[1])
-	var twitterData twitter
-	json.Unmarshal([]byte(jsonString), &twitterData)
-	return twitterData
 }
 
 func download(data twitter, uri string) downloader.VideoData {
@@ -49,8 +45,8 @@ func download(data twitter, uri string) downloader.VideoData {
 	var format = make(map[string]downloader.FormatData)
 	switch {
 	// if video file is m3u8 and ts
-	case strings.HasSuffix(data.VideoURL, "m3u8"):
-		m3u8urls := utils.M3u8URLs(data.VideoURL)
+	case strings.HasSuffix(data.Track.URL, "m3u8"):
+		m3u8urls := utils.M3u8URLs(data.Track.URL)
 		for index, m3u8 := range m3u8urls {
 			var totalSize int64
 			var urls []downloader.URLData
@@ -78,10 +74,10 @@ func download(data twitter, uri string) downloader.VideoData {
 		}
 
 	// if video file is mp4
-	case strings.HasSuffix(data.VideoURL, "mp4"):
-		size = request.Size(data.VideoURL, uri)
+	case strings.HasSuffix(data.Track.URL, "mp4"):
+		size = request.Size(data.Track.URL, uri)
 		urlData := downloader.URLData{
-			URL:  data.VideoURL,
+			URL:  data.Track.URL,
 			Size: size,
 			Ext:  "mp4",
 		}
@@ -93,7 +89,7 @@ func download(data twitter, uri string) downloader.VideoData {
 
 	extractedData := downloader.VideoData{
 		Site:    "Twitter twitter.com",
-		Title:   fmt.Sprintf("%s %s", data.User.Name, data.TweetID),
+		Title:   fmt.Sprintf("%s %s", data.Username, data.TweetID),
 		Type:    "video",
 		Formats: format,
 	}
