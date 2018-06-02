@@ -22,15 +22,24 @@ func TestYouku(t *testing.T) {
 				Quality: "mp4hd3v2 1920x1080",
 			},
 		},
-		// {
-		// 	name: "normal test",
-		// 	args: test.Args{
-		// 		URL:     "http://v.youku.com/v_show/id_XMzQ1MTAzNjQwNA==.html",
-		// 		Title:   "这！就是街舞 第一季 第3期：百强“互杀”队长不忍直视",
-		// 		Size:    750911635,
-		// 		Quality: "mp4hd2v2 1280x720",
-		// 	},
-		// },
+		{
+			name: "normal test",
+			args: test.Args{
+				URL:     "http://v.youku.com/v_show/id_XMzQ1MTAzNjQwNA==.html",
+				Title:   "这！就是街舞 第一季 第3期：百强“互杀”队长不忍直视",
+				Size:    1419459808,
+				Quality: "mp4hd3v2 1920x1080",
+			},
+		},
+		{
+			name: "title test",
+			args: test.Args{
+				URL:     "http://v.youku.com/v_show/id_XMzYzMDgxMTAyNA.html",
+				Title:   "想看你微笑 01",
+				Size:    568769655,
+				Quality: "mp4hd3v2 1920x1080",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

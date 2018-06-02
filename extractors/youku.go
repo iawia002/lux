@@ -57,7 +57,7 @@ const youkuReferer = "https://v.youku.com"
 
 // var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
 
-var ccodes = []string{"0510"}
+var ccodes = []string{"0519"}
 
 func youkuUps(vid string) youkuData {
 	var url string
@@ -134,7 +134,9 @@ func Youku(url string) downloader.VideoData {
 	}
 	format := genData(youkuData.Data)
 	var title string
-	if youkuData.Data.Show.Title == "" {
+	if youkuData.Data.Show.Title == "" || strings.Contains(
+		youkuData.Data.Video.Title, youkuData.Data.Show.Title,
+	) {
 		title = youkuData.Data.Video.Title
 	} else {
 		title = fmt.Sprintf("%s %s", youkuData.Data.Show.Title, youkuData.Data.Video.Title)
