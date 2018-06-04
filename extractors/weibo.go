@@ -19,7 +19,9 @@ func Weibo(url string) downloader.VideoData {
 		}
 	}
 	html := request.Get(url, url, nil)
-	title := utils.MatchOneOf(html, `"content2": "(.+?)",`)[1]
+	title := utils.MatchOneOf(
+		html, `"content2": "(.+?)",`, `"status_title": "(.+?)",`,
+	)[1]
 	realURL := utils.MatchOneOf(
 		html, `"stream_url_hd": "(.+?)"`, `"stream_url": "(.+?)"`,
 	)[1]
