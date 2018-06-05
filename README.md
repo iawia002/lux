@@ -5,7 +5,7 @@
 [![Build Status](https://img.shields.io/travis/iawia002/annie.svg?style=flat-square)](https://travis-ci.com/iawia002/annie)
 [![Go Report Card](https://goreportcard.com/badge/github.com/iawia002/annie?style=flat-square)](https://goreportcard.com/report/github.com/iawia002/annie)
 [![GitHub release](https://img.shields.io/github/release/iawia002/annie.svg?style=flat-square)](https://github.com/iawia002/annie/releases)
-![homebrew](https://img.shields.io/homebrew/v/annie.svg?style=flat-square)
+[![homebrew](https://img.shields.io/homebrew/v/annie.svg?style=flat-square)](https://formulae.brew.sh/formula/annie)
 [![](https://img.shields.io/badge/telegram-join%20chat-0088cc.svg?longCache=true&style=flat-square)](https://t.me/anniedev)
 
 
