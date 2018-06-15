@@ -223,6 +223,7 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 		var data bilibiliData
 		json.Unmarshal([]byte(jsonString), &data)
 
+		// Avoid duplicate formats
 		if _, ok := format[strconv.Itoa(data.Quality)]; ok {
 			continue
 		}
