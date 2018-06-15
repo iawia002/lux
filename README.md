@@ -453,6 +453,7 @@ Facebook | <https://facebook.com> | ✓ | | | |
 微博 | <https://weibo.com> | ✓ | | | |
 Instagram | <https://www.instagram.com> | ✓ | ✓ | | |
 Twitter | <https://twitter.com> | ✓ | | | |
+腾讯视频 | <https://v.qq.com> | ✓ | | | |
 
 
 ## Known issues

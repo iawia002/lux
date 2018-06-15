@@ -88,6 +88,8 @@ func download(videoURL string) {
 		extractors.Instagram(videoURL)
 	case "twitter":
 		extractors.Twitter(videoURL)
+	case "qq":
+		extractors.QQ(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}
