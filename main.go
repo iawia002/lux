@@ -56,7 +56,7 @@ func download(videoURL string) {
 		domain = utils.Domain(u.Host)
 	}
 	switch domain {
-	case "douyin":
+	case "douyin", "iesdouyin":
 		extractors.Douyin(videoURL)
 	case "bilibili":
 		bilibili.Download(videoURL)
