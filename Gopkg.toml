@@ -1,0 +1,16 @@
+[[constraint]]
+  name = "github.com/PuerkitoBio/goquery"
+  version = "1.4.1"
+
+[[constraint]]
+  name = "github.com/cheggaaa/pb"
+  version = "1.0.25"
+
+[[constraint]]
+  name = "github.com/fatih/color"
+  version = "1.7.0"
+
+[prune]
+  non-go = true
+  go-tests = true
+  unused-packages = true

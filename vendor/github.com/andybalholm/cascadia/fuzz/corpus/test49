@@ -1,1 +1,0 @@
-div:has(:containsOwn("2"))
