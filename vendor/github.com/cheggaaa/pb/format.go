@@ -113,6 +113,13 @@ func formatDuration(n int64) (result string) {
 		result = fmt.Sprintf("%dd", d/24/time.Hour)
 		d -= (d / time.Hour / 24) * (time.Hour * 24)
 	}
-	result = fmt.Sprintf("%s%v", result, d)
+	if d > time.Hour {
+		result = fmt.Sprintf("%s%dh", result, d/time.Hour)
+		d -= d / time.Hour * time.Hour
+	}
+	m := d / time.Minute
+	d -= m * time.Minute
+	s := d / time.Second
+	result = fmt.Sprintf("%s%02dm%02ds", result, m, s)
 	return
 }

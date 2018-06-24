@@ -13,7 +13,7 @@ import (
 )
 
 // Current version
-const Version = "1.0.22"
+const Version = "1.0.25"
 
 const (
 	// Default refresh rate - 200ms
@@ -114,7 +114,7 @@ type ProgressBar struct {
 func (pb *ProgressBar) Start() *ProgressBar {
 	pb.startTime = time.Now()
 	pb.startValue = atomic.LoadInt64(&pb.current)
-	if pb.Total == 0 {
+	if atomic.LoadInt64(&pb.Total) == 0 {
 		pb.ShowTimeLeft = false
 		pb.ShowPercent = false
 		pb.AutoStat = false
@@ -222,7 +222,7 @@ func (pb *ProgressBar) Finish() {
 	//Protect multiple calls
 	pb.finishOnce.Do(func() {
 		close(pb.finish)
-		pb.write(atomic.LoadInt64(&pb.current))
+		pb.write(atomic.LoadInt64(&pb.Total), atomic.LoadInt64(&pb.current))
 		pb.mu.Lock()
 		defer pb.mu.Unlock()
 		switch {
@@ -272,7 +272,7 @@ func (pb *ProgressBar) NewProxyReader(r io.Reader) *Reader {
 	return &Reader{r, pb}
 }
 
-func (pb *ProgressBar) write(current int64) {
+func (pb *ProgressBar) write(total, current int64) {
 	width := pb.GetWidth()
 
 	var percentBox, countersBox, timeLeftBox, timeSpentBox, speedBox, barBox, end, out string
@@ -280,8 +280,8 @@ func (pb *ProgressBar) write(current int64) {
 	// percents
 	if pb.ShowPercent {
 		var percent float64
-		if pb.Total > 0 {
-			percent = float64(current) / (float64(pb.Total) / float64(100))
+		if total > 0 {
+			percent = float64(current) / (float64(total) / float64(100))
 		} else {
 			percent = float64(current) / float64(100)
 		}
@@ -291,9 +291,9 @@ func (pb *ProgressBar) write(current int64) {
 	// counters
 	if pb.ShowCounters {
 		current := Format(current).To(pb.Units).Width(pb.UnitsWidth)
-		if pb.Total > 0 {
-			total := Format(pb.Total).To(pb.Units).Width(pb.UnitsWidth)
-			countersBox = fmt.Sprintf(" %s / %s ", current, total)
+		if total > 0 {
+			totalS := Format(total).To(pb.Units).Width(pb.UnitsWidth)
+			countersBox = fmt.Sprintf(" %s / %s ", current, totalS)
 		} else {
 			countersBox = fmt.Sprintf(" %s / ? ", current)
 		}
@@ -322,8 +322,8 @@ func (pb *ProgressBar) write(current int64) {
 		if pb.ShowTimeLeft && currentFromStart > 0 {
 			perEntry := fromChange / time.Duration(currentFromStart)
 			var left time.Duration
-			if pb.Total > 0 {
-				left = time.Duration(pb.Total-currentFromStart) * perEntry
+			if total > 0 {
+				left = time.Duration(total-currentFromStart) * perEntry
 				left -= time.Since(lastChangeTime)
 				left = (left / time.Second) * time.Second
 			} else {
@@ -353,8 +353,8 @@ func (pb *ProgressBar) write(current int64) {
 	if pb.ShowBar {
 		size := width - barWidth
 		if size > 0 {
-			if pb.Total > 0 {
-				curSize := int(math.Ceil((float64(current) / float64(pb.Total)) * float64(size)))
+			if total > 0 {
+				curSize := int(math.Ceil((float64(current) / float64(total)) * float64(size)))
 				emptySize := size - curSize
 				barBox = pb.BarStart
 				if emptySize < 0 {
@@ -400,9 +400,10 @@ func (pb *ProgressBar) write(current int64) {
 
 	// and print!
 	pb.mu.Lock()
+	defer pb.mu.Unlock()
 	pb.lastPrint = out + end
 	isFinish := pb.isFinish
-	pb.mu.Unlock()
+
 	switch {
 	case isFinish:
 		return
@@ -438,18 +439,19 @@ func (pb *ProgressBar) GetWidth() int {
 func (pb *ProgressBar) Update() {
 	c := atomic.LoadInt64(&pb.current)
 	p := atomic.LoadInt64(&pb.previous)
+	t := atomic.LoadInt64(&pb.Total)
 	if p != c {
 		pb.mu.Lock()
 		pb.changeTime = time.Now()
 		pb.mu.Unlock()
 		atomic.StoreInt64(&pb.previous, c)
 	}
-	pb.write(c)
+	pb.write(t, c)
 	if pb.AutoStat {
 		if c == 0 {
 			pb.startTime = time.Now()
 			pb.startValue = 0
-		} else if c >= pb.Total && pb.isFinish != true {
+		} else if c >= t && pb.isFinish != true {
 			pb.Finish()
 		}
 	}
@@ -460,6 +462,29 @@ func (pb *ProgressBar) String() string {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 	return pb.lastPrint
+}
+
+// SetTotal atomically sets new total count
+func (pb *ProgressBar) SetTotal(total int) *ProgressBar {
+	return pb.SetTotal64(int64(total))
+}
+
+// SetTotal64 atomically sets new total count
+func (pb *ProgressBar) SetTotal64(total int64) *ProgressBar {
+	atomic.StoreInt64(&pb.Total, total)
+	return pb
+}
+
+// Reset bar and set new total count
+// Does effect only on finished bar
+func (pb *ProgressBar) Reset(total int) *ProgressBar {
+	pb.mu.Lock()
+	defer pb.mu.Unlock()
+	if pb.isFinish {
+		pb.SetTotal(total).Set(0)
+		atomic.StoreInt64(&pb.previous, 0)
+	}
+	return pb
 }
 
 // Internal loop for refreshing the progressbar
