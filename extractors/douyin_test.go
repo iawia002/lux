@@ -16,8 +16,9 @@ func TestDouyin(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:   "https://www.douyin.com/share/video/6509219899754155272",
-				Title: "好冷  逢考必过",
+				URL:   "https://www.douyin.com/share/video/6557825773007277319/?mid=6557826301539912456",
+				Title: "跟特效师一起学跳舞，看变形金刚擎天柱怎么跳，你也来试试！@抖音小助手",
+				Size:  4899602,
 			},
 		},
 	}
