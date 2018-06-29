@@ -18,7 +18,7 @@ func TestIqiyi(t *testing.T) {
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/v_19rrbhikxo.html",
 				Title:   "热血街舞团：鹿晗个人宣传片震撼发布 执着前行终现万丈荣光",
-				Size:    12750912,
+				Size:    13843192,
 				Quality: "1280x720",
 			},
 		},
@@ -36,7 +36,7 @@ func TestIqiyi(t *testing.T) {
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/a_19rrhcqtot.html#curid=958070800_e05591c8ad96022f79f41ec4fcc611a9",
 				Title:   "《热血街舞团》综艺专题-高清视频在线观看-爱奇艺",
-				Size:    12750912,
+				Size:    13843192,
 				Quality: "1280x720",
 			},
 		},
@@ -45,7 +45,7 @@ func TestIqiyi(t *testing.T) {
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/a_19rrhcqtot.html#curid=958065800_03b77bd0648a6c1df86b0f7c4fd0e526",
 				Title:   "《热血街舞团》综艺专题-高清视频在线观看-爱奇艺",
-				Size:    7743532,
+				Size:    10949684,
 				Quality: "1280x720",
 			},
 		},
