@@ -153,7 +153,7 @@ func Download(url string) {
 		return
 	}
 	if options.Bangumi {
-		dataString := utils.MatchOneOf(html, `window.__INITIAL_STATE__=(.+?);`)[1]
+		dataString := utils.MatchOneOf(html, `window.__INITIAL_STATE__=(.+?);\(function`)[1]
 		var data bangumiData
 		json.Unmarshal([]byte(dataString), &data)
 		needDownloadItems := utils.NeedDownloadList(len(data.EpList))
