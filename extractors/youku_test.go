@@ -31,15 +31,6 @@ func TestYouku(t *testing.T) {
 				Quality: "mp4hd3v2 1920x1080",
 			},
 		},
-		{
-			name: "title test",
-			args: test.Args{
-				URL:     "http://v.youku.com/v_show/id_XMzYzMDgxMTAyNA.html",
-				Title:   "想看你微笑 01",
-				Size:    568769655,
-				Quality: "mp4hd3v2 1920x1080",
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -73,6 +73,7 @@ func Iqiyi(url string) downloader.VideoData {
 			html,
 			`data-player-tvid="([^"]+)"`,
 			`param\['tvid'\]\s*=\s*"(.+?)"`,
+			`"tvid":"(\d+)"`,
 		)
 	}
 	vid := utils.MatchOneOf(
@@ -85,11 +86,12 @@ func Iqiyi(url string) downloader.VideoData {
 			html,
 			`data-player-videoid="([^"]+)"`,
 			`param\['vid'\]\s*=\s*"(.+?)"`,
+			`"vid":"(\w+)"`,
 		)
 	}
 	doc := parser.GetDoc(html)
-	title := strings.TrimSpace(doc.Find("h1 a").Text()) +
-		strings.TrimSpace(doc.Find("h1 span").Text())
+	title := strings.TrimSpace(doc.Find("h1>a").First().Text()) +
+		strings.TrimSpace(doc.Find("h1>span").First().Text())
 	if title == "" {
 		title = doc.Find("title").Text()
 	}
