@@ -3,6 +3,7 @@ package request
 import (
 	"compress/gzip"
 	"compress/zlib"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -29,6 +30,7 @@ func Request(
 	transport := &http.Transport{
 		DisableCompression:  true,
 		TLSHandshakeTimeout: 10 * time.Second,
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 	}
 	if config.Proxy != "" {
 		var httpProxy, err = netURL.Parse(config.Proxy)
