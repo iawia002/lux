@@ -46,6 +46,14 @@ type VideoData struct {
 	Formats map[string]FormatData
 }
 
+func progressBar(size int64) *pb.ProgressBar {
+	bar := pb.New64(size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
+	bar.ShowSpeed = true
+	bar.ShowFinalTime = true
+	bar.SetMaxWidth(1000)
+	return bar
+}
+
 func (data *FormatData) calculateTotalSize() {
 	var size int64
 	for _, urlData := range data.URLs {
@@ -54,15 +62,35 @@ func (data *FormatData) calculateTotalSize() {
 	data.Size = size
 }
 
-// urlSave save url file
-func (data FormatData) urlSave(
+// Caption download danmaku, subtitles, etc
+func Caption(url, refer, fileName, ext string) {
+	if !config.Caption || config.InfoOnly {
+		return
+	}
+	fmt.Println("\nDownloading captions...")
+	body := request.Get(url, refer, nil)
+	filePath := utils.FilePath(fileName, ext, false)
+	file, fileError := os.Create(filePath)
+	if fileError != nil {
+		log.Fatal(fileError)
+	}
+	defer file.Close()
+	file.WriteString(body)
+}
+
+// Save save url file
+func Save(
 	urlData URLData, refer, fileName string, bar *pb.ProgressBar,
 ) {
 	filePath := utils.FilePath(fileName, urlData.Ext, false)
 	fileSize, exists := utils.FileSize(filePath)
+	if bar == nil {
+		bar = progressBar(urlData.Size)
+		bar.Start()
+	}
 	// Skip segment file
 	// TODO: Live video URLs will not return the size
-	if fileSize == urlData.Size {
+	if exists && fileSize == urlData.Size {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
 		bar.Add64(fileSize)
 		return
@@ -201,14 +229,11 @@ func (v VideoData) Download(refer string) {
 		fmt.Printf("%s: file already exists, skipping\n", mergedFilePath)
 		return
 	}
-	bar := pb.New64(data.Size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
-	bar.ShowSpeed = true
-	bar.ShowFinalTime = true
-	bar.SetMaxWidth(1000)
+	bar := progressBar(data.Size)
 	bar.Start()
 	if len(data.URLs) == 1 {
 		// only one fragment
-		data.urlSave(data.URLs[0], refer, title, bar)
+		Save(data.URLs[0], refer, title, bar)
 		bar.Finish()
 		return
 	}
@@ -223,7 +248,7 @@ func (v VideoData) Download(refer string) {
 		wgp.Add()
 		go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
 			defer wgp.Done()
-			data.urlSave(url, refer, fileName, bar)
+			Save(url, refer, fileName, bar)
 		}(url, refer, partFileName, bar)
 
 	}

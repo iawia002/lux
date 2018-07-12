@@ -36,6 +36,7 @@ func init() {
 		&config.PlaylistItems, "items", "",
 		"Playlist video items to download. Separated by commas like: 1,5,6",
 	)
+	flag.BoolVar(&config.Caption, "C", false, "Download captions")
 }
 
 func download(videoURL string) {

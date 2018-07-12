@@ -400,7 +400,8 @@ $ annie -j https://www.bilibili.com/video/av20203945
 ```console
 $ annie -h
 
-Usage of annie:
+Usage of ./annie:
+  -C	Download captions
   -F string
     	URLs file
   -O string
