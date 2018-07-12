@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"time"
 
@@ -35,6 +36,7 @@ type FormatData struct {
 	URLs    []URLData
 	Quality string
 	Size    int64 // total size of all urls
+	name    string
 }
 
 // VideoData data struct of video info
@@ -169,6 +171,12 @@ func printStream(k string, data FormatData) {
 	fmt.Println()
 }
 
+type formats []FormatData
+
+func (f formats) Len() int           { return len(f) }
+func (f formats) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
+func (f formats) Less(i, j int) bool { return f[i].Size > f[j].Size }
+
 func (v VideoData) printInfo(format string) {
 	cyan := color.New(color.FgCyan)
 	fmt.Println()
@@ -181,8 +189,16 @@ func (v VideoData) printInfo(format string) {
 	if config.InfoOnly {
 		cyan.Printf(" Streams:   ")
 		fmt.Println("# All available quality")
-		for k, data := range v.Formats {
-			printStream(k, data)
+		var sortedFormats formats
+		var k string
+		var data FormatData
+		for k, data = range v.Formats {
+			data.name = k
+			sortedFormats = append(sortedFormats, data)
+		}
+		sort.Sort(sortedFormats)
+		for _, data = range sortedFormats {
+			printStream(data.name, data)
 		}
 	} else {
 		cyan.Printf(" Stream:   ")

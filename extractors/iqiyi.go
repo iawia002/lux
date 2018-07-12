@@ -90,8 +90,15 @@ func Iqiyi(url string) downloader.VideoData {
 		)
 	}
 	doc := parser.GetDoc(html)
-	title := strings.TrimSpace(doc.Find("h1>a").First().Text()) +
-		strings.TrimSpace(doc.Find("h1>span").First().Text())
+	title := strings.TrimSpace(doc.Find("h1>a").First().Text())
+	var sub string
+	for _, k := range []string{"span", "em"} {
+		if sub != "" {
+			break
+		}
+		sub = strings.TrimSpace(doc.Find("h1>" + k).First().Text())
+	}
+	title += sub
 	if title == "" {
 		title = doc.Find("title").Text()
 	}
