@@ -1,8 +1,8 @@
 package request
 
 import (
+	"compress/flate"
 	"compress/gzip"
-	"compress/zlib"
 	"crypto/tls"
 	"fmt"
 	"io"
@@ -133,7 +133,7 @@ func Get(url, refer string, headers map[string]string) string {
 	case "gzip":
 		reader, _ = gzip.NewReader(res.Body)
 	case "deflate":
-		reader, _ = zlib.NewReader(res.Body)
+		reader = flate.NewReader(res.Body)
 	default:
 		reader = res.Body
 	}

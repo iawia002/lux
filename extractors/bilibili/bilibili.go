@@ -249,12 +249,17 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 		}
 		title = tempTitle
 	}
+	title = utils.FileName(title)
 	extractedData := downloader.VideoData{
 		Site:    "哔哩哔哩 bilibili.com",
-		Title:   utils.FileName(title),
+		Title:   title,
 		Type:    "video",
 		Formats: format,
 	}
 	extractedData.Download(url)
+	downloader.Caption(
+		fmt.Sprintf("https://comment.bilibili.com/%s.xml", cid),
+		url, title, "xml",
+	)
 	return extractedData
 }

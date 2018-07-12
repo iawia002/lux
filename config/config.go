@@ -35,6 +35,8 @@ var (
 	PlaylistEnd int
 	// PlaylistItems Playlist video items to download. Separated by commas like: 1,5,6
 	PlaylistItems string
+	// Caption download captions
+	Caption bool
 )
 
 // FakeHeaders fake http headers
