@@ -57,6 +57,9 @@ func genSignedURL(streamURL string, stream url.Values, js string) string {
 		}
 		realURL = fmt.Sprintf("%s&signature=%s", streamURL, sig)
 	}
+	if !strings.Contains(realURL, "ratebypass") {
+		realURL += "&ratebypass=yes"
+	}
 	return realURL
 }
 
@@ -156,9 +159,6 @@ func extractVideoURLS(data youtubeData, referer string) map[string]downloader.Fo
 			ext = utils.MatchOneOf(streamType, `(\w+)/(\w+);`)[2]
 		}
 		realURL := genSignedURL(stream.Get("url"), stream, data.Assets.JS)
-		if !strings.Contains(realURL, "ratebypass=yes") {
-			realURL += "&ratebypass=yes"
-		}
 		size := request.Size(realURL, referer)
 		urlData := downloader.URLData{
 			URL:  realURL,
@@ -186,7 +186,7 @@ func extractVideoURLS(data youtubeData, referer string) map[string]downloader.Fo
 
 	// Unlike `url_encoded_fmt_stream_map`, all videos in `adaptive_fmts` have no sound,
 	// we need download video and audio both and then merge them.
-	// Another problem is that even if we add `ratebypass=yes`, the download speed still slow sometimes.
+	// Another problem is that even if we add `ratebypass=yes`, the download speed still slow sometimes. https://github.com/iawia002/annie/issues/191#issuecomment-405449649
 
 	// All videos here have no sound and need to be added separately
 	for itag, f := range format {
