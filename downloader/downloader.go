@@ -80,6 +80,25 @@ func Caption(url, refer, fileName, ext string) {
 	file.WriteString(body)
 }
 
+func writeFile(
+	url string, file *os.File, headers map[string]string, bar *pb.ProgressBar,
+) {
+	res := request.Request("GET", url, nil, headers)
+	if res.StatusCode >= 400 {
+		red := color.New(color.FgRed)
+		log.Print(url)
+		log.Fatal(red.Sprintf("HTTP error: %d", res.StatusCode))
+	}
+	defer res.Body.Close()
+	writer := io.MultiWriter(file, bar)
+	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
+	// So don't worry about memory.
+	_, copyErr := io.Copy(writer, res.Body)
+	if copyErr != nil {
+		log.Fatal(fmt.Sprintf("file copy error: %s", copyErr))
+	}
+}
+
 // Save save url file
 func Save(
 	urlData URLData, refer, fileName string, bar *pb.ProgressBar,
@@ -115,7 +134,7 @@ func Save(
 	var file *os.File
 	var fileError error
 	if tempFileSize > 0 {
-		// range start from zero
+		// range start from 0, 0-1023 means the first 1024 bytes of the file
 		headers["Range"] = fmt.Sprintf("bytes=%d-", tempFileSize)
 		file, fileError = os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY, 0644)
 		bar.Add64(tempFileSize)
@@ -125,9 +144,29 @@ func Save(
 	if fileError != nil {
 		log.Fatal(fileError)
 	}
-
+	if strings.Contains(urlData.URL, "googlevideo") {
+		var start, end, chunkSize int64
+		chunkSize = 10 * 1024 * 1024
+		remainingSize := urlData.Size
+		if tempFileSize > 0 {
+			start = tempFileSize
+			remainingSize -= tempFileSize
+		}
+		chunk := remainingSize / chunkSize
+		if remainingSize%chunkSize != 0 {
+			chunk++
+		}
+		var i int64 = 1
+		for ; i <= chunk; i++ {
+			end = start + chunkSize - 1
+			headers["Range"] = fmt.Sprintf("bytes=%d-%d", start, end)
+			writeFile(urlData.URL, file, headers, bar)
+			start = end + 1
+		}
+	} else {
+		writeFile(urlData.URL, file, headers, bar)
+	}
 	// close and rename temp file at the end of this function
-	// must be done here to avoid the following request error to cause the file can't close properly
 	defer func() {
 		file.Close()
 		// must close the file before rename or it will cause `The process cannot access the file because it is being used by another process.` error.
@@ -136,21 +175,6 @@ func Save(
 			log.Fatal(err)
 		}
 	}()
-
-	res := request.Request("GET", urlData.URL, nil, headers)
-	if res.StatusCode >= 400 {
-		red := color.New(color.FgRed)
-		log.Print(urlData.URL)
-		log.Fatal(red.Sprintf("HTTP error: %d", res.StatusCode))
-	}
-	defer res.Body.Close()
-	writer := io.MultiWriter(file, bar)
-	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
-	// So don't worry about memory.
-	_, copyErr := io.Copy(writer, res.Body)
-	if copyErr != nil {
-		log.Fatal(fmt.Sprintf("file copy error: %s", copyErr))
-	}
 }
 
 func printStream(k string, data FormatData) {
