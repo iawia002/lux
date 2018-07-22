@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -52,12 +53,10 @@ type youkuData struct {
 
 const youkuReferer = "https://v.youku.com"
 
-// http://g.alicdn.com/player/ykplayer/0.5.28/youku-player.min.js
+// https://g.alicdn.com/player/ykplayer/0.5.61/youku-player.min.js
 // {"0505":"interior","050F":"interior","0501":"interior","0502":"interior","0503":"interior","0510":"adshow","0512":"BDskin","0590":"BDskin"}
 
 // var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
-
-var ccodes = []string{"0808"}
 
 func youkuUps(vid string) youkuData {
 	var url string
@@ -67,10 +66,10 @@ func youkuUps(vid string) youkuData {
 	headers := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
 	setCookie := headers.Get("Set-Cookie")
 	utid = utils.MatchOneOf(setCookie, `cna=(.+?);`)[1]
-	// http://g.alicdn.com/player/ykplayer/0.5.28/youku-player.min.js
+	// https://g.alicdn.com/player/ykplayer/0.5.61/youku-player.min.js
 	// grep -oE '"[0-9a-zA-Z+/=]{256}"' youku-player.min.js
 	ckey := "7B19C0AB12633B22E7FE81271162026020570708D6CC189E4924503C49D243A0DE6CD84A766832C2C99898FC5ED31F3709BB3CDD82C96492E721BDD381735026"
-	for _, ccode := range ccodes {
+	for _, ccode := range []string{config.Ccode} {
 		url = fmt.Sprintf(
 			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s&ckey=%s",
 			vid, ccode, time.Now().Unix()/1000, netURL.QueryEscape(utid), netURL.QueryEscape(ckey),
