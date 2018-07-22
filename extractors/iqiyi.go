@@ -149,7 +149,7 @@ func Iqiyi(url string) downloader.VideoData {
 
 	extractedData := downloader.VideoData{
 		Site:    "爱奇艺 iqiyi.com",
-		Title:   title,
+		Title:   utils.FileName(title),
 		Type:    "video",
 		Formats: format,
 	}
