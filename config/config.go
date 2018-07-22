@@ -37,6 +37,8 @@ var (
 	PlaylistItems string
 	// Caption download captions
 	Caption bool
+	// Ccode youku ccode
+	Ccode string
 )
 
 // FakeHeaders fake http headers
