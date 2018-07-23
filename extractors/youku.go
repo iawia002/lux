@@ -57,7 +57,7 @@ const youkuReferer = "https://v.youku.com"
 
 // var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
 
-var ccodes = []string{"0519"}
+var ccodes = []string{"02020101"}
 
 func youkuUps(vid string) youkuData {
 	var url string
@@ -69,7 +69,7 @@ func youkuUps(vid string) youkuData {
 	utid = utils.MatchOneOf(setCookie, `cna=(.+?);`)[1]
 	// http://g.alicdn.com/player/ykplayer/0.5.28/youku-player.min.js
 	// grep -oE '"[0-9a-zA-Z+/=]{256}"' youku-player.min.js
-	ckey := "DIl58SLFxFNndSV1GFNnMQVYkx1PP5tKe1siZu/86PR1u/Wh1Ptd+WOZsHHWxysSfAOhNJpdVWsdVJNsfJ8Sxd8WKVvNfAS8aS8fAOzYARzPyPc3JvtnPHjTdKfESTdnuTW6ZPvk2pNDh4uFzotgdMEFkzQ5wZVXl2Pf1/Y6hLK0OnCNxBj3+nb0v72gZ6b0td+WOZsHHWxysSo/0y9D2K42SaB8Y/+aD2K42SaB8Y/+ahU+WOZsHcrxysooUeND"
+	ckey := "7B19C0AB12633B22E7FE81271162026020570708D6CC189E4924503C49D243A0DE6CD84A766832C2C99898FC5ED31F3709BB3CDD82C96492E721BDD381735026"
 	for _, ccode := range ccodes {
 		url = fmt.Sprintf(
 			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s&ckey=%s",
