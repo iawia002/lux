@@ -37,6 +37,7 @@ func init() {
 		"Playlist video items to download. Separated by commas like: 1,5,6",
 	)
 	flag.BoolVar(&config.Caption, "C", false, "Download captions")
+	flag.StringVar(&config.Ccode, "ccode", "0590", "Youku ccode")
 }
 
 func download(videoURL string) {
