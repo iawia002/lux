@@ -95,7 +95,6 @@ func Request(
 			break
 		}
 		if requestError != nil && i+1 == retryTimes {
-			log.Print(url)
 			panic(requestError)
 		}
 		time.Sleep(1 * time.Second)
