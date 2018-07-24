@@ -19,7 +19,7 @@ func TestYouku(t *testing.T) {
 				URL:     "http://v.youku.com/v_show/id_XMzUzMjE3NDczNg==.html",
 				Title:   "车事儿：智能汽车已经不在遥远 东风风光iX5发布",
 				Size:    45185427,
-				Quality: "mp4hd3v2 1920x1080",
+				Quality: "mp4hd3 1920x1080",
 			},
 		},
 		{
@@ -28,7 +28,7 @@ func TestYouku(t *testing.T) {
 				URL:     "http://v.youku.com/v_show/id_XMzQ1MTAzNjQwNA==.html",
 				Title:   "这！就是街舞 第一季 第3期：百强“互杀”队长不忍直视",
 				Size:    1419459808,
-				Quality: "mp4hd3v2 1920x1080",
+				Quality: "mp4hd3 1920x1080",
 			},
 		},
 	}

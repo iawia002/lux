@@ -35,7 +35,7 @@ func TestIqiyi(t *testing.T) {
 			name: "curid test 1",
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/a_19rrhcqtot.html#curid=958065800_03b77bd0648a6c1df86b0f7c4fd0e526",
-				Title:   "热血街舞团",
+				Title:   "《热血街舞团》综艺专题-高清视频在线观看-爱奇艺",
 				Size:    10949684,
 				Quality: "1280x720",
 			},
