@@ -28,8 +28,8 @@ func init() {
 	flag.StringVar(&config.OutputPath, "o", "", "Specify the output path")
 	flag.StringVar(&config.OutputName, "O", "", "Specify the output file name")
 	flag.BoolVar(&config.ExtractedData, "j", false, "Print extracted data")
-	flag.IntVar(&config.ThreadNumber, "n", 10, "The number of download thread")
-	flag.StringVar(&config.File, "F", "", "URLs file")
+	flag.IntVar(&config.ThreadNumber, "n", 10, "The number of download thread (only works for multiple-parts video)")
+	flag.StringVar(&config.File, "F", "", "URLs file path")
 	flag.IntVar(&config.PlaylistStart, "start", 1, "Playlist video to start at")
 	flag.IntVar(&config.PlaylistEnd, "end", 0, "Playlist video to end at")
 	flag.StringVar(

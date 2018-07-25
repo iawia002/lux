@@ -13,6 +13,20 @@
 
 * [Installation](#installation)
 * [Getting Started](#getting-started)
+  * [Download a video](#download-a-video)
+  * [Download anything else](#download-anything-else)
+  * [Download playlist](#download-playlist)
+  * [Multiple inputs](#multiple-inputs)
+  * [Resume a download](#resume-a-download)
+  * [Cookies](#cookies)
+  * [Proxy](#proxy)
+  * [Multi-Thread](#multi-thread)
+  * [Short link](#short-link)
+  * [Use specified Referrer](#use-specified-referrer)
+  * [Specify the output path and name](#specify-the-output-path-and-name)
+  * [Debug Mode](#debug-mode)
+  * [Reuse extracted data](#reuse-extracted-data)
+  * [Options](#options)
 * [Supported Sites](#supported-sites)
 * [Known issues](#known-issues)
 * [Contributing](#contributing)
@@ -61,6 +75,12 @@ $ xbps-install -S annie
 
 
 ## Getting Started
+
+Usage:
+
+```
+annie [OPTIONS] URL [URL...]
+```
 
 ### Download a video
 
@@ -395,42 +415,71 @@ $ annie -j https://www.bilibili.com/video/av20203945
 }
 ```
 
-### All available arguments
+### Options
 
-```console
-$ annie -h
-
-Usage of ./annie:
-  -C	Download captions
+```
+  -i	Information only
   -F string
-    	URLs file
-  -O string
-    	Specify the output file name
-  -c string
-    	Cookie
+    	URLs file path
   -d	Debug mode
-  -end int
-    	Playlist video to end at
+  -j	Print extracted data
+  -v	Show version
+```
+
+#### Download:
+
+```
   -f string
     	Select specific format to download
-  -i	Information only
-  -items string
-    	Playlist video items to download. Separated by commas like: 1,5,6
-  -j	Print extracted data
-  -n int
-    	The number of download thread (default 10)
-  -o string
-    	Specify the output path
   -p	Download playlist
+  -n int
+    	The number of download thread (only works for multiple-parts video) (default 10)
+  -c string
+    	Cookie
   -r string
     	Use specified Referrer
+```
+
+#### Network:
+
+```
   -s string
     	SOCKS5 proxy
-  -start int
-    	Playlist video to start at (default 1)
-  -v	Show version
   -x string
     	HTTP proxy
+```
+
+#### Playlist:
+
+```
+  -start int
+    	Playlist video to start at (default 1)
+  -end int
+    	Playlist video to end at
+  -items string
+    	Playlist video items to download. Separated by commas like: 1,5,6
+```
+
+#### Filesystem:
+
+```
+  -o string
+    	Specify the output path
+  -O string
+    	Specify the output file name
+```
+
+#### Subtitle:
+
+```
+  -C	Download captions
+```
+
+#### Youku:
+
+```
+  -ccode string
+    	Youku ccode (default "0808")
 ```
 
 

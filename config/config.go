@@ -25,9 +25,9 @@ var (
 	OutputName string
 	// ExtractedData print extracted data
 	ExtractedData bool
-	// ThreadNumber the number of download thread
+	// ThreadNumber The number of download thread (only works for multiple-parts video)
 	ThreadNumber int
-	// File URLs file
+	// File URLs file path
 	File string
 	// PlaylistStart Playlist video to start at
 	PlaylistStart int
