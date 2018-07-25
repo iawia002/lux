@@ -57,7 +57,7 @@ const youkuReferer = "https://v.youku.com"
 
 // var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
 
-var ccodes = []string{"02020101"}
+var ccodes = []string{"0808"}
 
 func youkuUps(vid string) youkuData {
 	var url string
