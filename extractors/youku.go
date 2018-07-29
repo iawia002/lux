@@ -25,11 +25,12 @@ type segs struct {
 }
 
 type stream struct {
-	Size   int64  `json:"size"`
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
-	Segs   []segs `json:"segs"`
-	Type   string `json:"stream_type"`
+	Size      int64  `json:"size"`
+	Width     int    `json:"width"`
+	Height    int    `json:"height"`
+	Segs      []segs `json:"segs"`
+	Type      string `json:"stream_type"`
+	AudioLang string `json:"audio_lang"`
 }
 
 type youkuVideo struct {
@@ -52,6 +53,18 @@ type youkuData struct {
 }
 
 const youkuReferer = "https://v.youku.com"
+
+func getAudioLang(lang string) string {
+	var youkuAudioLang = map[string]string{
+		"guoyu": "国语",
+		"ja":    "日语",
+	}
+	translate, ok := youkuAudioLang[lang]
+	if !ok {
+		return lang
+	}
+	return translate
+}
 
 // https://g.alicdn.com/player/ykplayer/0.5.61/youku-player.min.js
 // {"0505":"interior","050F":"interior","0501":"interior","0502":"interior","0503":"interior","0510":"adshow","0512":"BDskin","0590":"BDskin"}
@@ -87,18 +100,31 @@ func youkuUps(vid string) youkuData {
 
 func genData(youkuData data) map[string]downloader.FormatData {
 	var (
-		size        int64
-		bestQuality string
+		size         int64
+		bestQuality  string
+		formatString string
+		quality      string
 	)
 	format := map[string]downloader.FormatData{}
-	// get the best quality
-	for _, s := range youkuData.Stream {
-		if s.Size > size {
-			size = s.Size
-			bestQuality = s.Type
-		}
-	}
 	for _, stream := range youkuData.Stream {
+		if stream.AudioLang == "default" {
+			formatString = stream.Type
+			quality = fmt.Sprintf(
+				"%s %dx%d", stream.Type, stream.Width, stream.Height,
+			)
+		} else {
+			formatString = fmt.Sprintf("%s-%s", stream.Type, stream.AudioLang)
+			quality = fmt.Sprintf(
+				"%s %dx%d %s", stream.Type, stream.Width, stream.Height,
+				getAudioLang(stream.AudioLang),
+			)
+		}
+		// get the best quality
+		if stream.Size > size {
+			size = stream.Size
+			bestQuality = formatString
+		}
+
 		ext := strings.Split(
 			strings.Split(stream.Segs[0].URL, "?")[0],
 			".",
@@ -112,8 +138,7 @@ func genData(youkuData data) map[string]downloader.FormatData {
 			}
 			urls = append(urls, url)
 		}
-		quality := fmt.Sprintf("%s %dx%d", stream.Type, stream.Width, stream.Height)
-		format[stream.Type] = downloader.FormatData{
+		format[formatString] = downloader.FormatData{
 			URLs:    urls,
 			Size:    stream.Size,
 			Quality: quality,
