@@ -30,6 +30,8 @@ type iqiyi struct {
 }
 
 var iqiyiFormats = []int{
+	10, //4K
+	19, //4K
 	18, // 1080p
 	5,  // 1072p, 1080p
 	4,  // 720p
