@@ -1,22 +1,22 @@
 <p align="center"><img src="static/logo.png" alt="Annie" height="100px"></p>
 
 <div align="center">
-  <a href="https://codecov.io/gh/iawia002/annie" target="_blank">
+  <a href="https://codecov.io/gh/iawia002/annie">
     <img src="https://img.shields.io/codecov/c/github/iawia002/annie.svg?style=flat-square" alt="Codecov">
   </a>
-  <a href="https://travis-ci.com/iawia002/annie" target="_blank">
+  <a href="https://travis-ci.com/iawia002/annie">
     <img src="https://img.shields.io/travis/iawia002/annie.svg?style=flat-square" alt="Build Status">
   </a>
-  <a href="https://goreportcard.com/report/github.com/iawia002/annie" target="_blank">
+  <a href="https://goreportcard.com/report/github.com/iawia002/annie">
     <img src="https://goreportcard.com/badge/github.com/iawia002/annie?style=flat-square" alt="Go Report Card">
   </a>
   <a href="https://github.com/iawia002/annie/releases">
     <img src="https://img.shields.io/github/release/iawia002/annie.svg?style=flat-square" alt="GitHub release">
   </a>
-  <a href="https://formulae.brew.sh/formula/annie" target="_blank">
+  <a href="https://formulae.brew.sh/formula/annie">
     <img src="https://img.shields.io/homebrew/v/annie.svg?style=flat-square" alt="Homebrew">
   </a>
-  <a href="https://t.me/anniedev" target="_blank">
+  <a href="https://t.me/anniedev">
     <img src="https://img.shields.io/badge/telegram-join%20chat-0088cc.svg?longCache=true&style=flat-square" alt="telegram">
   </a>
 </div>
