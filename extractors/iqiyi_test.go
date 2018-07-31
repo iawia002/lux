@@ -34,10 +34,10 @@ func TestIqiyi(t *testing.T) {
 		{
 			name: "curid test 1",
 			args: test.Args{
-				URL:     "http://www.iqiyi.com/a_19rrhcqtot.html#curid=958065800_03b77bd0648a6c1df86b0f7c4fd0e526",
-				Title:   "《热血街舞团》综艺专题-高清视频在线观看-爱奇艺",
-				Size:    10949684,
-				Quality: "1280x720",
+				URL:     "http://www.iqiyi.com/v_19rrbebyt8.html#curid=963226000_f877de17f261458b04c932ca90ee67a3",
+				Title:   "热血街舞团：召集人公演炸屏来袭 热血之城上演“抢人”大战",
+				Size:    92637940,
+				Quality: "1920x1080",
 			},
 		},
 	}
