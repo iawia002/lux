@@ -36,8 +36,8 @@ func TestIqiyi(t *testing.T) {
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/v_19rrbebyt8.html#curid=963226000_f877de17f261458b04c932ca90ee67a3",
 				Title:   "热血街舞团：召集人公演炸屏来袭 热血之城上演“抢人”大战",
-				Size:    92637940,
-				Quality: "1920x1080",
+				Size:    344675816,
+				Quality: "3840x2160",
 			},
 		},
 	}
