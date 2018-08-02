@@ -63,9 +63,6 @@ func download(data twitter, uri string) downloader.VideoData {
 			}
 			qualityString := utils.MatchOneOf(m3u8, `/(\d+x\d+)/`)[1]
 			quality := strconv.Itoa(index + 1)
-			if index+1 == len(m3u8urls) {
-				quality = "default"
-			}
 			format[quality] = downloader.FormatData{
 				Quality: qualityString,
 				URLs:    urls,

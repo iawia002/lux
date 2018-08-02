@@ -51,11 +51,7 @@ func Vimeo(url string) downloader.VideoData {
 	format := map[string]downloader.FormatData{}
 	var size int64
 	var urlData downloader.URLData
-	var highestProfile int
 	for _, video := range vimeoData.Request.Files.Progressive {
-		if video.Profile > highestProfile {
-			highestProfile = video.Profile
-		}
 		size = request.Size(video.URL, url)
 		urlData = downloader.URLData{
 			URL:  video.URL,
@@ -68,8 +64,6 @@ func Vimeo(url string) downloader.VideoData {
 			Quality: video.Quality,
 		}
 	}
-	format["default"] = format[strconv.Itoa(highestProfile)]
-	delete(format, strconv.Itoa(highestProfile))
 
 	extractedData := downloader.VideoData{
 		Site:    "Vimeo vimeo.com",

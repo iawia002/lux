@@ -159,15 +159,6 @@ func Mgtv(url string) downloader.VideoData {
 			Quality: stream.Name,
 		}
 	}
-	// best quality
-	for _, quality := range []string{"3", "2", "1"} {
-		// 超清，高清，标清
-		if data, ok := format[quality]; ok {
-			format["default"] = data
-			delete(format, quality)
-			break
-		}
-	}
 	extractedData := downloader.VideoData{
 		Site:    "芒果TV mgtv.com",
 		Title:   title,

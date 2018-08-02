@@ -9,38 +9,24 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
-type instagramEdgeNode struct {
-	DisplayURL string `json:"display_url"`
-}
-
-type instagramEdges struct {
-	Node instagramEdgeNode `json:"node"`
-}
-
-type instagramEdgeSidecar struct {
-	Edges []instagramEdges `json:"edges"`
-}
-
-type instagramShortcodeMedia struct {
-	DisplayURL  string               `json:"display_url"`
-	VideoURL    string               `json:"video_url"`
-	EdgeSidecar instagramEdgeSidecar `json:"edge_sidecar_to_children"`
-}
-
-type instagramGraphql struct {
-	ShortcodeMedia instagramShortcodeMedia `json:"shortcode_media"`
-}
-
-type instagramPostPage struct {
-	Graphql instagramGraphql `json:"graphql"`
-}
-
-type instagramEntryData struct {
-	PostPage []instagramPostPage `json:"PostPage"`
-}
-
 type instagram struct {
-	EntryData instagramEntryData `json:"entry_data"`
+	EntryData struct {
+		PostPage []struct {
+			Graphql struct {
+				ShortcodeMedia struct {
+					DisplayURL  string `json:"display_url"`
+					VideoURL    string `json:"video_url"`
+					EdgeSidecar struct {
+						Edges []struct {
+							Node struct {
+								DisplayURL string `json:"display_url"`
+							} `json:"node"`
+						} `json:"edges"`
+					} `json:"edge_sidecar_to_children"`
+				} `json:"shortcode_media"`
+			} `json:"graphql"`
+		} `json:"PostPage"`
+	} `json:"entry_data"`
 }
 
 // Instagram download function

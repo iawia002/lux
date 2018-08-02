@@ -39,13 +39,20 @@ type FormatData struct {
 	name    string
 }
 
+type formats []FormatData
+
+func (f formats) Len() int           { return len(f) }
+func (f formats) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
+func (f formats) Less(i, j int) bool { return f[i].Size > f[j].Size }
+
 // VideoData data struct of video info
 type VideoData struct {
 	Site  string
 	Title string
 	Type  string
 	// each format has it's own URLs and Quality
-	Formats map[string]FormatData
+	Formats       map[string]FormatData
+	sortedFormats formats
 }
 
 func progressBar(size int64) *pb.ProgressBar {
@@ -177,10 +184,10 @@ func Save(
 	}()
 }
 
-func printStream(k string, data FormatData) {
+func (data FormatData) printStream() {
 	blue := color.New(color.FgBlue)
 	cyan := color.New(color.FgCyan)
-	blue.Println(fmt.Sprintf("     [%s]  -------------------", k))
+	blue.Println(fmt.Sprintf("     [%s]  -------------------", data.name))
 	if data.Quality != "" {
 		cyan.Printf("     Quality:         ")
 		fmt.Println(data.Quality)
@@ -191,15 +198,35 @@ func printStream(k string, data FormatData) {
 	}
 	fmt.Printf("%.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
 	cyan.Printf("     # download with: ")
-	fmt.Println("annie -f " + k + " \"URL\"")
+	fmt.Println("annie -f " + data.name + " \"URL\"")
 	fmt.Println()
 }
 
-type formats []FormatData
-
-func (f formats) Len() int           { return len(f) }
-func (f formats) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
-func (f formats) Less(i, j int) bool { return f[i].Size > f[j].Size }
+func (v *VideoData) genSortedFormats() {
+	if len(v.Formats) == 1 {
+		data := v.Formats["default"]
+		data.name = "default"
+		if data.Size == 0 {
+			data.calculateTotalSize()
+		}
+		v.Formats["default"] = data
+		v.sortedFormats = append(v.sortedFormats, data)
+		return
+	}
+	for k, data := range v.Formats {
+		if data.Size == 0 {
+			data.calculateTotalSize()
+		}
+		data.name = k
+		v.Formats[k] = data
+		v.sortedFormats = append(v.sortedFormats, data)
+	}
+	sort.Sort(v.sortedFormats)
+	bestQuality := v.sortedFormats[0].name
+	v.sortedFormats[0].name = "default"
+	v.Formats["default"] = v.sortedFormats[0]
+	delete(v.Formats, bestQuality)
+}
 
 func (v VideoData) printInfo(format string) {
 	cyan := color.New(color.FgCyan)
@@ -213,26 +240,19 @@ func (v VideoData) printInfo(format string) {
 	if config.InfoOnly {
 		cyan.Printf(" Streams:   ")
 		fmt.Println("# All available quality")
-		var sortedFormats formats
-		var k string
-		var data FormatData
-		for k, data = range v.Formats {
-			data.name = k
-			sortedFormats = append(sortedFormats, data)
-		}
-		sort.Sort(sortedFormats)
-		for _, data = range sortedFormats {
-			printStream(data.name, data)
+		for _, data := range v.sortedFormats {
+			data.printStream()
 		}
 	} else {
 		cyan.Printf(" Stream:   ")
 		fmt.Println()
-		printStream(format, v.Formats[format])
+		v.Formats[format].printStream()
 	}
 }
 
 // Download download urls
 func (v VideoData) Download(refer string) {
+	v.genSortedFormats()
 	if config.ExtractedData {
 		jsonData, _ := json.MarshalIndent(v, "", "    ")
 		fmt.Printf("%s\n", jsonData)
@@ -253,9 +273,6 @@ func (v VideoData) Download(refer string) {
 	if !ok {
 		log.Println(v)
 		log.Fatal("No format named " + format)
-	}
-	if data.Size == 0 {
-		data.calculateTotalSize()
 	}
 	v.printInfo(format)
 	if config.InfoOnly {

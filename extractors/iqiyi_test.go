@@ -18,7 +18,7 @@ func TestIqiyi(t *testing.T) {
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/v_19rrbdmaj0.html",
 				Title:   "新一轮降水将至 冷空气影响中东部地区",
-				Size:    2838236,
+				Size:    3122304,
 				Quality: "896x504",
 			},
 		},
