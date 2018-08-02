@@ -34,10 +34,9 @@ var leQuality = map[string]string{
 func Le(url string) downloader.VideoData {
 	vid := utils.MatchOneOf(url, `ptv/vplay/(\d+).html`)[1]
 	var (
-		apiURL      string
-		jsonData    string
-		bestQuality string
-		data        leData
+		apiURL   string
+		jsonData string
+		data     leData
 	)
 	format := map[string]downloader.FormatData{}
 	for _, q := range []string{"52", "22", "13", "21"} {
@@ -53,9 +52,6 @@ func Le(url string) downloader.VideoData {
 		}
 		if data.Data == nil {
 			continue
-		}
-		if bestQuality == "" {
-			bestQuality = q
 		}
 		urls := []downloader.URLData{}
 		var (
@@ -85,8 +81,6 @@ func Le(url string) downloader.VideoData {
 			),
 		}
 	}
-	format["default"] = format[bestQuality]
-	delete(format, bestQuality)
 	html := request.Get(url, url, nil)
 	title := utils.MatchOneOf(html, `title:"(.+?)",`)[1]
 	extractedData := downloader.VideoData{

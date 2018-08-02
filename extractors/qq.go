@@ -111,8 +111,6 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) map[string]downloader.Format
 			Quality: fi.Cname,
 		}
 	}
-	format["default"] = format[data.Fl.Fi[len(data.Fl.Fi)-1].Name]
-	delete(format, data.Fl.Fi[len(data.Fl.Fi)-1].Name)
 	return format
 }
 

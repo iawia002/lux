@@ -216,7 +216,6 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 	}
 
 	format := map[string]downloader.FormatData{}
-	var defaultQuality string
 	for _, q := range []string{"15", "32", "64", "80", "112", "74", "116"} {
 		apiURL := genAPI(aid, cid, options.Bangumi, q, seasonType)
 		jsonString := request.Get(apiURL, referer, nil)
@@ -234,10 +233,7 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 			Size:    size,
 			Quality: quality[data.Quality],
 		}
-		defaultQuality = q // last one is the best quality
 	}
-	format["default"] = format[defaultQuality]
-	delete(format, defaultQuality)
 
 	// get the title
 	doc := parser.GetDoc(html)

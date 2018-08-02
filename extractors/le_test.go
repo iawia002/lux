@@ -16,17 +16,15 @@ func TestLe(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:     "http://www.le.com/ptv/vplay/31453073.html",
-				Title:   "难以管理！中国共享单车撤出华盛顿",
-				Quality: "高清 960x544",
+				URL:   "http://www.le.com/ptv/vplay/31453073.html",
+				Title: "难以管理！中国共享单车撤出华盛顿",
 			},
 		},
 		{
 			name: "comic test",
 			args: test.Args{
-				URL:     "http://www.le.com/ptv/vplay/31448498.html",
-				Title:   "天行九歌 60",
-				Quality: "1080P 1920x1072",
+				URL:   "http://www.le.com/ptv/vplay/31448498.html",
+				Title: "天行九歌 60",
 			},
 		},
 	}

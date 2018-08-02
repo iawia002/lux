@@ -14,9 +14,7 @@ func Facebook(url string) downloader.VideoData {
 	title := utils.MatchOneOf(html, `<title id="pageTitle">(.+)</title>`)[1]
 
 	format := map[string]downloader.FormatData{}
-	var tag string
 	for _, quality := range []string{"sd", "hd"} {
-		tag = quality
 		u := utils.MatchOneOf(
 			html, fmt.Sprintf(`%s_src:"(.+?)"`, quality),
 		)[1]
@@ -26,10 +24,7 @@ func Facebook(url string) downloader.VideoData {
 			Size: size,
 			Ext:  "mp4",
 		}
-		if quality == "hd" {
-			tag = "default"
-		}
-		format[tag] = downloader.FormatData{
+		format[quality] = downloader.FormatData{
 			URLs:    []downloader.URLData{urlData},
 			Size:    size,
 			Quality: quality,

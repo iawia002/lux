@@ -100,8 +100,6 @@ func youkuUps(vid string) youkuData {
 
 func genData(youkuData data) map[string]downloader.FormatData {
 	var (
-		size         int64
-		bestQuality  string
 		formatString string
 		quality      string
 	)
@@ -118,11 +116,6 @@ func genData(youkuData data) map[string]downloader.FormatData {
 				"%s %dx%d %s", stream.Type, stream.Width, stream.Height,
 				getAudioLang(stream.AudioLang),
 			)
-		}
-		// get the best quality
-		if stream.Size > size {
-			size = stream.Size
-			bestQuality = formatString
 		}
 
 		ext := strings.Split(
@@ -144,8 +137,6 @@ func genData(youkuData data) map[string]downloader.FormatData {
 			Quality: quality,
 		}
 	}
-	format["default"] = format[bestQuality]
-	delete(format, bestQuality)
 	return format
 }
 
