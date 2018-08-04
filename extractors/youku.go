@@ -72,13 +72,19 @@ func getAudioLang(lang string) string {
 // var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
 
 func youkuUps(vid string) youkuData {
-	var url string
-	var utid string
-	var html string
-	var data youkuData
-	headers := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
-	setCookie := headers.Get("Set-Cookie")
-	utid = utils.MatchOneOf(setCookie, `cna=(.+?);`)[1]
+	var (
+		url  string
+		utid string
+		html string
+		data youkuData
+	)
+	if strings.Contains(config.Cookie, "cna=") {
+		utid = utils.MatchOneOf(config.Cookie, `cna=(.+?);`)[1]
+	} else {
+		headers := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
+		setCookie := headers.Get("Set-Cookie")
+		utid = utils.MatchOneOf(setCookie, `cna=(.+?);`)[1]
+	}
 	// https://g.alicdn.com/player/ykplayer/0.5.61/youku-player.min.js
 	// grep -oE '"[0-9a-zA-Z+/=]{256}"' youku-player.min.js
 	ckey := "7B19C0AB12633B22E7FE81271162026020570708D6CC189E4924503C49D243A0DE6CD84A766832C2C99898FC5ED31F3709BB3CDD82C96492E721BDD381735026"
