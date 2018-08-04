@@ -198,7 +198,11 @@ func (data FormatData) printStream() {
 	}
 	fmt.Printf("%.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
 	cyan.Printf("     # download with: ")
-	fmt.Println("annie -f " + data.name + " \"URL\"")
+	if data.name == "default" {
+		fmt.Println("annie \"URL\"")
+	} else {
+		fmt.Println("annie -f " + data.name + " \"URL\"")
+	}
 	fmt.Println()
 }
 
