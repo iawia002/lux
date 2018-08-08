@@ -66,14 +66,16 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) map[string]downloader.Format
 	}
 	var fmtIDPrefix string
 	for _, fi := range data.Fl.Fi {
-		// Multiple formats
-		if fi.ID > 100000 {
-			fmtIDPrefix = "m"
-		} else {
-			fmtIDPrefix = "p"
+		if fc > 0 {
+			// Multiple formats
+			if fi.ID > 100000 {
+				fmtIDPrefix = "m"
+			} else {
+				fmtIDPrefix = "p"
+			}
+			fmtIDName := fmt.Sprintf("%s%d", fmtIDPrefix, fi.ID%10000)
+			fns[1] = fmtIDName
 		}
-		fmtIDName := fmt.Sprintf("%s%d", fmtIDPrefix, fi.ID%10000)
-		fns[1] = fmtIDName
 		var urls []downloader.URLData
 		var totalSize int64
 		var filename string
