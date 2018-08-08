@@ -25,19 +25,19 @@ func TestIqiyi(t *testing.T) {
 		{
 			name: "title test 1",
 			args: test.Args{
-				URL:     "http://www.iqiyi.com/v_19rrbhikxo.html",
-				Title:   "热血街舞团：鹿晗个人宣传片震撼发布 执着前行终现万丈荣光",
-				Size:    13843192,
+				URL:     "http://www.iqiyi.com/v_19rqy2z83w.html",
+				Title:   "收了创意视频2018：58天环球飞行记",
+				Size:    41235168,
 				Quality: "1280x720",
 			},
 		},
 		{
 			name: "curid test 1",
 			args: test.Args{
-				URL:     "http://www.iqiyi.com/v_19rrbebyt8.html#curid=963226000_f877de17f261458b04c932ca90ee67a3",
-				Title:   "热血街舞团：召集人公演炸屏来袭 热血之城上演“抢人”大战",
-				Size:    344675816,
-				Quality: "3840x2160",
+				URL:     "https://www.iqiyi.com/v_19rro0jdls.html#curid=350289100_6e6601aae889d0b1004586a52027c321",
+				Title:   "Shawn Mendes - Never Be Alone",
+				Size:    41084204,
+				Quality: "1280x528",
 			},
 		},
 	}
