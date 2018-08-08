@@ -14,27 +14,27 @@ func TestInstagram(t *testing.T) {
 		args test.Args
 	}{
 		{
-			name: "Video",
+			name: "video test",
 			args: test.Args{
-				URL:   "https://www.instagram.com/p/BYQ0PMWlAQY",
-				Title: "王薇雅🇨🇳🇺🇸 on Instagram：“我的Ins是用来分享#lifestyle 一些正能量健身旅游等，请那些负能量离我远点！谢谢😀😀BTW，我从来不...",
-				Size:  1469037,
+				URL:   "https://www.instagram.com/p/BlIka1ZFCNr",
+				Title: "P!NK on Instagram：“AFL got us hyped! #adelaideadventures #iwanttoplay”",
+				Size:  2741413,
 			},
 		},
 		{
-			name: "Image Single",
+			name: "image test",
 			args: test.Args{
-				URL:   "https://www.instagram.com/p/Bei7whzgfMq",
-				Title: "王薇雅🇨🇳🇺🇸 on Instagram：“Let go of what u can no longer keep. Protect what’s sti...",
-				Size:  144348,
+				URL:   "https://www.instagram.com/p/Bl5oVUyl9Yx",
+				Title: "P!NK on Instagram：“Australia：heaven”",
+				Size:  250596,
 			},
 		},
 		{
-			name: "Image Album",
+			name: "image album test",
 			args: test.Args{
-				URL:   "https://www.instagram.com/p/BdZ7sPTgchP",
-				Title: "王薇雅🇨🇳🇺🇸 on Instagram：“2018的第一餐，吃得很满足🐷#happynewyear #🎆 #🎊”",
-				Size:  10353828,
+				URL:   "https://www.instagram.com/p/Bjyr-gxF4Rb",
+				Title: "P!NK on Instagram：“Nature. Nurture. Kiddos. Gratitude”",
+				Size:  4599909,
 			},
 		},
 	}
