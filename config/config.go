@@ -39,6 +39,8 @@ var (
 	Caption bool
 	// Ccode youku ccode
 	Ccode string
+	// RetryTimes how many times to retry when the download failed
+	RetryTimes int
 )
 
 // FakeHeaders fake http headers

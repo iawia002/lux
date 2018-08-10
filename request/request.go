@@ -84,18 +84,18 @@ func Request(
 	if config.Refer != "" {
 		req.Header.Set("Referer", config.Refer)
 	}
-	retryTimes := 3
 	var (
 		res          *http.Response
 		requestError error
 	)
-	for i := 0; i < retryTimes; i++ {
+	for i := 0; ; i++ {
 		res, requestError = client.Do(req)
-		if requestError == nil {
+		if requestError == nil && res.StatusCode < 400 {
 			break
-		}
-		if requestError != nil && i+1 == retryTimes {
-			panic(requestError)
+		} else if i+1 >= config.RetryTimes {
+			panic(fmt.Sprintf(
+				"request error: %s HTTP %d", requestError, res.StatusCode,
+			))
 		}
 		time.Sleep(1 * time.Second)
 	}

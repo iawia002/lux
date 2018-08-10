@@ -32,6 +32,7 @@
   * [Multiple inputs](#multiple-inputs)
   * [Resume a download](#resume-a-download)
   * [Cookies](#cookies)
+  * [Auto retry](#auto-retry)
   * [Proxy](#proxy)
   * [Multi-Thread](#multi-thread)
   * [Short link](#short-link)
@@ -266,6 +267,10 @@ $ annie -F ~/Desktop/u.txt
 
 A temporary `.download` file is kept in the output directory. If `annie` is ran with the same arguments, then the download progress will resume from the last session.
 
+### Auto retry
+
+annie will auto retry when the download failed, you can specify the retry times by `-retry` option (default is 100).
+
 ### Cookies
 
 Cookies can be provided to `annie` with the `-c` option if they are required for accessing the video.
@@ -460,6 +465,8 @@ $ annie -j https://www.bilibili.com/video/av20203945
     	SOCKS5 proxy
   -x string
     	HTTP proxy
+  -retry int
+    	How many times to retry when the download failed (default 100)
 ```
 
 #### Playlist:
