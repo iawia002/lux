@@ -89,11 +89,6 @@ func writeFile(
 	url string, file *os.File, headers map[string]string, bar *pb.ProgressBar,
 ) (int64, error) {
 	res := request.Request("GET", url, nil, headers)
-	if res.StatusCode >= 400 {
-		red := color.New(color.FgRed)
-		log.Print(url)
-		log.Fatal(red.Sprintf("HTTP error: %d", res.StatusCode))
-	}
 	defer res.Body.Close()
 	writer := io.MultiWriter(file, bar)
 	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
