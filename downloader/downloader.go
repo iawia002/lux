@@ -87,7 +87,7 @@ func Caption(url, refer, fileName, ext string) {
 
 func writeFile(
 	url string, file *os.File, headers map[string]string, bar *pb.ProgressBar,
-) {
+) (int64, error) {
 	res := request.Request("GET", url, nil, headers)
 	if res.StatusCode >= 400 {
 		red := color.New(color.FgRed)
@@ -98,10 +98,11 @@ func writeFile(
 	writer := io.MultiWriter(file, bar)
 	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
 	// So don't worry about memory.
-	_, copyErr := io.Copy(writer, res.Body)
+	written, copyErr := io.Copy(writer, res.Body)
 	if copyErr != nil {
-		log.Fatal(fmt.Sprintf("file copy error: %s", copyErr))
+		return written, fmt.Errorf("file copy error: %s", copyErr)
 	}
+	return written, nil
 }
 
 // Save save url file
@@ -165,11 +166,33 @@ func Save(
 		for ; i <= chunk; i++ {
 			end = start + chunkSize - 1
 			headers["Range"] = fmt.Sprintf("bytes=%d-%d", start, end)
-			writeFile(urlData.URL, file, headers, bar)
+			temp := start
+			for i := 0; ; i++ {
+				written, err := writeFile(urlData.URL, file, headers, bar)
+				if err == nil {
+					break
+				} else if i+1 >= config.RetryTimes {
+					log.Fatal(err)
+				}
+				temp += written
+				headers["Range"] = fmt.Sprintf("bytes=%d-%d", temp, end)
+				time.Sleep(1 * time.Second)
+			}
 			start = end + 1
 		}
 	} else {
-		writeFile(urlData.URL, file, headers, bar)
+		temp := tempFileSize
+		for i := 0; ; i++ {
+			written, err := writeFile(urlData.URL, file, headers, bar)
+			if err == nil {
+				break
+			} else if i+1 >= config.RetryTimes {
+				log.Fatal(err)
+			}
+			temp += written
+			headers["Range"] = fmt.Sprintf("bytes=%d-", temp)
+			time.Sleep(1 * time.Second)
+		}
 	}
 	// close and rename temp file at the end of this function
 	defer func() {
@@ -309,7 +332,6 @@ func (v VideoData) Download(refer string) {
 			defer wgp.Done()
 			Save(url, refer, fileName, bar)
 		}(url, refer, partFileName, bar)
-
 	}
 	wgp.Wait()
 	bar.Finish()

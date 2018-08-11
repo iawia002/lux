@@ -38,6 +38,9 @@ func init() {
 	)
 	flag.BoolVar(&config.Caption, "C", false, "Download captions")
 	flag.StringVar(&config.Ccode, "ccode", "0808", "Youku ccode")
+	flag.IntVar(
+		&config.RetryTimes, "retry", 100, "How many times to retry when the download failed",
+	)
 }
 
 func download(videoURL string) {
