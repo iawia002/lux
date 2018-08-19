@@ -165,7 +165,7 @@ func extractVideoURLS(data youtubeData, referer string) map[string]downloader.Fo
 			Size: size,
 			Ext:  ext,
 		}
-		if ext == "m4a" {
+		if isAudio {
 			// Audio data for merging with video
 			audio = urlData
 		}
