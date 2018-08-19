@@ -223,16 +223,6 @@ func (data FormatData) printStream() {
 }
 
 func (v *VideoData) genSortedFormats() {
-	if len(v.Formats) == 1 {
-		data := v.Formats["default"]
-		data.name = "default"
-		if data.Size == 0 {
-			data.calculateTotalSize()
-		}
-		v.Formats["default"] = data
-		v.sortedFormats = append(v.sortedFormats, data)
-		return
-	}
 	for k, data := range v.Formats {
 		if data.Size == 0 {
 			data.calculateTotalSize()
@@ -241,7 +231,18 @@ func (v *VideoData) genSortedFormats() {
 		v.Formats[k] = data
 		v.sortedFormats = append(v.sortedFormats, data)
 	}
-	sort.Sort(v.sortedFormats)
+	if len(v.Formats) > 1 {
+		// Only multiple formats require sorting
+		sort.Sort(v.sortedFormats)
+	}
+	if !config.InfoOnly && !config.ExtractedData &&
+		config.Format != "" && config.Format != "default" {
+		return
+	}
+	// if Formats already have "default" format, skip follow step
+	if _, ok := v.Formats["default"]; ok {
+		return
+	}
 	bestQuality := v.sortedFormats[0].name
 	v.sortedFormats[0].name = "default"
 	v.Formats["default"] = v.sortedFormats[0]
@@ -294,7 +295,7 @@ func (v VideoData) Download(refer string) {
 		log.Println(v)
 		log.Fatal("No format named " + format)
 	}
-	v.printInfo(format)
+	v.printInfo(format) // if InfoOnly, this func will print all formats info
 	if config.InfoOnly {
 		return
 	}
