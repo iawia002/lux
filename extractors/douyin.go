@@ -1,9 +1,6 @@
 package extractors
 
 import (
-	// "encoding/json"
-	"strings"
-
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -27,7 +24,6 @@ func Douyin(url string) downloader.VideoData {
 	html := request.Get(url, url, nil)
 	title := utils.MatchOneOf(html, `<p class="desc">(.+?)</p>`)[1]
 	realURL := utils.MatchOneOf(html, `playAddr: "(.+?)"`)[1]
-	realURL = strings.Replace(realURL, "/playwm/", "/play/", 1)
 	size := request.Size(realURL, url)
 	urlData := downloader.URLData{
 		URL:  realURL,
