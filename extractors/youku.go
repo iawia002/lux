@@ -148,7 +148,9 @@ func genData(youkuData data) map[string]downloader.FormatData {
 
 // Youku download function
 func Youku(url string) downloader.VideoData {
-	vid := utils.MatchOneOf(url, `id_(.+?).html`)[1]
+	vid := utils.MatchOneOf(
+		url, `id_(.+?)\.html`, `id_(.+)`,
+	)[1]
 	youkuData := youkuUps(vid)
 	if youkuData.Data.Error.Code != 0 {
 		log.Fatal(youkuData.Data.Error.Note)
