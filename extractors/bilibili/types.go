@@ -1,5 +1,10 @@
 package bilibili
 
+type qualityInfo struct {
+	Description []string `json:"accept_description"`
+	Quality     []int    `json:"accept_quality"`
+}
+
 type dURLData struct {
 	Size  int64  `json:"size"`
 	URL   string `json:"url"`
@@ -48,12 +53,14 @@ type multiPage struct {
 	VideoData multiPageVideoData `json:"videoData"`
 }
 
-var quality = map[int]string{
+var qualityString = map[int]string{
 	116: "高清 1080P60",
 	74:  "高清 720P60",
 	112: "高清 1080P+",
 	80:  "高清 1080P",
 	64:  "高清 720P",
+	48:  "高清 720P",
 	32:  "清晰 480P",
+	16:  "流畅 360P",
 	15:  "流畅 360P",
 }

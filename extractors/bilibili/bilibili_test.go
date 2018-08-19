@@ -71,33 +71,6 @@ func TestBilibili(t *testing.T) {
 				Title:   "你的名字。",
 			},
 		},
-		// {
-		// 	name: "playlist test",
-		// 	args: test.Args{
-		// 		URL:     "https://www.bilibili.com/video/av20827366/",
-		// 		Title:   "【极限2K画质 60fps】这可能是我做过最美的miku了【boomclap布料解算版】 1080P版",
-		// 		Size:    38664181,
-		// 		Quality: "高清 1080P",
-		// 	},
-		// },
-		// {
-		// 	name: "playlist test",
-		// 	args: test.Args{
-		// 		URL:     "https://www.bilibili.com/video/av20827366/?p=1",
-		// 		Title:   "【极限2K画质 60fps】这可能是我做过最美的miku了【boomclap布料解算版】 1080P版",
-		// 		Size:    38664181,
-		// 		Quality: "高清 1080P",
-		// 	},
-		// },
-		// {
-		// 	name: "playlist test",
-		// 	args: test.Args{
-		// 		URL:     "https://www.bilibili.com/video/av20827366/?p=2",
-		// 		Title:   "极限2K画质 60fps】这可能是我做过最美的miku了【boomclap布料解算版】 2K版",
-		// 		Size:    68503929,
-		// 		Quality: "高清 1080P",
-		// 	},
-		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

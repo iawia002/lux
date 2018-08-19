@@ -215,9 +215,18 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 		seasonType = utils.MatchOneOf(html, `"season_type":(\d+)`)[1]
 	}
 
-	format := map[string]downloader.FormatData{}
-	for _, q := range []string{"15", "32", "64", "80", "112", "74", "116"} {
-		apiURL := genAPI(aid, cid, options.Bangumi, q, seasonType)
+	// Get "accept_quality" and "accept_description"
+	// "accept_description":["高清 1080P","高清 720P","清晰 480P","流畅 360P"],
+	// "accept_quality":[80,48,32,16],
+	jsonString := request.Get(
+		genAPI(aid, cid, options.Bangumi, "15", seasonType), referer, nil,
+	)
+	var quality qualityInfo
+	json.Unmarshal([]byte(jsonString), &quality)
+
+	format := make(map[string]downloader.FormatData, len(quality.Quality))
+	for _, q := range quality.Quality {
+		apiURL := genAPI(aid, cid, options.Bangumi, strconv.Itoa(q), seasonType)
 		jsonString := request.Get(apiURL, referer, nil)
 		var data bilibiliData
 		json.Unmarshal([]byte(jsonString), &data)
@@ -228,10 +237,10 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 		}
 
 		urls, size := genURL(data.DURL)
-		format[q] = downloader.FormatData{
+		format[strconv.Itoa(data.Quality)] = downloader.FormatData{
 			URLs:    urls,
 			Size:    size,
-			Quality: quality[data.Quality],
+			Quality: qualityString[data.Quality],
 		}
 	}
 
