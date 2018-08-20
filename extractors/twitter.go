@@ -45,7 +45,7 @@ func download(data twitter, uri string) downloader.VideoData {
 	var format = make(map[string]downloader.FormatData)
 	switch {
 	// if video file is m3u8 and ts
-	case strings.HasSuffix(data.Track.URL, "m3u8"):
+	case strings.Contains(data.Track.URL, ".m3u8"):
 		m3u8urls := utils.M3u8URLs(data.Track.URL)
 		for index, m3u8 := range m3u8urls {
 			var totalSize int64
@@ -71,7 +71,7 @@ func download(data twitter, uri string) downloader.VideoData {
 		}
 
 	// if video file is mp4
-	case strings.HasSuffix(data.Track.URL, "mp4"):
+	case strings.Contains(data.Track.URL, ".mp4"):
 		size = request.Size(data.Track.URL, uri)
 		urlData := downloader.URLData{
 			URL:  data.Track.URL,
