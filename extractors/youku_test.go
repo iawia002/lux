@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	config.Ccode = "0808"
+	config.Ccode = "0590"
 }
 
 func TestYouku(t *testing.T) {
