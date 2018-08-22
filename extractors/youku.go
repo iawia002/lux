@@ -1,9 +1,15 @@
 package extractors
 
 import (
+	"bytes"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	netURL "net/url"
 	"strings"
 	"time"
@@ -89,6 +95,9 @@ func youkuUps(vid string) youkuData {
 	// grep -oE '"[0-9a-zA-Z+/=]{256}"' youku-player.min.js
 	ckey := "7B19C0AB12633B22E7FE81271162026020570708D6CC189E4924503C49D243A0DE6CD84A766832C2C99898FC5ED31F3709BB3CDD82C96492E721BDD381735026"
 	for _, ccode := range []string{config.Ccode} {
+		if ccode == "010101500003" {
+			utid = generateUtdid()
+		}
 		url = fmt.Sprintf(
 			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s&ckey=%s",
 			vid, ccode, time.Now().Unix()/1000, netURL.QueryEscape(utid), netURL.QueryEscape(ckey),
@@ -102,6 +111,40 @@ func youkuUps(vid string) youkuData {
 		}
 	}
 	return data
+}
+
+func getBytes(val int32) []byte {
+	var buff bytes.Buffer
+	binary.Write(&buff, binary.BigEndian, val)
+	return buff.Bytes()
+}
+
+func hashCode(s string) int32 {
+	var result int32 = 0
+	for _, c := range s {
+		result = result*0x1f + int32(c)
+	}
+	return result
+}
+
+func hmacSha1(key []byte, msg []byte) []byte {
+	mac := hmac.New(sha1.New, key)
+	mac.Write([]byte(msg))
+	return mac.Sum(nil)
+}
+
+func generateUtdid() string {
+	timestamp := int32(time.Now().Unix())
+	var buffer bytes.Buffer
+	buffer.Write(getBytes(timestamp))
+	buffer.Write(getBytes(rand.Int31()))
+	buffer.WriteByte(0x03)
+	buffer.WriteByte(0x00)
+	imei := fmt.Sprintf("%d", rand.Int31())
+	buffer.Write(getBytes(hashCode(imei)))
+	data := hmacSha1([]byte("d6fc3a4a06adbde89223bvefedc24fecde188aaa9161"), buffer.Bytes())
+	buffer.Write(getBytes(hashCode(base64.StdEncoding.EncodeToString(data))))
+	return base64.StdEncoding.EncodeToString(buffer.Bytes())
 }
 
 func genData(youkuData data) map[string]downloader.FormatData {

@@ -499,7 +499,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
 
 ```
   -ccode string
-    	Youku ccode (default "0808")
+    	Youku ccode (default "010101500003")
 ```
 
 
@@ -524,7 +524,6 @@ Facebook | <https://facebook.com> | ✓ | | | |
 Instagram | <https://www.instagram.com> | ✓ | ✓ | | |
 Twitter | <https://twitter.com> | ✓ | | | |
 腾讯视频 | <https://v.qq.com> | ✓ | | | |
-乐视视频 | <https://www.le.com> | ✓ | | | |
 
 
 ## Known issues
