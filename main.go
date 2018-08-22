@@ -95,8 +95,6 @@ func download(videoURL string) {
 		extractors.Twitter(videoURL)
 	case "qq":
 		extractors.QQ(videoURL)
-	case "le":
-		extractors.Le(videoURL)
 	default:
 		extractors.Universal(videoURL)
 	}

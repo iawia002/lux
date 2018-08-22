@@ -168,8 +168,14 @@ func M3u8URLs(uri string) []string {
 			if strings.HasPrefix(line, "http") {
 				urls = append(urls, line)
 			} else {
-				base, _ := url.Parse(uri)
-				u, _ := url.Parse(line)
+				base, err := url.Parse(uri)
+				if err != nil {
+					continue
+				}
+				u, err := url.Parse(line)
+				if err != nil {
+					continue
+				}
 				urls = append(urls, fmt.Sprintf("%s", base.ResolveReference(u)))
 			}
 		}
