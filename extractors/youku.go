@@ -64,6 +64,7 @@ func getAudioLang(lang string) string {
 	var youkuAudioLang = map[string]string{
 		"guoyu": "国语",
 		"ja":    "日语",
+		"yue":   "粤语",
 	}
 	translate, ok := youkuAudioLang[lang]
 	if !ok {
