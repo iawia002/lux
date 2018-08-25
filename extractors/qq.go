@@ -53,36 +53,46 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) map[string]downloader.Format
 	var vkey string
 	// number of fragments
 	clips := data.Vl.Vi[0].Cl.Fc
-	fc := clips
 	if clips == 0 {
 		clips = 1
 	}
-	fns := strings.Split(data.Vl.Vi[0].Fn, ".")
 
-	if fc > 0 {
-		// If the number of fragments > 0, the filename needs to add the number of fragments
-		// n0687peq62x.p709.mp4 -> n0687peq62x.p709.1.mp4
-		fns = append(fns[:2], append([]string{"1"}, fns[2:]...)...)
-	}
-	var fmtIDPrefix string
 	for _, fi := range data.Fl.Fi {
-		if fc > 0 {
-			// Multiple formats
-			if fi.ID > 100000 {
-				fmtIDPrefix = "m"
-			} else {
-				fmtIDPrefix = "p"
-			}
-			fmtIDName := fmt.Sprintf("%s%d", fmtIDPrefix, fi.ID%10000)
-			fns[1] = fmtIDName
+		var fmtIDPrefix string
+		fns := strings.Split(data.Vl.Vi[0].Fn, ".")
+		if fi.ID > 100000 {
+			fmtIDPrefix = "m"
+		} else if fi.ID > 10000 {
+			fmtIDPrefix = "p"
 		}
+		if fmtIDPrefix != "" {
+			fmtIDName := fmt.Sprintf("%s%d", fmtIDPrefix, fi.ID%10000)
+			if len(fns) < 3 {
+				// v0739eolv38.mp4 -> v0739eolv38.m701.mp4
+				fns = append(fns[:1], append([]string{fmtIDName}, fns[1:]...)...)
+			} else {
+				// n0687peq62x.p709.mp4 -> n0687peq62x.m709.mp4
+				fns[1] = fmtIDName
+			}
+		} else if len(fns) >= 3 {
+			// delete ID part
+			// e0765r4mwcr.2.mp4 -> e0765r4mwcr.mp4
+			fns = append(fns[:1], fns[2:]...)
+		}
+
 		var urls []downloader.URLData
 		var totalSize int64
 		var filename string
 		for part := 1; part < clips+1; part++ {
 			// Multiple fragments per format
-			if fc > 0 {
-				fns[2] = strconv.Itoa(part)
+			if fmtIDPrefix == "p" {
+				if len(fns) < 4 {
+					// If the number of fragments > 0, the filename needs to add the number of fragments
+					// n0687peq62x.p709.mp4 -> n0687peq62x.p709.1.mp4
+					fns = append(fns[:2], append([]string{strconv.Itoa(part)}, fns[2:]...)...)
+				} else {
+					fns[2] = strconv.Itoa(part)
+				}
 			}
 			filename = strings.Join(fns, ".")
 			html := request.Get(

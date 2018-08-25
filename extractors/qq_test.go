@@ -37,7 +37,16 @@ func TestQQ(t *testing.T) {
 				URL:     "https://v.qq.com/iframe/player.html?vid=v0739eolv38",
 				Title:   "PGI国际邀请赛，FPP第四局，OMG强势吃鸡，全场观众高喊OMG",
 				Size:    10714773,
-				Quality: "标清;(270P)",
+				Quality: "高清;(480P)",
+			},
+		},
+		{
+			name: "fmt ID test",
+			args: test.Args{
+				URL:     "https://v.qq.com/x/cover/2aya3ibdmft6vdw/e0765r4mwcr.html",
+				Title:   "《卡路里》出圈！妖娆男子教学广场舞版，大妈表情亮了！",
+				Size:    14112979,
+				Quality: "超清;(720P)",
 			},
 		},
 	}
