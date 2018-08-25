@@ -18,7 +18,6 @@ func TestFacebook(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.facebook.com/JackyardsCovers/videos/vb.267832806658747/1215502888558396/",
 				Title:   "Jackyards - Great video, beautifully shot down Bournemouth...",
-				Size:    7105632,
 				Quality: "hd",
 			},
 		},
