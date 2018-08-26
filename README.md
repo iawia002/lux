@@ -499,7 +499,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
 
 ```
   -ccode string
-    	Youku ccode (default "010101500003")
+    	Youku ccode
 ```
 
 
