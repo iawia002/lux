@@ -93,10 +93,15 @@ func Request(
 		if requestError == nil && res.StatusCode < 400 {
 			break
 		} else if i+1 >= config.RetryTimes {
-			log.Println(url)
-			panic(fmt.Sprintf(
-				"request error: %v HTTP %d", requestError, res.StatusCode,
-			))
+			var err string
+			if requestError != nil {
+				err = fmt.Sprintf("request error: %v", requestError)
+			} else {
+				err = fmt.Sprintf(
+					"%s request error: HTTP %d", url, res.StatusCode,
+				)
+			}
+			panic(err)
 		}
 		time.Sleep(1 * time.Second)
 	}
