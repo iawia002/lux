@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MercuryEngineering/CookieMonster"
 	"github.com/fatih/color"
 	"github.com/kr/pretty"
 	"golang.org/x/net/proxy"
@@ -71,15 +72,31 @@ func Request(
 	}
 	if config.Cookie != "" {
 		var cookie string
+		var cookies []*http.Cookie
 		if _, fileErr := os.Stat(config.Cookie); fileErr == nil {
 			// Cookie is a file
-			data, _ := ioutil.ReadFile(config.Cookie)
-			cookie = string(data)
+			// Netscape cookie file
+			cookies, err = cookiemonster.ParseFile(config.Cookie)
+			if err != nil || len(cookies) == 0 {
+				// Cookie header
+				data, _ := ioutil.ReadFile(config.Cookie)
+				cookie = string(data)
+			}
 		} else {
 			// Just strings
-			cookie = config.Cookie
+			cookies, err = cookiemonster.ParseString(config.Cookie)
+			if err != nil || len(cookies) == 0 {
+				cookie = config.Cookie
+			}
 		}
-		req.Header.Set("Cookie", cookie)
+		if cookie != "" {
+			req.Header.Set("Cookie", cookie)
+		}
+		if cookies != nil {
+			for _, c := range cookies {
+				req.AddCookie(c)
+			}
+		}
 	}
 	if config.Refer != "" {
 		req.Header.Set("Referer", config.Refer)

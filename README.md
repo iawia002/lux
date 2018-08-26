@@ -275,7 +275,7 @@ annie will auto retry when the download failed, you can specify the retry times 
 
 Cookies can be provided to `annie` with the `-c` option if they are required for accessing the video.
 
-**Note: cookies must match the following format:**
+Cookies can be the following format or [Netscape Cookie](https://curl.haxx.se/rfc/cookie_spec.html) format:
 
 ```console
 name=value; name2=value2; ...
