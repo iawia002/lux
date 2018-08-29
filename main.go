@@ -37,7 +37,7 @@ func init() {
 		"Playlist video items to download. Separated by commas like: 1,5,6",
 	)
 	flag.BoolVar(&config.Caption, "C", false, "Download captions")
-	flag.StringVar(&config.Ccode, "ccode", "0515", "Youku ccode")
+	flag.StringVar(&config.Ccode, "ccode", "010101500003", "Youku ccode")
 	flag.IntVar(
 		&config.RetryTimes, "retry", 100, "How many times to retry when the download failed",
 	)
