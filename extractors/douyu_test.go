@@ -9,6 +9,7 @@ import (
 
 func TestDouyu(t *testing.T) {
 	config.InfoOnly = true
+	config.RetryTimes = 100
 	tests := []struct {
 		name string
 		args test.Args
