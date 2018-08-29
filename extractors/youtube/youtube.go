@@ -130,18 +130,11 @@ func extractVideoURLS(data youtubeData, referer string) map[string]downloader.Fo
 	var audio downloader.URLData
 	format := map[string]downloader.FormatData{}
 
-	bestQualityURL, _ := url.ParseQuery(streams[0])
-	bestQualityItag := bestQualityURL.Get("itag")
-
 	for _, s := range streams {
 		stream, _ := url.ParseQuery(s)
 		itag := stream.Get("itag")
 		streamType := stream.Get("type")
 		isAudio := strings.HasPrefix(streamType, "audio/mp4")
-
-		if !isAudio && !utils.ShouldExtract(itag, bestQualityItag) {
-			continue
-		}
 
 		quality := stream.Get("quality_label")
 		if quality == "" {
