@@ -96,7 +96,7 @@ func youkuUps(vid string) youkuData {
 	// grep -oE '"[0-9a-zA-Z+/=]{256}"' youku-player.min.js
 	ckey := "7B19C0AB12633B22E7FE81271162026020570708D6CC189E4924503C49D243A0DE6CD84A766832C2C99898FC5ED31F3709BB3CDD82C96492E721BDD381735026"
 	for _, ccode := range []string{config.Ccode} {
-		if ccode == "010101500003" {
+		if ccode == "0103010102" {
 			utid = generateUtdid()
 		}
 		url = fmt.Sprintf(
@@ -137,7 +137,7 @@ func hmacSha1(key []byte, msg []byte) []byte {
 func generateUtdid() string {
 	timestamp := int32(time.Now().Unix())
 	var buffer bytes.Buffer
-	buffer.Write(getBytes(timestamp))
+	buffer.Write(getBytes(timestamp - 8*60*1000))
 	buffer.Write(getBytes(rand.Int31()))
 	buffer.WriteByte(0x03)
 	buffer.WriteByte(0x00)
