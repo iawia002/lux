@@ -11,7 +11,6 @@ import (
 	"net"
 	"net/http"
 	netURL "net/url"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -73,21 +72,9 @@ func Request(
 	if config.Cookie != "" {
 		var cookie string
 		var cookies []*http.Cookie
-		if _, fileErr := os.Stat(config.Cookie); fileErr == nil {
-			// Cookie is a file
-			// Netscape cookie file
-			cookies, err = cookiemonster.ParseFile(config.Cookie)
-			if err != nil || len(cookies) == 0 {
-				// Cookie header
-				data, _ := ioutil.ReadFile(config.Cookie)
-				cookie = string(data)
-			}
-		} else {
-			// Just strings
-			cookies, err = cookiemonster.ParseString(config.Cookie)
-			if err != nil || len(cookies) == 0 {
-				cookie = config.Cookie
-			}
+		cookies, err = cookiemonster.ParseString(config.Cookie)
+		if err != nil || len(cookies) == 0 {
+			cookie = config.Cookie
 		}
 		if cookie != "" {
 			req.Header.Set("Cookie", cookie)

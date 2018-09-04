@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -129,6 +130,16 @@ func main() {
 		fmt.Println("Usage: annie [args] URLs...")
 		flag.PrintDefaults()
 		return
+	}
+	if config.Cookie != "" {
+		if _, fileErr := os.Stat(config.Cookie); fileErr == nil {
+			// Cookie is a file
+			data, err := ioutil.ReadFile(config.Cookie)
+			if err != nil {
+				log.Fatal(err)
+			}
+			config.Cookie = string(data)
+		}
 	}
 	for _, videoURL := range args {
 		download(videoURL)

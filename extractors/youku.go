@@ -85,8 +85,8 @@ func youkuUps(vid string) youkuData {
 		html string
 		data youkuData
 	)
-	if strings.Contains(config.Cookie, "cna=") {
-		utid = utils.MatchOneOf(config.Cookie, `cna=(.+?);`)[1]
+	if strings.Contains(config.Cookie, "cna") {
+		utid = utils.MatchOneOf(config.Cookie, `cna=(.+?);`, `cna\s*(.+?)\s*`)[1]
 	} else {
 		headers := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
 		setCookie := headers.Get("Set-Cookie")
