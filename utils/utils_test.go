@@ -3,6 +3,8 @@ package utils
 import (
 	"reflect"
 	"testing"
+
+	"github.com/iawia002/annie/config"
 )
 
 func TestMatchOneOf(t *testing.T) {
@@ -278,6 +280,10 @@ func TestFilePath(t *testing.T) {
 			}
 		})
 	}
+
+	// error test
+	config.OutputPath = "test"
+	FilePath("", "", true)
 }
 
 func TestItemInSlice(t *testing.T) {
@@ -369,6 +375,14 @@ func TestGetNameAndExt(t *testing.T) {
 				t.Errorf("GetNameAndExt() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
+	}
+
+	// error test
+	for _, u := range []string{"https://a.com/a", "test"} {
+		_, _, err := GetNameAndExt(u)
+		if err == nil {
+			t.Error()
+		}
 	}
 }
 

@@ -135,7 +135,10 @@ func ItemInSlice(item, list interface{}) bool {
 // https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg ->
 // 1f5a87801a0711e898b12b640777720f, jpg
 func GetNameAndExt(uri string) (string, string, error) {
-	u, _ := url.ParseRequestURI(uri)
+	u, err := url.ParseRequestURI(uri)
+	if err != nil {
+		return "", "", err
+	}
 	s := strings.Split(u.Path, "/")
 	filename := strings.Split(s[len(s)-1], ".")
 	if len(filename) > 1 {
