@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"sort"
 	"strings"
@@ -70,25 +69,35 @@ func (data *FormatData) calculateTotalSize() {
 }
 
 // Caption download danmaku, subtitles, etc
-func Caption(url, refer, fileName, ext string) {
+func Caption(url, refer, fileName, ext string) error {
 	if !config.Caption || config.InfoOnly {
-		return
+		return nil
 	}
 	fmt.Println("\nDownloading captions...")
-	body := request.Get(url, refer, nil)
-	filePath := utils.FilePath(fileName, ext, false)
+	body, err := request.Get(url, refer, nil)
+	if err != nil {
+		return err
+	}
+	filePath, err := utils.FilePath(fileName, ext, false)
+	if err != nil {
+		return err
+	}
 	file, fileError := os.Create(filePath)
 	if fileError != nil {
-		log.Fatal(fileError)
+		return fileError
 	}
 	defer file.Close()
 	file.WriteString(body)
+	return nil
 }
 
 func writeFile(
 	url string, file *os.File, headers map[string]string, bar *pb.ProgressBar,
 ) (int64, error) {
-	res := request.Request("GET", url, nil, headers)
+	res, err := request.Request("GET", url, nil, headers)
+	if err != nil {
+		return 0, err
+	}
 	defer res.Body.Close()
 	writer := io.MultiWriter(file, bar)
 	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
@@ -103,9 +112,16 @@ func writeFile(
 // Save save url file
 func Save(
 	urlData URLData, refer, fileName string, bar *pb.ProgressBar,
-) {
-	filePath := utils.FilePath(fileName, urlData.Ext, false)
-	fileSize, exists := utils.FileSize(filePath)
+) error {
+	var err error
+	filePath, err := utils.FilePath(fileName, urlData.Ext, false)
+	if err != nil {
+		return err
+	}
+	fileSize, exists, err := utils.FileSize(filePath)
+	if err != nil {
+		return err
+	}
 	if bar == nil {
 		bar = progressBar(urlData.Size)
 		bar.Start()
@@ -115,7 +131,7 @@ func Save(
 	if exists && fileSize == urlData.Size {
 		fmt.Printf("%s: file already exists, skipping\n", filePath)
 		bar.Add64(fileSize)
-		return
+		return nil
 	}
 	if exists && fileSize != urlData.Size {
 		// files with the same name but different size
@@ -124,11 +140,14 @@ func Save(
 		overwriting, _ := reader.ReadString('\n')
 		overwriting = strings.Replace(overwriting, "\n", "", -1)
 		if overwriting != "y" {
-			return
+			return nil
 		}
 	}
 	tempFilePath := filePath + ".download"
-	tempFileSize, _ := utils.FileSize(tempFilePath)
+	tempFileSize, _, err := utils.FileSize(tempFilePath)
+	if err != nil {
+		return err
+	}
 	headers := map[string]string{
 		"Referer": refer,
 	}
@@ -143,7 +162,7 @@ func Save(
 		file, fileError = os.Create(tempFilePath)
 	}
 	if fileError != nil {
-		log.Fatal(fileError)
+		return fileError
 	}
 	if strings.Contains(urlData.URL, "googlevideo") {
 		var start, end, chunkSize int64
@@ -167,7 +186,7 @@ func Save(
 				if err == nil {
 					break
 				} else if i+1 >= config.RetryTimes {
-					log.Fatal(err)
+					return err
 				}
 				temp += written
 				headers["Range"] = fmt.Sprintf("bytes=%d-%d", temp, end)
@@ -182,22 +201,23 @@ func Save(
 			if err == nil {
 				break
 			} else if i+1 >= config.RetryTimes {
-				log.Fatal(err)
+				return err
 			}
 			temp += written
 			headers["Range"] = fmt.Sprintf("bytes=%d-", temp)
 			time.Sleep(1 * time.Second)
 		}
 	}
+
 	// close and rename temp file at the end of this function
 	defer func() {
-		file.Close()
 		// must close the file before rename or it will cause `The process cannot access the file because it is being used by another process.` error.
-		err := os.Rename(tempFilePath, filePath)
-		if err != nil {
-			log.Fatal(err)
+		file.Close()
+		if err == nil {
+			os.Rename(tempFilePath, filePath)
 		}
 	}()
+	return nil
 }
 
 func (data FormatData) printStream() {
@@ -272,12 +292,12 @@ func (v VideoData) printInfo(format string) {
 }
 
 // Download download urls
-func (v VideoData) Download(refer string) {
+func (v VideoData) Download(refer string) error {
 	v.genSortedFormats()
 	if config.ExtractedData {
 		jsonData, _ := json.MarshalIndent(v, "", "    ")
 		fmt.Printf("%s\n", jsonData)
-		return
+		return nil
 	}
 	var format, title string
 	if config.OutputName == "" {
@@ -292,58 +312,77 @@ func (v VideoData) Download(refer string) {
 	}
 	data, ok := v.Formats[format]
 	if !ok {
-		log.Println(v)
-		log.Fatal("No format named " + format)
+		return fmt.Errorf("No format named %s", format)
 	}
 	v.printInfo(format) // if InfoOnly, this func will print all formats info
 	if config.InfoOnly {
-		return
+		return nil
 	}
+	var err error
 	// Skip the complete file that has been merged
-	mergedFilePath := utils.FilePath(title, "mp4", false)
-	_, mergedFileExists := utils.FileSize(mergedFilePath)
+	mergedFilePath, err := utils.FilePath(title, "mp4", false)
+	if err != nil {
+		return err
+	}
+	_, mergedFileExists, err := utils.FileSize(mergedFilePath)
+	if err != nil {
+		return err
+	}
 	// After the merge, the file size has changed, so we do not check whether the size matches
 	if mergedFileExists {
 		fmt.Printf("%s: file already exists, skipping\n", mergedFilePath)
-		return
+		return nil
 	}
 	bar := progressBar(data.Size)
 	bar.Start()
 	if len(data.URLs) == 1 {
 		// only one fragment
-		Save(data.URLs[0], refer, title, bar)
+		err := Save(data.URLs[0], refer, title, bar)
+		if err != nil {
+			return err
+		}
 		bar.Finish()
-		return
+		return nil
 	}
 	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
 	// multiple fragments
 	parts := []string{}
+	errs := make([]error, len(data.URLs))
 	for index, url := range data.URLs {
 		partFileName := fmt.Sprintf("%s[%d]", title, index)
-		partFilePath := utils.FilePath(partFileName, url.Ext, false)
+		partFilePath, err := utils.FilePath(partFileName, url.Ext, false)
+		if err != nil {
+			return err
+		}
 		parts = append(parts, partFilePath)
 
 		wgp.Add()
 		go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
 			defer wgp.Done()
-			Save(url, refer, fileName, bar)
+			err := Save(url, refer, fileName, bar)
+			if err != nil {
+				errs = append(errs, err)
+			}
 		}(url, refer, partFileName, bar)
 	}
 	wgp.Wait()
+	if len(errs) > 0 {
+		return errs[0]
+	}
 	bar.Finish()
 
 	if v.Type != "video" {
-		return
+		return nil
 	}
 	// merge
 	fmt.Printf("Merging video parts into %s\n", mergedFilePath)
-	var err error
 	if v.Site == "YouTube youtube.com" {
 		err = utils.MergeAudioAndVideo(parts, mergedFilePath)
 	} else {
 		err = utils.MergeToMP4(parts, mergedFilePath, title)
 	}
 	if err != nil {
-		log.Println(err)
+		return err
 	}
+	return nil
 }

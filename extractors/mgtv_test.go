@@ -44,7 +44,7 @@ func TestMgtv(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := Mgtv(tt.args.URL)
+			data, _ := Mgtv(tt.args.URL)
 			test.Check(t, tt.args, data)
 		})
 	}

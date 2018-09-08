@@ -20,11 +20,18 @@ type douyinData struct {
 }
 
 // Douyin download function
-func Douyin(url string) downloader.VideoData {
-	html := request.Get(url, url, nil)
+func Douyin(url string) (downloader.VideoData, error) {
+	var err error
+	html, err := request.Get(url, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	title := utils.MatchOneOf(html, `<p class="desc">(.+?)</p>`)[1]
 	realURL := utils.MatchOneOf(html, `playAddr: "(.+?)"`)[1]
-	size := request.Size(realURL, url)
+	size, err := request.Size(realURL, url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	urlData := downloader.URLData{
 		URL:  realURL,
 		Size: size,
@@ -42,6 +49,9 @@ func Douyin(url string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

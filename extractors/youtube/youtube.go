@@ -2,8 +2,8 @@ package youtube
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 
@@ -33,18 +33,28 @@ const referer = "https://www.youtube.com"
 
 var tokensCache = make(map[string][]string)
 
-func getSig(sig, js string) string {
+func getSig(sig, js string) (string, error) {
 	url := fmt.Sprintf("https://www.youtube.com%s", js)
 	tokens, ok := tokensCache[url]
 	if !ok {
-		tokens = getSigTokens(request.Get(url, referer, nil))
+		html, err := request.Get(url, referer, nil)
+		if err != nil {
+			return "", err
+		}
+		tokens, err = getSigTokens(html)
+		if err != nil {
+			return "", err
+		}
 		tokensCache[url] = tokens
 	}
-	return decipherTokens(tokens, sig)
+	return decipherTokens(tokens, sig), nil
 }
 
-func genSignedURL(streamURL string, stream url.Values, js string) string {
-	var realURL, sig string
+func genSignedURL(streamURL string, stream url.Values, js string) (string, error) {
+	var (
+		realURL, sig string
+		err          error
+	)
 	if strings.Contains(streamURL, "signature=") {
 		// URL itself already has a signature parameter
 		realURL = streamURL
@@ -53,27 +63,37 @@ func genSignedURL(streamURL string, stream url.Values, js string) string {
 		sig = stream.Get("sig")
 		if sig == "" {
 			// Signature need decrypt
-			sig = getSig(stream.Get("s"), js)
+			sig, err = getSig(stream.Get("s"), js)
+			if err != nil {
+				return "", err
+			}
 		}
 		realURL = fmt.Sprintf("%s&signature=%s", streamURL, sig)
 	}
 	if !strings.Contains(realURL, "ratebypass") {
 		realURL += "&ratebypass=yes"
 	}
-	return realURL
+	return realURL, nil
 }
 
 // Download YouTube main download function
-func Download(uri string) {
+func Download(uri string) error {
+	var err error
 	if !config.Playlist {
-		youtubeDownload(uri)
-		return
+		_, err = youtubeDownload(uri)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 	listID := utils.MatchOneOf(uri, `(list|p)=([^/&]+)`)[2]
 	if listID == "" {
-		log.Fatal("Can't get list ID from URL")
+		return errors.New("Can't get list ID from URL")
 	}
-	html := request.Get("https://www.youtube.com/playlist?list="+listID, referer, nil)
+	html, err := request.Get("https://www.youtube.com/playlist?list="+listID, referer, nil)
+	if err != nil {
+		return err
+	}
 	// "videoId":"OQxX8zgyzuM","thumbnail"
 	videoIDs := utils.MatchAll(html, `"videoId":"([^,]+?)","thumbnail"`)
 	needDownloadItems := utils.NeedDownloadList(len(videoIDs))
@@ -84,11 +104,16 @@ func Download(uri string) {
 		u := fmt.Sprintf(
 			"https://www.youtube.com/watch?v=%s&list=%s", videoID[1], listID,
 		)
-		youtubeDownload(u)
+		_, err = youtubeDownload(u)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func youtubeDownload(uri string) downloader.VideoData {
+func youtubeDownload(uri string) (downloader.VideoData, error) {
+	var err error
 	vid := utils.MatchOneOf(
 		uri,
 		`watch\?v=([^/&]+)`,
@@ -97,19 +122,25 @@ func youtubeDownload(uri string) downloader.VideoData {
 		`v/([^/?]+)`,
 	)
 	if vid == nil {
-		log.Fatal("Can't find vid")
+		return downloader.VideoData{}, errors.New("Can't find vid")
 	}
 	videoURL := fmt.Sprintf(
 		"https://www.youtube.com/watch?v=%s&gl=US&hl=en&has_verified=1&bpctr=9999999999",
 		vid[1],
 	)
-	html := request.Get(videoURL, referer, nil)
+	html, err := request.Get(videoURL, referer, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	ytplayer := utils.MatchOneOf(html, `;ytplayer\.config\s*=\s*({.+?});`)[1]
 	var youtube youtubeData
 	json.Unmarshal([]byte(ytplayer), &youtube)
 	title := youtube.Args.Title
 
-	format := extractVideoURLS(youtube, uri)
+	format, err := extractVideoURLS(youtube, uri)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 
 	extractedData := downloader.VideoData{
 		Site:    "YouTube youtube.com",
@@ -117,11 +148,14 @@ func youtubeDownload(uri string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(uri)
-	return extractedData
+	err = extractedData.Download(uri)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }
 
-func extractVideoURLS(data youtubeData, referer string) map[string]downloader.FormatData {
+func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.FormatData, error) {
 	streams := strings.Split(data.Args.Stream, ",")
 	if data.Args.Stream == "" {
 		streams = strings.Split(data.Args.Stream2, ",")
@@ -131,7 +165,10 @@ func extractVideoURLS(data youtubeData, referer string) map[string]downloader.Fo
 	format := map[string]downloader.FormatData{}
 
 	for _, s := range streams {
-		stream, _ := url.ParseQuery(s)
+		stream, err := url.ParseQuery(s)
+		if err != nil {
+			return nil, err
+		}
 		itag := stream.Get("itag")
 		streamType := stream.Get("type")
 		isAudio := strings.HasPrefix(streamType, "audio/mp4")
@@ -151,8 +188,14 @@ func extractVideoURLS(data youtubeData, referer string) map[string]downloader.Fo
 		} else {
 			ext = utils.MatchOneOf(streamType, `(\w+)/(\w+);`)[2]
 		}
-		realURL := genSignedURL(stream.Get("url"), stream, data.Assets.JS)
-		size := request.Size(realURL, referer)
+		realURL, err := genSignedURL(stream.Get("url"), stream, data.Assets.JS)
+		if err != nil {
+			return nil, err
+		}
+		size, err := request.Size(realURL, referer)
+		if err != nil {
+			return nil, err
+		}
 		urlData := downloader.URLData{
 			URL:  realURL,
 			Size: size,
@@ -171,7 +214,7 @@ func extractVideoURLS(data youtubeData, referer string) map[string]downloader.Fo
 
 	// `url_encoded_fmt_stream_map`
 	if data.Args.Stream == "" {
-		return format
+		return format, nil
 	}
 
 	// Unlike `url_encoded_fmt_stream_map`, all videos in `adaptive_fmts` have no sound,
@@ -186,5 +229,5 @@ func extractVideoURLS(data youtubeData, referer string) map[string]downloader.Fo
 			format[itag] = f
 		}
 	}
-	return format
+	return format, nil
 }

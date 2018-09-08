@@ -34,7 +34,7 @@ func TestVimeo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := Vimeo(tt.args.URL)
+			data, _ := Vimeo(tt.args.URL)
 			test.Check(t, tt.args, data)
 		})
 	}

@@ -53,16 +53,25 @@ type mgtvPm2Data struct {
 	} `json:"data"`
 }
 
-func mgtvM3u8(url string) ([]mgtvURLInfo, int64) {
+func mgtvM3u8(url string) ([]mgtvURLInfo, int64, error) {
 	var data []mgtvURLInfo
 	var temp mgtvURLInfo
 	var size, totalSize int64
-	urls := utils.M3u8URLs(url)
-	m3u8String := request.Get(url, url, nil)
+	urls, err := utils.M3u8URLs(url)
+	if err != nil {
+		return nil, 0, err
+	}
+	m3u8String, err := request.Get(url, url, nil)
+	if err != nil {
+		return nil, 0, err
+	}
 	sizes := utils.MatchAll(m3u8String, `#EXT-MGTV-File-SIZE:(\d+)`)
 	// sizes: [[#EXT-MGTV-File-SIZE:1893724, 1893724]]
 	for index, u := range urls {
-		size, _ = strconv.ParseInt(sizes[index][1], 10, 64)
+		size, err = strconv.ParseInt(sizes[index][1], 10, 64)
+		if err != nil {
+			return nil, 0, err
+		}
 		totalSize += size
 		temp = mgtvURLInfo{
 			URL:  u,
@@ -70,7 +79,7 @@ func mgtvM3u8(url string) ([]mgtvURLInfo, int64) {
 		}
 		data = append(data, temp)
 	}
-	return data, totalSize
+	return data, totalSize, nil
 }
 
 func encodeTk2(str string) string {
@@ -86,8 +95,11 @@ func encodeTk2(str string) string {
 }
 
 // Mgtv download function
-func Mgtv(url string) downloader.VideoData {
-	html := request.Get(url, url, nil)
+func Mgtv(url string) (downloader.VideoData, error) {
+	html, err := request.Get(url, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	vid := utils.MatchOneOf(
 		url,
 		`https?://www.mgtv.com/(?:b|l)/\d+/(\d+).html`,
@@ -103,7 +115,7 @@ func Mgtv(url string) downloader.VideoData {
 		"Cookie": "PM_CHKID=1",
 	}
 	clit := fmt.Sprintf("clit=%d", time.Now().Unix()/1000)
-	pm2DataString := request.Get(
+	pm2DataString, err := request.Get(
 		fmt.Sprintf(
 			"https://pcweb.api.mgtv.com/player/video?video_id=%s&tk2=%s",
 			vid[1],
@@ -114,9 +126,12 @@ func Mgtv(url string) downloader.VideoData {
 		url,
 		headers,
 	)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	var pm2 mgtvPm2Data
 	json.Unmarshal([]byte(pm2DataString), &pm2)
-	dataString := request.Get(
+	dataString, err := request.Get(
 		fmt.Sprintf(
 			"https://pcweb.api.mgtv.com/player/getSource?video_id=%s&tk2=%s&pm2=%s",
 			vid[1], encodeTk2(clit), pm2.Data.Atc.Pm2,
@@ -124,6 +139,9 @@ func Mgtv(url string) downloader.VideoData {
 		url,
 		headers,
 	)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	var mgtvData mgtv
 	json.Unmarshal([]byte(dataString), &mgtvData)
 	title := strings.TrimSpace(
@@ -138,11 +156,15 @@ func Mgtv(url string) downloader.VideoData {
 		}
 		// real download address
 		addr = mgtvVideoAddr{}
-		json.Unmarshal(
-			[]byte(request.Get(mgtvData.Data.StreamDomain[0]+stream.URL, url, headers)),
-			&addr,
-		)
-		m3u8URLs, totalSize := mgtvM3u8(addr.Info)
+		addrInfo, err := request.Get(mgtvData.Data.StreamDomain[0]+stream.URL, url, headers)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
+		json.Unmarshal([]byte(addrInfo), &addr)
+		m3u8URLs, totalSize, err := mgtvM3u8(addr.Info)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 		urls := []downloader.URLData{}
 		var temp downloader.URLData
 		for _, u := range m3u8URLs {
@@ -165,6 +187,9 @@ func Mgtv(url string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

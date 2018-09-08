@@ -9,8 +9,12 @@ import (
 )
 
 // Facebook download function
-func Facebook(url string) downloader.VideoData {
-	html := request.Get(url, url, nil)
+func Facebook(url string) (downloader.VideoData, error) {
+	var err error
+	html, err := request.Get(url, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	title := utils.MatchOneOf(html, `<title id="pageTitle">(.+)</title>`)[1]
 
 	format := map[string]downloader.FormatData{}
@@ -18,7 +22,10 @@ func Facebook(url string) downloader.VideoData {
 		u := utils.MatchOneOf(
 			html, fmt.Sprintf(`%s_src:"(.+?)"`, quality),
 		)[1]
-		size := request.Size(u, url)
+		size, err := request.Size(u, url)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 		urlData := downloader.URLData{
 			URL:  u,
 			Size: size,
@@ -37,6 +44,9 @@ func Facebook(url string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

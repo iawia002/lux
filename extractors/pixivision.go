@@ -7,9 +7,15 @@ import (
 )
 
 // Pixivision download function
-func Pixivision(url string) downloader.VideoData {
-	html := request.Get(url, url, nil)
-	title, urls := parser.GetImages(url, html, "am__work__illust  ", nil)
+func Pixivision(url string) (downloader.VideoData, error) {
+	html, err := request.Get(url, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	title, urls, err := parser.GetImages(url, html, "am__work__illust  ", nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	format := map[string]downloader.FormatData{
 		"default": {
 			URLs: urls,
@@ -22,6 +28,6 @@ func Pixivision(url string) downloader.VideoData {
 		Type:    "image",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	return extractedData, nil
 }

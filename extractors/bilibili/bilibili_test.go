@@ -85,10 +85,10 @@ func TestBilibili(t *testing.T) {
 				// single mode
 				config.Playlist = false
 				Download(tt.args.URL)
-				data = bilibiliDownload(tt.args.URL, options)
+				data, _ = bilibiliDownload(tt.args.URL, options)
 			} else {
 				config.Playlist = false
-				data = bilibiliDownload(tt.args.URL, options)
+				data, _ = bilibiliDownload(tt.args.URL, options)
 			}
 			test.Check(t, tt.args, data)
 		})

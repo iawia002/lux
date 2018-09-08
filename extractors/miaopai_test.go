@@ -24,7 +24,7 @@ func TestMiaopai(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := Miaopai(tt.args.URL)
+			data, _ := Miaopai(tt.args.URL)
 			test.Check(t, tt.args, data)
 		})
 	}

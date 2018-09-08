@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 
@@ -29,7 +28,9 @@ func init() {
 	flag.StringVar(&config.OutputPath, "o", "", "Specify the output path")
 	flag.StringVar(&config.OutputName, "O", "", "Specify the output file name")
 	flag.BoolVar(&config.ExtractedData, "j", false, "Print extracted data")
-	flag.IntVar(&config.ThreadNumber, "n", 10, "The number of download thread (only works for multiple-parts video)")
+	flag.IntVar(
+		&config.ThreadNumber, "n", 10, "The number of download thread (only works for multiple-parts video)",
+	)
 	flag.StringVar(&config.File, "F", "", "URLs file path")
 	flag.IntVar(&config.PlaylistStart, "start", 1, "Playlist video to start at")
 	flag.IntVar(&config.PlaylistEnd, "end", 0, "Playlist video to end at")
@@ -44,8 +45,11 @@ func init() {
 	)
 }
 
-func download(videoURL string) {
-	var domain string
+func download(videoURL string) error {
+	var (
+		domain string
+		err    error
+	)
 	bilibiliShortLink := utils.MatchOneOf(videoURL, `^(av|ep)\d+`)
 	if bilibiliShortLink != nil {
 		bilibiliURL := map[string]string{
@@ -57,51 +61,53 @@ func download(videoURL string) {
 	} else {
 		u, err := url.ParseRequestURI(videoURL)
 		if err != nil {
-			log.Fatal(err)
+			return fmt.Errorf("Downloading %s error: %v", videoURL, err)
 		}
 		domain = utils.Domain(u.Host)
 	}
 	switch domain {
 	case "douyin", "iesdouyin":
-		extractors.Douyin(videoURL)
+		_, err = extractors.Douyin(videoURL)
 	case "bilibili":
-		bilibili.Download(videoURL)
+		err = bilibili.Download(videoURL)
 	case "bcy":
-		extractors.Bcy(videoURL)
+		_, err = extractors.Bcy(videoURL)
 	case "pixivision":
-		extractors.Pixivision(videoURL)
+		_, err = extractors.Pixivision(videoURL)
 	case "youku":
-		extractors.Youku(videoURL)
+		_, err = extractors.Youku(videoURL)
 	case "youtube", "youtu": // youtu.be
-		youtube.Download(videoURL)
+		err = youtube.Download(videoURL)
 	case "iqiyi":
-		extractors.Iqiyi(videoURL)
+		_, err = extractors.Iqiyi(videoURL)
 	case "mgtv":
-		extractors.Mgtv(videoURL)
+		_, err = extractors.Mgtv(videoURL)
 	case "tumblr":
-		extractors.Tumblr(videoURL)
+		_, err = extractors.Tumblr(videoURL)
 	case "vimeo":
-		extractors.Vimeo(videoURL)
+		_, err = extractors.Vimeo(videoURL)
 	case "facebook":
-		extractors.Facebook(videoURL)
+		_, err = extractors.Facebook(videoURL)
 	case "douyu":
-		extractors.Douyu(videoURL)
+		_, err = extractors.Douyu(videoURL)
 	case "miaopai":
-		extractors.Miaopai(videoURL)
+		_, err = extractors.Miaopai(videoURL)
 	case "weibo":
-		extractors.Weibo(videoURL)
+		_, err = extractors.Weibo(videoURL)
 	case "instagram":
-		extractors.Instagram(videoURL)
+		_, err = extractors.Instagram(videoURL)
 	case "twitter":
-		extractors.Twitter(videoURL)
+		_, err = extractors.Twitter(videoURL)
 	case "qq":
-		extractors.QQ(videoURL)
+		_, err = extractors.QQ(videoURL)
 	default:
-		extractors.Universal(videoURL)
+		_, err = extractors.Universal(videoURL)
 	}
+	return err
 }
 
 func main() {
+	var err error
 	flag.Parse()
 	args := flag.Args()
 	if config.Version {
@@ -114,7 +120,8 @@ func main() {
 	if config.File != "" {
 		file, err := os.Open(config.File)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			return
 		}
 		defer file.Close()
 		scanner := bufio.NewScanner(file)
@@ -136,12 +143,16 @@ func main() {
 			// Cookie is a file
 			data, err := ioutil.ReadFile(config.Cookie)
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println(err)
+				return
 			}
 			config.Cookie = string(data)
 		}
 	}
 	for _, videoURL := range args {
-		download(videoURL)
+		err = download(videoURL)
+		if err != nil {
+			fmt.Printf("Downloading %s error: %v \n", videoURL, err)
+		}
 	}
 }

@@ -44,7 +44,7 @@ func TestIqiyi(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := Iqiyi(tt.args.URL)
+			data, _ := Iqiyi(tt.args.URL)
 			test.Check(t, tt.args, data)
 		})
 	}

@@ -97,7 +97,7 @@ func TestFileSize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := FileSize(tt.args.filePath); got != tt.want {
+			if got, _, _ := FileSize(tt.args.filePath); got != tt.want {
 				t.Errorf("FileSize() = %v, want %v", got, tt.want)
 			}
 		})
@@ -273,7 +273,7 @@ func TestFilePath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := FilePath(tt.args.name, tt.args.ext, tt.args.escape); got != tt.want {
+			if got, _ := FilePath(tt.args.name, tt.args.ext, tt.args.escape); got != tt.want {
 				t.Errorf("FilePath() = %v, want %v", got, tt.want)
 			}
 		})
@@ -361,7 +361,7 @@ func TestGetNameAndExt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := GetNameAndExt(tt.args.uri)
+			got, got1, _ := GetNameAndExt(tt.args.uri)
 			if got != tt.want {
 				t.Errorf("GetNameAndExt() got = %v, want %v", got, tt.want)
 			}

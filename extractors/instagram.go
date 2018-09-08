@@ -30,10 +30,16 @@ type instagram struct {
 }
 
 // Instagram download function
-func Instagram(url string) downloader.VideoData {
-	html := request.Get(url, url, nil)
+func Instagram(url string) (downloader.VideoData, error) {
+	html, err := request.Get(url, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	// get the title
-	doc := parser.GetDoc(html)
+	doc, err := parser.GetDoc(html)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	title := parser.Title(doc)
 
 	dataString := utils.MatchOneOf(html, `window\._sharedData\s*=\s*(.*);`)[1]
@@ -48,7 +54,10 @@ func Instagram(url string) downloader.VideoData {
 		// Video
 		dataType = "video"
 		realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.VideoURL
-		size = request.Size(realURL, url)
+		size, err = request.Size(realURL, url)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 		format["default"] = downloader.FormatData{
 			URLs: []downloader.URLData{
 				{
@@ -65,7 +74,10 @@ func Instagram(url string) downloader.VideoData {
 		if data.EntryData.PostPage[0].Graphql.ShortcodeMedia.EdgeSidecar.Edges == nil {
 			// Single
 			realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.DisplayURL
-			size = request.Size(realURL, url)
+			size, err = request.Size(realURL, url)
+			if err != nil {
+				return downloader.VideoData{}, err
+			}
 			format["default"] = downloader.FormatData{
 				URLs: []downloader.URLData{
 					{
@@ -82,7 +94,10 @@ func Instagram(url string) downloader.VideoData {
 			var urls []downloader.URLData
 			for _, u := range data.EntryData.PostPage[0].Graphql.ShortcodeMedia.EdgeSidecar.Edges {
 				realURL = u.Node.DisplayURL
-				size = request.Size(realURL, url)
+				size, err = request.Size(realURL, url)
+				if err != nil {
+					return downloader.VideoData{}, err
+				}
 				urlData := downloader.URLData{
 					URL:  realURL,
 					Size: size,
@@ -104,6 +119,9 @@ func Instagram(url string) downloader.VideoData {
 		Type:    dataType,
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

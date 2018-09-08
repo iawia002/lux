@@ -2,7 +2,7 @@ package extractors
 
 import (
 	"encoding/json"
-	"log"
+	"errors"
 
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/request"
@@ -23,13 +23,22 @@ type douyuURLInfo struct {
 	Size int64
 }
 
-func douyuM3u8(url string) ([]douyuURLInfo, int64) {
-	var data []douyuURLInfo
-	var temp douyuURLInfo
-	var size, totalSize int64
-	urls := utils.M3u8URLs(url)
+func douyuM3u8(url string) ([]douyuURLInfo, int64, error) {
+	var (
+		data            []douyuURLInfo
+		temp            douyuURLInfo
+		size, totalSize int64
+		err             error
+	)
+	urls, err := utils.M3u8URLs(url)
+	if err != nil {
+		return nil, 0, err
+	}
 	for _, u := range urls {
-		size = request.Size(u, url)
+		size, err = request.Size(u, url)
+		if err != nil {
+			return nil, 0, err
+		}
 		totalSize += size
 		temp = douyuURLInfo{
 			URL:  u,
@@ -37,25 +46,35 @@ func douyuM3u8(url string) ([]douyuURLInfo, int64) {
 		}
 		data = append(data, temp)
 	}
-	return data, totalSize
+	return data, totalSize, nil
 }
 
 // Douyu download function
-func Douyu(url string) downloader.VideoData {
+func Douyu(url string) (downloader.VideoData, error) {
+	var err error
 	liveVid := utils.MatchOneOf(url, `https?://www.douyu.com/(\S+)`)
 	if liveVid != nil {
-		log.Fatal("暂不支持斗鱼直播")
+		return downloader.VideoData{}, errors.New("暂不支持斗鱼直播")
 	}
 
-	html := request.Get(url, url, nil)
+	html, err := request.Get(url, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	title := utils.MatchOneOf(html, `<title>(.*?)</title>`)[1]
 
 	vid := utils.MatchOneOf(url, `https?://v.douyu.com/show/(\S+)`)[1]
-	dataString := request.Get("http://vmobile.douyu.com/video/getInfo?vid="+vid, url, nil)
+	dataString, err := request.Get("http://vmobile.douyu.com/video/getInfo?vid="+vid, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	var dataDict douyuData
 	json.Unmarshal([]byte(dataString), &dataDict)
 
-	m3u8URLs, totalSize := douyuM3u8(dataDict.Data.VideoURL)
+	m3u8URLs, totalSize, err := douyuM3u8(dataDict.Data.VideoURL)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	urls := []downloader.URLData{}
 	var temp downloader.URLData
 	for _, u := range m3u8URLs {
@@ -79,6 +98,9 @@ func Douyu(url string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

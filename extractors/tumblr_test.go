@@ -48,7 +48,7 @@ func TestTumblr(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := Tumblr(tt.args.URL)
+			data, _ := Tumblr(tt.args.URL)
 			test.Check(t, tt.args, data)
 		})
 	}

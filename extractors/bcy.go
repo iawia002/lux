@@ -7,14 +7,21 @@ import (
 )
 
 // Bcy download function
-func Bcy(url string) downloader.VideoData {
-	html := request.Get(url, url, nil)
-	title, urls := parser.GetImages(
+func Bcy(url string) (downloader.VideoData, error) {
+	var err error
+	html, err := request.Get(url, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	title, urls, err := parser.GetImages(
 		url, html, "detail_std detail_clickable", func(u string) string {
 			// https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg/w650
 			return u[:len(u)-5]
 		},
 	)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	format := map[string]downloader.FormatData{
 		"default": {
 			URLs: urls,
@@ -27,6 +34,9 @@ func Bcy(url string) downloader.VideoData {
 		Type:    "image",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

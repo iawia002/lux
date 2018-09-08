@@ -23,10 +23,41 @@ func TestGetDoc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			doc := GetDoc(tt.args.html)
+			doc, _ := GetDoc(tt.args.html)
 			title := doc.Find("title").First().Text()
 			if title != tt.want {
 				t.Errorf("GetDoc() = %s, want %s", title, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetImages(t *testing.T) {
+	type args struct {
+		html     string
+		url      string
+		imgClass string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "fail test",
+			args: args{
+				html:     `<html><head><title>hello</title></head><body><img class="test" src="test" /></body></html>`,
+				url:      "test",
+				imgClass: "test",
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			title, _, _ := GetImages(tt.args.url, tt.args.html, tt.args.imgClass, nil)
+			if title != tt.want {
+				t.Errorf("GetImages() = %s, want %s", title, tt.want)
 			}
 		})
 	}
@@ -65,7 +96,7 @@ func TestGetTitle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			doc := GetDoc(tt.args.html)
+			doc, _ := GetDoc(tt.args.html)
 			title := Title(doc)
 			if title != tt.want {
 				t.Errorf("Title() = %s, want %s", title, tt.want)
