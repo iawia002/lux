@@ -8,13 +8,22 @@ import (
 )
 
 // Miaopai download function
-func Miaopai(url string) downloader.VideoData {
-	html := request.Get(url, url, nil)
-	doc := parser.GetDoc(html)
+func Miaopai(url string) (downloader.VideoData, error) {
+	html, err := request.Get(url, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	doc, err := parser.GetDoc(html)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	title := parser.Title(doc)
 
 	realURL := utils.MatchOneOf(html, `"videoSrc":"(.+?)"`)[1]
-	size := request.Size(realURL, url)
+	size, err := request.Size(realURL, url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	urlData := downloader.URLData{
 		URL:  realURL,
 		Size: size,
@@ -32,6 +41,9 @@ func Miaopai(url string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

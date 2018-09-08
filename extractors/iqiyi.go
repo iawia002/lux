@@ -2,8 +2,8 @@ package extractors
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -31,12 +31,12 @@ type iqiyi struct {
 
 const iqiyiReferer = "https://www.iqiyi.com"
 
-func getIqiyiData(tvid, vid string) iqiyi {
+func getIqiyiData(tvid, vid string) (iqiyi, error) {
 	t := time.Now().Unix() * 1000
 	src := "76f90cbd92f94a2e925d83e8ccd22cb7"
 	key := "d5fb4bd9d50c4be6948c97edd7254b0e"
 	sc := utils.Md5(strconv.FormatInt(t, 10) + key + vid)
-	info := request.Get(
+	info, err := request.Get(
 		fmt.Sprintf(
 			"http://cache.m.iqiyi.com/jp/tmts/%s/%s/?t=%d&sc=%s&src=%s",
 			tvid, vid, t, sc, src,
@@ -44,14 +44,20 @@ func getIqiyiData(tvid, vid string) iqiyi {
 		iqiyiReferer,
 		nil,
 	)
+	if err != nil {
+		return iqiyi{}, err
+	}
 	var data iqiyi
 	json.Unmarshal([]byte(info[len("var tvInfoJs="):]), &data)
-	return data
+	return data, nil
 }
 
 // Iqiyi download function
-func Iqiyi(url string) downloader.VideoData {
-	html := request.Get(url, iqiyiReferer, nil)
+func Iqiyi(url string) (downloader.VideoData, error) {
+	html, err := request.Get(url, iqiyiReferer, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	tvid := utils.MatchOneOf(
 		url,
 		`#curid=(.+)_`,
@@ -78,7 +84,10 @@ func Iqiyi(url string) downloader.VideoData {
 			`"vid":"(\w+)"`,
 		)
 	}
-	doc := parser.GetDoc(html)
+	doc, err := parser.GetDoc(html)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	title := strings.TrimSpace(doc.Find("h1>a").First().Text())
 	var sub string
 	for _, k := range []string{"span", "em"} {
@@ -91,9 +100,12 @@ func Iqiyi(url string) downloader.VideoData {
 	if title == "" {
 		title = doc.Find("title").Text()
 	}
-	videoDatas := getIqiyiData(tvid[1], vid[1])
+	videoDatas, err := getIqiyiData(tvid[1], vid[1])
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	if videoDatas.Code != "A00000" {
-		log.Fatal("Can't play this video")
+		return downloader.VideoData{}, errors.New("Can't play this video")
 	}
 	format := map[string]downloader.FormatData{}
 	var urlData downloader.URLData
@@ -105,7 +117,11 @@ func Iqiyi(url string) downloader.VideoData {
 		}
 		urls := []downloader.URLData{}
 		totalSize = 0
-		for _, ts := range utils.M3u8URLs(video.M3utx) {
+		m3u8URLs, err := utils.M3u8URLs(video.M3utx)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
+		for _, ts := range m3u8URLs {
 			size, _ = strconv.ParseInt(
 				utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,
 			)
@@ -131,6 +147,9 @@ func Iqiyi(url string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

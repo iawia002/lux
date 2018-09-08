@@ -40,7 +40,7 @@ func TestInstagram(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data := Instagram(tt.args.URL)
+			data, _ := Instagram(tt.args.URL)
 			test.Check(t, tt.args, data)
 		})
 	}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -32,22 +31,25 @@ const referer = "https://www.bilibili.com"
 
 var utoken string
 
-func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) string {
+func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) (string, error) {
 	var (
+		err        error
 		baseAPIURL string
 		params     string
 	)
 	if config.Cookie != "" && utoken == "" {
-		utoken = request.Get(
+		utoken, err = request.Get(
 			fmt.Sprintf("%said=%s&cid=%s", bilibiliTokenAPI, aid, cid),
 			referer,
 			nil,
 		)
+		if err != nil {
+			return "", err
+		}
 		var t token
 		json.Unmarshal([]byte(utoken), &t)
 		if t.Code != 0 {
-			log.Println(config.Cookie)
-			log.Fatal("Cookie error: ", t.Message)
+			return "", fmt.Errorf("Cookie error: %s", t.Message)
 		}
 		utoken = t.Data.Token
 	}
@@ -74,7 +76,7 @@ func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) st
 	if !bangumi && utoken != "" {
 		api = fmt.Sprintf("%s&utoken=%s", api, utoken)
 	}
-	return api
+	return api, nil
 }
 
 func genURL(durl []dURLData) ([]downloader.URLData, int64) {
@@ -116,12 +118,16 @@ func getMultiPageData(html string) (multiPage, error) {
 }
 
 // Download bilibili main download function
-func Download(url string) {
+func Download(url string) error {
 	var options bilibiliOptions
+	var err error
 	if strings.Contains(url, "bangumi") {
 		options.Bangumi = true
 	}
-	html := request.Get(url, referer, nil)
+	html, err := request.Get(url, referer, nil)
+	if err != nil {
+		return err
+	}
 	if !config.Playlist {
 		options.HTML = html
 		data, err := getMultiPageData(html)
@@ -149,8 +155,11 @@ func Download(url string) {
 				options.Subtitle = page.Part
 			}
 		}
-		bilibiliDownload(url, options)
-		return
+		_, err = bilibiliDownload(url, options)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 	if options.Bangumi {
 		dataString := utils.MatchOneOf(html, `window.__INITIAL_STATE__=(.+?);\(function`)[1]
@@ -170,8 +179,11 @@ func Download(url string) {
 		if err != nil {
 			// this page has no playlist
 			options.HTML = html
-			bilibiliDownload(url, options)
-			return
+			_, err = bilibiliDownload(url, options)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
 		// https://www.bilibili.com/video/av20827366/?p=1
 		needDownloadItems := utils.NeedDownloadList(len(data.VideoData.Pages))
@@ -183,20 +195,28 @@ func Download(url string) {
 			options.Cid = strconv.Itoa(u.Cid)
 			options.Subtitle = u.Part
 			options.P = u.Page
-			bilibiliDownload(url, options)
+			_, err := bilibiliDownload(url, options)
+			if err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
-func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData {
+func bilibiliDownload(url string, options bilibiliOptions) (downloader.VideoData, error) {
 	var (
 		aid, cid, html string
+		err            error
 	)
 	if options.HTML != "" {
 		// reuse html string, but this can't be reused in case of playlist
 		html = options.HTML
 	} else {
-		html = request.Get(url, referer, nil)
+		html, err = request.Get(url, referer, nil)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 	}
 	if options.Aid != "" && options.Cid != "" {
 		aid = options.Aid
@@ -218,16 +238,27 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 	// Get "accept_quality" and "accept_description"
 	// "accept_description":["高清 1080P","高清 720P","清晰 480P","流畅 360P"],
 	// "accept_quality":[80,48,32,16],
-	jsonString := request.Get(
-		genAPI(aid, cid, options.Bangumi, "15", seasonType), referer, nil,
-	)
+	api, err := genAPI(aid, cid, options.Bangumi, "15", seasonType)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	jsonString, err := request.Get(api, referer, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	var quality qualityInfo
 	json.Unmarshal([]byte(jsonString), &quality)
 
 	format := make(map[string]downloader.FormatData, len(quality.Quality))
 	for _, q := range quality.Quality {
-		apiURL := genAPI(aid, cid, options.Bangumi, strconv.Itoa(q), seasonType)
-		jsonString := request.Get(apiURL, referer, nil)
+		apiURL, err := genAPI(aid, cid, options.Bangumi, strconv.Itoa(q), seasonType)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
+		jsonString, err := request.Get(apiURL, referer, nil)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 		var data bilibiliData
 		json.Unmarshal([]byte(jsonString), &data)
 
@@ -245,7 +276,10 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 	}
 
 	// get the title
-	doc := parser.GetDoc(html)
+	doc, err := parser.GetDoc(html)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	title := parser.Title(doc)
 	if options.Subtitle != "" {
 		tempTitle := fmt.Sprintf("%s %s", title, options.Subtitle)
@@ -261,10 +295,16 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.VideoData 
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	downloader.Caption(
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	err = downloader.Caption(
 		fmt.Sprintf("https://comment.bilibili.com/%s.xml", cid),
 		url, title, "xml",
 	)
-	return extractedData
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

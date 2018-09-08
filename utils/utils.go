@@ -3,7 +3,6 @@ package utils
 import (
 	"crypto/md5"
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -48,15 +47,15 @@ func MatchAll(text, pattern string) [][]string {
 }
 
 // FileSize return the file size of the specified path file
-func FileSize(filePath string) (int64, bool) {
+func FileSize(filePath string) (int64, bool, error) {
 	file, err := os.Stat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return 0, false
+			return 0, false, nil
 		}
-		log.Fatal(err)
+		return 0, false, err
 	}
-	return file.Size(), true
+	return file.Size(), true, nil
 }
 
 // Domain get the domain of given URL
@@ -94,12 +93,11 @@ func FileName(name string) string {
 }
 
 // FilePath gen valid file path
-func FilePath(name, ext string, escape bool) string {
+func FilePath(name, ext string, escape bool) (string, error) {
 	var outputPath string
 	if config.OutputPath != "" {
-		_, err := os.Stat(config.OutputPath)
-		if err != nil && os.IsNotExist(err) {
-			log.Fatal(err)
+		if _, err := os.Stat(config.OutputPath); err != nil {
+			return "", err
 		}
 	}
 	fileName := fmt.Sprintf("%s.%s", name, ext)
@@ -107,7 +105,7 @@ func FilePath(name, ext string, escape bool) string {
 		fileName = FileName(fileName)
 	}
 	outputPath = filepath.Join(config.OutputPath, fileName)
-	return outputPath
+	return outputPath, nil
 }
 
 // ItemInSlice if a item is in the list
@@ -136,18 +134,24 @@ func ItemInSlice(item, list interface{}) bool {
 // GetNameAndExt return the name and ext of the URL
 // https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg ->
 // 1f5a87801a0711e898b12b640777720f, jpg
-func GetNameAndExt(uri string) (string, string) {
-	u, _ := url.ParseRequestURI(uri)
+func GetNameAndExt(uri string) (string, string, error) {
+	u, err := url.ParseRequestURI(uri)
+	if err != nil {
+		return "", "", err
+	}
 	s := strings.Split(u.Path, "/")
 	filename := strings.Split(s[len(s)-1], ".")
 	if len(filename) > 1 {
-		return filename[0], filename[1]
+		return filename[0], filename[1], nil
 	}
 	// Image url like this
 	// https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg/w650
 	// has no suffix
-	contentType := request.ContentType(uri, uri)
-	return filename[0], strings.Split(contentType, "/")[1]
+	contentType, err := request.ContentType(uri, uri)
+	if err != nil {
+		return "", "", err
+	}
+	return filename[0], strings.Split(contentType, "/")[1], nil
 }
 
 // Md5 md5 hash
@@ -158,8 +162,11 @@ func Md5(text string) string {
 }
 
 // M3u8URLs get all urls from m3u8 url
-func M3u8URLs(uri string) []string {
-	html := request.Get(uri, "", nil)
+func M3u8URLs(uri string) ([]string, error) {
+	html, err := request.Get(uri, "", nil)
+	if err != nil {
+		return nil, err
+	}
 	lines := strings.Split(html, "\n")
 	var urls []string
 	for _, line := range lines {
@@ -180,7 +187,7 @@ func M3u8URLs(uri string) []string {
 			}
 		}
 	}
-	return urls
+	return urls, nil
 }
 
 // PrintVersion print version information

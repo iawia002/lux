@@ -2,8 +2,8 @@ package extractors
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -48,7 +48,7 @@ type qqKeyInfo struct {
 
 const qqPlayerVersion string = "3.2.19.333"
 
-func qqGenFormat(vid, cdn string, data qqVideoInfo) map[string]downloader.FormatData {
+func qqGenFormat(vid, cdn string, data qqVideoInfo) (map[string]downloader.FormatData, error) {
 	format := map[string]downloader.FormatData{}
 	var vkey string
 	// number of fragments
@@ -95,11 +95,14 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) map[string]downloader.Format
 				}
 			}
 			filename = strings.Join(fns, ".")
-			html := request.Get(
+			html, err := request.Get(
 				fmt.Sprintf(
 					"http://vv.video.qq.com/getkey?otype=json&platform=11&appver=%s&filename=%s&format=%d&vid=%s", qqPlayerVersion, filename, fi.ID, vid,
 				), cdn, nil,
 			)
+			if err != nil {
+				return nil, err
+			}
 			jsonString := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)[1]
 			var keyData qqKeyInfo
 			json.Unmarshal([]byte(jsonString), &keyData)
@@ -108,7 +111,10 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) map[string]downloader.Format
 				vkey = data.Vl.Vi[0].Fvkey
 			}
 			realURL := fmt.Sprintf("%s%s?vkey=%s", cdn, filename, vkey)
-			size := request.Size(realURL, cdn)
+			size, err := request.Size(realURL, cdn)
+			if err != nil {
+				return nil, err
+			}
 			urlData := downloader.URLData{
 				URL:  realURL,
 				Size: size,
@@ -123,37 +129,50 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) map[string]downloader.Format
 			Quality: fi.Cname,
 		}
 	}
-	return format
+	return format, nil
 }
 
 // QQ download function
-func QQ(url string) downloader.VideoData {
+func QQ(url string) (downloader.VideoData, error) {
 	vid := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)[1]
 	if len(vid) != 11 {
+		u, err := request.Get(url, url, nil)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 		vid = utils.MatchOneOf(
-			request.Get(url, url, nil), `vid=(\w+)`, `vid:\s*["'](\w+)`, `vid\s*=\s*["']\s*(\w+)`,
+			u, `vid=(\w+)`, `vid:\s*["'](\w+)`, `vid\s*=\s*["']\s*(\w+)`,
 		)[1]
 	}
-	html := request.Get(
+	html, err := request.Get(
 		fmt.Sprintf(
 			"http://vv.video.qq.com/getinfo?otype=json&platform=11&defnpayver=1&appver=%s&defn=shd&vid=%s", qqPlayerVersion, vid,
 		), url, nil,
 	)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	jsonString := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)[1]
 	var data qqVideoInfo
 	json.Unmarshal([]byte(jsonString), &data)
 	// API request error
 	if data.Msg != "" {
-		log.Fatal(data.Msg)
+		return downloader.VideoData{}, errors.New(data.Msg)
 	}
 	cdn := data.Vl.Vi[0].Ul.UI[len(data.Vl.Vi[0].Ul.UI)-1].URL
-	format := qqGenFormat(vid, cdn, data)
+	format, err := qqGenFormat(vid, cdn, data)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	extractedData := downloader.VideoData{
 		Site:    "腾讯视频 v.qq.com",
 		Title:   utils.FileName(data.Vl.Vi[0].Ti),
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

@@ -71,7 +71,7 @@ func TestYoutube(t *testing.T) {
 				config.Playlist = false
 				Download(tt.args.URL)
 			} else {
-				data := youtubeDownload(tt.args.URL)
+				data, _ := youtubeDownload(tt.args.URL)
 				test.Check(t, tt.args, data)
 			}
 		})

@@ -7,8 +7,8 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	netURL "net/url"
 	"strings"
@@ -78,17 +78,21 @@ func getAudioLang(lang string) string {
 
 // var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
 
-func youkuUps(vid string) youkuData {
+func youkuUps(vid string) (youkuData, error) {
 	var (
 		url  string
 		utid string
 		html string
 		data youkuData
+		err  error
 	)
 	if strings.Contains(config.Cookie, "cna") {
 		utid = utils.MatchOneOf(config.Cookie, `cna=(.+?);`, `cna\s+(.+?)\s`, `cna\s+(.+?)$`)[1]
 	} else {
-		headers := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
+		headers, err := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
+		if err != nil {
+			return youkuData{}, err
+		}
 		setCookie := headers.Get("Set-Cookie")
 		utid = utils.MatchOneOf(setCookie, `cna=(.+?);`)[1]
 	}
@@ -103,15 +107,18 @@ func youkuUps(vid string) youkuData {
 			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s&ckey=%s",
 			vid, ccode, time.Now().Unix()/1000, netURL.QueryEscape(utid), netURL.QueryEscape(ckey),
 		)
-		html = request.Get(url, youkuReferer, nil)
+		html, err = request.Get(url, youkuReferer, nil)
+		if err != nil {
+			return youkuData{}, err
+		}
 		// data must be emptied before reassignment, otherwise it will contain the previous value(the 'error' data)
 		data = youkuData{}
 		json.Unmarshal([]byte(html), &data)
 		if data.Data.Error == (errorData{}) {
-			return data
+			return data, nil
 		}
 	}
-	return data
+	return data, nil
 }
 
 func getBytes(val int32) []byte {
@@ -121,7 +128,7 @@ func getBytes(val int32) []byte {
 }
 
 func hashCode(s string) int32 {
-	var result int32 = 0
+	var result int32
 	for _, c := range s {
 		result = result*0x1f + int32(c)
 	}
@@ -191,13 +198,16 @@ func genData(youkuData data) map[string]downloader.FormatData {
 }
 
 // Youku download function
-func Youku(url string) downloader.VideoData {
+func Youku(url string) (downloader.VideoData, error) {
 	vid := utils.MatchOneOf(
 		url, `id_(.+?)\.html`, `id_(.+)`,
 	)[1]
-	youkuData := youkuUps(vid)
+	youkuData, err := youkuUps(vid)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	if youkuData.Data.Error.Code != 0 {
-		log.Fatal(youkuData.Data.Error.Note)
+		return downloader.VideoData{}, errors.New(youkuData.Data.Error.Note)
 	}
 	format := genData(youkuData.Data)
 	var title string
@@ -214,6 +224,9 @@ func Youku(url string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	data.Download(url)
-	return data
+	err = data.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return data, nil
 }

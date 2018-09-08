@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	netURL "net/url"
@@ -26,7 +25,7 @@ import (
 // Request base request
 func Request(
 	method, url string, body io.Reader, headers map[string]string,
-) *http.Response {
+) (*http.Response, error) {
 	transport := &http.Transport{
 		DisableCompression:  true,
 		TLSHandshakeTimeout: 10 * time.Second,
@@ -35,7 +34,7 @@ func Request(
 	if config.Proxy != "" {
 		var httpProxy, err = netURL.Parse(config.Proxy)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		transport.Proxy = http.ProxyURL(httpProxy)
 	}
@@ -50,7 +49,7 @@ func Request(
 			},
 		)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		transport.Dial = dialer.Dial
 	}
@@ -59,8 +58,7 @@ func Request(
 	}
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-		log.Print(url)
-		panic(err)
+		return nil, err
 	}
 	for k, v := range config.FakeHeaders {
 		req.Header.Set(k, v)
@@ -97,15 +95,13 @@ func Request(
 		if requestError == nil && res.StatusCode < 400 {
 			break
 		} else if i+1 >= config.RetryTimes {
-			var err string
+			var err error
 			if requestError != nil {
-				err = fmt.Sprintf("request error: %v", requestError)
+				err = fmt.Errorf("request error: %v", requestError)
 			} else {
-				err = fmt.Sprintf(
-					"%s request error: HTTP %d", url, res.StatusCode,
-				)
+				err = fmt.Errorf("%s request error: HTTP %d", url, res.StatusCode)
 			}
-			panic(err)
+			return nil, err
 		}
 		time.Sleep(1 * time.Second)
 	}
@@ -125,18 +121,21 @@ func Request(
 			color.Green("%d", res.StatusCode)
 		}
 	}
-	return res
+	return res, nil
 }
 
 // Get get request
-func Get(url, refer string, headers map[string]string) string {
+func Get(url, refer string, headers map[string]string) (string, error) {
 	if headers == nil {
 		headers = map[string]string{}
 	}
 	if refer != "" {
 		headers["Referer"] = refer
 	}
-	res := Request("GET", url, nil, headers)
+	res, err := Request("GET", url, nil, headers)
+	if err != nil {
+		return "", err
+	}
 	var reader io.ReadCloser
 	switch res.Header.Get("Content-Encoding") {
 	case "gzip":
@@ -148,31 +147,46 @@ func Get(url, refer string, headers map[string]string) string {
 	}
 	defer res.Body.Close()
 	defer reader.Close()
-	body, _ := ioutil.ReadAll(reader)
-	return string(body)
+	body, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
 }
 
 // Headers return the HTTP Headers of the url
-func Headers(url, refer string) http.Header {
+func Headers(url, refer string) (http.Header, error) {
 	headers := map[string]string{
 		"Referer": refer,
 	}
-	res := Request("GET", url, nil, headers)
-	return res.Header
+	res, err := Request("GET", url, nil, headers)
+	if err != nil {
+		return nil, err
+	}
+	return res.Header, nil
 }
 
 // Size get size of the url
-func Size(url, refer string) int64 {
-	h := Headers(url, refer)
+func Size(url, refer string) (int64, error) {
+	h, err := Headers(url, refer)
+	if err != nil {
+		return 0, err
+	}
 	s := h.Get("Content-Length")
-	size, _ := strconv.ParseInt(s, 10, 64)
-	return size
+	size, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return size, nil
 }
 
 // ContentType get Content-Type of the url
-func ContentType(url, refer string) string {
-	h := Headers(url, refer)
+func ContentType(url, refer string) (string, error) {
+	h, err := Headers(url, refer)
+	if err != nil {
+		return "", err
+	}
 	s := h.Get("Content-Type")
 	// handle Content-Type like this: "text/html; charset=utf-8"
-	return strings.Split(s, ";")[0]
+	return strings.Split(s, ";")[0], nil
 }

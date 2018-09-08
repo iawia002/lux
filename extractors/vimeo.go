@@ -36,14 +36,22 @@ type vimeo struct {
 }
 
 // Vimeo download function
-func Vimeo(url string) downloader.VideoData {
-	var html string
-	var vid string
+func Vimeo(url string) (downloader.VideoData, error) {
+	var (
+		html, vid string
+		err       error
+	)
 	if strings.Contains(url, "player.vimeo.com") {
-		html = request.Get(url, url, nil)
+		html, err = request.Get(url, url, nil)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 	} else {
 		vid = utils.MatchOneOf(url, `vimeo\.com/(\d+)`)[1]
-		html = request.Get("https://player.vimeo.com/video/"+vid, url, nil)
+		html, err = request.Get("https://player.vimeo.com/video/"+vid, url, nil)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 	}
 	jsonString := utils.MatchOneOf(html, `{var \w+=({.+?});`)[1]
 	var vimeoData vimeo
@@ -52,7 +60,10 @@ func Vimeo(url string) downloader.VideoData {
 	var size int64
 	var urlData downloader.URLData
 	for _, video := range vimeoData.Request.Files.Progressive {
-		size = request.Size(video.URL, url)
+		size, err = request.Size(video.URL, url)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 		urlData = downloader.URLData{
 			URL:  video.URL,
 			Size: size,
@@ -71,6 +82,9 @@ func Vimeo(url string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }

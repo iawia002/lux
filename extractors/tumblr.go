@@ -2,7 +2,7 @@ package extractors
 
 import (
 	"encoding/json"
-	"log"
+	"errors"
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
@@ -23,18 +23,24 @@ type tumblrImage struct {
 	Image string `json:"image"`
 }
 
-func genURLData(url, referer string) (downloader.URLData, int64) {
-	size := request.Size(url, referer)
-	_, ext := utils.GetNameAndExt(url)
+func genURLData(url, referer string) (downloader.URLData, int64, error) {
+	size, err := request.Size(url, referer)
+	if err != nil {
+		return downloader.URLData{}, 0, err
+	}
+	_, ext, err := utils.GetNameAndExt(url)
+	if err != nil {
+		return downloader.URLData{}, 0, err
+	}
 	data := downloader.URLData{
 		URL:  url,
 		Size: size,
 		Ext:  ext,
 	}
-	return data, size
+	return data, size, nil
 }
 
-func tumblrImageDownload(url, html, title string) downloader.VideoData {
+func tumblrImageDownload(url, html, title string) (downloader.VideoData, error) {
 	jsonString := utils.MatchOneOf(
 		html, `<script type="application/ld\+json">\s*(.+?)</script>`,
 	)[1]
@@ -45,14 +51,20 @@ func tumblrImageDownload(url, html, title string) downloader.VideoData {
 		var imageList tumblrImageList
 		json.Unmarshal([]byte(jsonString), &imageList)
 		for _, u := range imageList.Image.List {
-			urlData, size := genURLData(u, url)
+			urlData, size, err := genURLData(u, url)
+			if err != nil {
+				return downloader.VideoData{}, err
+			}
 			totalSize += size
 			urls = append(urls, urlData)
 		}
 	} else {
 		var image tumblrImage
 		json.Unmarshal([]byte(jsonString), &image)
-		urlData, size := genURLData(image.Image, url)
+		urlData, size, err := genURLData(image.Image, url)
+		if err != nil {
+			return downloader.VideoData{}, err
+		}
 		totalSize = size
 		urls = append(urls, urlData)
 	}
@@ -69,18 +81,27 @@ func tumblrImageDownload(url, html, title string) downloader.VideoData {
 		Type:    "image",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err := extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }
 
-func tumblrVideoDownload(url, html, title string) downloader.VideoData {
+func tumblrVideoDownload(url, html, title string) (downloader.VideoData, error) {
 	videoURL := utils.MatchOneOf(html, `<iframe src='(.+?)'`)[1]
 	if !strings.Contains(videoURL, "tumblr.com/video") {
-		log.Fatal("annie doesn't support this URL right now")
+		return downloader.VideoData{}, errors.New("annie doesn't support this URL right now")
 	}
-	videoHTML := request.Get(videoURL, url, nil)
+	videoHTML, err := request.Get(videoURL, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	realURL := utils.MatchOneOf(videoHTML, `source src="(.+?)"`)[1]
-	urlData, size := genURLData(realURL, url)
+	urlData, size, err := genURLData(realURL, url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	format := map[string]downloader.FormatData{
 		"default": {
 			URLs: []downloader.URLData{urlData},
@@ -93,15 +114,24 @@ func tumblrVideoDownload(url, html, title string) downloader.VideoData {
 		Type:    "video",
 		Formats: format,
 	}
-	extractedData.Download(url)
-	return extractedData
+	err = extractedData.Download(url)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
+	return extractedData, nil
 }
 
 // Tumblr download function
-func Tumblr(url string) downloader.VideoData {
-	html := request.Get(url, url, nil)
+func Tumblr(url string) (downloader.VideoData, error) {
+	html, err := request.Get(url, url, nil)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	// get the title
-	doc := parser.GetDoc(html)
+	doc, err := parser.GetDoc(html)
+	if err != nil {
+		return downloader.VideoData{}, err
+	}
 	title := parser.Title(doc)
 	if strings.Contains(html, "<iframe src=") {
 		// Video

@@ -1,8 +1,8 @@
 package youtube
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -53,12 +53,12 @@ var swapRegexp = regexp.MustCompile(fmt.Sprintf(
 	`(?m)(?:^|,)(%s)%s`, jsvarStr, swapStr,
 ))
 
-func getSigTokens(html string) []string {
+func getSigTokens(html string) ([]string, error) {
 	objResult := actionsObjRegexp.FindStringSubmatch(html)
 	funcResult := actionsFuncRegexp.FindStringSubmatch(html)
 
 	if len(objResult) < 3 || len(funcResult) < 2 {
-		log.Fatal("Error parsing signature tokens")
+		return nil, errors.New("Error parsing signature tokens")
 	}
 	obj := strings.Replace(objResult[1], "$", `\$`, -1)
 	objBody := strings.Replace(objResult[2], "$", `\$`, -1)
@@ -85,7 +85,7 @@ func getSigTokens(html string) []string {
 		`(?:a=)?%s\.(%s)\(a,(\d+)\)`, obj, strings.Join(keys, "|"),
 	))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	results := regex.FindAllStringSubmatch(funcBody, -1)
 	var tokens []string
@@ -101,7 +101,7 @@ func getSigTokens(html string) []string {
 			tokens = append(tokens, "p"+s[2])
 		}
 	}
-	return tokens
+	return tokens, nil
 }
 
 func reverseStringSlice(s []string) {
