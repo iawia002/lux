@@ -1,7 +1,6 @@
 package downloader
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -129,19 +128,8 @@ func Save(
 	// Skip segment file
 	// TODO: Live video URLs will not return the size
 	if exists && fileSize == urlData.Size {
-		fmt.Printf("%s: file already exists, skipping\n", filePath)
 		bar.Add64(fileSize)
 		return nil
-	}
-	if exists && fileSize != urlData.Size {
-		// files with the same name but different size
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Printf("%s: file already exists, overwriting? [y/n]", filePath)
-		overwriting, _ := reader.ReadString('\n')
-		overwriting = strings.Replace(overwriting, "\n", "", -1)
-		if overwriting != "y" {
-			return nil
-		}
 	}
 	tempFilePath := filePath + ".download"
 	tempFileSize, _, err := utils.FileSize(tempFilePath)
@@ -151,8 +139,10 @@ func Save(
 	headers := map[string]string{
 		"Referer": refer,
 	}
-	var file *os.File
-	var fileError error
+	var (
+		file      *os.File
+		fileError error
+	)
 	if tempFileSize > 0 {
 		// range start from 0, 0-1023 means the first 1024 bytes of the file
 		headers["Range"] = fmt.Sprintf("bytes=%d-", tempFileSize)
@@ -347,7 +337,7 @@ func (v VideoData) Download(refer string) error {
 	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
 	// multiple fragments
 	parts := []string{}
-	errs := make([]error, len(data.URLs))
+	errs := make([]error, 0)
 	for index, url := range data.URLs {
 		partFileName := fmt.Sprintf("%s[%d]", title, index)
 		partFilePath, err := utils.FilePath(partFileName, url.Ext, false)

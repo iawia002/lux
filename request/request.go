@@ -63,9 +63,11 @@ func Request(
 	for k, v := range config.FakeHeaders {
 		req.Header.Set(k, v)
 	}
-	req.Header.Set("Referer", url)
 	for k, v := range headers {
 		req.Header.Set(k, v)
+	}
+	if _, ok := headers["Referer"]; !ok {
+		req.Header.Set("Referer", url)
 	}
 	if config.Cookie != "" {
 		var cookie string

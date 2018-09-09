@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/fatih/color"
+
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/extractors/bilibili"
@@ -61,7 +63,7 @@ func download(videoURL string) error {
 	} else {
 		u, err := url.ParseRequestURI(videoURL)
 		if err != nil {
-			return fmt.Errorf("Downloading %s error: %v", videoURL, err)
+			return err
 		}
 		domain = utils.Domain(u.Host)
 	}
@@ -143,7 +145,7 @@ func main() {
 			// Cookie is a file
 			data, err := ioutil.ReadFile(config.Cookie)
 			if err != nil {
-				fmt.Println(err)
+				color.Red("%v", err)
 				return
 			}
 			config.Cookie = string(data)
@@ -152,7 +154,10 @@ func main() {
 	for _, videoURL := range args {
 		err = download(videoURL)
 		if err != nil {
-			fmt.Printf("Downloading %s error: %v \n", videoURL, err)
+			fmt.Printf(
+				"Downloading %s error:\n%s\n",
+				color.CyanString("%s", videoURL), color.RedString("%v", err),
+			)
 		}
 	}
 }

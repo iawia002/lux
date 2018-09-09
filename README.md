@@ -528,6 +528,15 @@ Twitter | <https://twitter.com> | ✓ | | | |
 
 ## Known issues
 
+### 优酷
+
+优酷的 `ccode` 经常变化导致 annie 不可用，如果你知道有新的可用的 `ccode`，可以直接使用 `annie -ccode ...` 而不用等待 annie 更新（当然，也欢迎你给我们提一个 Pull request 来更新默认的 `ccode`）
+
+最好是每次下载都附带登录过的 Cookie 以避免部分 `ccode` 的问题
+
+### 爱奇艺
+
+不支持断点续传，它的响应头中没有 `Accept-Ranges`
 
 ## Contributing
 
