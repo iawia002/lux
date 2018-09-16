@@ -31,8 +31,9 @@ type FormatData struct {
 	// and support for downloading multiple image files at once
 	URLs    []URLData
 	Quality string
-	Size    int64 // total size of all urls
-	name    string
+	// total size of all urls
+	Size int64
+	name string
 }
 
 type formats []FormatData
@@ -224,12 +225,7 @@ func (data FormatData) printStream() {
 	}
 	fmt.Printf("%.2f MiB (%d Bytes)\n", float64(data.Size)/(1024*1024), data.Size)
 	cyan.Printf("     # download with: ")
-	if data.name == "default" {
-		fmt.Println("annie \"URL\"")
-	} else {
-		fmt.Println("annie -f " + data.name + " \"URL\"")
-	}
-	fmt.Println()
+	fmt.Printf("annie -f %s ...\n\n", data.name)
 }
 
 func (v *VideoData) genSortedFormats() {
@@ -242,21 +238,8 @@ func (v *VideoData) genSortedFormats() {
 		v.sortedFormats = append(v.sortedFormats, data)
 	}
 	if len(v.Formats) > 1 {
-		// Only multiple formats require sorting
 		sort.Sort(v.sortedFormats)
 	}
-	if !config.InfoOnly && !config.ExtractedData &&
-		config.Format != "" && config.Format != "default" {
-		return
-	}
-	// if Formats already have "default" format, skip follow step
-	if _, ok := v.Formats["default"]; ok {
-		return
-	}
-	bestQuality := v.sortedFormats[0].name
-	v.sortedFormats[0].name = "default"
-	v.Formats["default"] = v.sortedFormats[0]
-	delete(v.Formats, bestQuality)
 }
 
 func (v VideoData) printInfo(format string) {
@@ -289,14 +272,17 @@ func (v VideoData) Download(refer string) error {
 		fmt.Printf("%s\n", jsonData)
 		return nil
 	}
-	var format, title string
+	var (
+		title  string
+		format string
+	)
 	if config.OutputName == "" {
 		title = v.Title
 	} else {
 		title = utils.FileName(config.OutputName)
 	}
 	if config.Format == "" {
-		format = "default"
+		format = v.sortedFormats[0].name
 	} else {
 		format = config.Format
 	}
