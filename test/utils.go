@@ -1,6 +1,7 @@
 package test
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/iawia002/annie/downloader"
@@ -8,7 +9,12 @@ import (
 
 // CheckData check the given data
 func CheckData(args Args, data downloader.VideoData) bool {
-	defaultData := data.Formats["default"]
+	sortedFormats := make([]downloader.FormatData, len(data.Formats))
+	for _, data := range data.Formats {
+		sortedFormats = append(sortedFormats, data)
+	}
+	sort.Slice(sortedFormats, func(i, j int) bool { return sortedFormats[i].Size > sortedFormats[j].Size })
+	defaultData := sortedFormats[0]
 	if args.Title != data.Title {
 		return false
 	}
