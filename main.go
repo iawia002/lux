@@ -11,8 +11,24 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/iawia002/annie/config"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors/bcy"
 	"github.com/iawia002/annie/extractors/bilibili"
+	"github.com/iawia002/annie/extractors/douyin"
+	"github.com/iawia002/annie/extractors/douyu"
+	"github.com/iawia002/annie/extractors/facebook"
+	"github.com/iawia002/annie/extractors/instagram"
+	"github.com/iawia002/annie/extractors/iqiyi"
+	"github.com/iawia002/annie/extractors/mgtv"
+	"github.com/iawia002/annie/extractors/miaopai"
+	"github.com/iawia002/annie/extractors/pixivision"
+	"github.com/iawia002/annie/extractors/qq"
+	"github.com/iawia002/annie/extractors/tumblr"
+	"github.com/iawia002/annie/extractors/twitter"
+	"github.com/iawia002/annie/extractors/universal"
+	"github.com/iawia002/annie/extractors/vimeo"
+	"github.com/iawia002/annie/extractors/weibo"
+	"github.com/iawia002/annie/extractors/youku"
 	"github.com/iawia002/annie/extractors/youtube"
 	"github.com/iawia002/annie/utils"
 )
@@ -47,10 +63,18 @@ func init() {
 	)
 }
 
-func download(videoURL string) error {
+func printError(url string, err error) {
+	fmt.Printf(
+		"Downloading %s error:\n%s\n",
+		color.CyanString("%s", url), color.RedString("%v", err),
+	)
+}
+
+func download(videoURL string) {
 	var (
 		domain string
 		err    error
+		data   []downloader.VideoData
 	)
 	bilibiliShortLink := utils.MatchOneOf(videoURL, `^(av|ep)\d+`)
 	if bilibiliShortLink != nil {
@@ -63,53 +87,65 @@ func download(videoURL string) error {
 	} else {
 		u, err := url.ParseRequestURI(videoURL)
 		if err != nil {
-			return err
+			printError(videoURL, err)
+			return
 		}
 		domain = utils.Domain(u.Host)
 	}
 	switch domain {
 	case "douyin", "iesdouyin":
-		_, err = extractors.Douyin(videoURL)
+		data, err = douyin.Download(videoURL)
 	case "bilibili":
-		err = bilibili.Download(videoURL)
+		data, err = bilibili.Download(videoURL)
 	case "bcy":
-		_, err = extractors.Bcy(videoURL)
+		data, err = bcy.Download(videoURL)
 	case "pixivision":
-		_, err = extractors.Pixivision(videoURL)
+		data, err = pixivision.Download(videoURL)
 	case "youku":
-		_, err = extractors.Youku(videoURL)
+		data, err = youku.Download(videoURL)
 	case "youtube", "youtu": // youtu.be
-		err = youtube.Download(videoURL)
+		data, err = youtube.Download(videoURL)
 	case "iqiyi":
-		_, err = extractors.Iqiyi(videoURL)
+		data, err = iqiyi.Download(videoURL)
 	case "mgtv":
-		_, err = extractors.Mgtv(videoURL)
+		data, err = mgtv.Download(videoURL)
 	case "tumblr":
-		_, err = extractors.Tumblr(videoURL)
+		data, err = tumblr.Download(videoURL)
 	case "vimeo":
-		_, err = extractors.Vimeo(videoURL)
+		data, err = vimeo.Download(videoURL)
 	case "facebook":
-		_, err = extractors.Facebook(videoURL)
+		data, err = facebook.Download(videoURL)
 	case "douyu":
-		_, err = extractors.Douyu(videoURL)
+		data, err = douyu.Download(videoURL)
 	case "miaopai":
-		_, err = extractors.Miaopai(videoURL)
+		data, err = miaopai.Download(videoURL)
 	case "weibo":
-		_, err = extractors.Weibo(videoURL)
+		data, err = weibo.Download(videoURL)
 	case "instagram":
-		_, err = extractors.Instagram(videoURL)
+		data, err = instagram.Download(videoURL)
 	case "twitter":
-		_, err = extractors.Twitter(videoURL)
+		data, err = twitter.Download(videoURL)
 	case "qq":
-		_, err = extractors.QQ(videoURL)
+		data, err = qq.Download(videoURL)
 	default:
-		_, err = extractors.Universal(videoURL)
+		data, err = universal.Download(videoURL)
 	}
-	return err
+	if err != nil {
+		printError(videoURL, err)
+	}
+	for _, item := range data {
+		if item.Site == "" {
+			// empty data
+			continue
+		}
+		err = item.Download(videoURL)
+		if err != nil {
+			printError(videoURL, err)
+		}
+	}
 }
 
 func main() {
-	var err error
 	flag.Parse()
 	args := flag.Args()
 	if config.Version {
@@ -152,12 +188,6 @@ func main() {
 		}
 	}
 	for _, videoURL := range args {
-		err = download(videoURL)
-		if err != nil {
-			fmt.Printf(
-				"Downloading %s error:\n%s\n",
-				color.CyanString("%s", videoURL), color.RedString("%v", err),
-			)
-		}
+		download(videoURL)
 	}
 }
