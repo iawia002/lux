@@ -33,8 +33,10 @@ func CheckData(args Args, data downloader.VideoData) bool {
 }
 
 // Check check the result
-func Check(t *testing.T, args Args, data downloader.VideoData) {
-	if !CheckData(args, data) {
-		t.Errorf("Got: %v\nExpected: %v", data, args)
+func Check(t *testing.T, args Args, data []downloader.VideoData) {
+	for _, v := range data {
+		if !CheckData(args, v) {
+			t.Errorf("Got: %v\nExpected: %v", data, args)
+		}
 	}
 }

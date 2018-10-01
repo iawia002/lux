@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/iawia002/annie/config"
+	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/test"
 )
 
@@ -28,7 +29,7 @@ func TestYoutube(t *testing.T) {
 			args: test.Args{
 				URL:     "https://youtu.be/z8eFzkfto2w",
 				Title:   "Circle Of Love - Rudy Mancuso",
-				Size:    39103542,
+				Size:    32970861,
 				Quality: `1080p video/webm; codecs="vp9"`,
 			},
 		},
@@ -63,17 +64,16 @@ func TestYoutube(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var data []downloader.VideoData
 			if tt.playlist {
 				// playlist mode
 				config.Playlist = true
 				Download(tt.args.URL)
-				// single mode
-				config.Playlist = false
-				Download(tt.args.URL)
 			} else {
-				data, _ := youtubeDownload(tt.args.URL)
-				test.Check(t, tt.args, data)
+				config.Playlist = false
+				data, _ = Download(tt.args.URL)
 			}
+			test.Check(t, tt.args, data)
 		})
 	}
 }

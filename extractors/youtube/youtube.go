@@ -77,26 +77,27 @@ func genSignedURL(streamURL string, stream url.Values, js string) (string, error
 }
 
 // Download YouTube main download function
-func Download(uri string) error {
+func Download(uri string) ([]downloader.VideoData, error) {
 	var err error
 	if !config.Playlist {
-		_, err = youtubeDownload(uri)
+		data, err := youtubeDownload(uri)
 		if err != nil {
-			return err
+			return downloader.EmptyData, err
 		}
-		return nil
+		return []downloader.VideoData{data}, nil
 	}
 	listID := utils.MatchOneOf(uri, `(list|p)=([^/&]+)`)[2]
 	if listID == "" {
-		return errors.New("Can't get list ID from URL")
+		return downloader.EmptyData, errors.New("Can't get list ID from URL")
 	}
 	html, err := request.Get("https://www.youtube.com/playlist?list="+listID, referer, nil)
 	if err != nil {
-		return err
+		return downloader.EmptyData, err
 	}
 	// "videoId":"OQxX8zgyzuM","thumbnail"
 	videoIDs := utils.MatchAll(html, `"videoId":"([^,]+?)","thumbnail"`)
 	needDownloadItems := utils.NeedDownloadList(len(videoIDs))
+	extractedData := make([]downloader.VideoData, len(needDownloadItems))
 	for index, videoID := range videoIDs {
 		if !utils.ItemInSlice(index+1, needDownloadItems) {
 			continue
@@ -104,12 +105,13 @@ func Download(uri string) error {
 		u := fmt.Sprintf(
 			"https://www.youtube.com/watch?v=%s&list=%s", videoID[1], listID,
 		)
-		_, err = youtubeDownload(u)
-		if err != nil {
-			return err
+		data, err := youtubeDownload(u)
+		if err == nil {
+			// if err is not nil, the data is empty struct
+			extractedData[index] = data
 		}
 	}
-	return nil
+	return extractedData, nil
 }
 
 func youtubeDownload(uri string) (downloader.VideoData, error) {
@@ -142,17 +144,12 @@ func youtubeDownload(uri string) (downloader.VideoData, error) {
 		return downloader.VideoData{}, err
 	}
 
-	extractedData := downloader.VideoData{
+	return downloader.VideoData{
 		Site:    "YouTube youtube.com",
 		Title:   utils.FileName(title),
 		Type:    "video",
 		Formats: format,
-	}
-	err = extractedData.Download(uri)
-	if err != nil {
-		return downloader.VideoData{}, err
-	}
-	return extractedData, nil
+	}, nil
 }
 
 func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.FormatData, error) {

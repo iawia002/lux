@@ -118,7 +118,7 @@ func getMultiPageData(html string) (multiPage, error) {
 }
 
 // Download bilibili main download function
-func Download(url string) error {
+func Download(url string) ([]downloader.VideoData, error) {
 	var options bilibiliOptions
 	var err error
 	if strings.Contains(url, "bangumi") {
@@ -126,11 +126,11 @@ func Download(url string) error {
 	}
 	html, err := request.Get(url, referer, nil)
 	if err != nil {
-		return err
+		return downloader.EmptyData, err
 	}
 	if !config.Playlist {
 		options.HTML = html
-		data, err := getMultiPageData(html)
+		pageData, err := getMultiPageData(html)
 		if err == nil && !options.Bangumi {
 			// handle URL that has a playlist, mainly for unified titles
 			// <h1> tag does not include subtitles
@@ -145,8 +145,8 @@ func Download(url string) error {
 				p, _ = strconv.Atoi(pageString[1])
 			}
 			options.P = p
-			page := data.VideoData.Pages[p-1]
-			options.Aid = data.Aid
+			page := pageData.VideoData.Pages[p-1]
+			options.Aid = pageData.Aid
 			options.Cid = strconv.Itoa(page.Cid)
 			// "part":"" or "part":"Untitled"
 			if page.Part == "Untitled" {
@@ -155,53 +155,61 @@ func Download(url string) error {
 				options.Subtitle = page.Part
 			}
 		}
-		_, err = bilibiliDownload(url, options)
+		data, err := bilibiliDownload(url, options)
 		if err != nil {
-			return err
+			return downloader.EmptyData, err
 		}
-		return nil
+		return []downloader.VideoData{data}, nil
 	}
+	// for Bangumi playlist
 	if options.Bangumi {
 		dataString := utils.MatchOneOf(html, `window.__INITIAL_STATE__=(.+?);\(function`)[1]
 		var data bangumiData
 		json.Unmarshal([]byte(dataString), &data)
 		needDownloadItems := utils.NeedDownloadList(len(data.EpList))
+		extractedData := make([]downloader.VideoData, len(needDownloadItems))
 		for index, u := range data.EpList {
 			if !utils.ItemInSlice(index+1, needDownloadItems) {
 				continue
 			}
-			bilibiliDownload(
+			videoData, err := bilibiliDownload(
 				fmt.Sprintf("https://www.bilibili.com/bangumi/play/ep%d", u.EpID), options,
 			)
+			if err == nil {
+				// if err is not nil, the data is empty struct
+				extractedData[index] = videoData
+			}
 		}
-	} else {
-		data, err := getMultiPageData(html)
+		return extractedData, nil
+	}
+	// for normal video playlist
+	data, err := getMultiPageData(html)
+	if err != nil {
+		// this page has no playlist
+		options.HTML = html
+		videoData, err := bilibiliDownload(url, options)
 		if err != nil {
-			// this page has no playlist
-			options.HTML = html
-			_, err = bilibiliDownload(url, options)
-			if err != nil {
-				return err
-			}
-			return nil
+			return downloader.EmptyData, err
 		}
-		// https://www.bilibili.com/video/av20827366/?p=1
-		needDownloadItems := utils.NeedDownloadList(len(data.VideoData.Pages))
-		for index, u := range data.VideoData.Pages {
-			if !utils.ItemInSlice(index+1, needDownloadItems) {
-				continue
-			}
-			options.Aid = data.Aid
-			options.Cid = strconv.Itoa(u.Cid)
-			options.Subtitle = u.Part
-			options.P = u.Page
-			_, err := bilibiliDownload(url, options)
-			if err != nil {
-				return err
-			}
+		return []downloader.VideoData{videoData}, nil
+	}
+	// https://www.bilibili.com/video/av20827366/?p=1
+	needDownloadItems := utils.NeedDownloadList(len(data.VideoData.Pages))
+	extractedData := make([]downloader.VideoData, len(needDownloadItems))
+	for index, u := range data.VideoData.Pages {
+		if !utils.ItemInSlice(index+1, needDownloadItems) {
+			continue
+		}
+		options.Aid = data.Aid
+		options.Cid = strconv.Itoa(u.Cid)
+		options.Subtitle = u.Part
+		options.P = u.Page
+		videoData, err := bilibiliDownload(url, options)
+		if err == nil {
+			extractedData[index] = videoData
 		}
 	}
-	return nil
+	return extractedData, nil
 }
 
 func bilibiliDownload(url string, options bilibiliOptions) (downloader.VideoData, error) {
@@ -289,22 +297,16 @@ func bilibiliDownload(url string, options bilibiliOptions) (downloader.VideoData
 		title = tempTitle
 	}
 	title = utils.FileName(title)
-	extractedData := downloader.VideoData{
+
+	downloader.Caption(
+		fmt.Sprintf("https://comment.bilibili.com/%s.xml", cid),
+		url, title, "xml",
+	)
+
+	return downloader.VideoData{
 		Site:    "哔哩哔哩 bilibili.com",
 		Title:   title,
 		Type:    "video",
 		Formats: format,
-	}
-	err = extractedData.Download(url)
-	if err != nil {
-		return downloader.VideoData{}, err
-	}
-	err = downloader.Caption(
-		fmt.Sprintf("https://comment.bilibili.com/%s.xml", cid),
-		url, title, "xml",
-	)
-	if err != nil {
-		return downloader.VideoData{}, err
-	}
-	return extractedData, nil
+	}, nil
 }

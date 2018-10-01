@@ -19,9 +19,9 @@ import (
 
 // URLData data struct of single URL
 type URLData struct {
-	URL  string
-	Size int64
-	Ext  string
+	URL  string `json:"url"`
+	Size int64  `json:"size"`
+	Ext  string `json:"ext"`
 }
 
 // FormatData data struct of every format
@@ -29,10 +29,10 @@ type FormatData struct {
 	// [URLData: {URL, Size, Ext}, ...]
 	// Some video files have multiple fragments
 	// and support for downloading multiple image files at once
-	URLs    []URLData
-	Quality string
+	URLs    []URLData `json:"urls"`
+	Quality string    `json:"quality"`
 	// total size of all urls
-	Size int64
+	Size int64 `json:"size"`
 	name string
 }
 
@@ -44,13 +44,16 @@ func (f formats) Less(i, j int) bool { return f[i].Size > f[j].Size }
 
 // VideoData data struct of video info
 type VideoData struct {
-	Site  string
-	Title string
-	Type  string
+	Site  string `json:"site"`
+	Title string `json:"title"`
+	Type  string `json:"type"`
 	// each format has it's own URLs and Quality
-	Formats       map[string]FormatData
+	Formats       map[string]FormatData `json:"formats"`
 	sortedFormats formats
 }
+
+// EmptyData empty VideoData list
+var EmptyData = make([]VideoData, 0)
 
 func progressBar(size int64) *pb.ProgressBar {
 	bar := pb.New64(size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
