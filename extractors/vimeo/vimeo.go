@@ -53,7 +53,7 @@ func Download(url string) ([]downloader.VideoData, error) {
 			return downloader.EmptyData, err
 		}
 	}
-	jsonString := utils.MatchOneOf(html, `{var \w+=({.+?});`)[1]
+	jsonString := utils.MatchOneOf(html, `var \w+\s?=\s?({.+?});`)[1]
 	var vimeoData vimeo
 	json.Unmarshal([]byte(jsonString), &vimeoData)
 	format := map[string]downloader.FormatData{}
