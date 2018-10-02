@@ -1,7 +1,8 @@
-language: go
-
 sudo: false
+matrix:
+  fast_finish: true
 
+language: go
 go:
   - "1.11"
 

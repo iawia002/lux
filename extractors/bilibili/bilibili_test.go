@@ -10,6 +10,7 @@ import (
 
 func TestBilibili(t *testing.T) {
 	config.InfoOnly = true
+	config.ThreadNumber = 9 // travis out of memory issue
 	tests := []struct {
 		name     string
 		args     test.Args
