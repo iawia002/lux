@@ -168,18 +168,24 @@ func Download(url string) ([]downloader.VideoData, error) {
 		json.Unmarshal([]byte(dataString), &data)
 		needDownloadItems := utils.NeedDownloadList(len(data.EpList))
 		extractedData := make([]downloader.VideoData, len(needDownloadItems))
+		wgp := utils.NewWaitGroupPool(config.ThreadNumber)
 		for index, u := range data.EpList {
 			if !utils.ItemInSlice(index+1, needDownloadItems) {
 				continue
 			}
-			videoData, err := bilibiliDownload(
-				fmt.Sprintf("https://www.bilibili.com/bangumi/play/ep%d", u.EpID), options,
-			)
-			if err == nil {
-				// if err is not nil, the data is empty struct
-				extractedData[index] = videoData
-			}
+			wgp.Add()
+			go func(index, epID int, options bilibiliOptions, extractedData []downloader.VideoData) {
+				defer wgp.Done()
+				videoData, err := bilibiliDownload(
+					fmt.Sprintf("https://www.bilibili.com/bangumi/play/ep%d", epID), options,
+				)
+				if err == nil {
+					// if err is not nil, the data is empty struct
+					extractedData[index] = videoData
+				}
+			}(index, u.EpID, options, extractedData)
 		}
+		wgp.Wait()
 		return extractedData, nil
 	}
 	// for normal video playlist
@@ -196,6 +202,7 @@ func Download(url string) ([]downloader.VideoData, error) {
 	// https://www.bilibili.com/video/av20827366/?p=1
 	needDownloadItems := utils.NeedDownloadList(len(data.VideoData.Pages))
 	extractedData := make([]downloader.VideoData, len(needDownloadItems))
+	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
 	for index, u := range data.VideoData.Pages {
 		if !utils.ItemInSlice(index+1, needDownloadItems) {
 			continue
@@ -204,11 +211,16 @@ func Download(url string) ([]downloader.VideoData, error) {
 		options.Cid = strconv.Itoa(u.Cid)
 		options.Subtitle = u.Part
 		options.P = u.Page
-		videoData, err := bilibiliDownload(url, options)
-		if err == nil {
-			extractedData[index] = videoData
-		}
+		wgp.Add()
+		go func(index int, url string, options bilibiliOptions, extractedData []downloader.VideoData) {
+			defer wgp.Done()
+			videoData, err := bilibiliDownload(url, options)
+			if err == nil {
+				extractedData[index] = videoData
+			}
+		}(index, url, options, extractedData)
 	}
+	wgp.Wait()
 	return extractedData, nil
 }
 

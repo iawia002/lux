@@ -10,6 +10,7 @@ import (
 
 func TestYoutube(t *testing.T) {
 	config.InfoOnly = true
+	config.ThreadNumber = 9
 	tests := []struct {
 		name     string
 		args     test.Args

@@ -98,6 +98,7 @@ func Download(uri string) ([]downloader.VideoData, error) {
 	videoIDs := utils.MatchAll(html, `"videoId":"([^,]+?)","thumbnail"`)
 	needDownloadItems := utils.NeedDownloadList(len(videoIDs))
 	extractedData := make([]downloader.VideoData, len(needDownloadItems))
+	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
 	for index, videoID := range videoIDs {
 		if !utils.ItemInSlice(index+1, needDownloadItems) {
 			continue
@@ -105,12 +106,17 @@ func Download(uri string) ([]downloader.VideoData, error) {
 		u := fmt.Sprintf(
 			"https://www.youtube.com/watch?v=%s&list=%s", videoID[1], listID,
 		)
-		data, err := youtubeDownload(u)
-		if err == nil {
-			// if err is not nil, the data is empty struct
-			extractedData[index] = data
-		}
+		wgp.Add()
+		go func(index int, u string, extractedData []downloader.VideoData) {
+			defer wgp.Done()
+			data, err := youtubeDownload(u)
+			if err == nil {
+				// if err is not nil, the data is empty struct
+				extractedData[index] = data
+			}
+		}(index, u, extractedData)
 	}
+	wgp.Wait()
 	return extractedData, nil
 }
 
