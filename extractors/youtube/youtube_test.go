@@ -65,16 +65,21 @@ func TestYoutube(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var data []downloader.VideoData
+			var (
+				data []downloader.VideoData
+				err  error
+			)
 			if tt.playlist {
 				// playlist mode
 				config.Playlist = true
-				Download(tt.args.URL)
+				_, err = Download(tt.args.URL)
+				test.CheckError(t, err)
 			} else {
 				config.Playlist = false
-				data, _ = Download(tt.args.URL)
+				data, err = Download(tt.args.URL)
+				test.CheckError(t, err)
+				test.Check(t, tt.args, data[0])
 			}
-			test.Check(t, tt.args, data)
 		})
 	}
 }

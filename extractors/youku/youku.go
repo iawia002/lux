@@ -179,7 +179,7 @@ func genData(youkuData data) map[string]downloader.FormatData {
 			strings.Split(stream.Segs[0].URL, "?")[0],
 			".",
 		)
-		urls := []downloader.URLData{}
+		urls := make([]downloader.URLData, len(stream.Segs))
 		for _, data := range stream.Segs {
 			url := downloader.URLData{
 				URL:  data.URL,

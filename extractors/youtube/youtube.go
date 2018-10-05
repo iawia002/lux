@@ -34,10 +34,10 @@ const referer = "https://www.youtube.com"
 var tokensCache = make(map[string][]string)
 
 func getSig(sig, js string) (string, error) {
-	url := fmt.Sprintf("https://www.youtube.com%s", js)
-	tokens, ok := tokensCache[url]
+	sigURL := fmt.Sprintf("https://www.youtube.com%s", js)
+	tokens, ok := tokensCache[sigURL]
 	if !ok {
-		html, err := request.Get(url, referer, nil)
+		html, err := request.Get(sigURL, referer, nil)
 		if err != nil {
 			return "", err
 		}
@@ -45,7 +45,7 @@ func getSig(sig, js string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		tokensCache[url] = tokens
+		tokensCache[sigURL] = tokens
 	}
 	return decipherTokens(tokens, sig), nil
 }
@@ -88,7 +88,7 @@ func Download(uri string) ([]downloader.VideoData, error) {
 	}
 	listID := utils.MatchOneOf(uri, `(list|p)=([^/&]+)`)[2]
 	if listID == "" {
-		return downloader.EmptyData, errors.New("Can't get list ID from URL")
+		return downloader.EmptyData, errors.New("can't get list ID from URL")
 	}
 	html, err := request.Get("https://www.youtube.com/playlist?list="+listID, referer, nil)
 	if err != nil {
@@ -130,7 +130,7 @@ func youtubeDownload(uri string) (downloader.VideoData, error) {
 		`v/([^/?]+)`,
 	)
 	if vid == nil {
-		return downloader.VideoData{}, errors.New("Can't find vid")
+		return downloader.VideoData{}, errors.New("can't find vid")
 	}
 	videoURL := fmt.Sprintf(
 		"https://www.youtube.com/watch?v=%s&gl=US&hl=en&has_verified=1&bpctr=9999999999",

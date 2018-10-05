@@ -291,7 +291,7 @@ func (v VideoData) Download(refer string) error {
 	}
 	data, ok := v.Formats[format]
 	if !ok {
-		return fmt.Errorf("No format named %s", format)
+		return fmt.Errorf("no format named %s", format)
 	}
 	v.printInfo(format) // if InfoOnly, this func will print all formats info
 	if config.InfoOnly {
@@ -325,8 +325,8 @@ func (v VideoData) Download(refer string) error {
 	}
 	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
 	// multiple fragments
-	parts := []string{}
 	errs := make([]error, 0)
+	parts := make([]string, len(data.URLs))
 	for index, url := range data.URLs {
 		partFileName := fmt.Sprintf("%s[%d]", title, index)
 		partFilePath, err := utils.FilePath(partFileName, url.Ext, false)
