@@ -105,7 +105,7 @@ func Download(url string) ([]downloader.VideoData, error) {
 		return downloader.EmptyData, err
 	}
 	if videoDatas.Code != "A00000" {
-		return downloader.EmptyData, errors.New("Can't play this video")
+		return downloader.EmptyData, errors.New("can't play this video")
 	}
 	format := map[string]downloader.FormatData{}
 	var urlData downloader.URLData
@@ -115,12 +115,12 @@ func Download(url string) ([]downloader.VideoData, error) {
 			// This format will go wrong when merging
 			continue
 		}
-		urls := []downloader.URLData{}
 		totalSize = 0
 		m3u8URLs, err := utils.M3u8URLs(video.M3utx)
 		if err != nil {
 			return downloader.EmptyData, err
 		}
+		urls := make([]downloader.URLData, len(m3u8URLs))
 		for _, ts := range m3u8URLs {
 			size, _ = strconv.ParseInt(
 				utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,

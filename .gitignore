@@ -15,6 +15,7 @@
 *.pyc
 
 .vscode
+.idea
 dist/
 github_token
 .github_token

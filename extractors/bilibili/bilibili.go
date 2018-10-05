@@ -49,7 +49,7 @@ func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) (s
 		var t token
 		json.Unmarshal([]byte(utoken), &t)
 		if t.Code != 0 {
-			return "", fmt.Errorf("Cookie error: %s", t.Message)
+			return "", fmt.Errorf("cookie error: %s", t.Message)
 		}
 		utoken = t.Data.Token
 	}
@@ -111,7 +111,7 @@ func getMultiPageData(html string) (multiPage, error) {
 		html, `window.__INITIAL_STATE__=(.+?);\(function`,
 	)
 	if multiPageDataString == nil {
-		return data, errors.New("This page has no playlist")
+		return data, errors.New("this page has no playlist")
 	}
 	json.Unmarshal([]byte(multiPageDataString[1]), &data)
 	return data, nil

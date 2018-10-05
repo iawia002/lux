@@ -58,7 +58,7 @@ func getSigTokens(html string) ([]string, error) {
 	funcResult := actionsFuncRegexp.FindStringSubmatch(html)
 
 	if len(objResult) < 3 || len(funcResult) < 2 {
-		return nil, errors.New("Error parsing signature tokens")
+		return nil, errors.New("error parsing signature tokens")
 	}
 	obj := strings.Replace(objResult[1], "$", `\$`, -1)
 	objBody := strings.Replace(objResult[2], "$", `\$`, -1)

@@ -73,7 +73,7 @@ func Download(url string) ([]downloader.VideoData, error) {
 	if err != nil {
 		return downloader.EmptyData, err
 	}
-	urls := []downloader.URLData{}
+	urls := make([]downloader.URLData, len(m3u8URLs))
 	var temp downloader.URLData
 	for _, u := range m3u8URLs {
 		temp = downloader.URLData{
