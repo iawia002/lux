@@ -25,6 +25,14 @@ var (
 	OutputName string
 	// ExtractedData print extracted data
 	ExtractedData bool
+	// Aria2 RPC
+	UseAria2RPC bool
+	// Aria2 RPC Token
+	Aria2Token string
+	// Aria2 Address, use localhost:6800 as default
+	Aria2Addr string
+	// Aria2 Method, use http as default
+	Aria2Method string
 	// ThreadNumber The number of download thread (only works for multiple-parts video)
 	ThreadNumber int
 	// File URLs file path

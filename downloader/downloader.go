@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"net/http"
+	"bytes"
 
 	"github.com/cheggaaa/pb"
 	"github.com/fatih/color"
@@ -34,6 +36,25 @@ type FormatData struct {
 	// total size of all urls
 	Size int64 `json:"size"`
 	name string
+}
+
+// JsonRPC 2.0 for Aria2
+type Aria2RPCData struct {
+	// More info about RPC interface please refer to 
+	// https://aria2.github.io/manual/en/html/aria2c.html#rpc-interface
+	Jsonrpc string `json:"jsonrpc"`
+	Id string `json:"id"`
+	// For a simple download, only inplemented `addUri`
+	Method string `json:"method"`
+	// secret, uris, options
+	Params [3]interface{} `json:"params"`
+}
+
+// Options for `aria2.addUri`
+// https://aria2.github.io/manual/en/html/aria2c.html#id3
+type Aria2Input struct {
+	// For a simple download, only add headers
+	Header []string `json:"header"`
 }
 
 type formats []FormatData
@@ -273,6 +294,31 @@ func (v VideoData) Download(refer string) error {
 	if config.ExtractedData {
 		jsonData, _ := json.MarshalIndent(v, "", "    ")
 		fmt.Printf("%s\n", jsonData)
+		return nil
+	}
+	// User aria2 rpc to download
+	if config.UseAria2RPC {
+		rpcData := Aria2RPCData {
+			Jsonrpc: "2.0",
+			Id: "annie",  // can be modified
+			Method: "aria2.addUri",
+		}
+		rpcData.Params[0] = "token:" + config.Aria2Token
+		var urls []string
+		for _, p := range v.sortedFormats[0].URLs {
+			urls = append(urls, p.URL)
+		}
+		rpcData.Params[1] = &urls
+		var inputs Aria2Input
+		inputs.Header = append(inputs.Header, "Referer: " + refer)
+		rpcData.Params[2] = &inputs
+		jsonData, _ := json.Marshal(rpcData)
+		reqUrl := config.Aria2Method + "://" + config.Aria2Addr + "/jsonrpc"
+		req, _ := http.NewRequest("POST", reqUrl, bytes.NewBuffer(jsonData))
+		req.Header.Set("Content-Type", "application/json")
+		var client http.Client
+		resp, _ := client.Do(req)
+		defer resp.Body.Close()
 		return nil
 	}
 	var (

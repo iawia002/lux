@@ -19,3 +19,6 @@
 dist/
 github_token
 .github_token
+
+# macOS
+.DS_Store

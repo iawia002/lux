@@ -46,6 +46,10 @@ func init() {
 	flag.StringVar(&config.OutputPath, "o", "", "Specify the output path")
 	flag.StringVar(&config.OutputName, "O", "", "Specify the output file name")
 	flag.BoolVar(&config.ExtractedData, "j", false, "Print extracted data")
+	flag.BoolVar(&config.UseAria2RPC, "aria2", false, "Use Aria2 RPC to download")
+	flag.StringVar(&config.Aria2Token, "aria2token", "", "Aria2 RPC Token")
+	flag.StringVar(&config.Aria2Addr, "aria2addr", "localhost:6800", "Aria2 Address")
+	flag.StringVar(&config.Aria2Method, "aria2method", "http", "Aria2 Method")
 	flag.IntVar(
 		&config.ThreadNumber, "n", 10, "The number of download thread (only works for multiple-parts video)",
 	)
