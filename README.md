@@ -502,6 +502,21 @@ $ annie -j https://www.bilibili.com/video/av20203945
     	Youku ccode
 ```
 
+#### aria2:
+
+> Note: If you use aria2 to download, you need to merge the multi-part videos yourself.
+
+```
+  -aria2
+    	Use Aria2 RPC to download
+  -aria2addr string
+    	Aria2 Address (default "localhost:6800")
+  -aria2method string
+    	Aria2 Method (default "http")
+  -aria2token string
+    	Aria2 RPC Token
+```
+
 
 ## Supported Sites
 
