@@ -1,15 +1,15 @@
 package downloader
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"sort"
 	"strings"
 	"time"
-	"net/http"
-	"bytes"
 
 	"github.com/cheggaaa/pb"
 	"github.com/fatih/color"
@@ -38,19 +38,19 @@ type FormatData struct {
 	name string
 }
 
-// JsonRPC 2.0 for Aria2
+// Aria2RPCData json RPC 2.0 for Aria2
 type Aria2RPCData struct {
-	// More info about RPC interface please refer to 
+	// More info about RPC interface please refer to
 	// https://aria2.github.io/manual/en/html/aria2c.html#rpc-interface
-	Jsonrpc string `json:"jsonrpc"`
-	Id string `json:"id"`
+	JSONRPC string `json:"jsonrpc"`
+	ID      string `json:"id"`
 	// For a simple download, only inplemented `addUri`
 	Method string `json:"method"`
 	// secret, uris, options
 	Params [3]interface{} `json:"params"`
 }
 
-// Options for `aria2.addUri`
+// Aria2Input options for `aria2.addUri`
 // https://aria2.github.io/manual/en/html/aria2c.html#id3
 type Aria2Input struct {
 	// For a simple download, only add headers
@@ -226,7 +226,8 @@ func Save(
 
 	// close and rename temp file at the end of this function
 	defer func() {
-		// must close the file before rename or it will cause `The process cannot access the file because it is being used by another process.` error.
+		// must close the file before rename or it will cause
+		// `The process cannot access the file because it is being used by another process.` error.
 		file.Close()
 		if err == nil {
 			os.Rename(tempFilePath, filePath)
@@ -296,31 +297,6 @@ func (v VideoData) Download(refer string) error {
 		fmt.Printf("%s\n", jsonData)
 		return nil
 	}
-	// User aria2 rpc to download
-	if config.UseAria2RPC {
-		rpcData := Aria2RPCData {
-			Jsonrpc: "2.0",
-			Id: "annie",  // can be modified
-			Method: "aria2.addUri",
-		}
-		rpcData.Params[0] = "token:" + config.Aria2Token
-		var urls []string
-		for _, p := range v.sortedFormats[0].URLs {
-			urls = append(urls, p.URL)
-		}
-		rpcData.Params[1] = &urls
-		var inputs Aria2Input
-		inputs.Header = append(inputs.Header, "Referer: " + refer)
-		rpcData.Params[2] = &inputs
-		jsonData, _ := json.Marshal(rpcData)
-		reqUrl := config.Aria2Method + "://" + config.Aria2Addr + "/jsonrpc"
-		req, _ := http.NewRequest("POST", reqUrl, bytes.NewBuffer(jsonData))
-		req.Header.Set("Content-Type", "application/json")
-		var client http.Client
-		resp, _ := client.Do(req)
-		defer resp.Body.Close()
-		return nil
-	}
 	var (
 		title  string
 		format string
@@ -341,6 +317,40 @@ func (v VideoData) Download(refer string) error {
 	}
 	v.printInfo(format) // if InfoOnly, this func will print all formats info
 	if config.InfoOnly {
+		return nil
+	}
+	// Use aria2 rpc to download
+	if config.UseAria2RPC {
+		rpcData := Aria2RPCData{
+			JSONRPC: "2.0",
+			ID:      "annie", // can be modified
+			Method:  "aria2.addUri",
+		}
+		rpcData.Params[0] = "token:" + config.Aria2Token
+		var urls []string
+		for _, p := range data.URLs {
+			urls = append(urls, p.URL)
+		}
+		rpcData.Params[1] = &urls
+		var inputs Aria2Input
+		inputs.Header = append(inputs.Header, "Referer: "+refer)
+		rpcData.Params[2] = &inputs
+		jsonData, err := json.Marshal(rpcData)
+		if err != nil {
+			return err
+		}
+		reqURL := fmt.Sprintf("%s://%s/jsonrpc", config.Aria2Method, config.Aria2Addr)
+		req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer(jsonData))
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		var client http.Client
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
 		return nil
 	}
 	var err error

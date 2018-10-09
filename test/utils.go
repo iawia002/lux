@@ -13,15 +13,11 @@ func CheckData(args, data Args) bool {
 		return false
 	}
 	// not every video got quality information
-	if args.Quality != "" {
-		if args.Quality != data.Quality {
-			return false
-		}
+	if args.Quality != "" && args.Quality != data.Quality {
+		return false
 	}
-	if args.Size != 0 {
-		if args.Size != data.Size {
-			return false
-		}
+	if args.Size != 0 && args.Size != data.Size {
+		return false
 	}
 	return true
 }
@@ -42,13 +38,13 @@ func Check(t *testing.T, args Args, data downloader.VideoData) {
 		Size:    defaultData.Size,
 	}
 	if !CheckData(args, temp) {
-		t.Errorf("Got: %v\nExpected: %v", data, args)
+		t.Errorf("Got: %v\nExpected: %v", temp, args)
 	}
 }
 
 // CheckError check the error
 func CheckError(t *testing.T, err error) {
 	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
+		t.Fatalf("Unexpected error: %v", err)
 	}
 }
