@@ -108,7 +108,6 @@ func Download(url string) ([]downloader.VideoData, error) {
 		return downloader.EmptyData, errors.New("can't play this video")
 	}
 	format := map[string]downloader.FormatData{}
-	var urlData downloader.URLData
 	var size, totalSize int64
 	for _, video := range videoDatas.Data.Vidl {
 		if video.Vd == 14 {
@@ -121,18 +120,17 @@ func Download(url string) ([]downloader.VideoData, error) {
 			return downloader.EmptyData, err
 		}
 		urls := make([]downloader.URLData, len(m3u8URLs))
-		for _, ts := range m3u8URLs {
+		for index, ts := range m3u8URLs {
 			size, _ = strconv.ParseInt(
 				utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,
 			)
-			// http://dx.data.video.qiyi.com -> http://data.video.qiyi.com
-			urlData = downloader.URLData{
+			totalSize += size
+			urls[index] = downloader.URLData{
+				// http://dx.data.video.qiyi.com -> http://data.video.qiyi.com
 				URL:  strings.Replace(ts, "dx.data.video.qiyi.com", "data.video.qiyi.com", 1),
 				Size: size,
 				Ext:  "ts",
 			}
-			totalSize += size
-			urls = append(urls, urlData)
 		}
 		format[strconv.Itoa(video.Vd)] = downloader.FormatData{
 			URLs:    urls,

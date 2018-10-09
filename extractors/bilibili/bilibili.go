@@ -80,18 +80,15 @@ func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) (s
 }
 
 func genURL(durl []dURLData) ([]downloader.URLData, int64) {
-	var (
-		urls []downloader.URLData
-		size int64
-	)
-	for _, data := range durl {
+	var size int64
+	urls := make([]downloader.URLData, len(durl))
+	for index, data := range durl {
 		size += data.Size
-		url := downloader.URLData{
+		urls[index] = downloader.URLData{
 			URL:  data.URL,
 			Size: data.Size,
 			Ext:  "flv",
 		}
-		urls = append(urls, url)
 	}
 	return urls, size
 }
