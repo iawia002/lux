@@ -180,13 +180,12 @@ func genData(youkuData data) map[string]downloader.FormatData {
 			".",
 		)
 		urls := make([]downloader.URLData, len(stream.Segs))
-		for _, data := range stream.Segs {
-			url := downloader.URLData{
+		for index, data := range stream.Segs {
+			urls[index] = downloader.URLData{
 				URL:  data.URL,
 				Size: data.Size,
 				Ext:  ext[len(ext)-1],
 			}
-			urls = append(urls, url)
 		}
 		format[formatString] = downloader.FormatData{
 			URLs:    urls,

@@ -74,14 +74,12 @@ func Download(url string) ([]downloader.VideoData, error) {
 		return downloader.EmptyData, err
 	}
 	urls := make([]downloader.URLData, len(m3u8URLs))
-	var temp downloader.URLData
-	for _, u := range m3u8URLs {
-		temp = downloader.URLData{
+	for index, u := range m3u8URLs {
+		urls[index] = downloader.URLData{
 			URL:  u.URL,
 			Size: u.Size,
 			Ext:  "ts",
 		}
-		urls = append(urls, temp)
 	}
 
 	format := map[string]downloader.FormatData{

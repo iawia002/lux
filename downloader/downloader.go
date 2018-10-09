@@ -389,7 +389,7 @@ func (v VideoData) Download(refer string) error {
 		if err != nil {
 			return err
 		}
-		parts = append(parts, partFilePath)
+		parts[index] = partFilePath
 
 		wgp.Add()
 		go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
