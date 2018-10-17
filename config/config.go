@@ -17,8 +17,8 @@ var (
 	Proxy string
 	// Socks5Proxy SOCKS5 proxy
 	Socks5Proxy string
-	// Format select specified format to download
-	Format string
+	// Stream select specified stream to download
+	Stream string
 	// OutputPath output file path
 	OutputPath string
 	// OutputName output file name

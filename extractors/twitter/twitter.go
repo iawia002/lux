@@ -20,7 +20,7 @@ type twitter struct {
 }
 
 // Download main download function
-func Download(uri string) ([]downloader.VideoData, error) {
+func Download(uri string) ([]downloader.Data, error) {
 	html, err := request.Get(uri, uri, nil)
 	if err != nil {
 		return downloader.EmptyData, err
@@ -48,12 +48,12 @@ func Download(uri string) ([]downloader.VideoData, error) {
 	return extractedData, nil
 }
 
-func download(data twitter, uri string) ([]downloader.VideoData, error) {
+func download(data twitter, uri string) ([]downloader.Data, error) {
 	var (
 		err  error
 		size int64
 	)
-	format := make(map[string]downloader.FormatData)
+	streams := make(map[string]downloader.Stream)
 	switch {
 	// if video file is m3u8 and ts
 	case strings.Contains(data.Track.URL, ".m3u8"):
@@ -63,7 +63,7 @@ func download(data twitter, uri string) ([]downloader.VideoData, error) {
 		}
 		for index, m3u8 := range m3u8urls {
 			var totalSize int64
-			var urls []downloader.URLData
+			var urls []downloader.URL
 			ts, err := utils.M3u8URLs(m3u8)
 			if err != nil {
 				return downloader.EmptyData, err
@@ -73,7 +73,7 @@ func download(data twitter, uri string) ([]downloader.VideoData, error) {
 				if err != nil {
 					return downloader.EmptyData, err
 				}
-				temp := downloader.URLData{
+				temp := downloader.URL{
 					URL:  i,
 					Size: size,
 					Ext:  "ts",
@@ -83,7 +83,7 @@ func download(data twitter, uri string) ([]downloader.VideoData, error) {
 			}
 			qualityString := utils.MatchOneOf(m3u8, `/(\d+x\d+)/`)[1]
 			quality := strconv.Itoa(index + 1)
-			format[quality] = downloader.FormatData{
+			streams[quality] = downloader.Stream{
 				Quality: qualityString,
 				URLs:    urls,
 				Size:    totalSize,
@@ -96,23 +96,23 @@ func download(data twitter, uri string) ([]downloader.VideoData, error) {
 		if err != nil {
 			return downloader.EmptyData, err
 		}
-		urlData := downloader.URLData{
+		urlData := downloader.URL{
 			URL:  data.Track.URL,
 			Size: size,
 			Ext:  "mp4",
 		}
-		format["default"] = downloader.FormatData{
-			URLs: []downloader.URLData{urlData},
+		streams["default"] = downloader.Stream{
+			URLs: []downloader.URL{urlData},
 			Size: size,
 		}
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "Twitter twitter.com",
 			Title:   fmt.Sprintf("%s %s", data.Username, data.TweetID),
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

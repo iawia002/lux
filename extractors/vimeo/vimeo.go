@@ -36,7 +36,7 @@ type vimeo struct {
 }
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	var (
 		html, vid string
 		err       error
@@ -56,32 +56,32 @@ func Download(url string) ([]downloader.VideoData, error) {
 	jsonString := utils.MatchOneOf(html, `var \w+\s?=\s?({.+?});`)[1]
 	var vimeoData vimeo
 	json.Unmarshal([]byte(jsonString), &vimeoData)
-	format := map[string]downloader.FormatData{}
+	streams := map[string]downloader.Stream{}
 	var size int64
-	var urlData downloader.URLData
+	var urlData downloader.URL
 	for _, video := range vimeoData.Request.Files.Progressive {
 		size, err = request.Size(video.URL, url)
 		if err != nil {
 			return downloader.EmptyData, err
 		}
-		urlData = downloader.URLData{
+		urlData = downloader.URL{
 			URL:  video.URL,
 			Size: size,
 			Ext:  "mp4",
 		}
-		format[strconv.Itoa(video.Profile)] = downloader.FormatData{
-			URLs:    []downloader.URLData{urlData},
+		streams[strconv.Itoa(video.Profile)] = downloader.Stream{
+			URLs:    []downloader.URL{urlData},
 			Size:    size,
 			Quality: video.Quality,
 		}
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "Vimeo vimeo.com",
 			Title:   vimeoData.Video.Title,
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

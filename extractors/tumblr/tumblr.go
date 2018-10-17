@@ -23,16 +23,16 @@ type tumblrImage struct {
 	Image string `json:"image"`
 }
 
-func genURLData(url, referer string) (downloader.URLData, int64, error) {
+func genURLData(url, referer string) (downloader.URL, int64, error) {
 	size, err := request.Size(url, referer)
 	if err != nil {
-		return downloader.URLData{}, 0, err
+		return downloader.URL{}, 0, err
 	}
 	_, ext, err := utils.GetNameAndExt(url)
 	if err != nil {
-		return downloader.URLData{}, 0, err
+		return downloader.URL{}, 0, err
 	}
-	data := downloader.URLData{
+	data := downloader.URL{
 		URL:  url,
 		Size: size,
 		Ext:  ext,
@@ -40,12 +40,12 @@ func genURLData(url, referer string) (downloader.URLData, int64, error) {
 	return data, size, nil
 }
 
-func tumblrImageDownload(url, html, title string) ([]downloader.VideoData, error) {
+func tumblrImageDownload(url, html, title string) ([]downloader.Data, error) {
 	jsonString := utils.MatchOneOf(
 		html, `<script type="application/ld\+json">\s*(.+?)</script>`,
 	)[1]
 	var totalSize int64
-	var urls []downloader.URLData
+	var urls []downloader.URL
 	if strings.Contains(jsonString, `"image":{"@list"`) {
 		// there are two data structures in the same field(image)
 		var imageList tumblrImageList
@@ -68,24 +68,24 @@ func tumblrImageDownload(url, html, title string) ([]downloader.VideoData, error
 		totalSize = size
 		urls = append(urls, urlData)
 	}
-	format := map[string]downloader.FormatData{
+	streams := map[string]downloader.Stream{
 		"default": {
 			URLs: urls,
 			Size: totalSize,
 		},
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "Tumblr tumblr.com",
 			Title:   title,
 			Type:    "image",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }
 
-func tumblrVideoDownload(url, html, title string) ([]downloader.VideoData, error) {
+func tumblrVideoDownload(url, html, title string) ([]downloader.Data, error) {
 	videoURL := utils.MatchOneOf(html, `<iframe src='(.+?)'`)[1]
 	if !strings.Contains(videoURL, "tumblr.com/video") {
 		return downloader.EmptyData, errors.New("annie doesn't support this URL right now")
@@ -99,25 +99,25 @@ func tumblrVideoDownload(url, html, title string) ([]downloader.VideoData, error
 	if err != nil {
 		return downloader.EmptyData, err
 	}
-	format := map[string]downloader.FormatData{
+	streams := map[string]downloader.Stream{
 		"default": {
-			URLs: []downloader.URLData{urlData},
+			URLs: []downloader.URL{urlData},
 			Size: size,
 		},
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "Tumblr tumblr.com",
 			Title:   title,
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return downloader.EmptyData, err
@@ -129,7 +129,7 @@ func Download(url string) ([]downloader.VideoData, error) {
 	}
 	title := parser.Title(doc)
 	if strings.Contains(html, "<iframe src=") {
-		// Video
+		// Data
 		return tumblrVideoDownload(url, html, title)
 	}
 	// Image

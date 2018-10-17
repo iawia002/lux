@@ -8,7 +8,7 @@ import (
 )
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return downloader.EmptyData, err
@@ -24,24 +24,24 @@ func Download(url string) ([]downloader.VideoData, error) {
 	if err != nil {
 		return downloader.EmptyData, err
 	}
-	urlData := downloader.URLData{
+	urlData := downloader.URL{
 		URL:  realURL,
 		Size: size,
 		Ext:  "mp4",
 	}
-	format := map[string]downloader.FormatData{
+	streams := map[string]downloader.Stream{
 		"default": {
-			URLs: []downloader.URLData{urlData},
+			URLs: []downloader.URL{urlData},
 			Size: size,
 		},
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "秒拍 miaopai.com",
 			Title:   title,
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

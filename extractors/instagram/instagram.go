@@ -30,7 +30,7 @@ type instagram struct {
 }
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return downloader.EmptyData, err
@@ -48,18 +48,18 @@ func Download(url string) ([]downloader.VideoData, error) {
 
 	var realURL, dataType string
 	var size int64
-	format := map[string]downloader.FormatData{}
+	streams := map[string]downloader.Stream{}
 
 	if data.EntryData.PostPage[0].Graphql.ShortcodeMedia.VideoURL != "" {
-		// Video
+		// Data
 		dataType = "video"
 		realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.VideoURL
 		size, err = request.Size(realURL, url)
 		if err != nil {
 			return downloader.EmptyData, err
 		}
-		format["default"] = downloader.FormatData{
-			URLs: []downloader.URLData{
+		streams["default"] = downloader.Stream{
+			URLs: []downloader.URL{
 				{
 					URL:  realURL,
 					Size: size,
@@ -78,8 +78,8 @@ func Download(url string) ([]downloader.VideoData, error) {
 			if err != nil {
 				return downloader.EmptyData, err
 			}
-			format["default"] = downloader.FormatData{
-				URLs: []downloader.URLData{
+			streams["default"] = downloader.Stream{
+				URLs: []downloader.URL{
 					{
 						URL:  realURL,
 						Size: size,
@@ -91,14 +91,14 @@ func Download(url string) ([]downloader.VideoData, error) {
 		} else {
 			// Album
 			var totalSize int64
-			var urls []downloader.URLData
+			var urls []downloader.URL
 			for _, u := range data.EntryData.PostPage[0].Graphql.ShortcodeMedia.EdgeSidecar.Edges {
 				realURL = u.Node.DisplayURL
 				size, err = request.Size(realURL, url)
 				if err != nil {
 					return downloader.EmptyData, err
 				}
-				urlData := downloader.URLData{
+				urlData := downloader.URL{
 					URL:  realURL,
 					Size: size,
 					Ext:  "jpg",
@@ -106,19 +106,19 @@ func Download(url string) ([]downloader.VideoData, error) {
 				urls = append(urls, urlData)
 				totalSize += size
 			}
-			format["default"] = downloader.FormatData{
+			streams["default"] = downloader.Stream{
 				URLs: urls,
 				Size: totalSize,
 			}
 		}
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "Instagram instagram.com",
 			Title:   utils.FileName(title),
 			Type:    dataType,
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

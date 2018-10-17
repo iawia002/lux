@@ -77,14 +77,14 @@ func genSignedURL(streamURL string, stream url.Values, js string) (string, error
 }
 
 // Download YouTube main download function
-func Download(uri string) ([]downloader.VideoData, error) {
+func Download(uri string) ([]downloader.Data, error) {
 	var err error
 	if !config.Playlist {
 		data, err := youtubeDownload(uri)
 		if err != nil {
 			return downloader.EmptyData, err
 		}
-		return []downloader.VideoData{data}, nil
+		return []downloader.Data{data}, nil
 	}
 	listID := utils.MatchOneOf(uri, `(list|p)=([^/&]+)`)[2]
 	if listID == "" {
@@ -97,8 +97,9 @@ func Download(uri string) ([]downloader.VideoData, error) {
 	// "videoId":"OQxX8zgyzuM","thumbnail"
 	videoIDs := utils.MatchAll(html, `"videoId":"([^,]+?)","thumbnail"`)
 	needDownloadItems := utils.NeedDownloadList(len(videoIDs))
-	extractedData := make([]downloader.VideoData, len(needDownloadItems))
+	extractedData := make([]downloader.Data, len(needDownloadItems))
 	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
+	dataIndex := 0
 	for index, videoID := range videoIDs {
 		if !utils.ItemInSlice(index+1, needDownloadItems) {
 			continue
@@ -107,20 +108,22 @@ func Download(uri string) ([]downloader.VideoData, error) {
 			"https://www.youtube.com/watch?v=%s&list=%s", videoID[1], listID,
 		)
 		wgp.Add()
-		go func(index int, u string, extractedData []downloader.VideoData) {
+		go func(index int, u string, extractedData []downloader.Data) {
 			defer wgp.Done()
 			data, err := youtubeDownload(u)
-			if err == nil {
-				// if err is not nil, the data is empty struct
-				extractedData[index] = data
+			// if err is not nil, the data is empty struct
+			if err != nil {
+				data.Err = err
 			}
-		}(index, u, extractedData)
+			extractedData[index] = data
+		}(dataIndex, u, extractedData)
+		dataIndex++
 	}
 	wgp.Wait()
 	return extractedData, nil
 }
 
-func youtubeDownload(uri string) (downloader.VideoData, error) {
+func youtubeDownload(uri string) (downloader.Data, error) {
 	var err error
 	vid := utils.MatchOneOf(
 		uri,
@@ -130,7 +133,7 @@ func youtubeDownload(uri string) (downloader.VideoData, error) {
 		`v/([^/?]+)`,
 	)
 	if vid == nil {
-		return downloader.VideoData{}, errors.New("can't find vid")
+		return downloader.Data{}, errors.New("can't find vid")
 	}
 	videoURL := fmt.Sprintf(
 		"https://www.youtube.com/watch?v=%s&gl=US&hl=en&has_verified=1&bpctr=9999999999",
@@ -138,36 +141,36 @@ func youtubeDownload(uri string) (downloader.VideoData, error) {
 	)
 	html, err := request.Get(videoURL, referer, nil)
 	if err != nil {
-		return downloader.VideoData{}, err
+		return downloader.Data{}, err
 	}
 	ytplayer := utils.MatchOneOf(html, `;ytplayer\.config\s*=\s*({.+?});`)[1]
 	var youtube youtubeData
 	json.Unmarshal([]byte(ytplayer), &youtube)
 	title := youtube.Args.Title
 
-	format, err := extractVideoURLS(youtube, uri)
+	streams, err := extractVideoURLS(youtube, uri)
 	if err != nil {
-		return downloader.VideoData{}, err
+		return downloader.Data{}, err
 	}
 
-	return downloader.VideoData{
+	return downloader.Data{
 		Site:    "YouTube youtube.com",
 		Title:   utils.FileName(title),
 		Type:    "video",
-		Formats: format,
+		Streams: streams,
 	}, nil
 }
 
-func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.FormatData, error) {
-	streams := strings.Split(data.Args.Stream, ",")
+func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.Stream, error) {
+	youtubeStreams := strings.Split(data.Args.Stream, ",")
 	if data.Args.Stream == "" {
-		streams = strings.Split(data.Args.Stream2, ",")
+		youtubeStreams = strings.Split(data.Args.Stream2, ",")
 	}
 	var ext string
-	var audio downloader.URLData
-	format := map[string]downloader.FormatData{}
+	var audio downloader.URL
+	streams := map[string]downloader.Stream{}
 
-	for _, s := range streams {
+	for _, s := range youtubeStreams {
 		stream, err := url.ParseQuery(s)
 		if err != nil {
 			return nil, err
@@ -199,7 +202,7 @@ func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.F
 		if err != nil {
 			return nil, err
 		}
-		urlData := downloader.URLData{
+		urlData := downloader.URL{
 			URL:  realURL,
 			Size: size,
 			Ext:  ext,
@@ -208,8 +211,8 @@ func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.F
 			// Audio data for merging with video
 			audio = urlData
 		}
-		format[itag] = downloader.FormatData{
-			URLs:    []downloader.URLData{urlData},
+		streams[itag] = downloader.Stream{
+			URLs:    []downloader.URL{urlData},
 			Size:    size,
 			Quality: quality,
 		}
@@ -217,7 +220,7 @@ func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.F
 
 	// `url_encoded_fmt_stream_map`
 	if data.Args.Stream == "" {
-		return format, nil
+		return streams, nil
 	}
 
 	// Unlike `url_encoded_fmt_stream_map`, all videos in `adaptive_fmts` have no sound,
@@ -225,12 +228,12 @@ func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.F
 	// Another problem is that even if we add `ratebypass=yes`, the download speed still slow sometimes. https://github.com/iawia002/annie/issues/191#issuecomment-405449649
 
 	// All videos here have no sound and need to be added separately
-	for itag, f := range format {
+	for itag, f := range streams {
 		if strings.Contains(f.Quality, "video/") {
 			f.Size += audio.Size
 			f.URLs = append(f.URLs, audio)
-			format[itag] = f
+			streams[itag] = f
 		}
 	}
-	return format, nil
+	return streams, nil
 }

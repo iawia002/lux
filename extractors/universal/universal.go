@@ -9,7 +9,7 @@ import (
 )
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	fmt.Println()
 	fmt.Println("annie doesn't support this URL right now, but it will try to download it directly")
 
@@ -21,14 +21,14 @@ func Download(url string) ([]downloader.VideoData, error) {
 	if err != nil {
 		return downloader.EmptyData, err
 	}
-	urlData := downloader.URLData{
+	urlData := downloader.URL{
 		URL:  url,
 		Size: size,
 		Ext:  ext,
 	}
-	format := map[string]downloader.FormatData{
+	streams := map[string]downloader.Stream{
 		"default": {
-			URLs: []downloader.URLData{urlData},
+			URLs: []downloader.URL{urlData},
 			Size: size,
 		},
 	}
@@ -37,12 +37,12 @@ func Download(url string) ([]downloader.VideoData, error) {
 		return downloader.EmptyData, err
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "Universal",
 			Title:   utils.FileName(filename),
 			Type:    contentType,
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

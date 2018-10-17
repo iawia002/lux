@@ -117,7 +117,7 @@ $ annie https://youtu.be/Gnbch2osEeo
 >
 > `$ annie 'https://...'`
 
-The `-i` option displays all available quality and formats of video in the supplied link without downloading.
+The `-i` option displays all available quality of video without downloading.
 
 ```console
 $ annie -i https://youtu.be/Gnbch2osEeo
@@ -152,7 +152,7 @@ $ annie -i https://youtu.be/Gnbch2osEeo
      # download with: annie -f default "URL"
 ```
 
-Use `annie -f format "URL"` to download a specific format listed in the output of `-i` option.
+Use `annie -f stream "URL"` to download a specific stream listed in the output of `-i` option.
 
 ### Download anything else
 
@@ -413,21 +413,55 @@ The `-j` option will print the extracted data in JSON format.
 
 ```console
 $ annie -j https://www.bilibili.com/video/av20203945
+
 {
-    "Site": "哔哩哔哩 bilibili.com",
-    "Title": "【2018拜年祭单品】相遇day by day",
-    "Type": "video",
-    "Formats": {
-        "default": {
-            "URLs": [
+    "site": "哔哩哔哩 bilibili.com",
+    "title": "【2018拜年祭单品】相遇day by day",
+    "type": "video",
+    "streams": {
+        "15": {
+            "urls": [
                 {
-                    "URL": "http://cn-jszj-dx-v-11.acgvideo.com/vg1/upgcxcode/60/93/32989360/32989360-1-80.flv?expires=1522325400\u0026platform=pc\u0026ssig=5x0f9tkmvOrQBavICgRElA\u0026oi=3063167823\u0026nfa=wjcs6MVDpr+CJX9KAl+nbw==\u0026dynamic=1\u0026hfa=2022678329\u0026hfb=Yjk5ZmZjM2M1YzY4ZjAwYTMzMTIzYmIyNWY4ODJkNWI=\u0026trid=c2de1496db7646e8917f6a556668b5a9",
-                    "Size": 121735559,
-                    "Ext": "flv"
+                    "url": "...",
+                    "size": 18355205,
+                    "ext": "flv"
                 }
             ],
-            "Quality": "高清 1080P",
-            "Size": 121735559
+            "quality": "流畅 360P",
+            "size": 18355205
+        },
+        "32": {
+            "urls": [
+                {
+                    "url": "...",
+                    "size": 40058632,
+                    "ext": "flv"
+                }
+            ],
+            "quality": "清晰 480P",
+            "size": 40058632
+        },
+        "64": {
+            "urls": [
+                {
+                    "url": "...",
+                    "size": 82691087,
+                    "ext": "flv"
+                }
+            ],
+            "quality": "高清 720P",
+            "size": 82691087
+        },
+        "80": {
+            "urls": [
+                {
+                    "url": "...",
+                    "size": 121735559,
+                    "ext": "flv"
+                }
+            ],
+            "quality": "高清 1080P",
+            "size": 121735559
         }
     }
 }
@@ -448,7 +482,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
 
 ```
   -f string
-    	Select specific format to download
+    	Select specific stream to download
   -p	Download playlist
   -n int
     	The number of download thread (only works for multiple-parts video) (default 10)

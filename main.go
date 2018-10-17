@@ -42,7 +42,7 @@ func init() {
 	flag.StringVar(&config.Refer, "r", "", "Use specified Referrer")
 	flag.StringVar(&config.Proxy, "x", "", "HTTP proxy")
 	flag.StringVar(&config.Socks5Proxy, "s", "", "SOCKS5 proxy")
-	flag.StringVar(&config.Format, "f", "", "Select specific format to download")
+	flag.StringVar(&config.Stream, "f", "", "Select specific stream to download")
 	flag.StringVar(&config.OutputPath, "o", "", "Specify the output path")
 	flag.StringVar(&config.OutputName, "O", "", "Specify the output file name")
 	flag.BoolVar(&config.ExtractedData, "j", false, "Print extracted data")
@@ -78,7 +78,7 @@ func download(videoURL string) {
 	var (
 		domain string
 		err    error
-		data   []downloader.VideoData
+		data   []downloader.Data
 	)
 	bilibiliShortLink := utils.MatchOneOf(videoURL, `^(av|ep)\d+`)
 	if bilibiliShortLink != nil {
@@ -138,8 +138,9 @@ func download(videoURL string) {
 		printError(videoURL, err)
 	}
 	for _, item := range data {
-		if item.Site == "" {
+		if item.Err != nil {
 			// empty data
+			printError(videoURL, item.Err)
 			continue
 		}
 		err = item.Download(videoURL)
@@ -160,6 +161,7 @@ func main() {
 		utils.PrintVersion()
 	}
 	if config.File != "" {
+		// read URL list from file
 		file, err := os.Open(config.File)
 		if err != nil {
 			fmt.Println(err)
@@ -181,6 +183,8 @@ func main() {
 		return
 	}
 	if config.Cookie != "" {
+		// If config.Cookie is a file path, convert it to a string to ensure
+		// config.Cookie is always string
 		if _, fileErr := os.Stat(config.Cookie); fileErr == nil {
 			// Cookie is a file
 			data, err := ioutil.ReadFile(config.Cookie)

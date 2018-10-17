@@ -66,7 +66,7 @@ func TestYoutube(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var (
-				data []downloader.VideoData
+				data []downloader.Data
 				err  error
 			)
 			if tt.playlist {
