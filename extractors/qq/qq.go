@@ -97,7 +97,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]downloader.Stream
 			filename = strings.Join(fns, ".")
 			html, err := request.Get(
 				fmt.Sprintf(
-					"http://vv.video.qq.com/getkey?otype=json&platform=11&appver=%s&filename=%s&streams=%d&vid=%s",
+					"http://vv.video.qq.com/getkey?otype=json&platform=11&appver=%s&filename=%s&format=%d&vid=%s",
 					qqPlayerVersion, filename, fi.ID, vid,
 				), cdn, nil,
 			)
@@ -147,7 +147,8 @@ func Download(url string) ([]downloader.Data, error) {
 	}
 	html, err := request.Get(
 		fmt.Sprintf(
-			"http://vv.video.qq.com/getinfo?otype=json&platform=11&defnpayver=1&appver=%s&defn=shd&vid=%s", qqPlayerVersion, vid,
+			"http://vv.video.qq.com/getinfo?otype=json&platform=11&defnpayver=1&appver=%s&defn=shd&vid=%s",
+			qqPlayerVersion, vid,
 		), url, nil,
 	)
 	if err != nil {
