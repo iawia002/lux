@@ -135,17 +135,20 @@ func download(videoURL string) {
 		data, err = universal.Download(videoURL)
 	}
 	if err != nil {
+		// if this error occurs, it means that an error occurred before actually starting to extract data
+		// (there is an error in the preparation step), and the data list is empty.
 		printError(videoURL, err)
 	}
 	for _, item := range data {
 		if item.Err != nil {
-			// empty data
-			printError(videoURL, item.Err)
+			// if this error occurs, the preparation step is normal, but the data extraction is wrong.
+			// the data is an empty struct.
+			printError(item.URL, item.Err)
 			continue
 		}
 		err = item.Download(videoURL)
 		if err != nil {
-			printError(videoURL, err)
+			printError(item.URL, err)
 		}
 	}
 }

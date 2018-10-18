@@ -27,7 +27,7 @@ func Download(url string) ([]downloader.Data, error) {
 		fmt.Sprintf("https://n.miaopai.com/api/aj_media/info.json?smid=%s", id), url, nil,
 	)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	var data miaopai
 	json.Unmarshal([]byte(jsonString), &data)
@@ -35,7 +35,7 @@ func Download(url string) ([]downloader.Data, error) {
 	realURL := data.Data.MetaData[0].URLs.M
 	size, err := request.Size(realURL, url)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	urlData := downloader.URL{
 		URL:  realURL,
@@ -55,6 +55,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   data.Data.Description,
 			Type:    "video",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }

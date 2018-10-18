@@ -11,7 +11,7 @@ func Download(url string) ([]downloader.Data, error) {
 	var err error
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	title, urls, err := parser.GetImages(
 		url, html, "detail_std detail_clickable", func(u string) string {
@@ -20,7 +20,7 @@ func Download(url string) ([]downloader.Data, error) {
 		},
 	)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	streams := map[string]downloader.Stream{
 		"default": {
@@ -34,6 +34,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   title,
 			Type:    "image",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }

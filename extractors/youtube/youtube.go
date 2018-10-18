@@ -80,19 +80,15 @@ func genSignedURL(streamURL string, stream url.Values, js string) (string, error
 func Download(uri string) ([]downloader.Data, error) {
 	var err error
 	if !config.Playlist {
-		data, err := youtubeDownload(uri)
-		if err != nil {
-			return downloader.EmptyData, err
-		}
-		return []downloader.Data{data}, nil
+		return []downloader.Data{youtubeDownload(uri)}, nil
 	}
 	listID := utils.MatchOneOf(uri, `(list|p)=([^/&]+)`)[2]
 	if listID == "" {
-		return downloader.EmptyData, errors.New("can't get list ID from URL")
+		return downloader.EmptyList, errors.New("can't get list ID from URL")
 	}
 	html, err := request.Get("https://www.youtube.com/playlist?list="+listID, referer, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	// "videoId":"OQxX8zgyzuM","thumbnail"
 	videoIDs := utils.MatchAll(html, `"videoId":"([^,]+?)","thumbnail"`)
@@ -110,12 +106,7 @@ func Download(uri string) ([]downloader.Data, error) {
 		wgp.Add()
 		go func(index int, u string, extractedData []downloader.Data) {
 			defer wgp.Done()
-			data, err := youtubeDownload(u)
-			// if err is not nil, the data is empty struct
-			if err != nil {
-				data.Err = err
-			}
-			extractedData[index] = data
+			extractedData[index] = youtubeDownload(u)
 		}(dataIndex, u, extractedData)
 		dataIndex++
 	}
@@ -123,7 +114,8 @@ func Download(uri string) ([]downloader.Data, error) {
 	return extractedData, nil
 }
 
-func youtubeDownload(uri string) (downloader.Data, error) {
+// youtubeDownload download function for single url
+func youtubeDownload(uri string) downloader.Data {
 	var err error
 	vid := utils.MatchOneOf(
 		uri,
@@ -133,7 +125,7 @@ func youtubeDownload(uri string) (downloader.Data, error) {
 		`v/([^/?]+)`,
 	)
 	if vid == nil {
-		return downloader.Data{}, errors.New("can't find vid")
+		return downloader.EmptyData(uri, errors.New("can't find vid"))
 	}
 	videoURL := fmt.Sprintf(
 		"https://www.youtube.com/watch?v=%s&gl=US&hl=en&has_verified=1&bpctr=9999999999",
@@ -141,7 +133,7 @@ func youtubeDownload(uri string) (downloader.Data, error) {
 	)
 	html, err := request.Get(videoURL, referer, nil)
 	if err != nil {
-		return downloader.Data{}, err
+		return downloader.EmptyData(uri, err)
 	}
 	ytplayer := utils.MatchOneOf(html, `;ytplayer\.config\s*=\s*({.+?});`)[1]
 	var youtube youtubeData
@@ -150,7 +142,7 @@ func youtubeDownload(uri string) (downloader.Data, error) {
 
 	streams, err := extractVideoURLS(youtube, uri)
 	if err != nil {
-		return downloader.Data{}, err
+		return downloader.EmptyData(uri, err)
 	}
 
 	return downloader.Data{
@@ -158,7 +150,8 @@ func youtubeDownload(uri string) (downloader.Data, error) {
 		Title:   utils.FileName(title),
 		Type:    "video",
 		Streams: streams,
-	}, nil
+		URL:     uri,
+	}
 }
 
 func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.Stream, error) {

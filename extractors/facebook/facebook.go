@@ -13,7 +13,7 @@ func Download(url string) ([]downloader.Data, error) {
 	var err error
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	title := utils.MatchOneOf(html, `<title id="pageTitle">(.+)</title>`)[1]
 
@@ -24,7 +24,7 @@ func Download(url string) ([]downloader.Data, error) {
 		)[1]
 		size, err := request.Size(u, url)
 		if err != nil {
-			return downloader.EmptyData, err
+			return downloader.EmptyList, err
 		}
 		urlData := downloader.URL{
 			URL:  u,
@@ -44,6 +44,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   utils.FileName(title),
 			Type:    "video",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }

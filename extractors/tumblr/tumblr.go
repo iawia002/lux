@@ -53,7 +53,7 @@ func tumblrImageDownload(url, html, title string) ([]downloader.Data, error) {
 		for _, u := range imageList.Image.List {
 			urlData, size, err := genURLData(u, url)
 			if err != nil {
-				return downloader.EmptyData, err
+				return downloader.EmptyList, err
 			}
 			totalSize += size
 			urls = append(urls, urlData)
@@ -63,7 +63,7 @@ func tumblrImageDownload(url, html, title string) ([]downloader.Data, error) {
 		json.Unmarshal([]byte(jsonString), &image)
 		urlData, size, err := genURLData(image.Image, url)
 		if err != nil {
-			return downloader.EmptyData, err
+			return downloader.EmptyList, err
 		}
 		totalSize = size
 		urls = append(urls, urlData)
@@ -81,6 +81,7 @@ func tumblrImageDownload(url, html, title string) ([]downloader.Data, error) {
 			Title:   title,
 			Type:    "image",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }
@@ -88,16 +89,16 @@ func tumblrImageDownload(url, html, title string) ([]downloader.Data, error) {
 func tumblrVideoDownload(url, html, title string) ([]downloader.Data, error) {
 	videoURL := utils.MatchOneOf(html, `<iframe src='(.+?)'`)[1]
 	if !strings.Contains(videoURL, "tumblr.com/video") {
-		return downloader.EmptyData, errors.New("annie doesn't support this URL right now")
+		return downloader.EmptyList, errors.New("annie doesn't support this URL right now")
 	}
 	videoHTML, err := request.Get(videoURL, url, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	realURL := utils.MatchOneOf(videoHTML, `source src="(.+?)"`)[1]
 	urlData, size, err := genURLData(realURL, url)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	streams := map[string]downloader.Stream{
 		"default": {
@@ -112,6 +113,7 @@ func tumblrVideoDownload(url, html, title string) ([]downloader.Data, error) {
 			Title:   title,
 			Type:    "video",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }
@@ -120,12 +122,12 @@ func tumblrVideoDownload(url, html, title string) ([]downloader.Data, error) {
 func Download(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	// get the title
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	title := parser.Title(doc)
 	if strings.Contains(html, "<iframe src=") {

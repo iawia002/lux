@@ -98,7 +98,7 @@ func encodeTk2(str string) string {
 func Download(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	vid := utils.MatchOneOf(
 		url,
@@ -127,7 +127,7 @@ func Download(url string) ([]downloader.Data, error) {
 		headers,
 	)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	var pm2 mgtvPm2Data
 	json.Unmarshal([]byte(pm2DataString), &pm2)
@@ -140,7 +140,7 @@ func Download(url string) ([]downloader.Data, error) {
 		headers,
 	)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	var mgtvData mgtv
 	json.Unmarshal([]byte(dataString), &mgtvData)
@@ -158,12 +158,12 @@ func Download(url string) ([]downloader.Data, error) {
 		addr = mgtvVideoAddr{}
 		addrInfo, err := request.Get(mgtvData.Data.StreamDomain[0]+stream.URL, url, headers)
 		if err != nil {
-			return downloader.EmptyData, err
+			return downloader.EmptyList, err
 		}
 		json.Unmarshal([]byte(addrInfo), &addr)
 		m3u8URLs, totalSize, err := mgtvM3u8(addr.Info)
 		if err != nil {
-			return downloader.EmptyData, err
+			return downloader.EmptyList, err
 		}
 		urls := make([]downloader.URL, len(m3u8URLs))
 		for index, u := range m3u8URLs {
@@ -186,6 +186,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   title,
 			Type:    "video",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }

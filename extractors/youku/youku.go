@@ -203,10 +203,10 @@ func Download(url string) ([]downloader.Data, error) {
 	)[1]
 	youkuData, err := youkuUps(vid)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	if youkuData.Data.Error.Code != 0 {
-		return downloader.EmptyData, errors.New(youkuData.Data.Error.Note)
+		return downloader.EmptyList, errors.New(youkuData.Data.Error.Note)
 	}
 	streams := genData(youkuData.Data)
 	var title string
@@ -224,6 +224,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   utils.FileName(title),
 			Type:    "video",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }
