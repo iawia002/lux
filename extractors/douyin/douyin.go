@@ -7,7 +7,7 @@ import (
 )
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	var err error
 	html, err := request.Get(url, url, nil)
 	if err != nil {
@@ -19,23 +19,23 @@ func Download(url string) ([]downloader.VideoData, error) {
 	if err != nil {
 		return downloader.EmptyData, err
 	}
-	urlData := downloader.URLData{
+	urlData := downloader.URL{
 		URL:  realURL,
 		Size: size,
 		Ext:  "mp4",
 	}
-	format := map[string]downloader.FormatData{
+	streams := map[string]downloader.Stream{
 		"default": {
-			URLs: []downloader.URLData{urlData},
+			URLs: []downloader.URL{urlData},
 			Size: size,
 		},
 	}
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "抖音 douyin.com",
 			Title:   utils.FileName(title),
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

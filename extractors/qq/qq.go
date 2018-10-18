@@ -48,8 +48,8 @@ type qqKeyInfo struct {
 
 const qqPlayerVersion string = "3.2.19.333"
 
-func qqGenFormat(vid, cdn string, data qqVideoInfo) (map[string]downloader.FormatData, error) {
-	format := map[string]downloader.FormatData{}
+func genStreams(vid, cdn string, data qqVideoInfo) (map[string]downloader.Stream, error) {
+	streams := map[string]downloader.Stream{}
 	var vkey string
 	// number of fragments
 	clips := data.Vl.Vi[0].Cl.Fc
@@ -80,11 +80,11 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) (map[string]downloader.Forma
 			fns = append(fns[:1], fns[2:]...)
 		}
 
-		var urls []downloader.URLData
+		var urls []downloader.URL
 		var totalSize int64
 		var filename string
 		for part := 1; part < clips+1; part++ {
-			// Multiple fragments per format
+			// Multiple fragments per streams
 			if fmtIDPrefix == "p" {
 				if len(fns) < 4 {
 					// If the number of fragments > 0, the filename needs to add the number of fragments
@@ -97,7 +97,8 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) (map[string]downloader.Forma
 			filename = strings.Join(fns, ".")
 			html, err := request.Get(
 				fmt.Sprintf(
-					"http://vv.video.qq.com/getkey?otype=json&platform=11&appver=%s&filename=%s&format=%d&vid=%s", qqPlayerVersion, filename, fi.ID, vid,
+					"http://vv.video.qq.com/getkey?otype=json&platform=11&appver=%s&filename=%s&format=%d&vid=%s",
+					qqPlayerVersion, filename, fi.ID, vid,
 				), cdn, nil,
 			)
 			if err != nil {
@@ -115,7 +116,7 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) (map[string]downloader.Forma
 			if err != nil {
 				return nil, err
 			}
-			urlData := downloader.URLData{
+			urlData := downloader.URL{
 				URL:  realURL,
 				Size: size,
 				Ext:  "mp4",
@@ -123,17 +124,17 @@ func qqGenFormat(vid, cdn string, data qqVideoInfo) (map[string]downloader.Forma
 			urls = append(urls, urlData)
 			totalSize += size
 		}
-		format[fi.Name] = downloader.FormatData{
+		streams[fi.Name] = downloader.Stream{
 			URLs:    urls,
 			Size:    totalSize,
 			Quality: fi.Cname,
 		}
 	}
-	return format, nil
+	return streams, nil
 }
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	vid := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)[1]
 	if len(vid) != 11 {
 		u, err := request.Get(url, url, nil)
@@ -146,7 +147,8 @@ func Download(url string) ([]downloader.VideoData, error) {
 	}
 	html, err := request.Get(
 		fmt.Sprintf(
-			"http://vv.video.qq.com/getinfo?otype=json&platform=11&defnpayver=1&appver=%s&defn=shd&vid=%s", qqPlayerVersion, vid,
+			"http://vv.video.qq.com/getinfo?otype=json&platform=11&defnpayver=1&appver=%s&defn=shd&vid=%s",
+			qqPlayerVersion, vid,
 		), url, nil,
 	)
 	if err != nil {
@@ -160,17 +162,17 @@ func Download(url string) ([]downloader.VideoData, error) {
 		return downloader.EmptyData, errors.New(data.Msg)
 	}
 	cdn := data.Vl.Vi[0].Ul.UI[len(data.Vl.Vi[0].Ul.UI)-1].URL
-	format, err := qqGenFormat(vid, cdn, data)
+	streams, err := genStreams(vid, cdn, data)
 	if err != nil {
 		return downloader.EmptyData, err
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "腾讯视频 v.qq.com",
 			Title:   utils.FileName(data.Vl.Vi[0].Ti),
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

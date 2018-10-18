@@ -155,20 +155,20 @@ func generateUtdid() string {
 	return base64.StdEncoding.EncodeToString(buffer.Bytes())
 }
 
-func genData(youkuData data) map[string]downloader.FormatData {
+func genData(youkuData data) map[string]downloader.Stream {
 	var (
-		formatString string
+		streamString string
 		quality      string
 	)
-	format := map[string]downloader.FormatData{}
+	streams := map[string]downloader.Stream{}
 	for _, stream := range youkuData.Stream {
 		if stream.AudioLang == "default" {
-			formatString = stream.Type
+			streamString = stream.Type
 			quality = fmt.Sprintf(
 				"%s %dx%d", stream.Type, stream.Width, stream.Height,
 			)
 		} else {
-			formatString = fmt.Sprintf("%s-%s", stream.Type, stream.AudioLang)
+			streamString = fmt.Sprintf("%s-%s", stream.Type, stream.AudioLang)
 			quality = fmt.Sprintf(
 				"%s %dx%d %s", stream.Type, stream.Width, stream.Height,
 				getAudioLang(stream.AudioLang),
@@ -179,25 +179,25 @@ func genData(youkuData data) map[string]downloader.FormatData {
 			strings.Split(stream.Segs[0].URL, "?")[0],
 			".",
 		)
-		urls := make([]downloader.URLData, len(stream.Segs))
+		urls := make([]downloader.URL, len(stream.Segs))
 		for index, data := range stream.Segs {
-			urls[index] = downloader.URLData{
+			urls[index] = downloader.URL{
 				URL:  data.URL,
 				Size: data.Size,
 				Ext:  ext[len(ext)-1],
 			}
 		}
-		format[formatString] = downloader.FormatData{
+		streams[streamString] = downloader.Stream{
 			URLs:    urls,
 			Size:    stream.Size,
 			Quality: quality,
 		}
 	}
-	return format
+	return streams
 }
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	vid := utils.MatchOneOf(
 		url, `id_(.+?)\.html`, `id_(.+)`,
 	)[1]
@@ -208,7 +208,7 @@ func Download(url string) ([]downloader.VideoData, error) {
 	if youkuData.Data.Error.Code != 0 {
 		return downloader.EmptyData, errors.New(youkuData.Data.Error.Note)
 	}
-	format := genData(youkuData.Data)
+	streams := genData(youkuData.Data)
 	var title string
 	if youkuData.Data.Show.Title == "" || strings.Contains(
 		youkuData.Data.Video.Title, youkuData.Data.Show.Title,
@@ -218,12 +218,12 @@ func Download(url string) ([]downloader.VideoData, error) {
 		title = fmt.Sprintf("%s %s", youkuData.Data.Show.Title, youkuData.Data.Video.Title)
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "优酷 youku.com",
 			Title:   utils.FileName(title),
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	var err error
 	html, err := request.Get(url, url, nil)
 	if err != nil {
@@ -17,7 +17,7 @@ func Download(url string) ([]downloader.VideoData, error) {
 	}
 	title := utils.MatchOneOf(html, `<title id="pageTitle">(.+)</title>`)[1]
 
-	format := map[string]downloader.FormatData{}
+	streams := map[string]downloader.Stream{}
 	for _, quality := range []string{"sd", "hd"} {
 		u := utils.MatchOneOf(
 			html, fmt.Sprintf(`%s_src:"(.+?)"`, quality),
@@ -26,24 +26,24 @@ func Download(url string) ([]downloader.VideoData, error) {
 		if err != nil {
 			return downloader.EmptyData, err
 		}
-		urlData := downloader.URLData{
+		urlData := downloader.URL{
 			URL:  u,
 			Size: size,
 			Ext:  "mp4",
 		}
-		format[quality] = downloader.FormatData{
-			URLs:    []downloader.URLData{urlData},
+		streams[quality] = downloader.Stream{
+			URLs:    []downloader.URL{urlData},
 			Size:    size,
 			Quality: quality,
 		}
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "Facebook facebook.com",
 			Title:   utils.FileName(title),
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

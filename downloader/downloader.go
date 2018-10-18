@@ -19,24 +19,44 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
-// URLData data struct of single URL
-type URLData struct {
+// URL data struct for single URL information
+type URL struct {
 	URL  string `json:"url"`
 	Size int64  `json:"size"`
 	Ext  string `json:"ext"`
 }
 
-// FormatData data struct of every format
-type FormatData struct {
-	// [URLData: {URL, Size, Ext}, ...]
+// Stream data struct for each stream
+type Stream struct {
+	// [URL: {URL, Size, Ext}, ...]
 	// Some video files have multiple fragments
 	// and support for downloading multiple image files at once
-	URLs    []URLData `json:"urls"`
-	Quality string    `json:"quality"`
+	URLs    []URL  `json:"urls"`
+	Quality string `json:"quality"`
 	// total size of all urls
 	Size int64 `json:"size"`
+
+	// name used in sortedStreams
 	name string
 }
+
+// Data data struct for video information
+type Data struct {
+	Site  string `json:"site"`
+	Title string `json:"title"`
+	Type  string `json:"type"`
+	// each stream has it's own URLs and Quality
+	Streams       map[string]Stream `json:"streams"`
+	sortedStreams []Stream
+
+	// Err is used to record whether an error occurred when extracting data.
+	// It is used to record the error information corresponding to each url when extracting the list data.
+	// NOTE(iawia002): err is only used in Data list
+	Err error `json:"-"`
+}
+
+// EmptyData empty Data list
+var EmptyData = make([]Data, 0)
 
 // Aria2RPCData json RPC 2.0 for Aria2
 type Aria2RPCData struct {
@@ -57,25 +77,6 @@ type Aria2Input struct {
 	Header []string `json:"header"`
 }
 
-type formats []FormatData
-
-func (f formats) Len() int           { return len(f) }
-func (f formats) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
-func (f formats) Less(i, j int) bool { return f[i].Size > f[j].Size }
-
-// VideoData data struct of video info
-type VideoData struct {
-	Site  string `json:"site"`
-	Title string `json:"title"`
-	Type  string `json:"type"`
-	// each format has it's own URLs and Quality
-	Formats       map[string]FormatData `json:"formats"`
-	sortedFormats formats
-}
-
-// EmptyData empty VideoData list
-var EmptyData = make([]VideoData, 0)
-
 func progressBar(size int64) *pb.ProgressBar {
 	bar := pb.New64(size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
 	bar.ShowSpeed = true
@@ -84,7 +85,7 @@ func progressBar(size int64) *pb.ProgressBar {
 	return bar
 }
 
-func (data *FormatData) calculateTotalSize() {
+func (data *Stream) calculateTotalSize() {
 	var size int64
 	for _, urlData := range data.URLs {
 		size += urlData.Size
@@ -135,7 +136,7 @@ func writeFile(
 
 // Save save url file
 func Save(
-	urlData URLData, refer, fileName string, bar *pb.ProgressBar,
+	urlData URL, refer, fileName string, bar *pb.ProgressBar,
 ) error {
 	var err error
 	filePath, err := utils.FilePath(fileName, urlData.Ext, false)
@@ -236,7 +237,7 @@ func Save(
 	return nil
 }
 
-func (data FormatData) printStream() {
+func (data Stream) printStream() {
 	blue := color.New(color.FgBlue)
 	cyan := color.New(color.FgCyan)
 	blue.Println(fmt.Sprintf("     [%s]  -------------------", data.name))
@@ -253,21 +254,23 @@ func (data FormatData) printStream() {
 	fmt.Printf("annie -f %s ...\n\n", data.name)
 }
 
-func (v *VideoData) genSortedFormats() {
-	for k, data := range v.Formats {
+func (v *Data) genSortedStreams() {
+	for k, data := range v.Streams {
 		if data.Size == 0 {
 			data.calculateTotalSize()
 		}
 		data.name = k
-		v.Formats[k] = data
-		v.sortedFormats = append(v.sortedFormats, data)
+		v.Streams[k] = data
+		v.sortedStreams = append(v.sortedStreams, data)
 	}
-	if len(v.Formats) > 1 {
-		sort.Sort(v.sortedFormats)
+	if len(v.Streams) > 1 {
+		sort.Slice(
+			v.sortedStreams, func(i, j int) bool { return v.sortedStreams[i].Size > v.sortedStreams[j].Size },
+		)
 	}
 }
 
-func (v VideoData) printInfo(format string) {
+func (v Data) printInfo(stream string) {
 	cyan := color.New(color.FgCyan)
 	fmt.Println()
 	cyan.Printf(" Site:      ")
@@ -279,19 +282,19 @@ func (v VideoData) printInfo(format string) {
 	if config.InfoOnly {
 		cyan.Printf(" Streams:   ")
 		fmt.Println("# All available quality")
-		for _, data := range v.sortedFormats {
+		for _, data := range v.sortedStreams {
 			data.printStream()
 		}
 	} else {
 		cyan.Printf(" Stream:   ")
 		fmt.Println()
-		v.Formats[format].printStream()
+		v.Streams[stream].printStream()
 	}
 }
 
 // Download download urls
-func (v VideoData) Download(refer string) error {
-	v.genSortedFormats()
+func (v Data) Download(refer string) error {
+	v.genSortedStreams()
 	if config.ExtractedData {
 		jsonData, _ := json.MarshalIndent(v, "", "    ")
 		fmt.Printf("%s\n", jsonData)
@@ -299,23 +302,23 @@ func (v VideoData) Download(refer string) error {
 	}
 	var (
 		title  string
-		format string
+		stream string
 	)
 	if config.OutputName == "" {
 		title = v.Title
 	} else {
 		title = utils.FileName(config.OutputName)
 	}
-	if config.Format == "" {
-		format = v.sortedFormats[0].name
+	if config.Stream == "" {
+		stream = v.sortedStreams[0].name
 	} else {
-		format = config.Format
+		stream = config.Stream
 	}
-	data, ok := v.Formats[format]
+	data, ok := v.Streams[stream]
 	if !ok {
-		return fmt.Errorf("no format named %s", format)
+		return fmt.Errorf("no stream named %s", stream)
 	}
-	v.printInfo(format) // if InfoOnly, this func will print all formats info
+	v.printInfo(stream) // if InfoOnly, this func will print all streams info
 	if config.InfoOnly {
 		return nil
 	}
@@ -392,7 +395,7 @@ func (v VideoData) Download(refer string) error {
 		parts[index] = partFilePath
 
 		wgp.Add()
-		go func(url URLData, refer, fileName string, bar *pb.ProgressBar) {
+		go func(url URL, refer, fileName string, bar *pb.ProgressBar) {
 			defer wgp.Done()
 			err := Save(url, refer, fileName, bar)
 			if err != nil {

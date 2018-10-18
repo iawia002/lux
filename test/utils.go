@@ -23,14 +23,14 @@ func CheckData(args, data Args) bool {
 }
 
 // Check check the result
-func Check(t *testing.T, args Args, data downloader.VideoData) {
-	// get the default format
-	sortedFormats := make([]downloader.FormatData, len(data.Formats))
-	for _, data := range data.Formats {
-		sortedFormats = append(sortedFormats, data)
+func Check(t *testing.T, args Args, data downloader.Data) {
+	// get the default stream
+	sortedStreams := make([]downloader.Stream, len(data.Streams))
+	for _, data := range data.Streams {
+		sortedStreams = append(sortedStreams, data)
 	}
-	sort.Slice(sortedFormats, func(i, j int) bool { return sortedFormats[i].Size > sortedFormats[j].Size })
-	defaultData := sortedFormats[0]
+	sort.Slice(sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size })
+	defaultData := sortedStreams[0]
 
 	temp := Args{
 		Title:   data.Title,

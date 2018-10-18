@@ -7,7 +7,7 @@ import (
 )
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return downloader.EmptyData, err
@@ -16,19 +16,19 @@ func Download(url string) ([]downloader.VideoData, error) {
 	if err != nil {
 		return downloader.EmptyData, err
 	}
-	format := map[string]downloader.FormatData{
+	streams := map[string]downloader.Stream{
 		"default": {
 			URLs: urls,
 			Size: 0,
 		},
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "pixivision pixivision.net",
 			Title:   title,
 			Type:    "image",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

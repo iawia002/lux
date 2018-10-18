@@ -23,15 +23,15 @@ func GetDoc(html string) (*goquery.Document, error) {
 // GetImages find the img with a given class name
 func GetImages(
 	url, html, imgClass string, urlHandler func(string) string,
-) (string, []downloader.URLData, error) {
+) (string, []downloader.URL, error) {
 	var err error
 	doc, err := GetDoc(html)
 	if err != nil {
 		return "", nil, err
 	}
 	title := Title(doc)
-	urls := []downloader.URLData{}
-	urlData := downloader.URLData{}
+	urls := []downloader.URL{}
+	urlData := downloader.URL{}
 	doc.Find(fmt.Sprintf("img[class=\"%s\"]", imgClass)).Each(
 		func(i int, s *goquery.Selection) {
 			urlData.URL, _ = s.Attr("src")

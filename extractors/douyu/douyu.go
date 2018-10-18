@@ -48,7 +48,7 @@ func douyuM3u8(url string) ([]douyuURLInfo, int64, error) {
 }
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	var err error
 	liveVid := utils.MatchOneOf(url, `https?://www.douyu.com/(\S+)`)
 	if liveVid != nil {
@@ -73,27 +73,27 @@ func Download(url string) ([]downloader.VideoData, error) {
 	if err != nil {
 		return downloader.EmptyData, err
 	}
-	urls := make([]downloader.URLData, len(m3u8URLs))
+	urls := make([]downloader.URL, len(m3u8URLs))
 	for index, u := range m3u8URLs {
-		urls[index] = downloader.URLData{
+		urls[index] = downloader.URL{
 			URL:  u.URL,
 			Size: u.Size,
 			Ext:  "ts",
 		}
 	}
 
-	format := map[string]downloader.FormatData{
+	streams := map[string]downloader.Stream{
 		"default": {
 			URLs: urls,
 			Size: totalSize,
 		},
 	}
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "斗鱼 douyu.com",
 			Title:   title,
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }

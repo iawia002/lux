@@ -9,7 +9,7 @@ import (
 )
 
 // Download main download function
-func Download(url string) ([]downloader.VideoData, error) {
+func Download(url string) ([]downloader.Data, error) {
 	if !strings.Contains(url, "m.weibo.cn") {
 		statusID := utils.MatchOneOf(url, `weibo\.com/tv/v/([^\?/]+)`)
 		if statusID != nil {
@@ -32,24 +32,24 @@ func Download(url string) ([]downloader.VideoData, error) {
 	if err != nil {
 		return downloader.EmptyData, err
 	}
-	urlData := downloader.URLData{
+	urlData := downloader.URL{
 		URL:  realURL,
 		Size: size,
 		Ext:  "mp4",
 	}
-	format := map[string]downloader.FormatData{
+	streams := map[string]downloader.Stream{
 		"default": {
-			URLs: []downloader.URLData{urlData},
+			URLs: []downloader.URL{urlData},
 			Size: size,
 		},
 	}
 
-	return []downloader.VideoData{
+	return []downloader.Data{
 		{
 			Site:    "微博 weibo.com",
 			Title:   utils.FileName(title),
 			Type:    "video",
-			Formats: format,
+			Streams: streams,
 		},
 	}, nil
 }
