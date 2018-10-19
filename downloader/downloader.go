@@ -53,10 +53,20 @@ type Data struct {
 	// It is used to record the error information corresponding to each url when extracting the list data.
 	// NOTE(iawia002): err is only used in Data list
 	Err error `json:"-"`
+	// URL is used to record the address of this download
+	URL string `json:"url"`
 }
 
-// EmptyData empty Data list
-var EmptyData = make([]Data, 0)
+// EmptyList empty Data list
+var EmptyList = make([]Data, 0)
+
+// EmptyData returns an "empty" Data object with the given URL and error
+func EmptyData(url string, err error) Data {
+	return Data{
+		URL: url,
+		Err: err,
+	}
+}
 
 // Aria2RPCData json RPC 2.0 for Aria2
 type Aria2RPCData struct {
@@ -270,7 +280,7 @@ func (v *Data) genSortedStreams() {
 	}
 }
 
-func (v Data) printInfo(stream string) {
+func (v *Data) printInfo(stream string) {
 	cyan := color.New(color.FgCyan)
 	fmt.Println()
 	cyan.Printf(" Site:      ")
@@ -293,7 +303,7 @@ func (v Data) printInfo(stream string) {
 }
 
 // Download download urls
-func (v Data) Download(refer string) error {
+func (v *Data) Download(refer string) error {
 	v.genSortedStreams()
 	if config.ExtractedData {
 		jsonData, _ := json.MarshalIndent(v, "", "    ")

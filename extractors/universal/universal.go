@@ -15,11 +15,11 @@ func Download(url string) ([]downloader.Data, error) {
 
 	filename, ext, err := utils.GetNameAndExt(url)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	size, err := request.Size(url, url)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	urlData := downloader.URL{
 		URL:  url,
@@ -34,7 +34,7 @@ func Download(url string) ([]downloader.Data, error) {
 	}
 	contentType, err := request.ContentType(url, url)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 
 	return []downloader.Data{
@@ -43,6 +43,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   utils.FileName(filename),
 			Type:    contentType,
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }

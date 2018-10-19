@@ -139,7 +139,7 @@ func Download(url string) ([]downloader.Data, error) {
 	if len(vid) != 11 {
 		u, err := request.Get(url, url, nil)
 		if err != nil {
-			return downloader.EmptyData, err
+			return downloader.EmptyList, err
 		}
 		vid = utils.MatchOneOf(
 			u, `vid=(\w+)`, `vid:\s*["'](\w+)`, `vid\s*=\s*["']\s*(\w+)`,
@@ -152,19 +152,19 @@ func Download(url string) ([]downloader.Data, error) {
 		), url, nil,
 	)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	jsonString := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)[1]
 	var data qqVideoInfo
 	json.Unmarshal([]byte(jsonString), &data)
 	// API request error
 	if data.Msg != "" {
-		return downloader.EmptyData, errors.New(data.Msg)
+		return downloader.EmptyList, errors.New(data.Msg)
 	}
 	cdn := data.Vl.Vi[0].Ul.UI[len(data.Vl.Vi[0].Ul.UI)-1].URL
 	streams, err := genStreams(vid, cdn, data)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 
 	return []downloader.Data{
@@ -173,6 +173,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   utils.FileName(data.Vl.Vi[0].Ti),
 			Type:    "video",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }

@@ -10,11 +10,11 @@ import (
 func Download(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	title, urls, err := parser.GetImages(url, html, "am__work__illust  ", nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	streams := map[string]downloader.Stream{
 		"default": {
@@ -29,6 +29,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   title,
 			Type:    "image",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }

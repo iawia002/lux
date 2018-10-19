@@ -33,12 +33,12 @@ type instagram struct {
 func Download(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	// get the title
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	title := parser.Title(doc)
 
@@ -56,7 +56,7 @@ func Download(url string) ([]downloader.Data, error) {
 		realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.VideoURL
 		size, err = request.Size(realURL, url)
 		if err != nil {
-			return downloader.EmptyData, err
+			return downloader.EmptyList, err
 		}
 		streams["default"] = downloader.Stream{
 			URLs: []downloader.URL{
@@ -76,7 +76,7 @@ func Download(url string) ([]downloader.Data, error) {
 			realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.DisplayURL
 			size, err = request.Size(realURL, url)
 			if err != nil {
-				return downloader.EmptyData, err
+				return downloader.EmptyList, err
 			}
 			streams["default"] = downloader.Stream{
 				URLs: []downloader.URL{
@@ -96,7 +96,7 @@ func Download(url string) ([]downloader.Data, error) {
 				realURL = u.Node.DisplayURL
 				size, err = request.Size(realURL, url)
 				if err != nil {
-					return downloader.EmptyData, err
+					return downloader.EmptyList, err
 				}
 				urlData := downloader.URL{
 					URL:  realURL,
@@ -119,6 +119,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   utils.FileName(title),
 			Type:    dataType,
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }

@@ -20,7 +20,7 @@ func Download(url string) ([]downloader.Data, error) {
 	}
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	title := utils.MatchOneOf(
 		html, `"content2": "(.+?)",`, `"status_title": "(.+?)",`,
@@ -30,7 +30,7 @@ func Download(url string) ([]downloader.Data, error) {
 	)[1]
 	size, err := request.Size(realURL, url)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	urlData := downloader.URL{
 		URL:  realURL,
@@ -50,6 +50,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   utils.FileName(title),
 			Type:    "video",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }

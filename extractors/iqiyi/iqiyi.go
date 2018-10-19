@@ -56,7 +56,7 @@ func getIqiyiData(tvid, vid string) (iqiyi, error) {
 func Download(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, iqiyiReferer, nil)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	tvid := utils.MatchOneOf(
 		url,
@@ -86,7 +86,7 @@ func Download(url string) ([]downloader.Data, error) {
 	}
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	title := strings.TrimSpace(doc.Find("h1>a").First().Text())
 	var sub string
@@ -102,10 +102,10 @@ func Download(url string) ([]downloader.Data, error) {
 	}
 	videoDatas, err := getIqiyiData(tvid[1], vid[1])
 	if err != nil {
-		return downloader.EmptyData, err
+		return downloader.EmptyList, err
 	}
 	if videoDatas.Code != "A00000" {
-		return downloader.EmptyData, errors.New("can't play this video")
+		return downloader.EmptyList, errors.New("can't play this video")
 	}
 	streams := map[string]downloader.Stream{}
 	var size, totalSize int64
@@ -117,7 +117,7 @@ func Download(url string) ([]downloader.Data, error) {
 		totalSize = 0
 		m3u8URLs, err := utils.M3u8URLs(video.M3utx)
 		if err != nil {
-			return downloader.EmptyData, err
+			return downloader.EmptyList, err
 		}
 		urls := make([]downloader.URL, len(m3u8URLs))
 		for index, ts := range m3u8URLs {
@@ -145,6 +145,7 @@ func Download(url string) ([]downloader.Data, error) {
 			Title:   utils.FileName(title),
 			Type:    "video",
 			Streams: streams,
+			URL:     url,
 		},
 	}, nil
 }
