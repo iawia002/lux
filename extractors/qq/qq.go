@@ -170,7 +170,7 @@ func Download(url string) ([]downloader.Data, error) {
 	return []downloader.Data{
 		{
 			Site:    "腾讯视频 v.qq.com",
-			Title:   utils.FileName(data.Vl.Vi[0].Ti),
+			Title:   data.Vl.Vi[0].Ti,
 			Type:    "video",
 			Streams: streams,
 			URL:     url,

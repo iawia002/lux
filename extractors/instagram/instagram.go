@@ -116,7 +116,7 @@ func Download(url string) ([]downloader.Data, error) {
 	return []downloader.Data{
 		{
 			Site:    "Instagram instagram.com",
-			Title:   utils.FileName(title),
+			Title:   title,
 			Type:    dataType,
 			Streams: streams,
 			URL:     url,

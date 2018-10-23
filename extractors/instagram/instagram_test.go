@@ -17,7 +17,7 @@ func TestDownload(t *testing.T) {
 			name: "video test",
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/BlIka1ZFCNr",
-				Title: "P!NK on Instagram：“AFL got us hyped! #adelaideadventures #iwanttoplay”",
+				Title: "P!NK on Instagram: “AFL got us hyped! #adelaideadventures #iwanttoplay”",
 				Size:  2741413,
 			},
 		},
@@ -25,7 +25,7 @@ func TestDownload(t *testing.T) {
 			name: "image test",
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/Bl5oVUyl9Yx",
-				Title: "P!NK on Instagram：“Australia：heaven”",
+				Title: "P!NK on Instagram: “Australia:heaven”",
 				Size:  250596,
 			},
 		},
@@ -33,7 +33,7 @@ func TestDownload(t *testing.T) {
 			name: "image album test",
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/Bjyr-gxF4Rb",
-				Title: "P!NK on Instagram：“Nature. Nurture. Kiddos. Gratitude”",
+				Title: "P!NK on Instagram: “Nature. Nurture.\nKiddos. Gratitude”",
 				Size:  4599909,
 			},
 		},

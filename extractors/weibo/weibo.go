@@ -47,7 +47,7 @@ func Download(url string) ([]downloader.Data, error) {
 	return []downloader.Data{
 		{
 			Site:    "微博 weibo.com",
-			Title:   utils.FileName(title),
+			Title:   title,
 			Type:    "video",
 			Streams: streams,
 			URL:     url,

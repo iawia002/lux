@@ -40,7 +40,7 @@ func Download(url string) ([]downloader.Data, error) {
 	return []downloader.Data{
 		{
 			Site:    "Universal",
-			Title:   utils.FileName(filename),
+			Title:   filename,
 			Type:    contentType,
 			Streams: streams,
 			URL:     url,

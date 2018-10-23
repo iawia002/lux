@@ -24,7 +24,7 @@ func TestDownload(t *testing.T) {
 			name: "image test 2",
 			args: test.Args{
 				URL:   "http://therealautoblog.tumblr.com/post/171623222197/paganis-new-projects-huayra-successor-with",
-				Title: "Autoblog • Pagani’s new projects：Huayra successor with...",
+				Title: "Autoblog • Pagani’s new projects: Huayra successor with...",
 			},
 		},
 		{

@@ -19,7 +19,7 @@ func TestDownload(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:     "http://v.youku.com/v_show/id_XMzUzMjE3NDczNg==.html",
-				Title:   "车事儿：智能汽车已经不在遥远 东风风光iX5发布",
+				Title:   "车事儿: 智能汽车已经不在遥远 东风风光iX5发布",
 				Size:    22692900,
 				Quality: "mp4hd2v2 1280x720",
 			},

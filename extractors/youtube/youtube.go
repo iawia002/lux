@@ -147,7 +147,7 @@ func youtubeDownload(uri string) downloader.Data {
 
 	return downloader.Data{
 		Site:    "YouTube youtube.com",
-		Title:   utils.FileName(title),
+		Title:   title,
 		Type:    "video",
 		Streams: streams,
 		URL:     uri,

@@ -221,7 +221,7 @@ func Download(url string) ([]downloader.Data, error) {
 	return []downloader.Data{
 		{
 			Site:    "优酷 youku.com",
-			Title:   utils.FileName(title),
+			Title:   title,
 			Type:    "video",
 			Streams: streams,
 			URL:     url,
