@@ -29,7 +29,7 @@ func TestYoutube(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:     "https://youtu.be/z8eFzkfto2w",
-				Title:   "Circle Of Love - Rudy Mancuso",
+				Title:   "Circle Of Love | Rudy Mancuso",
 				Size:    32970861,
 				Quality: `1080p video/webm; codecs="vp9"`,
 			},
@@ -38,7 +38,7 @@ func TestYoutube(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:     "https://www.youtube.com/watch?v=ASPku-eAZYs",
-				Title:   "怪獸與葛林戴華德的罪行 - HD首版電影預告大首播 (Fantastic Beasts：The Crimes of Grindelwald)",
+				Title:   "怪獸與葛林戴華德的罪行 | HD首版電影預告大首播 (Fantastic Beasts: The Crimes of Grindelwald)",
 				Size:    51086673,
 				Quality: `1080p60 video/mp4; codecs="avc1.64002a"`,
 			},

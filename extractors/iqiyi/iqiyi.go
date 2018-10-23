@@ -142,7 +142,7 @@ func Download(url string) ([]downloader.Data, error) {
 	return []downloader.Data{
 		{
 			Site:    "爱奇艺 iqiyi.com",
-			Title:   utils.FileName(title),
+			Title:   title,
 			Type:    "video",
 			Streams: streams,
 			URL:     url,

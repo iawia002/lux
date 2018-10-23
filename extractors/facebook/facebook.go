@@ -41,7 +41,7 @@ func Download(url string) ([]downloader.Data, error) {
 	return []downloader.Data{
 		{
 			Site:    "Facebook facebook.com",
-			Title:   utils.FileName(title),
+			Title:   title,
 			Type:    "video",
 			Streams: streams,
 			URL:     url,

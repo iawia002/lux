@@ -113,7 +113,7 @@ func Caption(url, refer, fileName, ext string) error {
 	if err != nil {
 		return err
 	}
-	filePath, err := utils.FilePath(fileName, ext, false)
+	filePath, err := utils.FilePath(fileName, ext, true)
 	if err != nil {
 		return err
 	}
@@ -315,7 +315,7 @@ func (v *Data) Download(refer string) error {
 		stream string
 	)
 	if config.OutputName == "" {
-		title = v.Title
+		title = utils.FileName(v.Title)
 	} else {
 		title = utils.FileName(config.OutputName)
 	}

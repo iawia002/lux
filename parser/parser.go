@@ -30,7 +30,7 @@ func GetImages(
 		return "", nil, err
 	}
 	title := Title(doc)
-	urls := []downloader.URL{}
+	urls := make([]downloader.URL, 0)
 	urlData := downloader.URL{}
 	doc.Find(fmt.Sprintf("img[class=\"%s\"]", imgClass)).Each(
 		func(i int, s *goquery.Selection) {
@@ -69,5 +69,5 @@ func Title(doc *goquery.Document) string {
 	if title == "" {
 		title = doc.Find("title").Text()
 	}
-	return utils.FileName(title)
+	return title
 }

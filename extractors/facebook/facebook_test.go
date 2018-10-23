@@ -25,7 +25,7 @@ func TestDownload(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:     "https://www.facebook.com/groups/314070194112/permalink/10155168902769113/",
-				Title:   "Ukrainian Scientists Worldwide Public Group - Facebook",
+				Title:   "Ukrainian Scientists Worldwide Public Group | Facebook",
 				Size:    336975453,
 				Quality: "hd",
 			},

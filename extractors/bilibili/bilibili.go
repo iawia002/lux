@@ -295,7 +295,6 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.Data {
 		}
 		title = tempTitle
 	}
-	title = utils.FileName(title)
 
 	downloader.Caption(
 		fmt.Sprintf("https://comment.bilibili.com/%s.xml", cid),

@@ -17,14 +17,14 @@ func TestDownload(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:   "https://bcy.net/illust/detail/38134/2048276",
-				Title: "牛奶小姐姐，草莓味的w - 半次元-二次元爱好者社区",
+				Title: "牛奶小姐姐，草莓味的w | 半次元-二次元爱好者社区",
 			},
 		},
 		{
 			name: "normal test",
 			args: test.Args{
 				URL:   "https://bcy.net/coser/detail/143767/2094010",
-				Title: "phx：柠檬先行预告！牧濑红莉栖 cn：三度 - 半次元-二次元爱好者社区",
+				Title: "phx：柠檬先行预告！牧濑红莉栖 cn: 三度 | 半次元-二次元爱好者社区",
 			},
 		},
 	}
