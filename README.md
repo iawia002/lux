@@ -595,6 +595,9 @@ Check out the [Contributing Guide](./CONTRIBUTING.md) to get started.
 
 Special thanks to [@Yasujizr](https://github.com/Yasujizr) who designed the amazing logo!
 
+Thanks for [JetBrains](https://www.jetbrains.com/?from=annie) for the wonderful IDE.
+
+<img src="static/jetbrains-variant-3.svg" />
 
 ## Authors
 
