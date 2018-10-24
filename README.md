@@ -597,7 +597,7 @@ Special thanks to [@Yasujizr](https://github.com/Yasujizr) who designed the amaz
 
 Thanks for [JetBrains](https://www.jetbrains.com/?from=annie) for the wonderful IDE.
 
-<img src="static/jetbrains-variant-3.svg" />
+<a href="https://www.jetbrains.com/?from=annie"><img src="static/jetbrains-variant-3.svg" /></a>
 
 ## Authors
 
