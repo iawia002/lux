@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 
@@ -173,10 +174,11 @@ func main() {
 		defer file.Close()
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
-			if scanner.Text() == "" {
+			universalURL := strings.TrimSpace(scanner.Text())
+			if universalURL == "" {
 				continue
 			}
-			args = append(args, scanner.Text())
+			args = append(args, universalURL)
 		}
 	}
 	if len(args) < 1 {
@@ -199,6 +201,6 @@ func main() {
 		}
 	}
 	for _, videoURL := range args {
-		download(videoURL)
+		download(strings.TrimSpace(videoURL))
 	}
 }
