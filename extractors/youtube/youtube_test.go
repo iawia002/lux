@@ -30,7 +30,7 @@ func TestYoutube(t *testing.T) {
 			args: test.Args{
 				URL:     "https://youtu.be/z8eFzkfto2w",
 				Title:   "Circle Of Love | Rudy Mancuso",
-				Size:    32970861,
+				Size:    33060990,
 				Quality: `1080p video/webm; codecs="vp9"`,
 			},
 		},
