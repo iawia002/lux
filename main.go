@@ -174,11 +174,11 @@ func main() {
 		defer file.Close()
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
-			universal_url := strings.TrimSpace(scanner.Text())
-			if universal_url == "" {
+			universalURL := strings.TrimSpace(scanner.Text())
+			if universalURL == "" {
 				continue
 			}
-			args = append(args, universal_url)
+			args = append(args, universalURL)
 		}
 	}
 	if len(args) < 1 {
