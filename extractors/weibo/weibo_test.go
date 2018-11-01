@@ -46,6 +46,15 @@ func TestDownload(t *testing.T) {
 				Size:  9198410,
 			},
 		},
+		{
+			name: "weibo.com/tv test",
+			args: test.Args{
+				URL:     "https://weibo.com/tv/v/jGz6llNZ1?fid=1034:4298353237002268",
+				Title:   "做了这么一个屌炸天的视频我也不知道起什么标题好 @DRock-Art @毒液-致命守护者 @漫威影业 #绘画# #blender# #漫威#",
+				Quality: "720",
+				Size:    7520929,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
