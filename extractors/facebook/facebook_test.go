@@ -17,7 +17,7 @@ func TestDownload(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:     "https://www.facebook.com/JackyardsCovers/videos/vb.267832806658747/1215502888558396/",
-				Title:   "Jackyards - Great video, beautifully shot down Bournemouth...",
+				Title:   "Great video, beautifully shot down... - Jackyards Seat Covers",
 				Quality: "hd",
 			},
 		},

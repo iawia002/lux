@@ -22,6 +22,7 @@ import (
 	"github.com/iawia002/annie/extractors/iqiyi"
 	"github.com/iawia002/annie/extractors/mgtv"
 	"github.com/iawia002/annie/extractors/miaopai"
+	"github.com/iawia002/annie/extractors/netease"
 	"github.com/iawia002/annie/extractors/pixivision"
 	"github.com/iawia002/annie/extractors/qq"
 	"github.com/iawia002/annie/extractors/tumblr"
@@ -124,6 +125,8 @@ func download(videoURL string) {
 		data, err = douyu.Download(videoURL)
 	case "miaopai":
 		data, err = miaopai.Download(videoURL)
+	case "163":
+		data, err = netease.Download(videoURL)
 	case "weibo":
 		data, err = weibo.Download(videoURL)
 	case "instagram":
