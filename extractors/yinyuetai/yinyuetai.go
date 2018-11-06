@@ -9,7 +9,7 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
-const yinyuetaiAPI = "http://ext.yinyuetai.com/main/"
+const yinyuetaiAPI = "https://ext.yinyuetai.com/main/"
 
 const (
 	actionGetMvInfo = "get-h-mv-info"
