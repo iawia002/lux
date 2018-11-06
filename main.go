@@ -30,6 +30,7 @@ import (
 	"github.com/iawia002/annie/extractors/universal"
 	"github.com/iawia002/annie/extractors/vimeo"
 	"github.com/iawia002/annie/extractors/weibo"
+	"github.com/iawia002/annie/extractors/yinyuetai"
 	"github.com/iawia002/annie/extractors/youku"
 	"github.com/iawia002/annie/extractors/youtube"
 	"github.com/iawia002/annie/utils"
@@ -135,6 +136,8 @@ func download(videoURL string) {
 		data, err = twitter.Download(videoURL)
 	case "qq":
 		data, err = qq.Download(videoURL)
+	case "yinyuetai":
+		data, err = yinyuetai.Download(videoURL)
 	default:
 		data, err = universal.Download(videoURL)
 	}
