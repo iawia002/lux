@@ -43,10 +43,10 @@ func TestDownload(t *testing.T) {
 		{
 			name: "normal test special",
 			args: test.Args{
-				URL:     "http://v.yinyuetai.com/video/3164150?vid=3164151",
-				Title:   "Lemon",
-				Size:    15993202,
-				Quality: "流畅",
+				URL:     "http://v.yinyuetai.com/video/3310345?vid=3310345",
+				Title:   "周杰伦 - 七里香",
+				Size:    118380541,
+				Quality: "超清",
 			},
 		},
 	}
