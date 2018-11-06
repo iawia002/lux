@@ -573,6 +573,7 @@ Facebook | <https://facebook.com> | ✓ | | | |
 Instagram | <https://www.instagram.com> | ✓ | ✓ | | |
 Twitter | <https://twitter.com> | ✓ | | | |
 腾讯视频 | <https://v.qq.com> | ✓ | | | |
+网易云音乐 | <https://music.163.com> | ✓ | | | |
 
 
 ## Known issues
