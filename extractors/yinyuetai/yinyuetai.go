@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -15,13 +16,14 @@ const (
 	actionGetMvInfo = "get-h-mv-info"
 )
 
-func genAPI(action string, param string) (string) {
+func genAPI(action string, param string) string {
 	return fmt.Sprintf("%s%s?json=true&%s", yinyuetaiAPI, action, param)
 }
 
 // Download main download function
 func Download(url string) ([]downloader.Data, error) {
-	vid := utils.MatchOneOf(url,
+	vid := utils.MatchOneOf(
+		url,
 		`https?://v.yinyuetai.com/video/(\d+)(?:\?vid=\d+)?`,
 		`https?://v.yinyuetai.com/video/h5/(\d+)(?:\?vid=\d+)?`,
 		`https?://m2.yinyuetai.com/video.html\?id=(\d+)`,
@@ -50,9 +52,9 @@ func Download(url string) ([]downloader.Data, error) {
 	title := data.VideoInfo.CoreVideoInfo.VideoName
 	streams := map[string]downloader.Stream{}
 	// set streams
-	for _, model := range data.VideoInfo.CoreVideoInfo.VideoUrlModels {
+	for _, model := range data.VideoInfo.CoreVideoInfo.VideoURLModels {
 		urlData := downloader.URL{
-			URL:  model.VideoUrl,
+			URL:  model.VideoURL,
 			Size: model.FileSize,
 			Ext:  "mp4",
 		}

@@ -15,12 +15,12 @@ type coreVideoInfo struct {
 	Duration       int             `json:"duration"`
 	Error          bool            `json:"error"`
 	ErrorMsg       string          `json:"errorMsg"`
-	VideoId        int             `json:"videoId"`
+	VideoID        int             `json:"videoID"`
 	VideoName      string          `json:"videoName"`
-	VideoUrlModels []videoUrlModel `json:"videoUrlModels"`
+	VideoURLModels []videoURLModel `json:"videoURLModels"`
 }
 
-type videoUrlModel struct {
+type videoURLModel struct {
 	Bitrate          int    `json:"bitrate"`
 	BitrateType      int    `json:"bitrateType"`
 	FileSize         int64  `json:"fileSize"`
@@ -28,5 +28,5 @@ type videoUrlModel struct {
 	SHA1             string `json:"sha1"`
 	QualityLevel     string `json:"qualityLevel"`
 	QualityLevelName string `json:"qualityLevelName"`
-	VideoUrl         string `json:"videoUrl"`
+	VideoURL         string `json:"videoURL"`
 }
