@@ -153,7 +153,7 @@ func download(videoURL string) {
 			printError(item.URL, item.Err)
 			continue
 		}
-		err = item.Download(videoURL)
+		err = downloader.Download(item, videoURL)
 		if err != nil {
 			printError(item.URL, err)
 		}

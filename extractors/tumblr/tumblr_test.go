@@ -28,13 +28,6 @@ func TestDownload(t *testing.T) {
 			},
 		},
 		{
-			name: "image test 3",
-			args: test.Args{
-				URL:   "https://outdoorspastelnature.tumblr.com/post/170380315768/feel-at-peace",
-				Title: "Pastel Nature",
-			},
-		},
-		{
 			name: "video test",
 			args: test.Args{
 				URL:   "https://boomgoestheprower.tumblr.com/post/174127507696",

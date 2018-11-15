@@ -91,7 +91,7 @@ func TestDownload(t *testing.T) {
 		},
 	}
 	for _, testCase := range testCases {
-		err := testCase.data.Download("")
+		err := Download(testCase.data, "")
 		if err != nil {
 			t.Error(err)
 		}
