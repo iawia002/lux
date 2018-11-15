@@ -21,7 +21,6 @@ func TestYoutube(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.youtube.com/watch?v=Gnbch2osEeo",
 				Title:   "Multifandom Mashup 2017",
-				Size:    60808458,
 				Quality: `720p video/mp4; codecs="avc1.4d401f"`,
 			},
 		},
@@ -39,7 +38,6 @@ func TestYoutube(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.youtube.com/watch?v=ASPku-eAZYs",
 				Title:   "怪獸與葛林戴華德的罪行 | HD首版電影預告大首播 (Fantastic Beasts: The Crimes of Grindelwald)",
-				Size:    51086673,
 				Quality: `1080p60 video/mp4; codecs="avc1.64002a"`,
 			},
 		},
