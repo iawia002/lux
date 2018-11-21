@@ -500,7 +500,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
   -x string
     	HTTP proxy
   -retry int
-    	How many times to retry when the download failed (default 100)
+    	How many times to retry when the download failed (default 10)
 ```
 
 #### Playlist:
@@ -534,6 +534,13 @@ $ annie -j https://www.bilibili.com/video/av20203945
 ```
   -ccode string
     	Youku ccode
+```
+
+#### YouTube
+
+```
+  -ytb-stream2
+    	Use data in url_encoded_fmt_stream_map
 ```
 
 #### aria2:

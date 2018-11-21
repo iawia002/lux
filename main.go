@@ -66,8 +66,9 @@ func init() {
 	flag.BoolVar(&config.Caption, "C", false, "Download captions")
 	flag.StringVar(&config.Ccode, "ccode", "0103010102", "Youku ccode")
 	flag.IntVar(
-		&config.RetryTimes, "retry", 100, "How many times to retry when the download failed",
+		&config.RetryTimes, "retry", 10, "How many times to retry when the download failed",
 	)
+	flag.BoolVar(&config.YouTubeStream2, "ytb-stream2", false, "Use data in url_encoded_fmt_stream_map")
 }
 
 func printError(url string, err error) {

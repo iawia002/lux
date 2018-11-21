@@ -155,9 +155,11 @@ func youtubeDownload(uri string) downloader.Data {
 }
 
 func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.Stream, error) {
-	youtubeStreams := strings.Split(data.Args.Stream, ",")
-	if data.Args.Stream == "" {
+	var youtubeStreams []string
+	if config.YouTubeStream2 || data.Args.Stream == "" {
 		youtubeStreams = strings.Split(data.Args.Stream2, ",")
+	} else {
+		youtubeStreams = strings.Split(data.Args.Stream, ",")
 	}
 	var ext string
 	var audio downloader.URL
@@ -193,7 +195,10 @@ func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.S
 		}
 		size, err := request.Size(realURL, referer)
 		if err != nil {
-			return nil, err
+			// some stream of the video will return a 404 error,
+			// I don't know if it is a problem with the signature algorithm.
+			// https://github.com/iawia002/annie/issues/322
+			continue
 		}
 		urlData := downloader.URL{
 			URL:  realURL,
