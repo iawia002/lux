@@ -15,6 +15,7 @@ func TestYoutube(t *testing.T) {
 		name     string
 		args     test.Args
 		playlist bool
+		stream2  bool
 	}{
 		{
 			name: "normal test",
@@ -60,6 +61,23 @@ func TestYoutube(t *testing.T) {
 				Quality: `hd720 video/mp4; codecs="avc1.64001F, mp4a.40.2"`,
 			},
 		},
+		{
+			name: "stream 404 test 1",
+			args: test.Args{
+				URL:     "https://www.youtube.com/watch?v=MRJ8NnUXacY",
+				Title:   "FreeFileSync: Mirror Synchronization",
+				Quality: `1080p60 video/mp4; codecs="avc1.64002a"`,
+			},
+		},
+		{
+			name: "stream 404 test 2",
+			args: test.Args{
+				URL:     "https://www.youtube.com/watch?v=MRJ8NnUXacY",
+				Title:   "FreeFileSync: Mirror Synchronization",
+				Quality: `hd720 video/mp4; codecs="avc1.64001F, mp4a.40.2"`,
+			},
+			stream2: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -67,6 +85,11 @@ func TestYoutube(t *testing.T) {
 				data []downloader.Data
 				err  error
 			)
+			if tt.stream2 {
+				config.YouTubeStream2 = true
+			} else {
+				config.YouTubeStream2 = false
+			}
 			if tt.playlist {
 				// playlist mode
 				config.Playlist = true
