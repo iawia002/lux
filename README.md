@@ -99,18 +99,18 @@ annie [OPTIONS] URL [URL...]
 ### Download a video
 
 ```console
-$ annie https://youtu.be/Gnbch2osEeo
+$ annie https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
  Site:      YouTube youtube.com
- Title:     Multifandom Mashup 2017
+ Title:     Rick Astley - Never Gonna Give You Up (Video)
  Type:      video
- Stream:
-     [default]  -------------------
-     Quality:         hd720
-     Size:            57.97 MiB (60785404 Bytes)
-     # download with: annie -f default "URL"
+ Stream:   
+     [248]  -------------------
+     Quality:         1080p video/webm; codecs="vp9"
+     Size:            63.93 MiB (67038963 Bytes)
+     # download with: annie -f 248 ...
 
- 11.93 MiB / 57.97 MiB [======>-------------------------]  20.57% 19.03 MiB/s 2s
+ 41.88 MiB / 63.93 MiB [=================>-------------]  65.51% 4.22 MiB/s 00m05s
 ```
 
 > Note: wrap the URL in quotation marks if it contains special characters. (thanks @tonyxyl for pointing this out)
@@ -120,36 +120,36 @@ $ annie https://youtu.be/Gnbch2osEeo
 The `-i` option displays all available quality of video without downloading.
 
 ```console
-$ annie -i https://youtu.be/Gnbch2osEeo
+$ annie -i https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
  Site:      YouTube youtube.com
- Title:     Multifandom Mashup 2017
+ Title:     Rick Astley - Never Gonna Give You Up (Video)
  Type:      video
  Streams:   # All available quality
-     [43]  -------------------
-     Quality:         medium
-     Size:            31.95 MiB (33505824 Bytes)
-     # download with: annie -f 43 "URL"
+     [248]  -------------------
+     Quality:         1080p video/webm; codecs="vp9"
+     Size:            49.29 MiB (51687554 Bytes)
+     # download with: annie -f 248 ...
 
-     [18]  -------------------
-     Quality:         medium
-     Size:            24.81 MiB (26011062 Bytes)
-     # download with: annie -f 18 "URL"
+     [137]  -------------------
+     Quality:         1080p video/mp4; codecs="avc1.640028"
+     Size:            43.45 MiB (45564306 Bytes)
+     # download with: annie -f 137 ...
 
-     [36]  -------------------
-     Quality:         small
-     Size:            8.67 MiB (9088579 Bytes)
-     # download with: annie -f 36 "URL"
+     [398]  -------------------
+     Quality:         720p video/mp4; codecs="av01.0.05M.08"
+     Size:            37.12 MiB (38926432 Bytes)
+     # download with: annie -f 398 ...
 
-     [17]  -------------------
-     Quality:         small
-     Size:            3.10 MiB (3248257 Bytes)
-     # download with: annie -f 17 "URL"
+     [136]  -------------------
+     Quality:         720p video/mp4; codecs="avc1.4d401f"
+     Size:            31.34 MiB (32867324 Bytes)
+     # download with: annie -f 136 ...
 
-     [default]  -------------------
-     Quality:         hd720
-     Size:            57.97 MiB (60785404 Bytes)
-     # download with: annie -f default "URL"
+     [247]  -------------------
+     Quality:         720p video/webm; codecs="vp9"
+     Size:            31.03 MiB (32536181 Bytes)
+     # download with: annie -f 247 ...
 ```
 
 Use `annie -f stream "URL"` to download a specific stream listed in the output of `-i` option.
