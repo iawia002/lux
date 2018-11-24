@@ -13,7 +13,7 @@ import (
 // Download main download function
 func Download(url string) ([]downloader.Data, error) {
 	url = strings.Replace(url, "/#/", "/", 1)
-	vid := utils.MatchOneOf(url, `https?://music.163.com/mv\?id=(\d+)`)
+	vid := utils.MatchOneOf(url, `/(mv|video)\?id=(\w+)`)
 	if vid == nil {
 		return downloader.EmptyList, errors.New("invalid url for netease music")
 	}
