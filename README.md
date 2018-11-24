@@ -87,6 +87,11 @@ For Void linux users, you can install `annie` via:
 $ xbps-install -S annie
 ```
 
+### [Scoop](https://scoop.sh/) on Windows
+
+```sh
+$ scoop install annie
+```
 
 ## Getting Started
 
