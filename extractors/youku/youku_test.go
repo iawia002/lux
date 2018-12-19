@@ -28,7 +28,7 @@ func TestDownload(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:     "http://v.youku.com/v_show/id_XMzQ1MTAzNjQwNA==.html",
-				Title:   "这！就是街舞 第一季 第3期：百强“互杀”队长不忍直视",
+				Title:   "这！就是街舞 第一季 百强“互杀”队长不忍直视，黄子韬组内上演街舞“世纪大战”",
 				Size:    750911635,
 				Quality: "mp4hd2v2 1280x720 国语",
 			},

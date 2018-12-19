@@ -41,15 +41,6 @@ func TestDownload(t *testing.T) {
 				Quality: "1920x800",
 			},
 		},
-		{
-			name: "normal test 2",
-			args: test.Args{
-				URL:     "https://www.iqiyi.com/v_19rrb5h8kw.html",
-				Title:   "熊出没 奇幻空间 :第1集 熊出没 奇幻空间",
-				Size:    1729583441,
-				Quality: "1920x800",
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
