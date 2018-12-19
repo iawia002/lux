@@ -19,7 +19,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/v_19rrbdmaj0.html",
 				Title:   "新一轮降水将至 冷空气影响中东部地区",
-				Size:    3122304,
+				Size:    2952228,
 				Quality: "896x504",
 			},
 		},
@@ -28,8 +28,8 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/v_19rqy2z83w.html",
 				Title:   "收了创意视频2018：58天环球飞行记",
-				Size:    41235168,
-				Quality: "1280x720",
+				Size:    76186786,
+				Quality: "1920x1080",
 			},
 		},
 		{
@@ -37,8 +37,17 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.iqiyi.com/v_19rro0jdls.html#curid=350289100_6e6601aae889d0b1004586a52027c321",
 				Title:   "Shawn Mendes - Never Be Alone",
-				Size:    41084204,
-				Quality: "1280x528",
+				Size:    79921894,
+				Quality: "1920x800",
+			},
+		},
+		{
+			name: "normal test 2",
+			args: test.Args{
+				URL:     "https://www.iqiyi.com/v_19rrb5h8kw.html",
+				Title:   "熊出没 奇幻空间 :第1集 熊出没 奇幻空间",
+				Size:    1729583441,
+				Quality: "1920x800",
 			},
 		},
 	}
