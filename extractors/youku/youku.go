@@ -98,14 +98,13 @@ func youkuUps(vid string) (youkuData, error) {
 	}
 	// https://g.alicdn.com/player/ykplayer/0.5.61/youku-player.min.js
 	// grep -oE '"[0-9a-zA-Z+/=]{256}"' youku-player.min.js
-	ckey := "7B19C0AB12633B22E7FE81271162026020570708D6CC189E4924503C49D243A0DE6CD84A766832C2C99898FC5ED31F3709BB3CDD82C96492E721BDD381735026"
-	for _, ccode := range []string{config.Ccode} {
+	for _, ccode := range []string{config.YoukuCcode} {
 		if ccode == "0103010102" {
 			utid = generateUtdid()
 		}
 		url = fmt.Sprintf(
 			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s&ckey=%s",
-			vid, ccode, time.Now().Unix()/1000, netURL.QueryEscape(utid), netURL.QueryEscape(ckey),
+			vid, ccode, time.Now().Unix()/1000, netURL.QueryEscape(utid), netURL.QueryEscape(config.YoukuCkey),
 		)
 		html, err = request.Get(url, youkuReferer, nil)
 		if err != nil {

@@ -10,7 +10,7 @@ import (
 func TestDownload(t *testing.T) {
 	config.InfoOnly = true
 	config.RetryTimes = 100
-	config.Ccode = "0590"
+	config.YoukuCcode = "0590"
 	tests := []struct {
 		name string
 		args test.Args
