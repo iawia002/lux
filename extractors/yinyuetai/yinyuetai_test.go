@@ -14,38 +14,11 @@ func TestDownload(t *testing.T) {
 		args test.Args
 	}{
 		{
-			name: "normal test",
-			args: test.Args{
-				URL:     "http://v.yinyuetai.com/video/3310345",
-				Title:   "周杰伦 - 七里香",
-				Size:    118380541,
-				Quality: "超清",
-			},
-		},
-		{
 			name: "h5 test",
 			args: test.Args{
 				URL:     "http://v.yinyuetai.com/video/h5/820981",
 				Title:   "Rap God",
 				Size:    144401919,
-				Quality: "超清",
-			},
-		},
-		{
-			name: "mobile test",
-			args: test.Args{
-				URL:     "http://m2.yinyuetai.com/video.html?id=3310363",
-				Title:   "周杰伦 - 等你下课",
-				Size:    105821486,
-				Quality: "超清",
-			},
-		},
-		{
-			name: "normal test special",
-			args: test.Args{
-				URL:     "http://v.yinyuetai.com/video/3310345?vid=3310345",
-				Title:   "周杰伦 - 七里香",
-				Size:    118380541,
 				Quality: "超清",
 			},
 		},

@@ -19,7 +19,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:   "https://www.miaopai.com/show/nPWJvdR4z2Bg1Sz3PJpNYffjpDgEiuv4msALgw__.htm",
 				Title: "情人节特辑：一个来自绝地求生的爱情故事，送给已经离开的你",
-				Size:  15756710,
+				Size:  12135847,
 			},
 		},
 		{
@@ -27,7 +27,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:   "https://m.miaopai.com/show/channel/3PCuI5IZ6wdSZISmTtasYTa-l~wrVxk1yEgWRQ__",
 				Title: "小学霸6点半起床学习:想赢在起跑线",
-				Size:  8783794,
+				Size:  6743958,
 			},
 		},
 		{
@@ -35,7 +35,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:   "http://n.miaopai.com/media/qVWj3dVK2oSxtW~vSq2tGeBKPE--tPSp",
 				Title: "如果你家的猫喜欢咬人怎么办？",
-				Size:  4794459,
+				Size:  3615866,
 			},
 		},
 	}

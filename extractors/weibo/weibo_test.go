@@ -43,7 +43,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:   "https://weibo.com/1642500775/GjbO5ByzE",
 				Title: "让人怦然心动的小姐姐们 via@大懒糖",
-				Size:  9198410,
+				Size:  2002420,
 			},
 		},
 		{

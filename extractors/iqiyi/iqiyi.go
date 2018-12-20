@@ -2,8 +2,8 @@ package iqiyi
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -14,41 +14,80 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
-type vidl struct {
-	M3utx      string `json:"m3utx"`
-	Vd         int    `json:"vd"` // quality number
-	ScreenSize string `json:"screenSize"`
-}
-
-type iqiyiData struct {
-	Vidl []vidl `json:"vidl"`
-}
-
 type iqiyi struct {
-	Code string    `json:"code"`
-	Data iqiyiData `json:"data"`
+	Code string `json:"code"`
+	Data struct {
+		VP struct {
+			Du  string `json:"du"`
+			Tkl []struct {
+				Vs []struct {
+					Bid   int    `json:"bid"`
+					Scrsz string `json:"scrsz"`
+					Vsize int64  `json:"vsize"`
+					Fs    []struct {
+						L string `json:"l"`
+						B int64  `json:"b"`
+					} `json:"fs"`
+				} `json:"vs"`
+			} `json:"tkl"`
+		} `json:"vp"`
+	} `json:"data"`
+	Msg string `json:"msg"`
+}
+
+type iqiyiURL struct {
+	L string `json:"l"`
 }
 
 const iqiyiReferer = "https://www.iqiyi.com"
 
-func getIqiyiData(tvid, vid string) (iqiyi, error) {
+func getMacID() string {
+	var macID string
+	chars := []string{
+		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "n", "m", "o", "p", "q", "r", "s", "t", "u", "v",
+		"w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+	}
+	size := len(chars)
+	for i := 0; i < 32; i++ {
+		macID += chars[rand.Intn(size)]
+	}
+	return macID
+}
+
+func getVF(params string) string {
+	var suffix string
+	for j := 0; j < 8; j++ {
+		for k := 0; k < 4; k++ {
+			var v8 int
+			v4 := 13 * (66*k + 27*j) % 35
+			if v4 >= 10 {
+				v8 = v4 + 88
+			} else {
+				v8 = v4 + 49
+			}
+			suffix += string(v8) // string(97) -> "a"
+		}
+	}
+	params += suffix
+
+	return utils.Md5(params)
+}
+
+func getVPS(tvid, vid string) (iqiyi, error) {
 	t := time.Now().Unix() * 1000
-	src := "76f90cbd92f94a2e925d83e8ccd22cb7"
-	key := "d5fb4bd9d50c4be6948c97edd7254b0e"
-	sc := utils.Md5(strconv.FormatInt(t, 10) + key + vid)
-	info, err := request.Get(
-		fmt.Sprintf(
-			"http://cache.m.iqiyi.com/jp/tmts/%s/%s/?t=%d&sc=%s&src=%s",
-			tvid, vid, t, sc, src,
-		),
-		iqiyiReferer,
-		nil,
+	host := "http://cache.video.qiyi.com"
+	params := fmt.Sprintf(
+		"/vps?tvid=%s&vid=%s&v=0&qypid=%s_12&src=01012001010000000000&t=%d&k_tag=1&k_uid=%s&rs=1",
+		tvid, vid, tvid, t, getMacID(),
 	)
+	vf := getVF(params)
+	apiURL := fmt.Sprintf("%s%s&vf=%s", host, params, vf)
+	info, err := request.Get(apiURL, iqiyiReferer, nil)
 	if err != nil {
 		return iqiyi{}, err
 	}
 	var data iqiyi
-	json.Unmarshal([]byte(info[len("var tvInfoJs="):]), &data)
+	json.Unmarshal([]byte(info), &data)
 	return data, nil
 }
 
@@ -100,42 +139,38 @@ func Download(url string) ([]downloader.Data, error) {
 	if title == "" {
 		title = doc.Find("title").Text()
 	}
-	videoDatas, err := getIqiyiData(tvid[1], vid[1])
+	videoDatas, err := getVPS(tvid[1], vid[1])
 	if err != nil {
 		return downloader.EmptyList, err
 	}
 	if videoDatas.Code != "A00000" {
-		return downloader.EmptyList, errors.New("can't play this video")
+		return downloader.EmptyList, fmt.Errorf("can't play this video: %s", videoDatas.Msg)
 	}
 	streams := map[string]downloader.Stream{}
-	var size, totalSize int64
-	for _, video := range videoDatas.Data.Vidl {
-		if video.Vd == 14 {
-			// This stream will go wrong when merging
-			continue
-		}
-		totalSize = 0
-		m3u8URLs, err := utils.M3u8URLs(video.M3utx)
-		if err != nil {
-			return downloader.EmptyList, err
-		}
-		urls := make([]downloader.URL, len(m3u8URLs))
-		for index, ts := range m3u8URLs {
-			size, _ = strconv.ParseInt(
-				utils.MatchOneOf(ts, `contentlength=(\d+)`)[1], 10, 64,
-			)
-			totalSize += size
+	urlPrefix := videoDatas.Data.VP.Du
+	for _, video := range videoDatas.Data.VP.Tkl[0].Vs {
+		urls := make([]downloader.URL, len(video.Fs))
+		for index, v := range video.Fs {
+			realURLData, err := request.Get(urlPrefix+v.L, iqiyiReferer, nil)
+			if err != nil {
+				return downloader.EmptyList, err
+			}
+			var realURL iqiyiURL
+			json.Unmarshal([]byte(realURLData), &realURL)
+			_, ext, err := utils.GetNameAndExt(realURL.L)
+			if err != nil {
+				return downloader.EmptyList, err
+			}
 			urls[index] = downloader.URL{
-				// http://dx.data.video.qiyi.com -> http://data.video.qiyi.com
-				URL:  strings.Replace(ts, "dx.data.video.qiyi.com", "data.video.qiyi.com", 1),
-				Size: size,
-				Ext:  "ts",
+				URL:  realURL.L,
+				Size: v.B,
+				Ext:  ext,
 			}
 		}
-		streams[strconv.Itoa(video.Vd)] = downloader.Stream{
+		streams[strconv.Itoa(video.Bid)] = downloader.Stream{
 			URLs:    urls,
-			Size:    totalSize,
-			Quality: video.ScreenSize,
+			Size:    video.Vsize,
+			Quality: video.Scrsz,
 		}
 	}
 

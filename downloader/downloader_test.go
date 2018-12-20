@@ -9,6 +9,7 @@ import (
 
 func init() {
 	config.RetryTimes = 100
+	config.ThreadNumber = 1
 }
 
 func TestDownload(t *testing.T) {
