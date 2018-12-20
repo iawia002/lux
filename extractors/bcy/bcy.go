@@ -1,10 +1,24 @@
 package bcy
 
 import (
+	"encoding/json"
+	"strings"
+
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
+	"github.com/iawia002/annie/utils"
 )
+
+type bcyData struct {
+	Detail struct {
+		PostData struct {
+			Multi []struct {
+				OriginalPath string `json:"original_path"`
+			} `json:"multi"`
+		} `json:"post_data"`
+	} `json:"detail"`
+}
 
 // Download main download function
 func Download(url string) ([]downloader.Data, error) {
@@ -13,19 +27,41 @@ func Download(url string) ([]downloader.Data, error) {
 	if err != nil {
 		return downloader.EmptyList, err
 	}
-	title, urls, err := parser.GetImages(
-		url, html, "detail_std detail_clickable", func(u string) string {
-			// https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg/w650
-			return u[:len(u)-5]
-		},
-	)
+
+	// parse json data
+	rep := strings.NewReplacer(`\"`, `"`, `\\`, `\`)
+	jsonString := rep.Replace(utils.MatchOneOf(html, `JSON.parse\("(.+?)"\);`)[1])
+	var data bcyData
+	json.Unmarshal([]byte(jsonString), &data)
+
+	doc, err := parser.GetDoc(html)
 	if err != nil {
 		return downloader.EmptyList, err
+	}
+	title := strings.Replace(parser.Title(doc), " - 半次元 banciyuan - 二次元爱好者社区", "", -1)
+
+	urls := make([]downloader.URL, 0, len(data.Detail.PostData.Multi))
+	var totalSize int64
+	for _, img := range data.Detail.PostData.Multi {
+		size, err := request.Size(img.OriginalPath, url)
+		if err != nil {
+			return downloader.EmptyList, err
+		}
+		totalSize += size
+		_, ext, err := utils.GetNameAndExt(img.OriginalPath)
+		if err != nil {
+			return downloader.EmptyList, err
+		}
+		urls = append(urls, downloader.URL{
+			URL:  img.OriginalPath,
+			Size: size,
+			Ext:  ext,
+		})
 	}
 	streams := map[string]downloader.Stream{
 		"default": {
 			URLs: urls,
-			Size: 0,
+			Size: totalSize,
 		},
 	}
 	return []downloader.Data{
