@@ -597,9 +597,6 @@ Twitter | <https://twitter.com> | ✓ | | | |
 
 最好是每次下载都附带登录过的 Cookie 以避免部分 `ccode` 的问题
 
-### 爱奇艺
-
-不支持断点续传，它的响应头中没有 `Accept-Ranges`
 
 ## Contributing
 
