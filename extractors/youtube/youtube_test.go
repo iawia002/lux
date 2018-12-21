@@ -93,11 +93,11 @@ func TestYoutube(t *testing.T) {
 			if tt.playlist {
 				// playlist mode
 				config.Playlist = true
-				_, err = Download(tt.args.URL)
+				_, err = Extract(tt.args.URL)
 				test.CheckError(t, err)
 			} else {
 				config.Playlist = false
-				data, err = Download(tt.args.URL)
+				data, err = Extract(tt.args.URL)
 				test.CheckError(t, err)
 				test.Check(t, tt.args, data[0])
 			}

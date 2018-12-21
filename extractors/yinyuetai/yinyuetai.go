@@ -20,8 +20,8 @@ func genAPI(action string, param string) string {
 	return fmt.Sprintf("%s%s?json=true&%s", yinyuetaiAPI, action, param)
 }
 
-// Download main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	vid := utils.MatchOneOf(
 		url,
 		`https?://v.yinyuetai.com/video/(\d+)(?:\?vid=\d+)?`,

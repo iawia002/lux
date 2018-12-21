@@ -20,8 +20,8 @@ type bcyData struct {
 	} `json:"detail"`
 }
 
-// Download main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	var err error
 	html, err := request.Get(url, url, nil)
 	if err != nil {

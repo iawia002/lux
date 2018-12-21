@@ -70,8 +70,8 @@ func downloadWeiboTV(url string) ([]downloader.Data, error) {
 	}, nil
 }
 
-// Download main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	if !strings.Contains(url, "m.weibo.cn") {
 		if strings.Contains(url, "weibo.com/tv/v/") {
 			return downloadWeiboTV(url)

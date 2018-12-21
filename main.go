@@ -108,45 +108,45 @@ func download(videoURL string) {
 	}
 	switch domain {
 	case "douyin", "iesdouyin":
-		data, err = douyin.Download(videoURL)
+		data, err = douyin.Extract(videoURL)
 	case "bilibili":
-		data, err = bilibili.Download(videoURL)
+		data, err = bilibili.Extract(videoURL)
 	case "bcy":
-		data, err = bcy.Download(videoURL)
+		data, err = bcy.Extract(videoURL)
 	case "pixivision":
-		data, err = pixivision.Download(videoURL)
+		data, err = pixivision.Extract(videoURL)
 	case "youku":
-		data, err = youku.Download(videoURL)
+		data, err = youku.Extract(videoURL)
 	case "youtube", "youtu": // youtu.be
-		data, err = youtube.Download(videoURL)
+		data, err = youtube.Extract(videoURL)
 	case "iqiyi":
-		data, err = iqiyi.Download(videoURL)
+		data, err = iqiyi.Extract(videoURL)
 	case "mgtv":
-		data, err = mgtv.Download(videoURL)
+		data, err = mgtv.Extract(videoURL)
 	case "tumblr":
-		data, err = tumblr.Download(videoURL)
+		data, err = tumblr.Extract(videoURL)
 	case "vimeo":
-		data, err = vimeo.Download(videoURL)
+		data, err = vimeo.Extract(videoURL)
 	case "facebook":
-		data, err = facebook.Download(videoURL)
+		data, err = facebook.Extract(videoURL)
 	case "douyu":
-		data, err = douyu.Download(videoURL)
+		data, err = douyu.Extract(videoURL)
 	case "miaopai":
-		data, err = miaopai.Download(videoURL)
+		data, err = miaopai.Extract(videoURL)
 	case "163":
-		data, err = netease.Download(videoURL)
+		data, err = netease.Extract(videoURL)
 	case "weibo":
-		data, err = weibo.Download(videoURL)
+		data, err = weibo.Extract(videoURL)
 	case "instagram":
-		data, err = instagram.Download(videoURL)
+		data, err = instagram.Extract(videoURL)
 	case "twitter":
-		data, err = twitter.Download(videoURL)
+		data, err = twitter.Extract(videoURL)
 	case "qq":
-		data, err = qq.Download(videoURL)
+		data, err = qq.Extract(videoURL)
 	case "yinyuetai":
-		data, err = yinyuetai.Download(videoURL)
+		data, err = yinyuetai.Extract(videoURL)
 	default:
-		data, err = universal.Download(videoURL)
+		data, err = universal.Extract(videoURL)
 	}
 	if err != nil {
 		// if this error occurs, it means that an error occurred before actually starting to extract data

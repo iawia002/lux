@@ -10,8 +10,8 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
-// Download main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	url = strings.Replace(url, "/#/", "/", 1)
 	vid := utils.MatchOneOf(url, `/(mv|video)\?id=(\w+)`)
 	if vid == nil {
