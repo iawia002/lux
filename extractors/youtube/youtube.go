@@ -76,8 +76,8 @@ func genSignedURL(streamURL string, stream url.Values, js string) (string, error
 	return realURL, nil
 }
 
-// Download YouTube main download function
-func Download(uri string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(uri string) ([]downloader.Data, error) {
 	var err error
 	if !config.Playlist {
 		return []downloader.Data{youtubeDownload(uri)}, nil

@@ -195,8 +195,8 @@ func genData(youkuData data) map[string]downloader.Stream {
 	return streams
 }
 
-// Download main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	vid := utils.MatchOneOf(
 		url, `id_(.+?)\.html`, `id_(.+)`,
 	)[1]

@@ -133,8 +133,8 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]downloader.Stream
 	return streams, nil
 }
 
-// Download main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	vid := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)[1]
 	if len(vid) != 11 {
 		u, err := request.Get(url, url, nil)

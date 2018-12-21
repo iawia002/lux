@@ -114,8 +114,8 @@ func getMultiPageData(html string) (multiPage, error) {
 	return data, nil
 }
 
-// Download bilibili main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	var options bilibiliOptions
 	var err error
 	if strings.Contains(url, "bangumi") {
@@ -210,7 +210,7 @@ func Download(url string) ([]downloader.Data, error) {
 	return extractedData, nil
 }
 
-// bilibiliDownload download function for single url
+// bilibiliDownload is the download function for a single URL
 func bilibiliDownload(url string, options bilibiliOptions) downloader.Data {
 	var (
 		aid, cid, html string

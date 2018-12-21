@@ -35,8 +35,8 @@ type vimeo struct {
 	Video   vimeoVideo   `json:"video"`
 }
 
-// Download main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	var (
 		html, vid string
 		err       error

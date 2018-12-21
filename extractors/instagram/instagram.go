@@ -29,8 +29,8 @@ type instagram struct {
 	} `json:"entry_data"`
 }
 
-// Download main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return downloader.EmptyList, err

@@ -19,8 +19,8 @@ type twitter struct {
 	Username string
 }
 
-// Download main download function
-func Download(uri string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(uri string) ([]downloader.Data, error) {
 	html, err := request.Get(uri, uri, nil)
 	if err != nil {
 		return downloader.EmptyList, err

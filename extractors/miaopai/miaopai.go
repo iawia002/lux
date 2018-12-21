@@ -20,8 +20,8 @@ type miaopai struct {
 	} `json:"data"`
 }
 
-// Download main download function
-func Download(url string) ([]downloader.Data, error) {
+// Extract is the main function for extracting data
+func Extract(url string) ([]downloader.Data, error) {
 	id := utils.MatchOneOf(url, `/media/([^\./]+)`, `/show(?:/channel)?/([^\./]+)`)[1]
 	jsonString, err := request.Get(
 		fmt.Sprintf("https://n.miaopai.com/api/aj_media/info.json?smid=%s", id), url, nil,
