@@ -239,7 +239,7 @@ func bilibiliDownload(url string, options bilibiliOptions) downloader.Data {
 	}
 	var seasonType string
 	if options.Bangumi {
-		seasonType = utils.MatchOneOf(html, `"season_type":(\d+)`)[1]
+		seasonType = utils.MatchOneOf(html, `"season_type":(\d+)`, `"ssType":(\d+)`)[1]
 	}
 
 	// Get "accept_quality" and "accept_description"
