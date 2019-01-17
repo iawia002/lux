@@ -37,9 +37,9 @@ func TestBilibili(t *testing.T) {
 		{
 			name: "bangumi test",
 			args: test.Args{
-				URL:     "https://www.bilibili.com/bangumi/play/ep167000",
-				Title:   "狐妖小红娘：第70话 苏苏智商上线",
-				Quality: "高清 1080P",
+				URL:   "https://www.bilibili.com/bangumi/play/ep167000",
+				Title: "狐妖小红娘：第70话 苏苏智商上线",
+				// Quality: "高清 1080P",
 			},
 		},
 		{

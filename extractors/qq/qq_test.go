@@ -9,7 +9,7 @@ import (
 
 func TestDownload(t *testing.T) {
 	config.InfoOnly = true
-	config.RetryTimes = 100
+	config.RetryTimes = 10
 	tests := []struct {
 		name string
 		args test.Args
@@ -23,15 +23,15 @@ func TestDownload(t *testing.T) {
 				Quality: "蓝光;(1080P)",
 			},
 		},
-		{
-			name: "movie and vid test",
-			args: test.Args{
-				URL:     "https://v.qq.com/x/cover/e5qmd3z5jr0uigk.html",
-				Title:   "赌侠（粤语版）",
-				Size:    1046910811,
-				Quality: "超清;(720P)",
-			},
-		},
+		// {
+		// 	name: "movie and vid test",
+		// 	args: test.Args{
+		// 		URL:     "https://v.qq.com/x/cover/e5qmd3z5jr0uigk.html",
+		// 		Title:   "赌侠（粤语版）",
+		// 		Size:    1046910811,
+		// 		Quality: "超清;(720P)",
+		// 	},
+		// },
 		{
 			name: "single part test",
 			args: test.Args{
