@@ -17,7 +17,7 @@ func TestBilibili(t *testing.T) {
 		playlist bool
 	}{
 		{
-			name: "normal test",
+			name: "normal test 1",
 			args: test.Args{
 				URL:     "https://www.bilibili.com/video/av20203945/",
 				Title:   "【2018拜年祭单品】相遇day by day",
@@ -26,13 +26,14 @@ func TestBilibili(t *testing.T) {
 			playlist: true,
 		},
 		{
-			name: "normal test",
+			name: "normal test 2",
 			args: test.Args{
-				URL:     "https://www.bilibili.com/video/av21303653/",
-				Title:   "【Fate远坂凛声线配音版】某红衣女子偷电瓶车被抓后竟然......【UP主自配】",
-				Size:    81997145,
+				URL:     "https://www.bilibili.com/video/av41301960",
+				Title:   "【英雄联盟】2019赛季CG 《觉醒》",
+				Size:    85790602,
 				Quality: "高清 1080P",
 			},
+			playlist: true,
 		},
 		{
 			name: "bangumi test",
@@ -61,7 +62,7 @@ func TestBilibili(t *testing.T) {
 			playlist: true,
 		},
 		{
-			name: "bangumi test",
+			name: "bangumi movie test",
 			args: test.Args{
 				URL:   "https://www.bilibili.com/bangumi/play/ss12044",
 				Title: "你的名字。",
