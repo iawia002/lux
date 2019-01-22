@@ -213,8 +213,8 @@ func Download(v Data, refer string) error {
 		var inputs Aria2Input
 		inputs.Header = append(inputs.Header, "Referer: "+refer)
 		rpcData.Params[2] = &inputs
-		for i, _ := range urls {
-			rpcData.Params[1] = urls[i:i + 1]
+		for i := range urls {
+			rpcData.Params[1] = urls[i : i+1]
 			jsonData, err := json.Marshal(rpcData)
 			if err != nil {
 				return err
@@ -226,11 +226,10 @@ func Download(v Data, refer string) error {
 			}
 			req.Header.Set("Content-Type", "application/json")
 			var client http.Client
-			resp, err := client.Do(req)
+			_, err = client.Do(req)
 			if err != nil {
 				return err
 			}
-			defer resp.Body.Close()
 		}
 		return nil
 	}
