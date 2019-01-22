@@ -138,6 +138,7 @@ func extractBangumi(url, html string) ([]downloader.Data, error) {
 		if id == 0 {
 			id = u.ID
 		}
+		// html content can't be reused here
 		options := bilibiliOptions{
 			url:     fmt.Sprintf("https://www.bilibili.com/bangumi/play/ep%d", id),
 			bangumi: true,
@@ -236,25 +237,17 @@ func extractNormalVideo(url, html string) ([]downloader.Data, error) {
 
 // Extract is the main function for extracting data
 func Extract(url string) ([]downloader.Data, error) {
-	var (
-		options bilibiliOptions
-		err     error
-	)
+	var err error
 	html, err := request.Get(url, referer, nil)
 	if err != nil {
 		return downloader.EmptyList, err
 	}
-	options.html = html
 	if strings.Contains(url, "bangumi") {
-		options.bangumi = true
-	}
-	if options.bangumi {
 		// handle bangumi
 		return extractBangumi(url, html)
-	} else {
-		// handle normal video
-		return extractNormalVideo(url, html)
 	}
+	// handle normal video
+	return extractNormalVideo(url, html)
 }
 
 // bilibiliDownload is the download function for a single URL
