@@ -25,6 +25,8 @@ var (
 	OutputName string
 	// ExtractedData print extracted data
 	ExtractedData bool
+	// ChunkSize size of MB
+	ChunkSizeMB int
 	// UseAria2RPC Use Aria2 RPC to download
 	UseAria2RPC bool
 	// Aria2Token Aria2 RPC Token
