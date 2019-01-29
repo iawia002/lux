@@ -113,7 +113,7 @@ func Save(
 	}
 	if strings.Contains(urlData.URL, "googlevideo") || strings.Contains(urlData.URL, "qq.com") {
 		var start, end, chunkSize int64
-		chunkSize = 10 * 1024 * 1024
+		chunkSize = 5 * 1024 * 1024
 		remainingSize := urlData.Size
 		if tempFileSize > 0 {
 			start = tempFileSize
