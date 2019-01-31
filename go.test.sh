@@ -10,9 +10,9 @@ trap 'rm -f profile.out downloader/*.{mp4,download,jpg}' SIGINT EXIT
 export CGO_ENABLED=1;
 
 for d in $(go list ./... | grep -v vendor); do
-	go test -v -timeout=2m -race -coverprofile=profile.out -covermode=atomic "${d}"
+	go test -v -race -coverprofile=profile.out -covermode=atomic "${d}"
 	if [ -f profile.out ]; then
-		cat profile.out >coverage.txt
+		cat profile.out > coverage.txt
 		rm profile.out
 	fi
 done
