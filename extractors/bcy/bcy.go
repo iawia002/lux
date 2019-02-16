@@ -38,7 +38,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	if err != nil {
 		return downloader.EmptyList, err
 	}
-	title := strings.Replace(parser.Title(doc), " - 半次元 banciyuan - 二次元爱好者社区", "", -1)
+	title := strings.Replace(parser.Title(doc), " - 半次元 banciyuan - ACG爱好者社区", "", -1)
 
 	urls := make([]downloader.URL, 0, len(data.Detail.PostData.Multi))
 	var totalSize int64
