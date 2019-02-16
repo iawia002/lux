@@ -23,8 +23,8 @@ const (
 const (
 	// BiliBili blocks keys from time to time.
 	// You can extract from the Android client or bilibiliPlayer.min.js
-	appKey = "84956560bc028eb7"
-	secKey = "94aba54af9065f71de72f5508f1cd42e"
+	appKey = "iVGUTjsxvpLeuDCf"
+	secKey = "aHRmhWMLkdeMuILqORnYZocwMBpMEOdt"
 )
 
 const referer = "https://www.bilibili.com"
