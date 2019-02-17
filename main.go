@@ -49,6 +49,7 @@ func init() {
 	flag.StringVar(&config.OutputPath, "o", "", "Specify the output path")
 	flag.StringVar(&config.OutputName, "O", "", "Specify the output file name")
 	flag.BoolVar(&config.ExtractedData, "j", false, "Print extracted data")
+	flag.IntVar(&config.ChunkSizeMB, "cs", 5, "Print chunkSize size of MB")
 	flag.BoolVar(&config.UseAria2RPC, "aria2", false, "Use Aria2 RPC to download")
 	flag.StringVar(&config.Aria2Token, "aria2token", "", "Aria2 RPC Token")
 	flag.StringVar(&config.Aria2Addr, "aria2addr", "localhost:6800", "Aria2 Address")
@@ -84,7 +85,7 @@ func printError(url string, err error) {
 	)
 }
 
-func download(videoURL string) {
+func download(videoURL string, chuckSizeMB int) {
 	var (
 		domain string
 		err    error
@@ -160,7 +161,7 @@ func download(videoURL string) {
 			printError(item.URL, item.Err)
 			continue
 		}
-		err = downloader.Download(item, videoURL)
+		err = downloader.Download(item, videoURL, chuckSizeMB)
 		if err != nil {
 			printError(item.URL, err)
 		}
@@ -214,6 +215,6 @@ func main() {
 		}
 	}
 	for _, videoURL := range args {
-		download(strings.TrimSpace(videoURL))
+		download(strings.TrimSpace(videoURL), config.ChunkSizeMB)
 	}
 }
