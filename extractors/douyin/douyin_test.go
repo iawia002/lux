@@ -22,6 +22,14 @@ func TestDownload(t *testing.T) {
 				Size:  4927877,
 			},
 		},
+		{
+			name: "no title test",
+			args: test.Args{
+				URL:   "http://v.douyin.com/Yy76ML/",
+				Title: "抖音短视频",
+				Size:  4320955,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

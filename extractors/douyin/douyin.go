@@ -13,7 +13,13 @@ func Extract(url string) ([]downloader.Data, error) {
 	if err != nil {
 		return downloader.EmptyList, err
 	}
-	title := utils.MatchOneOf(html, `<p class="desc">(.+?)</p>`)[1]
+	var title string
+	desc := utils.MatchOneOf(html, `<p class="desc">(.+?)</p>`)
+	if desc != nil {
+		title = desc[1]
+	} else {
+		title = "抖音短视频"
+	}
 	realURL := utils.MatchOneOf(html, `playAddr: "(.+?)"`)[1]
 	size, err := request.Size(realURL, url)
 	if err != nil {
