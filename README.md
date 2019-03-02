@@ -495,6 +495,8 @@ $ annie -j https://www.bilibili.com/video/av20203945
     	Cookie
   -r string
     	Use specified Referrer
+  -cs int
+    	HTTP chunk size for downloading (in MB) (default 0)
 ```
 
 #### Network:

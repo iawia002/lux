@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/cheggaaa/pb"
@@ -111,7 +110,7 @@ func Save(
 	if fileError != nil {
 		return fileError
 	}
-	if strings.Contains(urlData.URL, "googlevideo") || strings.Contains(urlData.URL, "qq.com") {
+	if chunkSizeMB > 0 {
 		var start, end, chunkSize int64
 		chunkSize = int64(chunkSizeMB) * 1024 * 1024
 		remainingSize := urlData.Size
