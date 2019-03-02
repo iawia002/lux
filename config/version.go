@@ -1,4 +1,4 @@
 package config
 
 // VERSION version of annie
-const VERSION = "0.9.2"
+const VERSION = "0.9.3"
