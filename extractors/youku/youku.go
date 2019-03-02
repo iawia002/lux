@@ -106,6 +106,9 @@ func youkuUps(vid string) (youkuData, error) {
 			"https://ups.youku.com/ups/get.json?vid=%s&ccode=%s&client_ip=192.168.1.1&client_ts=%d&utid=%s&ckey=%s",
 			vid, ccode, time.Now().Unix()/1000, netURL.QueryEscape(utid), netURL.QueryEscape(config.YoukuCkey),
 		)
+		if config.YoukuPassword != "" {
+			url = fmt.Sprintf("%s&password=%s", url, config.YoukuPassword)
+		}
 		html, err = request.Get(url, youkuReferer, nil)
 		if err != nil {
 			return youkuData{}, err
