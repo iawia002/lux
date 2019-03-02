@@ -540,9 +540,11 @@ $ annie -j https://www.bilibili.com/video/av20203945
 
 ```
   -ccode string
-    	Youku ccode (default "0103010102")
+    	Youku ccode (default "0590")
   -ckey string
     	Youku ckey (default "7B19C0AB12633B22E7FE81271162026020570708D6CC189E4924503C49D243A0DE6CD84A766832C2C99898FC5ED31F3709BB3CDD82C96492E721BDD381735026")
+  -password string
+    	Youku password
 ```
 
 #### YouTube
