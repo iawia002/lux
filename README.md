@@ -93,6 +93,12 @@ $ xbps-install -S annie
 $ scoop install annie
 ```
 
+### [Chocolatey](https://chocolatey.org/) on Windows
+
+```
+$ choco install annie
+```
+
 ## Getting Started
 
 Usage:
