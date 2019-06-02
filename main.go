@@ -25,6 +25,7 @@ import (
 	"github.com/iawia002/annie/extractors/miaopai"
 	"github.com/iawia002/annie/extractors/netease"
 	"github.com/iawia002/annie/extractors/pixivision"
+	"github.com/iawia002/annie/extractors/pornhub"
 	"github.com/iawia002/annie/extractors/qq"
 	"github.com/iawia002/annie/extractors/tumblr"
 	"github.com/iawia002/annie/extractors/twitter"
@@ -150,8 +151,13 @@ func download(videoURL string) {
 		data, err = qq.Extract(videoURL)
 	case "yinyuetai":
 		data, err = yinyuetai.Extract(videoURL)
+<<<<<<< HEAD
 	case "geekbang":
 		data, err = geekbang.Extract(videoURL)
+=======
+	case "pornhub":
+		data, err = pornhub.Extract(videoURL)
+>>>>>>> pornhub support
 	default:
 		data, err = universal.Extract(videoURL)
 	}
