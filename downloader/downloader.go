@@ -210,11 +210,11 @@ func Download(v Data, refer string, chunkSizeMB int) error {
 			urls = append(urls, p.URL)
 		}
 		var inputs Aria2Input
-		inputs.Out = title + "." + data.URLs[0].Ext
 		inputs.Header = append(inputs.Header, "Referer: "+refer)
-		rpcData.Params[2] = &inputs
 		for i := range urls {
 			rpcData.Params[1] = urls[i : i+1]
+			inputs.Out = fmt.Sprintf("%s[%d].%s", title, i, data.URLs[0].Ext)
+			rpcData.Params[2] = &inputs
 			jsonData, err := json.Marshal(rpcData)
 			if err != nil {
 				return err
