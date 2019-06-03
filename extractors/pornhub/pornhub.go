@@ -2,16 +2,17 @@ package pornhub
 
 import (
 	"encoding/json"
+
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
 
 type pornhubData struct {
-	DefaultQuality bool `json:"defaultQuality"`
-	Format string `json:"format"`
-	Quality string `json:"quality"`
-	VideoUrl string `json:"videoUrl"`
+	DefaultQuality bool   `json:"defaultQuality"`
+	Format         string `json:"format"`
+	Quality        string `json:"quality"`
+	VideoURL       string `json:"videoUrl"`
 }
 
 // Extract is the main function for extracting data
@@ -29,10 +30,10 @@ func Extract(url string) ([]downloader.Data, error) {
 		title = "pornhub video"
 	}
 
-	realURLs := utils.MatchOneOf(html, `"mediaDefinitions":\[(.+?)\],"isVertical"`)
+	realURLs := utils.MatchOneOf(html, `"mediaDefinitions":(.+?),"isVertical"`)
 
 	var pornhubs []pornhubData
-	err = json.Unmarshal([]byte(`[` + realURLs[1] + `]`), &pornhubs)
+	err = json.Unmarshal([]byte(realURLs[1]), &pornhubs)
 	if err != nil {
 		return downloader.EmptyList, err
 	}
@@ -40,8 +41,8 @@ func Extract(url string) ([]downloader.Data, error) {
 	//TODO add support for different quality
 	var realURL string
 	for _, downloadlink := range(pornhubs) {
-		if downloadlink.VideoUrl != "" {
-			realURL = downloadlink.VideoUrl
+		if downloadlink.VideoURL != "" {
+			realURL = downloadlink.VideoURL
 			break
 		}
 	}

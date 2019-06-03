@@ -151,13 +151,10 @@ func download(videoURL string) {
 		data, err = qq.Extract(videoURL)
 	case "yinyuetai":
 		data, err = yinyuetai.Extract(videoURL)
-<<<<<<< HEAD
 	case "geekbang":
 		data, err = geekbang.Extract(videoURL)
-=======
 	case "pornhub":
 		data, err = pornhub.Extract(videoURL)
->>>>>>> pornhub support
 	default:
 		data, err = universal.Extract(videoURL)
 	}
