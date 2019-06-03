@@ -31,7 +31,7 @@ type geekURLInfo struct {
 	Size int64
 }
 
-func geekM3u8(url string, totalSize int64) ([]geekURLInfo, int64, error) {
+func geekM3u8(url string) ([]geekURLInfo, error) {
 	var (
 		data []geekURLInfo
 		temp geekURLInfo
@@ -40,21 +40,16 @@ func geekM3u8(url string, totalSize int64) ([]geekURLInfo, int64, error) {
 	)
 	urls, err := utils.M3u8URLs(url)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	for _, u := range urls {
-		size = 0
-		// size, err = request.Size(u, url)
-		// if err != nil {
-		// 	return nil, 0, err
-		// }
 		temp = geekURLInfo{
 			URL:  u,
 			Size: size,
 		}
 		data = append(data, temp)
 	}
-	return data, totalSize, nil
+	return data, nil
 }
 
 // Extract is the main function for extracting data
@@ -90,7 +85,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	streams := make(map[string]downloader.Stream, len(geekData.Data.VideoMediaMap))
 
 	for key, media := range geekData.Data.VideoMediaMap {
-		m3u8URLs, totalSize, err := geekM3u8(media.URL, media.Size)
+		m3u8URLs, err := geekM3u8(media.URL)
 
 		if err != nil {
 			return downloader.EmptyList, err
@@ -107,7 +102,7 @@ func Extract(url string) ([]downloader.Data, error) {
 
 		streams[key] = downloader.Stream{
 			URLs: urls,
-			Size: totalSize,
+			Size: media.Size,
 		}
 	}
 

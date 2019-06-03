@@ -19,7 +19,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:   "https://time.geekbang.org/course/detail/190-97203",
 				Title: "02 | 内容综述 - 玩转webpack",
-				Size:  38193140,
+				Size:  38556544,
 			},
 		},
 	}
