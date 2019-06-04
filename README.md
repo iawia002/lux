@@ -599,6 +599,7 @@ Twitter | <https://twitter.com> | ✓ | | | |
 腾讯视频 | <https://v.qq.com> | ✓ | | | |
 网易云音乐 | <https://music.163.com> | ✓ | | | |
 音悦台 | <https://yinyuetai.com> | ✓ | | | |
+极客时间 | <https://time.geekbang.org> | ✓ | | | |
 
 
 ## Known issues

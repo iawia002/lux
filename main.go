@@ -18,6 +18,7 @@ import (
 	"github.com/iawia002/annie/extractors/douyin"
 	"github.com/iawia002/annie/extractors/douyu"
 	"github.com/iawia002/annie/extractors/facebook"
+	"github.com/iawia002/annie/extractors/geekbang"
 	"github.com/iawia002/annie/extractors/instagram"
 	"github.com/iawia002/annie/extractors/iqiyi"
 	"github.com/iawia002/annie/extractors/mgtv"
@@ -149,6 +150,8 @@ func download(videoURL string) {
 		data, err = qq.Extract(videoURL)
 	case "yinyuetai":
 		data, err = yinyuetai.Extract(videoURL)
+	case "geekbang":
+		data, err = geekbang.Extract(videoURL)
 	default:
 		data, err = universal.Extract(videoURL)
 	}
