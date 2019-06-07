@@ -90,7 +90,7 @@ func printError(url string, err error) {
 	)
 }
 
-func download(videoURL string) {
+func download(videoURL string) bool {
 	var (
 		domain string
 		err    error
@@ -108,7 +108,7 @@ func download(videoURL string) {
 		u, err := url.ParseRequestURI(videoURL)
 		if err != nil {
 			printError(videoURL, err)
-			return
+			return true
 		}
 		domain = utils.Domain(u.Host)
 	}
@@ -162,19 +162,24 @@ func download(videoURL string) {
 		// if this error occurs, it means that an error occurred before actually starting to extract data
 		// (there is an error in the preparation step), and the data list is empty.
 		printError(videoURL, err)
+		return true
 	}
+	var isErr bool
 	for _, item := range data {
 		if item.Err != nil {
 			// if this error occurs, the preparation step is normal, but the data extraction is wrong.
 			// the data is an empty struct.
 			printError(item.URL, item.Err)
+			isErr = true
 			continue
 		}
 		err = downloader.Download(item, videoURL, config.ChunkSizeMB)
 		if err != nil {
 			printError(item.URL, err)
+			isErr = true
 		}
 	}
+	return isErr
 }
 
 func main() {
@@ -223,7 +228,13 @@ func main() {
 			config.Cookie = string(data)
 		}
 	}
+	var isErr bool
 	for _, videoURL := range args {
-		download(strings.TrimSpace(videoURL))
+		if err := download(strings.TrimSpace(videoURL)); err {
+			isErr = true
+		}
+	}
+	if isErr {
+		os.Exit(1)
 	}
 }
