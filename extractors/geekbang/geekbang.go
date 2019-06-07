@@ -73,18 +73,18 @@ func Extract(url string) ([]downloader.Data, error) {
 		return downloader.EmptyList, err
 	}
 
-	var geekData geekData
-	err = json.Unmarshal(body, &geekData)
+	var data geekData
+	err = json.Unmarshal(body, &data)
 
-	if geekData.Code < 0 {
-		return downloader.EmptyList, errors.New(geekData.Error.Msg)
+	if data.Code < 0 {
+		return downloader.EmptyList, errors.New(data.Error.Msg)
 	}
 
-	title := geekData.Data.Title
+	title := data.Data.Title
 
-	streams := make(map[string]downloader.Stream, len(geekData.Data.VideoMediaMap))
+	streams := make(map[string]downloader.Stream, len(data.Data.VideoMediaMap))
 
-	for key, media := range geekData.Data.VideoMediaMap {
+	for key, media := range data.Data.VideoMediaMap {
 		m3u8URLs, err := geekM3u8(media.URL)
 
 		if err != nil {
@@ -101,8 +101,9 @@ func Extract(url string) ([]downloader.Data, error) {
 		}
 
 		streams[key] = downloader.Stream{
-			URLs: urls,
-			Size: media.Size,
+			URLs:    urls,
+			Size:    media.Size,
+			Quality: key,
 		}
 	}
 
