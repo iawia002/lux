@@ -2,6 +2,7 @@ package pornhub
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/request"
@@ -9,10 +10,9 @@ import (
 )
 
 type pornhubData struct {
-	DefaultQuality bool   `json:"defaultQuality"`
-	Format         string `json:"format"`
-	Quality        string `json:"quality"`
-	VideoURL       string `json:"videoUrl"`
+	Format   string `json:"format"`
+	Quality  string `json:"quality"`
+	VideoURL string `json:"videoUrl"`
 }
 
 // Extract is the main function for extracting data
@@ -38,33 +38,31 @@ func Extract(url string) ([]downloader.Data, error) {
 		return downloader.EmptyList, err
 	}
 
-	//TODO add support for different quality
-	var realURL string
-	for _, downloadlink := range(pornhubs) {
-		if downloadlink.VideoURL != "" {
-			realURL = downloadlink.VideoURL
-			break
+	streams := make(map[string]downloader.Stream, len(pornhubs))
+	for _, data := range pornhubs {
+		realURL := data.VideoURL
+		if realURL == "" {
+			continue
+		}
+		size, err := request.Size(realURL, url)
+		if err != nil {
+			return downloader.EmptyList, err
+		}
+		urlData := downloader.URL{
+			URL:  realURL,
+			Size: size,
+			Ext:  "mp4",
+		}
+		streams[data.Quality] = downloader.Stream{
+			URLs:    []downloader.URL{urlData},
+			Size:    size,
+			Quality: fmt.Sprintf("%sP", data.Quality),
 		}
 	}
 
-	size, err := request.Size(realURL, url)
-	if err != nil {
-		return downloader.EmptyList, err
-	}
-	urlData := downloader.URL{
-		URL:  realURL,
-		Size: size,
-		Ext:  "mp4",
-	}
-	streams := map[string]downloader.Stream{
-		"default": {
-			URLs: []downloader.URL{urlData},
-			Size: size,
-		},
-	}
 	return []downloader.Data{
 		{
-			Site:    "Pornhub",
+			Site:    "Pornhub pornhub.com",
 			Title:   title,
 			Type:    "video",
 			Streams: streams,
