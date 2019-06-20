@@ -175,6 +175,11 @@ func Size(url, refer string) (int64, error) {
 		return 0, err
 	}
 	s := h.Get("Content-Length")
+	if s == "" {
+		var err error
+		err = fmt.Errorf("Content-Length is not present")
+		return 0, err
+	}
 	size, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return 0, err
