@@ -4,6 +4,7 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -175,6 +176,9 @@ func Size(url, refer string) (int64, error) {
 		return 0, err
 	}
 	s := h.Get("Content-Length")
+	if s == "" {
+		return 0, errors.New("Content-Length is not present")
+	}
 	size, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return 0, err
