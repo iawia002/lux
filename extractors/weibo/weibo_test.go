@@ -9,19 +9,11 @@ import (
 
 func TestDownload(t *testing.T) {
 	config.InfoOnly = true
-	config.RetryTimes = 100
+	config.RetryTimes = 10
 	tests := []struct {
 		name string
 		args test.Args
 	}{
-		{
-			name: "normal test",
-			args: test.Args{
-				URL:   "https://m.weibo.cn/2815133121/G9VBqbsWM",
-				Title: "当你超过25岁再去夜店……",
-				Size:  3112080,
-			},
-		},
 		{
 			name: "fid url test",
 			args: test.Args{
