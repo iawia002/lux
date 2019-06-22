@@ -3,13 +3,16 @@ package miaopai
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"strings"
+	"time"
 
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
 
-type miaopai struct {
+type miaopaiData struct {
 	Data struct {
 		Description string `json:"description"`
 		MetaData    []struct {
@@ -20,18 +23,36 @@ type miaopai struct {
 	} `json:"data"`
 }
 
+func getRandomString(l int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	s := make([]string, 0)
+	chars := []string{
+		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "n", "m", "o", "p", "q", "r", "s", "t", "u", "v",
+		"w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+	}
+	for i := 0; i < l; i++ {
+		s = append(s, chars[rand.Intn(len(chars)-1)])
+	}
+	return strings.Join(s, ",")
+}
+
 // Extract is the main function for extracting data
 func Extract(url string) ([]downloader.Data, error) {
 	id := utils.MatchOneOf(url, `/media/([^\./]+)`, `/show(?:/channel)?/([^\./]+)`)[1]
+
+	var data miaopaiData
 	jsonString, err := request.Get(
-		fmt.Sprintf("https://n.miaopai.com/api/aj_media/info.json?smid=%s", id), url, nil,
+		fmt.Sprintf("https://n.miaopai.com/api/aj_media/info.json?smid=%s&appid=530&_cb=_jsonp%s", id, getRandomString(10)),
+		url, nil,
 	)
 	if err != nil {
 		return downloader.EmptyList, err
 	}
-	var data miaopai
-	json.Unmarshal([]byte(jsonString), &data)
-
+	err = json.Unmarshal([]byte(jsonString), &data)
+	if err != nil {
+		return downloader.EmptyList, err
+	}
 	realURL := data.Data.MetaData[0].URLs.M
 	size, err := request.Size(realURL, url)
 	if err != nil {
