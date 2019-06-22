@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+  "errors"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -176,7 +177,7 @@ func Size(url, refer string) (int64, error) {
 	}
 	s := h.Get("Content-Length")
 	if s == "" {
-		return 0, fmt.Errorf("Content-Length is not present")
+		return 0, errors.New("Content-Length is not present")
 	}
 	size, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
