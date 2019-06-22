@@ -25,9 +25,9 @@ func CheckData(args, data Args) bool {
 // Check check the result
 func Check(t *testing.T, args Args, data downloader.Data) {
 	// get the default stream
-	sortedStreams := make([]downloader.Stream, len(data.Streams))
-	for _, data := range data.Streams {
-		sortedStreams = append(sortedStreams, data)
+	sortedStreams := make([]downloader.Stream, 0, len(data.Streams))
+	for _, s := range data.Streams {
+		sortedStreams = append(sortedStreams, s)
 	}
 	sort.Slice(sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size })
 	defaultData := sortedStreams[0]

@@ -35,6 +35,15 @@ func TestYoutube(t *testing.T) {
 			},
 		},
 		{
+			name: "signature test",
+			args: test.Args{
+				URL:     "https://www.youtube.com/watch?v=ZtgzKBrU1GY",
+				Title:   "Halo Infinite - E3 2019 - Discover Hope",
+				Size:    877713473,
+				Quality: `2160p60 video/webm; codecs="vp9"`,
+			},
+		},
+		{
 			name: "normal test",
 			args: test.Args{
 				URL:     "https://www.youtube.com/watch?v=ASPku-eAZYs",

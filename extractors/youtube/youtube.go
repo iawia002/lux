@@ -31,51 +31,6 @@ type youtubeData struct {
 
 const referer = "https://www.youtube.com"
 
-var tokensCache = make(map[string][]string)
-
-func getSig(sig, js string) (string, error) {
-	sigURL := fmt.Sprintf("https://www.youtube.com%s", js)
-	tokens, ok := tokensCache[sigURL]
-	if !ok {
-		html, err := request.Get(sigURL, referer, nil)
-		if err != nil {
-			return "", err
-		}
-		tokens, err = getSigTokens(html)
-		if err != nil {
-			return "", err
-		}
-		tokensCache[sigURL] = tokens
-	}
-	return decipherTokens(tokens, sig), nil
-}
-
-func genSignedURL(streamURL string, stream url.Values, js string) (string, error) {
-	var (
-		realURL, sig string
-		err          error
-	)
-	if strings.Contains(streamURL, "signature=") {
-		// URL itself already has a signature parameter
-		realURL = streamURL
-	} else {
-		// URL has no signature parameter
-		sig = stream.Get("sig")
-		if sig == "" {
-			// Signature need decrypt
-			sig, err = getSig(stream.Get("s"), js)
-			if err != nil {
-				return "", err
-			}
-		}
-		realURL = fmt.Sprintf("%s&signature=%s", streamURL, sig)
-	}
-	if !strings.Contains(realURL, "ratebypass") {
-		realURL += "&ratebypass=yes"
-	}
-	return realURL, nil
-}
-
 // Extract is the main function for extracting data
 func Extract(uri string) ([]downloader.Data, error) {
 	var err error
@@ -128,7 +83,7 @@ func youtubeDownload(uri string) downloader.Data {
 		return downloader.EmptyData(uri, errors.New("can't find vid"))
 	}
 	videoURL := fmt.Sprintf(
-		"https://www.youtube.com/watch?v=%s&gl=US&hl=en&has_verified=1&bpctr=9999999999",
+		"https://www.youtube.com/watch?v=%s",
 		vid[1],
 	)
 	html, err := request.Get(videoURL, referer, nil)
@@ -189,7 +144,7 @@ func extractVideoURLS(data youtubeData, referer string) (map[string]downloader.S
 		} else {
 			ext = utils.MatchOneOf(streamType, `(\w+)/(\w+);`)[2]
 		}
-		realURL, err := genSignedURL(stream.Get("url"), stream, data.Assets.JS)
+		realURL, err := getDownloadURL(stream, data.Assets.JS)
 		if err != nil {
 			return nil, err
 		}
