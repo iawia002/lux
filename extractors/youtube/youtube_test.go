@@ -35,6 +35,15 @@ func TestYoutube(t *testing.T) {
 			},
 		},
 		{
+			name: "signature test",
+			args: test.Args{
+				URL:     "https://www.youtube.com/watch?v=ZtgzKBrU1GY",
+				Title:   "Halo Infinite - E3 2019 - Discover Hope",
+				Size:    877713473,
+				Quality: `2160p60 video/webm; codecs="vp9"`,
+			},
+		},
+		{
 			name: "normal test",
 			args: test.Args{
 				URL:     "https://www.youtube.com/watch?v=ASPku-eAZYs",
@@ -45,10 +54,10 @@ func TestYoutube(t *testing.T) {
 		{
 			name: "playlist test",
 			args: test.Args{
-				URL:     "https://www.youtube.com/watch?v=x2nKigmfzLQ&list=PLfyyPldyYFapPfxZOay2AoCCaNE1Ezd4_",
-				Title:   "【仔細看看】《羅根》黑白版-漫畫電影新高峰?! - 超粒方",
-				Size:    192310804,
-				Quality: `1080p video/webm; codecs="vp9"`,
+				URL:     "https://www.youtube.com/watch?v=Lt2pwLxJxgA&list=PLIYAO-qLriEtYm7UcXPH3SOJxgqjwRrIw",
+				Title:   "papi酱 - 你有酱婶儿的朋友吗？",
+				Size:    13549971,
+				Quality: `720p video/mp4; codecs="avc1.4d401f"`,
 			},
 			playlist: true,
 		},

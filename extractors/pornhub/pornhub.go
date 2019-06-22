@@ -33,10 +33,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	realURLs := utils.MatchOneOf(html, `"mediaDefinitions":(.+?),"isVertical"`)
 
 	var pornhubs []pornhubData
-	err = json.Unmarshal([]byte(realURLs[1]), &pornhubs)
-	if err != nil {
-		return downloader.EmptyList, err
-	}
+	json.Unmarshal([]byte(realURLs[1]), &pornhubs)
 
 	streams := make(map[string]downloader.Stream, len(pornhubs))
 	for _, data := range pornhubs {

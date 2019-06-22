@@ -17,7 +17,7 @@ func TestDownload(t *testing.T) {
 			name: "mv test 1",
 			args: test.Args{
 				URL:   "https://music.163.com/#/mv?id=5547010",
-				Title: "There For You - Troye Sivan - 高清MV - 网易云音乐",
+				Title: "There For You",
 				Size:  24249078,
 			},
 		},
@@ -25,7 +25,7 @@ func TestDownload(t *testing.T) {
 			name: "video test 1",
 			args: test.Args{
 				URL:   "https://music.163.com/#/video?id=C8C9D11629798595BD28451DE3AC9FF4",
-				Title: "＃金曜日の新垣结衣 总集編〈全9編〉 - 视频 - 网易云音乐",
+				Title: "＃金曜日の新垣结衣 总集編〈全9編〉",
 				Size:  37408123,
 			},
 		},
@@ -33,7 +33,7 @@ func TestDownload(t *testing.T) {
 			name: "video test 2",
 			args: test.Args{
 				URL:   "https://music.163.com/m/video?id=6309CF62EF5D44FED5974536604944CF&userid=567080617",
-				Title: "当皮卡丘失去了小智就失去了全世界 - 视频 - 网易云音乐",
+				Title: "当皮卡丘失去了小智就失去了全世界",
 				Size:  28547736,
 			},
 		},
