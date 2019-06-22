@@ -14,12 +14,12 @@ func TestDownload(t *testing.T) {
 		args test.Args
 	}{
 		{
-			name: "h5 test",
+			name: "normal test",
 			args: test.Args{
-				URL:     "http://v.yinyuetai.com/video/h5/820981",
-				Title:   "Rap God",
-				Size:    144401919,
-				Quality: "超清",
+				URL:     "http://v.yinyuetai.com/video/3386385",
+				Title:   "什么是爱/ What is Love",
+				Size:    20028736,
+				Quality: "流畅",
 			},
 		},
 	}
