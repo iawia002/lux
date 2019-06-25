@@ -601,6 +601,7 @@ Twitter | <https://twitter.com> | ✓ | | | |
 音悦台 | <https://yinyuetai.com> | ✓ | | | |
 极客时间 | <https://time.geekbang.org> | ✓ | | | |
 Pornhub | <https://pornhub.com> | ✓ | | | |
+AcFun | <https://www.acfun.cn> | ✓ | | | |
 
 
 ## Known issues

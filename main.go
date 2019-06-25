@@ -13,6 +13,7 @@ import (
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors/acfun"
 	"github.com/iawia002/annie/extractors/bcy"
 	"github.com/iawia002/annie/extractors/bilibili"
 	"github.com/iawia002/annie/extractors/douyin"
@@ -113,6 +114,8 @@ func download(videoURL string) bool {
 		domain = utils.Domain(u.Host)
 	}
 	switch domain {
+	case "acfun":
+		data, err = acfun.Extract(videoURL)
 	case "douyin", "iesdouyin":
 		data, err = douyin.Extract(videoURL)
 	case "bilibili":
