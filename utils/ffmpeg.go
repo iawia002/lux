@@ -42,7 +42,8 @@ func MergeAudioAndVideo(paths []string, mergedFilePath string) error {
 
 // MergeToMP4 merge video parts to MP4
 func MergeToMP4(paths []string, mergedFilePath string, filename string) error {
-	mergeFilePath := filename + ".txt" // merge list file should be in the current directory
+	//mergeFilePath := filename + ".txt" // merge list file should be in the current directory
+	mergeFilePath := mergedFilePath +"_"+filename + ".txt"
 
 	// write ffmpeg input file list
 	mergeFile, _ := os.Create(mergeFilePath)
