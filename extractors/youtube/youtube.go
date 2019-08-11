@@ -14,8 +14,8 @@ import (
 )
 
 type args struct {
-	Title  string `json:"title"`
-	Stream string `json:"adaptive_fmts"`
+	PlayerResponse string `json:"player_response"`
+	Stream         string `json:"adaptive_fmts"`
 	// not every page has `adaptive_fmts` field https://youtu.be/DNaOZovrSVo
 	Stream2 string `json:"url_encoded_fmt_stream_map"`
 }
@@ -93,7 +93,7 @@ func youtubeDownload(uri string) downloader.Data {
 	ytplayer := utils.MatchOneOf(html, `;ytplayer\.config\s*=\s*({.+?});`)[1]
 	var youtube youtubeData
 	json.Unmarshal([]byte(ytplayer), &youtube)
-	title := youtube.Args.Title
+	title := utils.GetStringFromJson(youtube.Args.PlayerResponse, "videoDetails.title")
 
 	streams, err := extractVideoURLS(youtube, uri)
 	if err != nil {
