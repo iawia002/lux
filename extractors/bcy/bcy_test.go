@@ -17,9 +17,9 @@ func TestDownload(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:   "https://bcy.net/coser/detail/143767/2094010",
-				Title: "phx：柠檬先行预告！牧濑红莉栖 cn: 三度 - 半次元 - ACG爱好者社区",
-				Size:  3329959,
+				URL:   "https://bcy.net/item/detail/6558738153367142664",
+				Title: "cos正片 命运石之门 牧濑红莉栖 克里斯蒂娜… - 半次元 - ACG爱好者社区",
+				Size:  13035763,
 			},
 		},
 	}
