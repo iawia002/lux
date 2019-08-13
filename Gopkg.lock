@@ -82,6 +82,30 @@
   version = "v0.0.2"
 
 [[projects]]
+  digest = "1:cf43b1118f4690d1dbc85392c89a926a89b694d94a9d87a6e6d7f762ba4b8a14"
+  name = "github.com/tidwall/gjson"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "c5e72cdf74dff23857243dd662c465b810891c21"
+  version = "v1.3.2"
+
+[[projects]]
+  digest = "1:20d232e544cf67770287960b1a5e8bee6a58a86fd71f77dfad60a9d903b9f2ed"
+  name = "github.com/tidwall/match"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "33827db735fff6510490d69a8622612558a557ed"
+  version = "v1.0.1"
+
+[[projects]]
+  digest = "1:280f705ff03437a764cd7ceed59f2bb1e8adbe380e70e1e225f6a38dac9040fa"
+  name = "github.com/tidwall/pretty"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "1166b9ac2b65e46a43d8618d30d1554f4652d49b"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   digest = "1:b5031cb45f8bf616d5d667c48e876a4ce3512d4ad65d51841879e18998f426e8"
   name = "golang.org/x/net"
@@ -111,6 +135,7 @@
     "github.com/cheggaaa/pb",
     "github.com/fatih/color",
     "github.com/kr/pretty",
+    "github.com/tidwall/gjson",
     "golang.org/x/net/proxy",
   ]
   solver-name = "gps-cdcl"

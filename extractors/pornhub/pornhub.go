@@ -37,6 +37,20 @@ func Extract(url string) ([]downloader.Data, error) {
 
 	streams := make(map[string]downloader.Stream, len(pornhubs))
 	for _, data := range pornhubs {
+		if data.Format == "hls" {
+			continue
+		}
+
+		if data.Quality == "" {
+			// skip the case where the quality value is an array
+			// "quality": [
+			//   720,
+			//   480,
+			//   240
+			// ]
+			continue
+		}
+
 		realURL := data.VideoURL
 		if realURL == "" {
 			continue

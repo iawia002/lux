@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/tidwall/gjson"
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
@@ -19,6 +20,11 @@ import (
 
 // MAXLENGTH Maximum length of file name
 const MAXLENGTH = 80
+
+// GetStringFromJson get the string value from json path
+func GetStringFromJson(json, path string) string {
+	return gjson.Get(json, path).String()
+}
 
 // MatchOneOf match one of the patterns
 func MatchOneOf(text string, patterns ...string) []string {
