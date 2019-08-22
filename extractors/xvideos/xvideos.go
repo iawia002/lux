@@ -12,7 +12,7 @@ import (
 
 const (
 	lowFlag      = "html5player.setVideoUrlLow('"
-	lowFinalFlag = `);
+	lowFinalFlag = `');
 	    html5player.setVideoUrlHigh(`
 	highFlag      = "html5player.setVideoUrlHigh('"
 	highFinalFlag = `');
