@@ -7,6 +7,42 @@ import (
 	"github.com/iawia002/annie/config"
 )
 
+func TestGetStringFromJson(t *testing.T) {
+	type args struct {
+		json string
+		path string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "json happy path test1",
+			args: args{
+				json: `{"name":{"first":"Janet","last":"Prichard"},"age":47}`,
+				path: "name.first",
+			},
+			want: "Janet",
+		},
+		{
+			name: "json happy path test2",
+			args: args{
+				json: `{"children": ["Sara","Alex","Jack"]}`,
+				path: "children.1",
+			},
+			want: "Alex",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GetStringFromJson(tt.args.json, tt.args.path); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetStringFromJson() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestMatchOneOf(t *testing.T) {
 	type args struct {
 		patterns []string
