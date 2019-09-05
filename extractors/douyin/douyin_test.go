@@ -21,13 +21,6 @@ func TestDownload(t *testing.T) {
 				Title: "跟特效师一起学跳舞，看变形金刚擎天柱怎么跳，你也来试试！@抖音小助手",
 			},
 		},
-		{
-			name: "no title test",
-			args: test.Args{
-				URL:   "http://v.douyin.com/Yy76ML/",
-				Title: "抖音短视频",
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
