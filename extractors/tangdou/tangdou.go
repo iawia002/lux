@@ -48,23 +48,23 @@ func tangdouDownload(uri string) downloader.Data {
 	}
 
 	title := utils.MatchOneOf(
-		html, `<div class="title">(.+?)</div>`, `<meta name="description" content="(.+?)" />`,
+		html, `<div class="title">(.+?)</div>`, `<meta name="description" content="(.+?)"`, `<title>(.+?)</title>`,
 	)[1]
 
 	var realURL string
 	videoURLs := utils.MatchOneOf(
-		html, `video:'(.+?)'`, `video:"(.+?)"`,
+		html, `video:'(.+?)'`, `video:"(.+?)"`, `<video.*src="(.+?)"`,
 	)
 	if videoURLs == nil {
 		shareURL := utils.MatchOneOf(
-			html, `<div class="video">\s*<script src="(.+?)">`,
+			html, `<div class="video">\s*<script src="(.+?)"`,
 		)[1]
 		signedVideo, err := request.Get(shareURL, uri, nil)
 		if err != nil {
 			return downloader.EmptyData(uri, err)
 		}
 		realURL = utils.MatchOneOf(
-			signedVideo, `src=\\"(.+?)\\">`,
+			signedVideo, `src=\\"(.+?)\\"`,
 		)[1]
 	} else {
 		realURL = videoURLs[1]

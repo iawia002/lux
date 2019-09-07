@@ -33,6 +33,14 @@ func TestTangDou(t *testing.T) {
 			},
 		},
 		{
+			name: "share url",
+			args: test.Args{
+				URL:   "https://share.tangdou.com/play.php?vid=1500667821669",
+				Title: "井岗紫薇广场舞18步双人舞《采槟榔》附分解",
+				Size:  26693149,
+			},
+		},
+		{
 			name: "playlist test",
 			args: test.Args{
 				URL:   "http://www.tangdou.com/playlist/view/1882",
