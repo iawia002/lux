@@ -27,6 +27,7 @@ import (
 	"github.com/iawia002/annie/extractors/pixivision"
 	"github.com/iawia002/annie/extractors/pornhub"
 	"github.com/iawia002/annie/extractors/qq"
+	"github.com/iawia002/annie/extractors/tangdou"
 	"github.com/iawia002/annie/extractors/tumblr"
 	"github.com/iawia002/annie/extractors/twitter"
 	"github.com/iawia002/annie/extractors/universal"
@@ -130,6 +131,8 @@ func download(videoURL string) bool {
 		data, err = iqiyi.Extract(videoURL)
 	case "mgtv":
 		data, err = mgtv.Extract(videoURL)
+	case "tangdou":
+		data, err = tangdou.Extract(videoURL)
 	case "tumblr":
 		data, err = tumblr.Extract(videoURL)
 	case "vimeo":
