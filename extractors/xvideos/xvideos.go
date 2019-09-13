@@ -109,7 +109,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	}
 	return []downloader.Data{
 		{
-			Site:    "XVIDEOS",
+			Site:    "XVIDEOS xvideos.com",
 			Title:   title,
 			Type:    "video",
 			Streams: streams,
