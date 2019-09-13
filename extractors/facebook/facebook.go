@@ -19,9 +19,13 @@ func Extract(url string) ([]downloader.Data, error) {
 
 	streams := map[string]downloader.Stream{}
 	for _, quality := range []string{"sd", "hd"} {
-		u := utils.MatchOneOf(
+		srcElement := utils.MatchOneOf(
 			html, fmt.Sprintf(`%s_src:"(.+?)"`, quality),
-		)[1]
+		)
+		if srcElement == nil {
+			continue
+		}
+		u := srcElement[1]
 		size, err := request.Size(u, url)
 		if err != nil {
 			return downloader.EmptyList, err
