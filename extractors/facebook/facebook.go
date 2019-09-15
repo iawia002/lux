@@ -20,7 +20,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	streams := map[string]downloader.Stream{}
 	for _, quality := range []string{"sd", "hd"} {
 		srcElement := utils.MatchOneOf(
-			html, fmt.Sprintf(`%s_src:"(.+?)"`, quality),
+			html, fmt.Sprintf(`%s_src_no_ratelimit:"(.+?)"`, quality),
 		)
 		if srcElement == nil {
 			continue
