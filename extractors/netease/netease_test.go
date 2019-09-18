@@ -29,14 +29,6 @@ func TestDownload(t *testing.T) {
 				Size:  37408123,
 			},
 		},
-		{
-			name: "video test 2",
-			args: test.Args{
-				URL:   "https://music.163.com/m/video?id=6309CF62EF5D44FED5974536604944CF&userid=567080617",
-				Title: "当皮卡丘失去了小智就失去了全世界",
-				Size:  28547736,
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
