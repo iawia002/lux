@@ -30,6 +30,7 @@ import (
 	"github.com/iawia002/annie/extractors/tangdou"
 	"github.com/iawia002/annie/extractors/tumblr"
 	"github.com/iawia002/annie/extractors/twitter"
+	"github.com/iawia002/annie/extractors/udn"
 	"github.com/iawia002/annie/extractors/universal"
 	"github.com/iawia002/annie/extractors/vimeo"
 	"github.com/iawia002/annie/extractors/weibo"
@@ -161,6 +162,8 @@ func download(videoURL string) bool {
 		data, err = pornhub.Extract(videoURL)
 	case "xvideos":
 		data, err = xvideos.Extract(videoURL)
+	case "udn":
+		data, err = udn.Extract(videoURL)
 	default:
 		data, err = universal.Extract(videoURL)
 	}
