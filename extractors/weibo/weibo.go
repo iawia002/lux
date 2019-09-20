@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -17,11 +18,11 @@ func downloadWeiboTV(url string) ([]downloader.Data, error) {
 	}
 	html, err := request.Get(url, url, headers)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	title := strings.TrimSpace(
 		strings.Replace(doc.Find(".info_txt").First().Text(), "\u200B", " ", -1), // Zero width space.
@@ -29,11 +30,14 @@ func downloadWeiboTV(url string) ([]downloader.Data, error) {
 	// http://f.us.sinaimg.cn/003Cddn4lx07oCX1hC0001040200hkQk0k010.mp4?label=mp4_hd&template=852x480.20&Expires=1541041515&ssig=%2BYnCmZaToS&KID=unistore,video
 	// &480=http://f.us.sinaimg.cn/003Cddn4lx07oCX1hC0001040200hkQk0k010.mp4?label=mp4_hd&template=852x480.20&Expires=1541041515&ssig=%2BYnCmZaToS&KID=unistore,video
 	// &720=http://f.us.sinaimg.cn/004cqzndlx07oCX1kMOQ01040200vyxj0k010.mp4?label=mp4_720p&template=1280x720.20&Expires=1541041515&ssig=Fdasnr1aW6&KID=unistore,video&qType=720
-	realURL, err := netURL.PathUnescape(
-		utils.MatchOneOf(html, `video-sources="fluency=(.+?)"`)[1],
-	)
+	realURLs := utils.MatchOneOf(html, `video-sources="fluency=(.+?)"`)
+	if realURLs == nil || len(realURLs) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+
+	realURL, err := netURL.PathUnescape(realURLs[1])
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	quality := []string{"480", "720"}
 	streams := make(map[string]downloader.Stream, len(quality))
@@ -45,7 +49,7 @@ func downloadWeiboTV(url string) ([]downloader.Data, error) {
 		}
 		size, err := request.Size(u, url)
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
 		streams[q] = downloader.Stream{
 			URLs: []downloader.URL{
@@ -80,17 +84,27 @@ func Extract(url string) ([]downloader.Data, error) {
 	}
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
-	title := utils.MatchOneOf(
+	titles := utils.MatchOneOf(
 		html, `"content2": "(.+?)",`, `"status_title": "(.+?)",`,
-	)[1]
-	realURL := utils.MatchOneOf(
+	)
+	if titles == nil || len(titles) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	title := titles[1]
+
+	realURLs := utils.MatchOneOf(
 		html, `"stream_url_hd": "(.+?)"`, `"stream_url": "(.+?)"`,
-	)[1]
+	)
+	if realURLs == nil || len(realURLs) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	realURL := realURLs[1]
+
 	size, err := request.Size(realURL, url)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	urlData := downloader.URL{
 		URL:  realURL,

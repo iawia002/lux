@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -52,26 +53,35 @@ func Extract(url string) ([]downloader.Data, error) {
 	var err error
 	liveVid := utils.MatchOneOf(url, `https?://www.douyu.com/(\S+)`)
 	if liveVid != nil {
-		return downloader.EmptyList, errors.New("暂不支持斗鱼直播")
+		return nil, errors.New("暂不支持斗鱼直播")
 	}
 
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
-	title := utils.MatchOneOf(html, `<title>(.*?)</title>`)[1]
+	titles := utils.MatchOneOf(html, `<title>(.*?)</title>`)
+	if titles == nil || len(titles) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	title := titles[1]
 
-	vid := utils.MatchOneOf(url, `https?://v.douyu.com/show/(\S+)`)[1]
+	vids := utils.MatchOneOf(url, `https?://v.douyu.com/show/(\S+)`)
+	if vids == nil || len(vids) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	vid := vids[1]
+
 	dataString, err := request.Get("http://vmobile.douyu.com/video/getInfo?vid="+vid, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	var dataDict douyuData
 	json.Unmarshal([]byte(dataString), &dataDict)
 
 	m3u8URLs, totalSize, err := douyuM3u8(dataDict.Data.VideoURL)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	urls := make([]downloader.URL, len(m3u8URLs))
 	for index, u := range m3u8URLs {

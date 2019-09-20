@@ -100,7 +100,7 @@ func download(videoURL string) bool {
 		data   []downloader.Data
 	)
 	bilibiliShortLink := utils.MatchOneOf(videoURL, `^(av|ep)\d+`)
-	if bilibiliShortLink != nil {
+	if bilibiliShortLink != nil && len(bilibiliShortLink) > 1 {
 		bilibiliURL := map[string]string{
 			"av": "https://www.bilibili.com/video/",
 			"ep": "https://www.bilibili.com/bangumi/play/",
@@ -111,7 +111,7 @@ func download(videoURL string) bool {
 		u, err := url.ParseRequestURI(videoURL)
 		if err != nil {
 			printError(videoURL, err)
-			return true
+			return false
 		}
 		domain = utils.Domain(u.Host)
 	}
@@ -171,7 +171,7 @@ func download(videoURL string) bool {
 		// if this error occurs, it means that an error occurred before actually starting to extract data
 		// (there is an error in the preparation step), and the data list is empty.
 		printError(videoURL, err)
-		return true
+		return false
 	}
 	var isErr bool
 	for _, item := range data {
@@ -188,7 +188,7 @@ func download(videoURL string) bool {
 			isErr = true
 		}
 	}
-	return isErr
+	return !isErr
 }
 
 func main() {
@@ -239,7 +239,7 @@ func main() {
 	}
 	var isErr bool
 	for _, videoURL := range args {
-		if err := download(strings.TrimSpace(videoURL)); err {
+		if !download(strings.TrimSpace(videoURL)) {
 			isErr = true
 		}
 	}

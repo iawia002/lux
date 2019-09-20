@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -18,7 +19,7 @@ const (
 )
 
 func getCDNUrl(html string) string {
-	if cdnURLs := utils.MatchOneOf(html, startFlag+"(.+?)"+endFlag); len(cdnURLs) > 1 && cdnURLs[1] != "" {
+	if cdnURLs := utils.MatchOneOf(html, startFlag+"(.+?)"+endFlag); cdnURLs != nil && len(cdnURLs) > 1 && cdnURLs[1] != "" {
 		return cdnURLs[1]
 	}
 	return ""
@@ -27,6 +28,9 @@ func getCDNUrl(html string) string {
 func prepareEmbedURL(url string) string {
 	if !strings.Contains(url, "https://video.udn.com/embed/") {
 		newIDs := strings.Split(url, "/")
+		if len(newIDs) < 1 {
+			return ""
+		}
 		return "https://video.udn.com/embed/news/" + newIDs[len(newIDs)-1]
 	}
 	return url
@@ -35,29 +39,33 @@ func prepareEmbedURL(url string) string {
 // Extract is the main function for extracting data
 func Extract(url string) ([]downloader.Data, error) {
 	url = prepareEmbedURL(url)
+	if len(url) == 0 {
+		return nil, extractors.ErrURLParseFailed
+	}
+
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	var title string
 	desc := utils.MatchOneOf(html, `title: '(.+?)',
         link:`)
-	if desc != nil {
+	if desc != nil && len(desc) > 1 {
 		title = desc[1]
 	} else {
 		title = "udn"
 	}
 	cdnURL := getCDNUrl(html)
 	if cdnURL == "" {
-		return downloader.EmptyList, errors.New("empty list")
+		return nil, errors.New("empty list")
 	}
 	srcURL, err := request.Get("http://"+cdnURL, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	size, err := request.Size(srcURL, url)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	urlData := downloader.URL{
 		URL:  srcURL,

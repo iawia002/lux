@@ -2,6 +2,7 @@ package douyin
 
 import (
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -11,7 +12,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	var err error
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	var title string
 	desc := utils.MatchOneOf(html, `<p class="desc">(.+?)</p>`)
@@ -20,10 +21,15 @@ func Extract(url string) ([]downloader.Data, error) {
 	} else {
 		title = "抖音短视频"
 	}
-	realURL := utils.MatchOneOf(html, `playAddr: "(.+?)"`)[1]
+	realURLs := utils.MatchOneOf(html, `playAddr: "(.+?)"`)
+	if realURLs == nil || len(realURLs) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	realURL := realURLs[1]
+
 	size, err := request.Size(realURL, url)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	urlData := downloader.URL{
 		URL:  realURL,
