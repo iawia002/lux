@@ -15,6 +15,7 @@ import (
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/extractors/bcy"
 	"github.com/iawia002/annie/extractors/bilibili"
+	"github.com/iawia002/annie/extractors/dailymotion"
 	"github.com/iawia002/annie/extractors/douyin"
 	"github.com/iawia002/annie/extractors/douyu"
 	"github.com/iawia002/annie/extractors/facebook"
@@ -163,6 +164,8 @@ func download(videoURL string) bool {
 		data, err = udn.Extract(videoURL)
 	case "tiktok":
 		data, err = tiktok.Extract(videoURL)
+	case "dailymotion":
+		data, err = dailymotion.Extract(videoURL)
 	default:
 		data, err = universal.Extract(videoURL)
 	}
