@@ -603,6 +603,7 @@ Twitter | <https://twitter.com> | ✓ | | | |
 极客时间 | <https://time.geekbang.org> | ✓ | | | |
 Pornhub | <https://pornhub.com> | ✓ | | | |
 XVIDEOS | <https://xvideos.com> | ✓ | | | |
+聯合新聞網 | <https://udn.com> | ✓ | | | |
 
 
 ## Known issues
