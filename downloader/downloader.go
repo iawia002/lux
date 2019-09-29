@@ -180,9 +180,9 @@ func Download(v Data, refer string, chunkSizeMB int) error {
 		stream string
 	)
 	if config.OutputName == "" {
-		title = utils.FileName(v.Title)
+		title = utils.FileName(v.Title, "")
 	} else {
-		title = utils.FileName(config.OutputName)
+		title = utils.FileName(config.OutputName, "")
 	}
 	if config.Stream == "" {
 		stream = v.sortedStreams[0].name

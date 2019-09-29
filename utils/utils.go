@@ -88,14 +88,19 @@ func LimitLength(s string, length int) string {
 }
 
 // FileName Converts a string to a valid filename
-func FileName(name string) string {
+func FileName(name string, ext string) string {
 	rep := strings.NewReplacer("\n", " ", "/", " ", "|", "-", ": ", "：", ":", "：", "'", "’")
 	name = rep.Replace(name)
 	if runtime.GOOS == "windows" {
 		rep = strings.NewReplacer("\"", " ", "?", " ", "*", " ", "\\", " ", "<", " ", ">", " ")
 		name = rep.Replace(name)
 	}
-	return LimitLength(name, MAXLENGTH)
+    limitedName := LimitLength(name, MAXLENGTH)
+    if ext == "" {
+        return limitedName
+    } else {
+        return fmt.Sprintf("%s.%s", limitedName, ext)
+    }
 }
 
 // FilePath gen valid file path
@@ -106,10 +111,12 @@ func FilePath(name, ext string, escape bool) (string, error) {
 			return "", err
 		}
 	}
-	fileName := fmt.Sprintf("%s.%s", name, ext)
+	var fileName string
 	if escape {
-		fileName = FileName(fileName)
-	}
+		fileName = FileName(name, ext)
+	} else {
+        fileName = fmt.Sprintf("%s.%s", name, ext)
+    }
 	outputPath = filepath.Join(config.OutputPath, fileName)
 	return outputPath, nil
 }
