@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MercuryEngineering/CookieMonster"
+	cookiemonster "github.com/MercuryEngineering/CookieMonster"
 	"github.com/fatih/color"
 	"github.com/kr/pretty"
 	"golang.org/x/net/proxy"
@@ -56,6 +56,7 @@ func Request(
 	}
 	client := &http.Client{
 		Transport: transport,
+		Timeout:   15 * time.Minute,
 	}
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
@@ -129,16 +130,24 @@ func Request(
 
 // Get get request
 func Get(url, refer string, headers map[string]string) (string, error) {
+	body, err := GetByte(url, refer, headers)
+	return string(body), err
+}
+
+// GetByte get request
+func GetByte(url, refer string, headers map[string]string) ([]byte, error) {
 	if headers == nil {
 		headers = map[string]string{}
 	}
 	if refer != "" {
 		headers["Referer"] = refer
 	}
-	res, err := Request("GET", url, nil, headers)
+	res, err := Request(http.MethodGet, url, nil, headers)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+	defer res.Body.Close()
+
 	var reader io.ReadCloser
 	switch res.Header.Get("Content-Encoding") {
 	case "gzip":
@@ -148,13 +157,13 @@ func Get(url, refer string, headers map[string]string) (string, error) {
 	default:
 		reader = res.Body
 	}
-	defer res.Body.Close()
 	defer reader.Close()
+
 	body, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return "", err
+	if err != nil && err != io.EOF {
+		return nil, err
 	}
-	return string(body), nil
+	return body, nil
 }
 
 // Headers return the HTTP Headers of the url
@@ -162,7 +171,7 @@ func Headers(url, refer string) (http.Header, error) {
 	headers := map[string]string{
 		"Referer": refer,
 	}
-	res, err := Request("GET", url, nil, headers)
+	res, err := Request(http.MethodGet, url, nil, headers)
 	if err != nil {
 		return nil, err
 	}

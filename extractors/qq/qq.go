@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -104,9 +105,17 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]downloader.Stream
 			if err != nil {
 				return nil, err
 			}
-			jsonString := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)[1]
+			jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
+			if jsonStrings == nil || len(jsonStrings) < 2 {
+				return nil, extractors.ErrURLParseFailed
+			}
+			jsonString := jsonStrings[1]
+
 			var keyData qqKeyInfo
-			json.Unmarshal([]byte(jsonString), &keyData)
+			if err = json.Unmarshal([]byte(jsonString), &keyData); err != nil {
+				return nil, err
+			}
+
 			vkey = keyData.Key
 			if vkey == "" {
 				vkey = data.Vl.Vi[0].Fvkey
@@ -135,15 +144,25 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]downloader.Stream
 
 // Extract is the main function for extracting data
 func Extract(url string) ([]downloader.Data, error) {
-	vid := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)[1]
+	vids := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)
+	if vids == nil || len(vids) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	vid := vids[1]
+
 	if len(vid) != 11 {
 		u, err := request.Get(url, url, nil)
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
-		vid = utils.MatchOneOf(
+
+		vids = utils.MatchOneOf(
 			u, `vid=(\w+)`, `vid:\s*["'](\w+)`, `vid\s*=\s*["']\s*(\w+)`,
-		)[1]
+		)
+		if vids == nil || len(vids) < 2 {
+			return nil, extractors.ErrURLParseFailed
+		}
+		vid = vids[1]
 	}
 	html, err := request.Get(
 		fmt.Sprintf(
@@ -152,19 +171,27 @@ func Extract(url string) ([]downloader.Data, error) {
 		), url, nil,
 	)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
-	jsonString := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)[1]
+	jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
+	if jsonStrings == nil || len(jsonStrings) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	jsonString := jsonStrings[1]
+
 	var data qqVideoInfo
-	json.Unmarshal([]byte(jsonString), &data)
+	if err = json.Unmarshal([]byte(jsonString), &data); err != nil {
+		return nil, err
+	}
+
 	// API request error
 	if data.Msg != "" {
-		return downloader.EmptyList, errors.New(data.Msg)
+		return nil, errors.New(data.Msg)
 	}
 	cdn := data.Vl.Vi[0].Ul.UI[len(data.Vl.Vi[0].Ul.UI)-1].URL
 	streams, err := genStreams(vid, cdn, data)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 
 	return []downloader.Data{

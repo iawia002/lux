@@ -16,6 +16,7 @@ import (
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -78,24 +79,29 @@ func getAudioLang(lang string) string {
 
 // var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
 
-func youkuUps(vid string) (youkuData, error) {
+func youkuUps(vid string) (*youkuData, error) {
 	var (
-		url  string
-		utid string
-		html string
-		data youkuData
-		err  error
+		url   string
+		utid  string
+		utids []string
+		data  youkuData
 	)
 	if strings.Contains(config.Cookie, "cna") {
-		utid = utils.MatchOneOf(config.Cookie, `cna=(.+?);`, `cna\s+(.+?)\s`, `cna\s+(.+?)$`)[1]
+		utids = utils.MatchOneOf(config.Cookie, `cna=(.+?);`, `cna\s+(.+?)\s`, `cna\s+(.+?)$`)
+
 	} else {
 		headers, err := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
 		if err != nil {
-			return youkuData{}, err
+			return nil, err
 		}
 		setCookie := headers.Get("Set-Cookie")
-		utid = utils.MatchOneOf(setCookie, `cna=(.+?);`)[1]
+		utids = utils.MatchOneOf(setCookie, `cna=(.+?);`)
 	}
+	if utids == nil || len(utids) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	utid = utids[1]
+
 	// https://g.alicdn.com/player/ykplayer/0.5.61/youku-player.min.js
 	// grep -oE '"[0-9a-zA-Z+/=]{256}"' youku-player.min.js
 	for _, ccode := range []string{config.YoukuCcode} {
@@ -109,18 +115,20 @@ func youkuUps(vid string) (youkuData, error) {
 		if config.YoukuPassword != "" {
 			url = fmt.Sprintf("%s&password=%s", url, config.YoukuPassword)
 		}
-		html, err = request.Get(url, youkuReferer, nil)
+		html, err := request.GetByte(url, youkuReferer, nil)
 		if err != nil {
-			return youkuData{}, err
+			return nil, err
 		}
 		// data must be emptied before reassignment, otherwise it will contain the previous value(the 'error' data)
 		data = youkuData{}
-		json.Unmarshal([]byte(html), &data)
+		if err = json.Unmarshal(html, &data); err != nil {
+			return nil, err
+		}
 		if data.Data.Error == (errorData{}) {
-			return data, nil
+			return &data, nil
 		}
 	}
-	return data, nil
+	return &data, nil
 }
 
 func getBytes(val int32) []byte {
@@ -139,7 +147,7 @@ func hashCode(s string) int32 {
 
 func hmacSha1(key []byte, msg []byte) []byte {
 	mac := hmac.New(sha1.New, key)
-	mac.Write([]byte(msg))
+	mac.Write(msg)
 	return mac.Sum(nil)
 }
 
@@ -200,15 +208,20 @@ func genData(youkuData data) map[string]downloader.Stream {
 
 // Extract is the main function for extracting data
 func Extract(url string) ([]downloader.Data, error) {
-	vid := utils.MatchOneOf(
+	vids := utils.MatchOneOf(
 		url, `id_(.+?)\.html`, `id_(.+)`,
-	)[1]
+	)
+	if vids == nil || len(vids) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	vid := vids[1]
+
 	youkuData, err := youkuUps(vid)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	if youkuData.Data.Error.Code != 0 {
-		return downloader.EmptyList, errors.New(youkuData.Data.Error.Note)
+		return nil, errors.New(youkuData.Data.Error.Note)
 	}
 	streams := genData(youkuData.Data)
 	var title string

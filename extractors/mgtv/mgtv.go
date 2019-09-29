@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -98,7 +99,7 @@ func encodeTk2(str string) string {
 func Extract(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	vid := utils.MatchOneOf(
 		url,
@@ -108,6 +109,10 @@ func Extract(url string) ([]downloader.Data, error) {
 	if vid == nil {
 		vid = utils.MatchOneOf(html, `vid: (\d+),`)
 	}
+	if vid == nil || len(vid) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+
 	// API extract from https://js.mgtv.com/imgotv-miniv6/global/page/play-tv.js
 	// getSource and getPlayInfo function
 	// Chrome Network JS panel
@@ -127,10 +132,13 @@ func Extract(url string) ([]downloader.Data, error) {
 		headers,
 	)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	var pm2 mgtvPm2Data
-	json.Unmarshal([]byte(pm2DataString), &pm2)
+	if err = json.Unmarshal([]byte(pm2DataString), &pm2); err != nil {
+		return nil, err
+	}
+
 	dataString, err := request.Get(
 		fmt.Sprintf(
 			"https://pcweb.api.mgtv.com/player/getSource?video_id=%s&tk2=%s&pm2=%s",
@@ -140,10 +148,13 @@ func Extract(url string) ([]downloader.Data, error) {
 		headers,
 	)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	var mgtvData mgtv
-	json.Unmarshal([]byte(dataString), &mgtvData)
+	if err = json.Unmarshal([]byte(dataString), &mgtvData); err != nil {
+		return nil, err
+	}
+
 	title := strings.TrimSpace(
 		pm2.Data.Info.Title + " " + pm2.Data.Info.Desc,
 	)
@@ -156,14 +167,17 @@ func Extract(url string) ([]downloader.Data, error) {
 		}
 		// real download address
 		addr = mgtvVideoAddr{}
-		addrInfo, err := request.Get(mgtvData.Data.StreamDomain[0]+stream.URL, url, headers)
+		addrInfo, err := request.GetByte(mgtvData.Data.StreamDomain[0]+stream.URL, url, headers)
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
-		json.Unmarshal([]byte(addrInfo), &addr)
+		if err = json.Unmarshal(addrInfo, &addr); err != nil {
+			return nil, err
+		}
+
 		m3u8URLs, totalSize, err := mgtvM3u8(addr.Info)
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
 		urls := make([]downloader.URL, len(m3u8URLs))
 		for index, u := range m3u8URLs {

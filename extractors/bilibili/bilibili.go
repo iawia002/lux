@@ -9,6 +9,7 @@ import (
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -111,7 +112,7 @@ func extractBangumi(url, html string) ([]downloader.Data, error) {
 	var data bangumiData
 	err := json.Unmarshal([]byte(dataString), &data)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	if !config.Playlist {
 		options := bilibiliOptions{
@@ -173,7 +174,7 @@ func getMultiPageData(html string) (*multiPage, error) {
 func extractNormalVideo(url, html string) ([]downloader.Data, error) {
 	pageData, err := getMultiPageData(html)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	if !config.Playlist {
 		// handle URL that has a playlist, mainly for unified titles
@@ -187,6 +188,10 @@ func extractNormalVideo(url, html string) ([]downloader.Data, error) {
 		} else {
 			// https://www.bilibili.com/video/av20827366/?p=2
 			p, _ = strconv.Atoi(pageString[1])
+		}
+
+		if len(pageData.VideoData.Pages) < p || p < 1 {
+			return nil, extractors.ErrURLParseFailed
 		}
 
 		page := pageData.VideoData.Pages[p-1]
@@ -240,7 +245,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	var err error
 	html, err := request.Get(url, referer, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	if strings.Contains(url, "bangumi") {
 		// handle bangumi
@@ -330,10 +335,13 @@ func bilibiliDownload(options bilibiliOptions) downloader.Data {
 		title = tempTitle
 	}
 
-	downloader.Caption(
+	err = downloader.Caption(
 		fmt.Sprintf("https://comment.bilibili.com/%s.xml", options.cid),
 		options.url, title, "xml",
 	)
+	if err != nil {
+		return downloader.EmptyData(options.url, err)
+	}
 
 	return downloader.Data{
 		Site:    "哔哩哔哩 bilibili.com",

@@ -80,11 +80,11 @@ func getSrc(html string) []*src {
 func Extract(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	var title string
 	desc := utils.MatchOneOf(html, `<title>(.+?)</title>`)
-	if desc != nil {
+	if desc != nil && len(desc) > 1 {
 		title = desc[1]
 	} else {
 		title = "xvideos"
@@ -94,7 +94,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	for _, src := range getSrc(html) {
 		size, err := request.Size(src.url, url)
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
 		urlData := downloader.URL{
 			URL:  src.url,

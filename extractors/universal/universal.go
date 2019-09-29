@@ -10,16 +10,15 @@ import (
 
 // Extract is the main function for extracting data
 func Extract(url string) ([]downloader.Data, error) {
-	fmt.Println()
-	fmt.Println("annie doesn't support this URL right now, but it will try to download it directly")
+	fmt.Println("\nannie doesn't support this URL right now, but it will try to download it directly")
 
 	filename, ext, err := utils.GetNameAndExt(url)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	size, err := request.Size(url, url)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	urlData := downloader.URL{
 		URL:  url,
@@ -34,7 +33,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	}
 	contentType, err := request.ContentType(url, url)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 
 	return []downloader.Data{

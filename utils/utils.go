@@ -2,6 +2,7 @@ package utils
 
 import (
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -169,6 +170,10 @@ func Md5(text string) string {
 
 // M3u8URLs get all urls from m3u8 url
 func M3u8URLs(uri string) ([]string, error) {
+	if len(uri) == 0 {
+		return nil, errors.New("url is null")
+	}
+
 	html, err := request.Get(uri, "", nil)
 	if err != nil {
 		return nil, err

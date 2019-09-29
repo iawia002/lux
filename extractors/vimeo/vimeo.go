@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -44,25 +45,33 @@ func Extract(url string) ([]downloader.Data, error) {
 	if strings.Contains(url, "player.vimeo.com") {
 		html, err = request.Get(url, url, nil)
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
 	} else {
 		vid = utils.MatchOneOf(url, `vimeo\.com/(\d+)`)[1]
 		html, err = request.Get("https://player.vimeo.com/video/"+vid, url, nil)
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
 	}
-	jsonString := utils.MatchOneOf(html, `var \w+\s?=\s?({.+?});`)[1]
+	jsonStrings := utils.MatchOneOf(html, `var \w+\s?=\s?({.+?});`)
+	if jsonStrings == nil || len(jsonStrings) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	jsonString := jsonStrings[1]
+
 	var vimeoData vimeo
-	json.Unmarshal([]byte(jsonString), &vimeoData)
+	if err = json.Unmarshal([]byte(jsonString), &vimeoData); err != nil {
+		return nil, err
+	}
+
 	streams := map[string]downloader.Stream{}
 	var size int64
 	var urlData downloader.URL
 	for _, video := range vimeoData.Request.Files.Progressive {
 		size, err = request.Size(video.URL, url)
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
 		urlData = downloader.URL{
 			URL:  video.URL,
