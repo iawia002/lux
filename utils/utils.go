@@ -95,12 +95,12 @@ func FileName(name string, ext string) string {
 		rep = strings.NewReplacer("\"", " ", "?", " ", "*", " ", "\\", " ", "<", " ", ">", " ")
 		name = rep.Replace(name)
 	}
-    limitedName := LimitLength(name, MAXLENGTH)
-    if ext == "" {
-        return limitedName
-    } else {
-        return fmt.Sprintf("%s.%s", limitedName, ext)
-    }
+	limitedName := LimitLength(name, MAXLENGTH)
+	if ext == "" {
+		return limitedName
+	} else {
+		return fmt.Sprintf("%s.%s", limitedName, ext)
+	}
 }
 
 // FilePath gen valid file path
@@ -115,8 +115,8 @@ func FilePath(name, ext string, escape bool) (string, error) {
 	if escape {
 		fileName = FileName(name, ext)
 	} else {
-        fileName = fmt.Sprintf("%s.%s", name, ext)
-    }
+		fileName = fmt.Sprintf("%s.%s", name, ext)
+	}
 	outputPath = filepath.Join(config.OutputPath, fileName)
 	return outputPath, nil
 }
