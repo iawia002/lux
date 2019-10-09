@@ -11,11 +11,22 @@ import (
 func NeedDownloadList(length int) []int {
 	if config.PlaylistItems != "" {
 		var items []int
-		var index int
+		var selStart, selEnd int
 		temp := strings.Split(config.PlaylistItems, ",")
+
 		for _, i := range temp {
-			index, _ = strconv.Atoi(strings.TrimSpace(i))
-			items = append(items, index)
+			selection := strings.Split(i, "-")
+			selStart, _ = strconv.Atoi(strings.TrimSpace(selection[0]))
+
+			if len(selection) >= 2 {
+				selEnd, _ = strconv.Atoi(strings.TrimSpace(selection[1]))
+			} else {
+				selEnd = selStart
+			}
+
+			for item := selStart; item <= selEnd; item++ {
+				items = append(items, item)
+			}
 		}
 		return items
 	}
