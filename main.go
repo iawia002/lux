@@ -67,7 +67,7 @@ func init() {
 	flag.IntVar(&config.PlaylistEnd, "end", 0, "Playlist video to end at")
 	flag.StringVar(
 		&config.PlaylistItems, "items", "",
-		"Playlist video items to download. Separated by commas like: 1,5,6",
+		"Playlist video items to download. Separated by commas like: 1,5,6,8-10",
 	)
 	flag.BoolVar(&config.Caption, "C", false, "Download captions")
 	flag.IntVar(

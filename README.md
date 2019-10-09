@@ -220,9 +220,9 @@ You can use the `-start`, `-end` or `-items` option to specify the download rang
 -start
     	Playlist video to start at (default 1)
 -end
-    	Playlist video to end at (default is last)
+    	Playlist video to end at
 -items
-    	Playlist video items to download. Separated by commas like: 1,5,6
+    	Playlist video items to download. Separated by commas like: 1,5,6,8-10
 ```
 
 ### Multiple inputs
@@ -524,7 +524,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
   -end int
     	Playlist video to end at
   -items string
-    	Playlist video items to download. Separated by commas like: 1,5,6
+    	Playlist video items to download. Separated by commas like: 1,5,6,8-10
 ```
 
 #### Filesystem:
