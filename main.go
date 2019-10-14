@@ -63,11 +63,11 @@ func init() {
 		&config.ThreadNumber, "n", 10, "The number of download thread (only works for multiple-parts video)",
 	)
 	flag.StringVar(&config.File, "F", "", "URLs file path")
-	flag.IntVar(&config.PlaylistStart, "start", 1, "Playlist video to start at")
-	flag.IntVar(&config.PlaylistEnd, "end", 0, "Playlist video to end at")
+	flag.IntVar(&config.itemStart, "start", 1, "Define the starting item of a playlist or a file input")
+	flag.IntVar(&config.itemEnd, "end", 0, "Define the ending item of a playlist or a file input")
 	flag.StringVar(
-		&config.PlaylistItems, "items", "",
-		"Playlist video items to download. Separated by commas like: 1,5,6,8-10",
+		&config.items, "items", "",
+		"Define wanted items from a file or playlist. Separated by commas like: 1,5,6,8-10",
 	)
 	flag.BoolVar(&config.Caption, "C", false, "Download captions")
 	flag.IntVar(
@@ -209,8 +209,23 @@ func main() {
 			return
 		}
 		defer file.Close()
+
+		var wantedItems []int
+		loopIdx := 0
 		scanner := bufio.NewScanner(file)
+		fileLength, err := FileLineCounter(scanner)
+		if err == nil {
+			fmt.Println(err)
+			return
+		} else {
+			wantedItems = NeedDownloadList(fileLength)
+		}
+		
 		for scanner.Scan() {
+			loopIdx += 1
+			if !ItemInSlice(scanner.Text(), wantedItems) && len(wantedItems) > 0 {
+				continue
+			}
 			universalURL := strings.TrimSpace(scanner.Text())
 			if universalURL == "" {
 				continue
