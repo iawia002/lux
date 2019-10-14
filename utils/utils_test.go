@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
@@ -509,6 +510,73 @@ func TestRange(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Range(tt.args.min, tt.args.max); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Range() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLineCount(t *testing.T) {
+	type args struct {
+		filePath string
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "negative test",
+			args: args{
+				filePath: "hello",
+			},
+			want: 0,
+		}, {
+			name: "positive test",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			want: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			file, _ := os.Open(tt.args.filePath)
+			got, _ := FileLineCounter(file)
+			if got < tt.want {
+				t.Errorf("Got: %v - want: %v", got, tt.want)
+			}
+		})
+	}
+}
+func TestParsingFile(t *testing.T) {
+	type args struct {
+		filePath string
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "negative test",
+			args: args{
+				filePath: "hello",
+			},
+			want: 0,
+		}, {
+			name: "positive test",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			want: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			file, _ := os.Open(tt.args.filePath)
+			got, _ := FileLineCounter(file)
+			if got < tt.want {
+				t.Errorf("Got: %v - want: %v", got, tt.want)
 			}
 		})
 	}

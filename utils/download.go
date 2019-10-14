@@ -3,14 +3,16 @@ package utils
 import (
 	"strconv"
 	"strings"
+
+	"github.com/iawia002/annie/config"
 )
 
 // NeedDownloadList return the indices of playlist that need download
 func NeedDownloadList(length int) []int {
-	if config.items != "" {
+	if config.Items != "" {
 		var items []int
 		var selStart, selEnd int
-		temp := strings.Split(config.items, ",")
+		temp := strings.Split(config.Items, ",")
 
 		for _, i := range temp {
 			selection := strings.Split(i, "-")
@@ -28,9 +30,9 @@ func NeedDownloadList(length int) []int {
 		}
 		return items
 	}
-	start := config.itemStart
-	end := config.itemEnd
-	if config.itemStart < 1 {
+	start := config.ItemStart
+	end := config.ItemEnd
+	if config.ItemStart < 1 {
 		start = 1
 	}
 	if end == 0 {

@@ -40,11 +40,11 @@ var (
 	// File URLs file path
 	File string
 	// ItemStart Define the starting item of a playlist or a file input
-	itemStart int
+	ItemStart int
 	// ItemEnd Define the ending item of a playlist or a file input
-	itemEnd int
-	// items Define wanted items from a file or playlist. Separated by commas like: 1,5,6,8-10
-	items string
+	ItemEnd int
+	// Items Define wanted items from a file or playlist. Separated by commas like: 1,5,6,8-10
+	Items string
 	// Caption download captions
 	Caption bool
 	// YoukuCcode youku ccode

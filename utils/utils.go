@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"bufio"
+	"bytes"
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -121,6 +124,7 @@ func FilePath(name, ext string, escape bool) (string, error) {
 	outputPath = filepath.Join(config.OutputPath, fileName)
 	return outputPath, nil
 }
+
 // FileLineCounter Counts line in file
 func FileLineCounter(r io.Reader) (int, error) {
 	buf := make([]byte, 32*1024)
@@ -139,6 +143,42 @@ func FileLineCounter(r io.Reader) (int, error) {
 			return count, err
 		}
 	}
+}
+
+// ParseInputFile Parses input file into args
+func ParseInputFile(fpath string) []string {
+	// read URL list from file
+	file, err := os.Open(config.File)
+	if err != nil {
+		fmt.Println(err)
+		return []string{}
+	}
+	defer file.Close()
+
+	fileLength, err := FileLineCounter(file)
+	if err == nil {
+		fmt.Println(err)
+		return []string{}
+	}
+
+	var wantedItems []int
+	wantedItems = NeedDownloadList(fileLength)
+	loopIdx := 0
+	scanner := bufio.NewScanner(file)
+
+	var items []string
+	for scanner.Scan() {
+		loopIdx++
+		if !ItemInSlice(loopIdx, wantedItems) && len(wantedItems) > 0 {
+			continue
+		}
+		universalURL := strings.TrimSpace(scanner.Text())
+		if universalURL == "" {
+			continue
+		}
+		items = append(items, universalURL)
+	}
+	return items
 }
 
 // ItemInSlice if a item is in the list

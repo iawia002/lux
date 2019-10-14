@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -63,10 +62,10 @@ func init() {
 		&config.ThreadNumber, "n", 10, "The number of download thread (only works for multiple-parts video)",
 	)
 	flag.StringVar(&config.File, "F", "", "URLs file path")
-	flag.IntVar(&config.itemStart, "start", 1, "Define the starting item of a playlist or a file input")
-	flag.IntVar(&config.itemEnd, "end", 0, "Define the ending item of a playlist or a file input")
+	flag.IntVar(&config.ItemStart, "start", 1, "Define the starting item of a playlist or a file input")
+	flag.IntVar(&config.ItemEnd, "end", 0, "Define the ending item of a playlist or a file input")
 	flag.StringVar(
-		&config.items, "items", "",
+		&config.Items, "items", "",
 		"Define wanted items from a file or playlist. Separated by commas like: 1,5,6,8-10",
 	)
 	flag.BoolVar(&config.Caption, "C", false, "Download captions")
@@ -202,36 +201,7 @@ func main() {
 		utils.PrintVersion()
 	}
 	if config.File != "" {
-		// read URL list from file
-		file, err := os.Open(config.File)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		defer file.Close()
-
-		var wantedItems []int
-		loopIdx := 0
-		scanner := bufio.NewScanner(file)
-		fileLength, err := FileLineCounter(scanner)
-		if err == nil {
-			fmt.Println(err)
-			return
-		} else {
-			wantedItems = NeedDownloadList(fileLength)
-		}
-		
-		for scanner.Scan() {
-			loopIdx += 1
-			if !ItemInSlice(scanner.Text(), wantedItems) && len(wantedItems) > 0 {
-				continue
-			}
-			universalURL := strings.TrimSpace(scanner.Text())
-			if universalURL == "" {
-				continue
-			}
-			args = append(args, universalURL)
-		}
+		args = append(args, utils.ParseInputFile(config.File)...)
 	}
 	if len(args) < 1 {
 		fmt.Println("Too few arguments")
