@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"annie/config"
 	"os"
 	"reflect"
 	"testing"
@@ -543,20 +542,30 @@ func TestLineCount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			file, _ := os.Open(tt.args.filePath)
 			got, _ := FileLineCounter(file)
-			if got > tt.want {
+			file.Close()
+			if got < tt.want {
 				t.Errorf("Got: %v - want: %v", got, tt.want)
 			}
 		})
 	}
 }
 func TestParsingFile(t *testing.T) {
+	/*_, thisFileName, _, ok := runtime.Caller(1)
+	if !ok {
+		t.Errorf("Couldn't get the path of this file")
+	}
+	fmt.Println(thisFileName)*/
+
 	type args struct {
 		filePath string
 	}
 	tests := []struct {
-		name string
-		args args
-		want int
+		name  string
+		args  args
+		start int
+		end   int
+		items string
+		want  int
 	}{
 		{
 			name: "negative test",
@@ -564,36 +573,36 @@ func TestParsingFile(t *testing.T) {
 				filePath: "hello",
 			},
 			want: 0,
-		},{
+		}, {
 			name: "start from x | end at x",
 			args: args{
 				filePath: "./utils_test.go",
 			},
-			start: 2
-			end: 4
-			want: 3,
-		},{
+			start: 2,
+			end:   4,
+			want:  3,
+		}, {
 			name: "end at x",
 			args: args{
 				filePath: "./utils_test.go",
 			},
-			end: 4
+			end:  4,
 			want: 4,
-		},{
+		}, {
 			name: "lower end then start",
 			args: args{
 				filePath: "./utils_test.go",
 			},
-			start: 2
-			end: 1
-			want: 1,
-		},{
+			start: 2,
+			end:   1,
+			want:  1,
+		}, {
 			name: "items 1",
 			args: args{
 				filePath: "./utils_test.go",
 			},
-			items: "1-2, 5, 6, 8"
-			want: 5,
+			items: "1-2, 5, 6, 8",
+			want:  5,
 		},
 	}
 	for _, tt := range tests {
@@ -601,24 +610,32 @@ func TestParsingFile(t *testing.T) {
 			config.ItemStart = tt.start
 			config.ItemEnd = tt.end
 			config.Items = tt.items
-			got, _ := ParseInputFile(tt.args.filePath)
-			if len(got) == tt.want {
-				t.Errorf("Got: %v - want: %v", got, tt.want)
+			file, _ := os.Open(tt.args.filePath)
+			got, _ := ParseInputFile(file)
+			file.Close()
+			if len(got) != tt.want {
+				t.Errorf("Got: %v - want: %v", len(got), tt.want)
 			}
 		})
 	}
 
 	//test for start from x
-	t.Run(tt.name, func(t *testing.T) {
+	t.Run("start from x", func(t *testing.T) {
 		config.ItemStart = 5
+		config.ItemEnd = 0
+		config.Items = ""
 		config.File = "./utils_test.go"
 		file, _ := os.Open(config.File)
 		linesCount, _ := FileLineCounter(file)
-		got, _ := ParseInputFile(config.File)
+		file.Close()
+
+		file, _ = os.Open(config.File)
+		got, _ := ParseInputFile(file)
+		defer file.Close()
 
 		//start from line x to the end of the file
-		if len(got) == linesCount - config.ItemStart - 1 {
-			t.Errorf("Got: %v - want: %v", got, tt.want)
+		if len(got) != linesCount-config.ItemStart+1 {
+			t.Errorf("Got: %v - want: %v", len(got), linesCount-config.ItemStart+1)
 		}
 	})
 }

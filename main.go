@@ -201,11 +201,17 @@ func main() {
 		utils.PrintVersion()
 	}
 	if config.File != "" {
-		fileItems, err := utils.ParseInputFile(config.File)
+		file, err := os.Open(config.File)
 		if err != nil {
 			printError(config.File, err)
 		}
-		args = append(args, fileItems)
+		defer file.Close()
+
+		fileItems, err := utils.ParseInputFile(file)
+		if err != nil {
+			printError(config.File, err)
+		}
+		args = append(args, fileItems...)
 	}
 	if len(args) < 1 {
 		fmt.Println("Too few arguments")
