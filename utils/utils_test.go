@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"annie/config"
 	"os"
 	"reflect"
 	"testing"
@@ -542,7 +543,7 @@ func TestLineCount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			file, _ := os.Open(tt.args.filePath)
 			got, _ := FileLineCounter(file)
-			if got < tt.want {
+			if got > tt.want {
 				t.Errorf("Got: %v - want: %v", got, tt.want)
 			}
 		})
@@ -563,21 +564,61 @@ func TestParsingFile(t *testing.T) {
 				filePath: "hello",
 			},
 			want: 0,
-		}, {
-			name: "positive test",
+		},{
+			name: "start from x | end at x",
 			args: args{
 				filePath: "./utils_test.go",
 			},
+			start: 2
+			end: 4
+			want: 3,
+		},{
+			name: "end at x",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			end: 4
+			want: 4,
+		},{
+			name: "lower end then start",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			start: 2
+			end: 1
 			want: 1,
+		},{
+			name: "items 1",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			items: "1-2, 5, 6, 8"
+			want: 5,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			file, _ := os.Open(tt.args.filePath)
-			got, _ := FileLineCounter(file)
-			if got < tt.want {
+			config.ItemStart = tt.start
+			config.ItemEnd = tt.end
+			config.Items = tt.items
+			got, _ := ParseInputFile(tt.args.filePath)
+			if len(got) == tt.want {
 				t.Errorf("Got: %v - want: %v", got, tt.want)
 			}
 		})
 	}
+
+	//test for start from x
+	t.Run(tt.name, func(t *testing.T) {
+		config.ItemStart = 5
+		config.File = "./utils_test.go"
+		file, _ := os.Open(config.File)
+		linesCount, _ := FileLineCounter(file)
+		got, _ := ParseInputFile(config.File)
+
+		//start from line x to the end of the file
+		if len(got) == linesCount - config.ItemStart - 1 {
+			t.Errorf("Got: %v - want: %v", got, tt.want)
+		}
+	})
 }

@@ -146,19 +146,18 @@ func FileLineCounter(r io.Reader) (int, error) {
 }
 
 // ParseInputFile Parses input file into args
-func ParseInputFile(fpath string) []string {
+func ParseInputFile(fpath string) ([]string, error) {
 	// read URL list from file
 	file, err := os.Open(config.File)
 	if err != nil {
 		fmt.Println(err)
-		return []string{}
+		return []string{}, err
 	}
 	defer file.Close()
 
 	fileLength, err := FileLineCounter(file)
 	if err == nil {
-		fmt.Println(err)
-		return []string{}
+		return []string{}, err
 	}
 
 	var wantedItems []int
@@ -166,6 +165,7 @@ func ParseInputFile(fpath string) []string {
 	loopIdx := 0
 	scanner := bufio.NewScanner(file)
 
+	//only read needed items
 	var items []string
 	for scanner.Scan() {
 		loopIdx++
@@ -178,7 +178,7 @@ func ParseInputFile(fpath string) []string {
 		}
 		items = append(items, universalURL)
 	}
-	return items
+	return nil, items
 }
 
 // ItemInSlice if a item is in the list
