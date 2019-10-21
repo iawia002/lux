@@ -611,7 +611,7 @@ func TestParsingFile(t *testing.T) {
 			config.ItemEnd = tt.end
 			config.Items = tt.items
 			file, _ := os.Open(tt.args.filePath)
-			got, _ := ParseInputFile(file)
+			got := ParseInputFile(file)
 			file.Close()
 			if len(got) != tt.want {
 				t.Errorf("Got: %v - want: %v", len(got), tt.want)
@@ -630,7 +630,7 @@ func TestParsingFile(t *testing.T) {
 		file.Close()
 
 		file, _ = os.Open(config.File)
-		got, _ := ParseInputFile(file)
+		got := ParseInputFile(file)
 		defer file.Close()
 
 		//start from line x to the end of the file

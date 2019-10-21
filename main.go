@@ -203,14 +203,11 @@ func main() {
 	if config.File != "" {
 		file, err := os.Open(config.File)
 		if err != nil {
-			printError(config.File, err)
+			fmt.Printf("Error %v", err)
 		}
 		defer file.Close()
 
-		fileItems, err := utils.ParseInputFile(file)
-		if err != nil {
-			printError(config.File, err)
-		}
+		fileItems := utils.ParseInputFile(file)
 		args = append(args, fileItems...)
 	}
 	if len(args) < 1 {

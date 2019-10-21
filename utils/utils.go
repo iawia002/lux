@@ -146,7 +146,7 @@ func FileLineCounter(r io.Reader) (int, error) {
 }
 
 // ParseInputFile Parses input file into args
-func ParseInputFile(r io.Reader) ([]string, error) {
+func ParseInputFile(r io.Reader) []string {
 	scanner := bufio.NewScanner(r)
 
 	var temp []string
@@ -170,7 +170,7 @@ func ParseInputFile(r io.Reader) ([]string, error) {
 		}
 	}
 
-	return items, nil
+	return items
 }
 
 // ItemInSlice if a item is in the list
