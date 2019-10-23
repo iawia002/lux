@@ -204,6 +204,7 @@ func main() {
 		file, err := os.Open(config.File)
 		if err != nil {
 			fmt.Printf("Error %v", err)
+			return
 		}
 		defer file.Close()
 
