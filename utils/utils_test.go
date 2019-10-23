@@ -549,8 +549,13 @@ func TestLineCount(t *testing.T) {
 		})
 	}
 }
-
 func TestParsingFile(t *testing.T) {
+	/*_, thisFileName, _, ok := runtime.Caller(1)
+	if !ok {
+		t.Errorf("Couldn't get the path of this file")
+	}
+	fmt.Println(thisFileName)*/
+
 	type args struct {
 		filePath string
 	}
@@ -614,7 +619,7 @@ func TestParsingFile(t *testing.T) {
 		})
 	}
 
-	// test for start from x
+	//test for start from x
 	t.Run("start from x", func(t *testing.T) {
 		config.ItemStart = 5
 		config.ItemEnd = 0
@@ -628,7 +633,7 @@ func TestParsingFile(t *testing.T) {
 		got := ParseInputFile(file)
 		defer file.Close()
 
-		// start from line x to the end of the file
+		//start from line x to the end of the file
 		if len(got) != linesCount-config.ItemStart+1 {
 			t.Errorf("Got: %v - want: %v", len(got), linesCount-config.ItemStart+1)
 		}
