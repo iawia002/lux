@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
@@ -512,4 +513,124 @@ func TestRange(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestLineCount(t *testing.T) {
+	type args struct {
+		filePath string
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "negative test",
+			args: args{
+				filePath: "hello",
+			},
+			want: 0,
+		}, {
+			name: "positive test",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			want: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			file, _ := os.Open(tt.args.filePath)
+			got, _ := FileLineCounter(file)
+			file.Close()
+			if got < tt.want {
+				t.Errorf("Got: %v - want: %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParsingFile(t *testing.T) {
+	type args struct {
+		filePath string
+	}
+	tests := []struct {
+		name  string
+		args  args
+		start int
+		end   int
+		items string
+		want  int
+	}{
+		{
+			name: "negative test",
+			args: args{
+				filePath: "hello",
+			},
+			want: 0,
+		}, {
+			name: "start from x | end at x",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			start: 2,
+			end:   4,
+			want:  3,
+		}, {
+			name: "end at x",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			end:  4,
+			want: 4,
+		}, {
+			name: "lower end then start",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			start: 2,
+			end:   1,
+			want:  1,
+		}, {
+			name: "items 1",
+			args: args{
+				filePath: "./utils_test.go",
+			},
+			items: "1-2, 5, 6, 8",
+			want:  5,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			config.ItemStart = tt.start
+			config.ItemEnd = tt.end
+			config.Items = tt.items
+			file, _ := os.Open(tt.args.filePath)
+			got := ParseInputFile(file)
+			file.Close()
+			if len(got) != tt.want {
+				t.Errorf("Got: %v - want: %v", len(got), tt.want)
+			}
+		})
+	}
+
+	// test for start from x
+	t.Run("start from x", func(t *testing.T) {
+		config.ItemStart = 5
+		config.ItemEnd = 0
+		config.Items = ""
+		config.File = "./utils_test.go"
+		file, _ := os.Open(config.File)
+		linesCount, _ := FileLineCounter(file)
+		file.Close()
+
+		file, _ = os.Open(config.File)
+		got := ParseInputFile(file)
+		defer file.Close()
+
+		// start from line x to the end of the file
+		if len(got) != linesCount-config.ItemStart+1 {
+			t.Errorf("Got: %v - want: %v", len(got), linesCount-config.ItemStart+1)
+		}
+	})
 }

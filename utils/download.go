@@ -9,10 +9,10 @@ import (
 
 // NeedDownloadList return the indices of playlist that need download
 func NeedDownloadList(length int) []int {
-	if config.PlaylistItems != "" {
+	if config.Items != "" {
 		var items []int
 		var selStart, selEnd int
-		temp := strings.Split(config.PlaylistItems, ",")
+		temp := strings.Split(config.Items, ",")
 
 		for _, i := range temp {
 			selection := strings.Split(i, "-")
@@ -30,9 +30,9 @@ func NeedDownloadList(length int) []int {
 		}
 		return items
 	}
-	start := config.PlaylistStart
-	end := config.PlaylistEnd
-	if config.PlaylistStart < 1 {
+	start := config.ItemStart
+	end := config.ItemEnd
+	if config.ItemStart < 1 {
 		start = 1
 	}
 	if end == 0 {

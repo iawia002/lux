@@ -89,9 +89,9 @@ func TestNeedDownloadList(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config.PlaylistStart = tt.start
-			config.PlaylistEnd = tt.end
-			config.PlaylistItems = tt.items
+			config.ItemStart = tt.start
+			config.ItemEnd = tt.end
+			config.Items = tt.items
 			if got := NeedDownloadList(tt.args.len); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NeedDownloadList() = %v, want %v", got, tt.want)
 			}
