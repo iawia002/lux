@@ -154,9 +154,6 @@ func ParseInputFile(r io.Reader) []string {
 	for scanner.Scan() {
 		totalLines++
 		universalURL := strings.TrimSpace(scanner.Text())
-		if universalURL == "" {
-			continue
-		}
 		temp = append(temp, universalURL)
 	}
 
