@@ -7,7 +7,9 @@ require (
 	github.com/PuerkitoBio/goquery v1.4.1
 	github.com/andybalholm/cascadia v1.0.0 // indirect
 	github.com/cheggaaa/pb v1.0.25
+	github.com/docker/go-units v0.4.0
 	github.com/fatih/color v1.7.0
+	github.com/juju/ratelimit v1.0.1
 	github.com/kr/pretty v0.1.0
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.3 // indirect
