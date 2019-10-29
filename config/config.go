@@ -39,12 +39,12 @@ var (
 	ThreadNumber int
 	// File URLs file path
 	File string
-	// PlaylistStart Playlist video to start at
-	PlaylistStart int
-	// PlaylistEnd Playlist video to end at
-	PlaylistEnd int
-	// PlaylistItems Playlist video items to download. Separated by commas like: 1,5,6
-	PlaylistItems string
+	// ItemStart Define the starting item of a playlist or a file input
+	ItemStart int
+	// ItemEnd Define the ending item of a playlist or a file input
+	ItemEnd int
+	// Items Define wanted items from a file or playlist. Separated by commas like: 1,5,6,8-10
+	Items string
 	// Caption download captions
 	Caption bool
 	// YoukuCcode youku ccode

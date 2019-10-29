@@ -272,6 +272,17 @@ $ annie -F ~/Desktop/u.txt
 ......
 ```
 
+You can use the `-start`, `-end` or `-items` option to specify the download range of the list:
+
+```
+-start
+    	File line to start at (default 1)
+-end
+    	File line to end at
+-items
+    	File lines to download. Separated by commas like: 1,5,6,8-10
+```
+
 ### Resume a download
 
 <kbd>Ctrl</kbd>+<kbd>C</kbd> interrupts a download.
