@@ -7,7 +7,7 @@ import (
 
 // WaitGroupPool pool of WaitGroup
 type WaitGroupPool struct {
-	pool chan int
+	pool chan struct{}
 	wg   *sync.WaitGroup
 }
 
@@ -17,7 +17,7 @@ func NewWaitGroupPool(size int) *WaitGroupPool {
 		size = math.MaxInt32
 	}
 	return &WaitGroupPool{
-		pool: make(chan int, size),
+		pool: make(chan struct{}, size),
 		wg:   &sync.WaitGroup{},
 	}
 }
@@ -25,7 +25,7 @@ func NewWaitGroupPool(size int) *WaitGroupPool {
 // Add increments the WaitGroup counter by one.
 // See sync.WaitGroup documentation for more information.
 func (p *WaitGroupPool) Add() {
-	p.pool <- 1
+	p.pool <- struct{}{}
 	p.wg.Add(1)
 }
 

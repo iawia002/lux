@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -95,7 +96,7 @@ func getVPS(tvid, vid string) (iqiyi, error) {
 func Extract(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, iqiyiReferer, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	tvid := utils.MatchOneOf(
 		url,
@@ -110,6 +111,10 @@ func Extract(url string) ([]downloader.Data, error) {
 			`"tvid":"(\d+)"`,
 		)
 	}
+	if tvid == nil || len(tvid) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+
 	vid := utils.MatchOneOf(
 		url,
 		`#curid=.+_(.*)$`,
@@ -123,9 +128,13 @@ func Extract(url string) ([]downloader.Data, error) {
 			`"vid":"(\w+)"`,
 		)
 	}
+	if vid == nil || len(vid) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	title := strings.TrimSpace(doc.Find("h1>a").First().Text())
 	var sub string
@@ -141,10 +150,10 @@ func Extract(url string) ([]downloader.Data, error) {
 	}
 	videoDatas, err := getVPS(tvid[1], vid[1])
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	if videoDatas.Code != "A00000" {
-		return downloader.EmptyList, fmt.Errorf("can't play this video: %s", videoDatas.Msg)
+		return nil, fmt.Errorf("can't play this video: %s", videoDatas.Msg)
 	}
 	streams := map[string]downloader.Stream{}
 	urlPrefix := videoDatas.Data.VP.Du
@@ -153,13 +162,15 @@ func Extract(url string) ([]downloader.Data, error) {
 		for index, v := range video.Fs {
 			realURLData, err := request.Get(urlPrefix+v.L, iqiyiReferer, nil)
 			if err != nil {
-				return downloader.EmptyList, err
+				return nil, err
 			}
 			var realURL iqiyiURL
-			json.Unmarshal([]byte(realURLData), &realURL)
+			if err = json.Unmarshal([]byte(realURLData), &realURL); err != nil {
+				return nil, err
+			}
 			_, ext, err := utils.GetNameAndExt(realURL.L)
 			if err != nil {
-				return downloader.EmptyList, err
+				return nil, err
 			}
 			urls[index] = downloader.URL{
 				URL:  realURL.L,

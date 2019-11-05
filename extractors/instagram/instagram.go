@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -33,18 +34,25 @@ type instagram struct {
 func Extract(url string) ([]downloader.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	// get the title
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	title := parser.Title(doc)
 
-	dataString := utils.MatchOneOf(html, `window\._sharedData\s*=\s*(.*);`)[1]
+	dataStrings := utils.MatchOneOf(html, `window\._sharedData\s*=\s*(.*);`)
+	if dataStrings == nil || len(dataStrings) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	dataString := dataStrings[1]
+
 	var data instagram
-	json.Unmarshal([]byte(dataString), &data)
+	if err = json.Unmarshal([]byte(dataString), &data); err != nil {
+		return nil, extractors.ErrURLParseFailed
+	}
 
 	var realURL, dataType string
 	var size int64
@@ -56,7 +64,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.VideoURL
 		size, err = request.Size(realURL, url)
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
 		streams["default"] = downloader.Stream{
 			URLs: []downloader.URL{
@@ -76,7 +84,7 @@ func Extract(url string) ([]downloader.Data, error) {
 			realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.DisplayURL
 			size, err = request.Size(realURL, url)
 			if err != nil {
-				return downloader.EmptyList, err
+				return nil, err
 			}
 			streams["default"] = downloader.Stream{
 				URLs: []downloader.URL{
@@ -96,7 +104,7 @@ func Extract(url string) ([]downloader.Data, error) {
 				realURL = u.Node.DisplayURL
 				size, err = request.Size(realURL, url)
 				if err != nil {
-					return downloader.EmptyList, err
+					return nil, err
 				}
 				urlData := downloader.URL{
 					URL:  realURL,

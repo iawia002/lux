@@ -1,4 +1,4 @@
-package bcy
+package xvideos
 
 import (
 	"testing"
@@ -7,9 +7,9 @@ import (
 	"github.com/iawia002/annie/test"
 )
 
-func TestDownload(t *testing.T) {
+func TestExtract(t *testing.T) {
 	config.InfoOnly = true
-	config.RetryTimes = 100
+	config.RetryTimes = 10
 	tests := []struct {
 		name string
 		args test.Args
@@ -17,9 +17,9 @@ func TestDownload(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:   "https://bcy.net/item/detail/6558738153367142664",
-				Title: "cos正片 命运石之门 牧濑红莉栖 克里斯蒂娜… - 半次元 - ACG爱好者社区",
-				Size:  13035763,
+				URL:   "https://www.xvideos.com/video29018757/asian_chick_enjoying_sex_debut._hd_full_at_nanairo.co",
+				Title: "Asian chick enjoying sex debut&period; HD FULL at&colon; nanairo&period;co - XVIDEOS.COM",
+				Size:  16574766,
 			},
 		},
 	}

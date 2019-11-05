@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -15,22 +16,32 @@ func Extract(url string) ([]downloader.Data, error) {
 	url = strings.Replace(url, "/#/", "/", 1)
 	vid := utils.MatchOneOf(url, `/(mv|video)\?id=(\w+)`)
 	if vid == nil {
-		return downloader.EmptyList, errors.New("invalid url for netease music")
+		return nil, errors.New("invalid url for netease music")
 	}
-	var err error
+
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	if strings.Contains(html, "u-errlg-404") {
-		return downloader.EmptyList, errors.New("404 music not found")
+		return nil, errors.New("404 music not found")
 	}
-	title := utils.MatchOneOf(html, `<meta property="og:title" content="(.+?)" />`)[1]
-	realURL := utils.MatchOneOf(html, `<meta property="og:video" content="(.+?)" />`)[1]
-	realURL, _ = netURL.QueryUnescape(realURL)
+
+	titles := utils.MatchOneOf(html, `<meta property="og:title" content="(.+?)" />`)
+	if titles == nil || len(titles) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	title := titles[1]
+
+	realURLs := utils.MatchOneOf(html, `<meta property="og:video" content="(.+?)" />`)
+	if realURLs == nil || len(realURLs) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	realURL, _ := netURL.QueryUnescape(realURLs[1])
+
 	size, err := request.Size(realURL, url)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	urlData := downloader.URL{
 		URL:  realURL,

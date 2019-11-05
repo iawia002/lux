@@ -220,9 +220,9 @@ You can use the `-start`, `-end` or `-items` option to specify the download rang
 -start
     	Playlist video to start at (default 1)
 -end
-    	Playlist video to end at (default is last)
+    	Playlist video to end at
 -items
-    	Playlist video items to download. Separated by commas like: 1,5,6
+    	Playlist video items to download. Separated by commas like: 1,5,6,8-10
 ```
 
 ### Multiple inputs
@@ -270,6 +270,17 @@ $ annie -F ~/Desktop/u.txt
  19.19 MiB / 19.19 MiB [=================================] 100.00% 9.69 MiB/s 1s
 
 ......
+```
+
+You can use the `-start`, `-end` or `-items` option to specify the download range of the list:
+
+```
+-start
+    	File line to start at (default 1)
+-end
+    	File line to end at
+-items
+    	File lines to download. Separated by commas like: 1,5,6,8-10
 ```
 
 ### Resume a download
@@ -524,7 +535,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
   -end int
     	Playlist video to end at
   -items string
-    	Playlist video items to download. Separated by commas like: 1,5,6
+    	Playlist video items to download. Separated by commas like: 1,5,6,8-10
 ```
 
 #### Filesystem:
@@ -588,6 +599,7 @@ pixivision | <https://www.pixivision.net> | | ✓ | | |
 YouTube | <https://www.youtube.com> | ✓ | | ✓ | |
 爱奇艺 | <https://www.iqiyi.com> | ✓ | | | |
 芒果TV | <https://www.mgtv.com> | ✓ | | | |
+糖豆广场舞 | <http://www.tangdou.com> | ✓ | | ✓ | |
 Tumblr | <https://www.tumblr.com> | ✓ | ✓ | | |
 Vimeo | <https://vimeo.com> | ✓ | | | |
 Facebook | <https://facebook.com> | ✓ | | | |
@@ -601,6 +613,8 @@ Twitter | <https://twitter.com> | ✓ | | | |
 音悦台 | <https://yinyuetai.com> | ✓ | | | |
 极客时间 | <https://time.geekbang.org> | ✓ | | | |
 Pornhub | <https://pornhub.com> | ✓ | | | |
+XVIDEOS | <https://xvideos.com> | ✓ | | | |
+聯合新聞網 | <https://udn.com> | ✓ | | | |
 
 
 ## Known issues

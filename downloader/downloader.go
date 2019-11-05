@@ -7,9 +7,11 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/cheggaaa/pb"
+
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -29,7 +31,7 @@ func Caption(url, refer, fileName, ext string) error {
 		return nil
 	}
 	fmt.Println("\nDownloading captions...")
-	body, err := request.Get(url, refer, nil)
+	body, err := request.GetByte(url, refer, nil)
 	if err != nil {
 		return err
 	}
@@ -42,23 +44,27 @@ func Caption(url, refer, fileName, ext string) error {
 		return fileError
 	}
 	defer file.Close()
-	file.WriteString(body)
+
+	if _, err = file.Write(body); err != nil {
+		return err
+	}
 	return nil
 }
 
 func writeFile(
 	url string, file *os.File, headers map[string]string, bar *pb.ProgressBar,
 ) (int64, error) {
-	res, err := request.Request("GET", url, nil, headers)
+	res, err := request.Request(http.MethodGet, url, nil, headers)
 	if err != nil {
 		return 0, err
 	}
 	defer res.Body.Close()
+
 	writer := io.MultiWriter(file, bar)
 	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
 	// So don't worry about memory.
 	written, copyErr := io.Copy(writer, res.Body)
-	if copyErr != nil {
+	if copyErr != nil && copyErr != io.EOF {
 		return written, fmt.Errorf("file copy error: %s", copyErr)
 	}
 	return written, nil
@@ -110,6 +116,17 @@ func Save(
 	if fileError != nil {
 		return fileError
 	}
+
+	// close and rename temp file at the end of this function
+	defer func() {
+		// must close the file before rename or it will cause
+		// `The process cannot access the file because it is being used by another process.` error.
+		file.Close()
+		if err == nil {
+			os.Rename(tempFilePath, filePath)
+		}
+	}()
+
 	if chunkSizeMB > 0 {
 		var start, end, chunkSize int64
 		chunkSize = int64(chunkSizeMB) * 1024 * 1024
@@ -155,15 +172,6 @@ func Save(
 		}
 	}
 
-	// close and rename temp file at the end of this function
-	defer func() {
-		// must close the file before rename or it will cause
-		// `The process cannot access the file because it is being used by another process.` error.
-		file.Close()
-		if err == nil {
-			os.Rename(tempFilePath, filePath)
-		}
-	}()
 	return nil
 }
 
@@ -180,9 +188,9 @@ func Download(v Data, refer string, chunkSizeMB int) error {
 		stream string
 	)
 	if config.OutputName == "" {
-		title = utils.FileName(v.Title)
+		title = utils.FileName(v.Title, "")
 	} else {
-		title = utils.FileName(config.OutputName)
+		title = utils.FileName(config.OutputName, "")
 	}
 	if config.Stream == "" {
 		stream = v.sortedStreams[0].name
@@ -220,20 +228,25 @@ func Download(v Data, refer string, chunkSizeMB int) error {
 				return err
 			}
 			reqURL := fmt.Sprintf("%s://%s/jsonrpc", config.Aria2Method, config.Aria2Addr)
-			req, err := http.NewRequest("POST", reqURL, bytes.NewBuffer(jsonData))
+			req, err := http.NewRequest(http.MethodPost, reqURL, bytes.NewBuffer(jsonData))
 			if err != nil {
 				return err
 			}
 			req.Header.Set("Content-Type", "application/json")
-			var client http.Client
-			_, err = client.Do(req)
+
+			var client = http.Client{Timeout: 30 * time.Second}
+			res, err := client.Do(req)
 			if err != nil {
 				return err
 			}
+			// The http Client and Transport guarantee that Body is always
+			// non-nil, even on responses without a body or responses with
+			// a zero-length body.
+			res.Body.Close()
 		}
 		return nil
 	}
-	var err error
+
 	// Skip the complete file that has been merged
 	mergedFilePath, err := utils.FilePath(title, "mp4", false)
 	if err != nil {
@@ -262,8 +275,13 @@ func Download(v Data, refer string, chunkSizeMB int) error {
 	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
 	// multiple fragments
 	errs := make([]error, 0)
+	lock := sync.Mutex{}
 	parts := make([]string, len(data.URLs))
 	for index, url := range data.URLs {
+		if len(errs) > 0 {
+			break
+		}
+
 		partFileName := fmt.Sprintf("%s[%d]", title, index)
 		partFilePath, err := utils.FilePath(partFileName, url.Ext, false)
 		if err != nil {
@@ -276,7 +294,9 @@ func Download(v Data, refer string, chunkSizeMB int) error {
 			defer wgp.Done()
 			err := Save(url, refer, fileName, bar, chunkSizeMB)
 			if err != nil {
+				lock.Lock()
 				errs = append(errs, err)
+				lock.Unlock()
 			}
 		}(url, refer, partFileName, bar)
 	}
@@ -296,8 +316,6 @@ func Download(v Data, refer string, chunkSizeMB int) error {
 	} else {
 		err = utils.MergeToMP4(parts, mergedFilePath, title)
 	}
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -27,11 +26,14 @@ import (
 	"github.com/iawia002/annie/extractors/pixivision"
 	"github.com/iawia002/annie/extractors/pornhub"
 	"github.com/iawia002/annie/extractors/qq"
+	"github.com/iawia002/annie/extractors/tangdou"
 	"github.com/iawia002/annie/extractors/tumblr"
 	"github.com/iawia002/annie/extractors/twitter"
+	"github.com/iawia002/annie/extractors/udn"
 	"github.com/iawia002/annie/extractors/universal"
 	"github.com/iawia002/annie/extractors/vimeo"
 	"github.com/iawia002/annie/extractors/weibo"
+	"github.com/iawia002/annie/extractors/xvideos"
 	"github.com/iawia002/annie/extractors/yinyuetai"
 	"github.com/iawia002/annie/extractors/youku"
 	"github.com/iawia002/annie/extractors/youtube"
@@ -60,11 +62,11 @@ func init() {
 		&config.ThreadNumber, "n", 10, "The number of download thread (only works for multiple-parts video)",
 	)
 	flag.StringVar(&config.File, "F", "", "URLs file path")
-	flag.IntVar(&config.PlaylistStart, "start", 1, "Playlist video to start at")
-	flag.IntVar(&config.PlaylistEnd, "end", 0, "Playlist video to end at")
+	flag.IntVar(&config.ItemStart, "start", 1, "Define the starting item of a playlist or a file input")
+	flag.IntVar(&config.ItemEnd, "end", 0, "Define the ending item of a playlist or a file input")
 	flag.StringVar(
-		&config.PlaylistItems, "items", "",
-		"Playlist video items to download. Separated by commas like: 1,5,6",
+		&config.Items, "items", "",
+		"Define wanted items from a file or playlist. Separated by commas like: 1,5,6,8-10",
 	)
 	flag.BoolVar(&config.Caption, "C", false, "Download captions")
 	flag.IntVar(
@@ -97,7 +99,7 @@ func download(videoURL string) bool {
 		data   []downloader.Data
 	)
 	bilibiliShortLink := utils.MatchOneOf(videoURL, `^(av|ep)\d+`)
-	if bilibiliShortLink != nil {
+	if bilibiliShortLink != nil && len(bilibiliShortLink) > 1 {
 		bilibiliURL := map[string]string{
 			"av": "https://www.bilibili.com/video/",
 			"ep": "https://www.bilibili.com/bangumi/play/",
@@ -108,7 +110,7 @@ func download(videoURL string) bool {
 		u, err := url.ParseRequestURI(videoURL)
 		if err != nil {
 			printError(videoURL, err)
-			return true
+			return false
 		}
 		domain = utils.Domain(u.Host)
 	}
@@ -129,6 +131,8 @@ func download(videoURL string) bool {
 		data, err = iqiyi.Extract(videoURL)
 	case "mgtv":
 		data, err = mgtv.Extract(videoURL)
+	case "tangdou":
+		data, err = tangdou.Extract(videoURL)
 	case "tumblr":
 		data, err = tumblr.Extract(videoURL)
 	case "vimeo":
@@ -155,6 +159,10 @@ func download(videoURL string) bool {
 		data, err = geekbang.Extract(videoURL)
 	case "pornhub":
 		data, err = pornhub.Extract(videoURL)
+	case "xvideos":
+		data, err = xvideos.Extract(videoURL)
+	case "udn":
+		data, err = udn.Extract(videoURL)
 	default:
 		data, err = universal.Extract(videoURL)
 	}
@@ -162,7 +170,7 @@ func download(videoURL string) bool {
 		// if this error occurs, it means that an error occurred before actually starting to extract data
 		// (there is an error in the preparation step), and the data list is empty.
 		printError(videoURL, err)
-		return true
+		return false
 	}
 	var isErr bool
 	for _, item := range data {
@@ -179,7 +187,7 @@ func download(videoURL string) bool {
 			isErr = true
 		}
 	}
-	return isErr
+	return !isErr
 }
 
 func main() {
@@ -193,21 +201,15 @@ func main() {
 		utils.PrintVersion()
 	}
 	if config.File != "" {
-		// read URL list from file
 		file, err := os.Open(config.File)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("Error %v", err)
 			return
 		}
 		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			universalURL := strings.TrimSpace(scanner.Text())
-			if universalURL == "" {
-				continue
-			}
-			args = append(args, universalURL)
-		}
+
+		fileItems := utils.ParseInputFile(file)
+		args = append(args, fileItems...)
 	}
 	if len(args) < 1 {
 		fmt.Println("Too few arguments")
@@ -230,7 +232,7 @@ func main() {
 	}
 	var isErr bool
 	for _, videoURL := range args {
-		if err := download(strings.TrimSpace(videoURL)); err {
+		if !download(strings.TrimSpace(videoURL)) {
 			isErr = true
 		}
 	}

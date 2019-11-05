@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -39,7 +40,11 @@ func getRandomString(l int) string {
 
 // Extract is the main function for extracting data
 func Extract(url string) ([]downloader.Data, error) {
-	id := utils.MatchOneOf(url, `/media/([^\./]+)`, `/show(?:/channel)?/([^\./]+)`)[1]
+	ids := utils.MatchOneOf(url, `/media/([^\./]+)`, `/show(?:/channel)?/([^\./]+)`)
+	if ids == nil || len(ids) < 2 {
+		return nil, extractors.ErrURLParseFailed
+	}
+	id := ids[1]
 
 	var data miaopaiData
 	jsonString, err := request.Get(
@@ -47,16 +52,16 @@ func Extract(url string) ([]downloader.Data, error) {
 		url, nil,
 	)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	err = json.Unmarshal([]byte(jsonString), &data)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	realURL := data.Data.MetaData[0].URLs.M
 	size, err := request.Size(realURL, url)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
 	urlData := downloader.URL{
 		URL:  realURL,

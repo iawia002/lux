@@ -47,9 +47,6 @@ type Data struct {
 	URL string `json:"url"`
 }
 
-// EmptyList empty Data list
-var EmptyList = make([]Data, 0)
-
 // EmptyData returns an "empty" Data object with the given URL and error
 func EmptyData(url string, err error) Data {
 	return Data{

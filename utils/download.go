@@ -9,19 +9,30 @@ import (
 
 // NeedDownloadList return the indices of playlist that need download
 func NeedDownloadList(length int) []int {
-	if config.PlaylistItems != "" {
+	if config.Items != "" {
 		var items []int
-		var index int
-		temp := strings.Split(config.PlaylistItems, ",")
+		var selStart, selEnd int
+		temp := strings.Split(config.Items, ",")
+
 		for _, i := range temp {
-			index, _ = strconv.Atoi(strings.TrimSpace(i))
-			items = append(items, index)
+			selection := strings.Split(i, "-")
+			selStart, _ = strconv.Atoi(strings.TrimSpace(selection[0]))
+
+			if len(selection) >= 2 {
+				selEnd, _ = strconv.Atoi(strings.TrimSpace(selection[1]))
+			} else {
+				selEnd = selStart
+			}
+
+			for item := selStart; item <= selEnd; item++ {
+				items = append(items, item)
+			}
 		}
 		return items
 	}
-	start := config.PlaylistStart
-	end := config.PlaylistEnd
-	if config.PlaylistStart < 1 {
+	start := config.ItemStart
+	end := config.ItemEnd
+	if config.ItemStart < 1 {
 		start = 1
 	}
 	if end == 0 {

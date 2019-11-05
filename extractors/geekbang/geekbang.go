@@ -3,21 +3,19 @@ package geekbang
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"net/http"
 	"strings"
 
 	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
 
 type geekData struct {
-	Code  int `json:"code"`
-	Error struct {
-		Code int    `json:"code"`
-		Msg  string `json:"msg"`
-	} `json:"error"`
-	Data struct {
+	Code  int             `json:"code"`
+	Error json.RawMessage `json:"error"`
+	Data  struct {
 		Title         string `json:"article_sharetitle"`
 		VideoMediaMap map[string]struct {
 			URL  string `json:"url"`
@@ -56,28 +54,25 @@ func geekM3u8(url string) ([]geekURLInfo, error) {
 func Extract(url string) ([]downloader.Data, error) {
 	var err error
 	matches := utils.MatchOneOf(url, `https?://time.geekbang.org/course/detail/(\d+)-(\d+)`)
-	if matches == nil {
-		return downloader.EmptyList, errors.New("地址有误")
+	if matches == nil || len(matches) < 3 {
+		return nil, extractors.ErrURLParseFailed
 	}
 
 	heanders := map[string]string{"Origin": "https://time.geekbang.org", "Content-Type": "application/json", "Referer": url}
 	params := strings.NewReader("{\"id\":" + string(matches[2]+"}"))
-	res, err := request.Request("POST", "https://time.geekbang.org/serv/v1/article", params, heanders)
+	res, err := request.Request(http.MethodPost, "https://time.geekbang.org/serv/v1/article", params, heanders)
 	if err != nil {
-		return downloader.EmptyList, err
+		return nil, err
 	}
-
-	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
-	if err != nil {
-		return downloader.EmptyList, err
-	}
 
 	var data geekData
-	err = json.Unmarshal(body, &data)
+	if err = json.NewDecoder(res.Body).Decode(&data); err != nil {
+		return nil, err
+	}
 
 	if data.Code < 0 {
-		return downloader.EmptyList, errors.New(data.Error.Msg)
+		return nil, errors.New(string(data.Error))
 	}
 
 	title := data.Data.Title
@@ -88,7 +83,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		m3u8URLs, err := geekM3u8(media.URL)
 
 		if err != nil {
-			return downloader.EmptyList, err
+			return nil, err
 		}
 
 		urls := make([]downloader.URL, len(m3u8URLs))
