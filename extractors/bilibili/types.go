@@ -53,7 +53,7 @@ type multiPageVideoData struct {
 }
 
 type multiPage struct {
-	Aid       string             `json:"aid"`
+	Aid       int                `json:"aid"`
 	VideoData multiPageVideoData `json:"videoData"`
 }
 

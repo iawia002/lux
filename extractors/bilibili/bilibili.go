@@ -32,7 +32,7 @@ const referer = "https://www.bilibili.com"
 
 var utoken string
 
-func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) (string, error) {
+func genAPI(aid, cid int, bangumi bool, quality string, seasonType string) (string, error) {
 	var (
 		err        error
 		baseAPIURL string
@@ -40,7 +40,7 @@ func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) (s
 	)
 	if config.Cookie != "" && utoken == "" {
 		utoken, err = request.Get(
-			fmt.Sprintf("%said=%s&cid=%s", bilibiliTokenAPI, aid, cid),
+			fmt.Sprintf("%said=%d&cid=%d", bilibiliTokenAPI, aid, cid),
 			referer,
 			nil,
 		)
@@ -62,13 +62,13 @@ func genAPI(aid, cid string, bangumi bool, quality string, seasonType string) (s
 		// qn=0 flag makes the CDN address different every time
 		// quality=116(1080P 60) is the highest quality so far
 		params = fmt.Sprintf(
-			"appkey=%s&cid=%s&module=bangumi&otype=json&qn=%s&quality=%s&season_type=%s&type=",
+			"appkey=%s&cid=%d&module=bangumi&otype=json&qn=%s&quality=%s&season_type=%s&type=",
 			appKey, cid, quality, quality, seasonType,
 		)
 		baseAPIURL = bilibiliBangumiAPI
 	} else {
 		params = fmt.Sprintf(
-			"appkey=%s&cid=%s&otype=json&qn=%s&quality=%s&type=",
+			"appkey=%s&cid=%d&otype=json&qn=%s&quality=%s&type=",
 			appKey, cid, quality, quality,
 		)
 		baseAPIURL = bilibiliAPI
@@ -101,8 +101,8 @@ type bilibiliOptions struct {
 	url      string
 	html     string
 	bangumi  bool
-	aid      string
-	cid      string
+	aid      int
+	cid      int
 	page     int
 	subtitle string
 }
@@ -119,8 +119,8 @@ func extractBangumi(url, html string) ([]downloader.Data, error) {
 			url:     url,
 			html:    html,
 			bangumi: true,
-			aid:     strconv.Itoa(data.EpInfo.Aid),
-			cid:     strconv.Itoa(data.EpInfo.Cid),
+			aid:     data.EpInfo.Aid,
+			cid:     data.EpInfo.Cid,
 		}
 		return []downloader.Data{bilibiliDownload(options)}, nil
 	}
@@ -143,8 +143,8 @@ func extractBangumi(url, html string) ([]downloader.Data, error) {
 		options := bilibiliOptions{
 			url:     fmt.Sprintf("https://www.bilibili.com/bangumi/play/ep%d", id),
 			bangumi: true,
-			aid:     strconv.Itoa(u.Aid),
-			cid:     strconv.Itoa(u.Cid),
+			aid:     u.Aid,
+			cid:     u.Cid,
 		}
 		go func(index int, options bilibiliOptions, extractedData []downloader.Data) {
 			defer wgp.Done()
@@ -199,7 +199,7 @@ func extractNormalVideo(url, html string) ([]downloader.Data, error) {
 			url:  url,
 			html: html,
 			aid:  pageData.Aid,
-			cid:  strconv.Itoa(page.Cid),
+			cid:  page.Cid,
 			page: p,
 		}
 		// "part":"" or "part":"Untitled"
@@ -226,7 +226,7 @@ func extractNormalVideo(url, html string) ([]downloader.Data, error) {
 			url:      url,
 			html:     html,
 			aid:      pageData.Aid,
-			cid:      strconv.Itoa(u.Cid),
+			cid:      u.Cid,
 			subtitle: u.Part,
 			page:     u.Page,
 		}
@@ -332,7 +332,7 @@ func bilibiliDownload(options bilibiliOptions) downloader.Data {
 	}
 
 	err = downloader.Caption(
-		fmt.Sprintf("https://comment.bilibili.com/%s.xml", options.cid),
+		fmt.Sprintf("https://comment.bilibili.com/%d.xml", options.cid),
 		options.url, title, "xml",
 	)
 	if err != nil {
