@@ -41,6 +41,8 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
+var singleThreadSpeedLimit string
+
 func init() {
 	flag.BoolVar(&config.Debug, "d", false, "Debug mode")
 	flag.BoolVar(&config.Version, "v", false, "Show version")
@@ -84,7 +86,7 @@ func init() {
 	flag.StringVar(&config.YoukuPassword, "password", "", "Youku password")
 	// youtube
 	flag.BoolVar(&config.YouTubeStream2, "ytb-stream2", false, "Use data in url_encoded_fmt_stream_map")
-	
+
 	flag.StringVar(&singleThreadSpeedLimit, "singleThreadSpeedLimit", "", "Limit the speed of each thread, 0 is unlimited")
 
 }
@@ -234,7 +236,6 @@ func main() {
 			config.Cookie = string(data)
 		}
 	}
-	var singleThreadSpeedLimit string
 	if singleThreadSpeedLimit == "" || singleThreadSpeedLimit == "0" {
 		config.SingleThreadSpeedLimit = 0
 	} else {
