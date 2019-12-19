@@ -99,6 +99,10 @@ func youtubeDownload(uri string) downloader.Data {
 	}
 	ytplayer := utils.MatchOneOf(html, `;ytplayer\.config\s*=\s*({.+?});`)
 	if ytplayer == nil || len(ytplayer) < 2 {
+		if strings.Contains(html, "LOGIN_REQUIRED") ||
+			strings.Contains(html, "Sign in to confirm your age") {
+			return downloader.EmptyData(uri, extractors.ErrLoginRequired)
+		}
 		return downloader.EmptyData(uri, extractors.ErrURLParseFailed)
 	}
 
