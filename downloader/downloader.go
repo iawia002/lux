@@ -15,6 +15,7 @@ import (
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
+	"github.com/juju/ratelimit"
 )
 
 func progressBar(size int64) *pb.ProgressBar {
@@ -63,7 +64,16 @@ func writeFile(
 	writer := io.MultiWriter(file, bar)
 	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
 	// So don't worry about memory.
-	written, copyErr := io.Copy(writer, res.Body)
+	var (
+		written int64
+		copyErr error
+	)
+	if config.SingleThreadSpeedLimit <= 0 {
+		written, copyErr = io.Copy(writer, res.Body)
+	} else {
+		bucket := ratelimit.NewBucketWithRate(float64(config.SingleThreadSpeedLimit), 4*1024)
+		written, copyErr = io.Copy(writer, ratelimit.Reader(res.Body, bucket))
+	}
 	if copyErr != nil && copyErr != io.EOF {
 		return written, fmt.Errorf("file copy error: %s", copyErr)
 	}

@@ -514,6 +514,8 @@ $ annie -j https://www.bilibili.com/video/av20203945
     	Use specified Referrer
   -cs int
     	HTTP chunk size for downloading (in MB) (default 0)
+  -singleThreadSpeedLimit string
+      Limit the speed of each thread, 0 is unlimited, acceptable input "10MiB", "200KB" (default 0)
 ```
 
 #### Network:

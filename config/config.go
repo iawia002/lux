@@ -57,6 +57,8 @@ var (
 	RetryTimes int
 	// YouTubeStream2 will use data in `url_encoded_fmt_stream_map`
 	YouTubeStream2 bool
+	// SingleThreadSpeedLimit will limit the speed of each thread
+	SingleThreadSpeedLimit int64
 )
 
 // FakeHeaders fake http headers
