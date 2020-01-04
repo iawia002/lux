@@ -57,6 +57,8 @@ var (
 	RetryTimes int
 	// YouTubeStream2 will use data in `url_encoded_fmt_stream_map`
 	YouTubeStream2 bool
+	// NoMTime Do not use the Last-Modified header to set the file modification time
+	NoMTime bool
 )
 
 // FakeHeaders fake http headers

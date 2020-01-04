@@ -127,6 +127,21 @@ func Save(
 		}
 	}()
 
+	// try to update mtime before renaming file
+	defer func() {
+		if err != nil || config.NoMTime {
+			return
+		}
+		resHeaders, reqError := request.Headers(urlData.URL, refer)
+		if reqError != nil {
+			return
+		}
+		t, parseError := time.Parse("Mon, 02 Jan 2006 15:04:05 GMT", resHeaders.Get("Last-Modified"))
+		if parseError == nil {
+			os.Chtimes(tempFilePath, time.Now(), t)
+		}
+	}()
+
 	if chunkSizeMB > 0 {
 		var start, end, chunkSize int64
 		chunkSize = int64(chunkSizeMB) * 1024 * 1024

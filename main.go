@@ -73,6 +73,7 @@ func init() {
 	flag.IntVar(
 		&config.RetryTimes, "retry", 10, "How many times to retry when the download failed",
 	)
+	flag.BoolVar(&config.NoMTime, "no-mtime", false, "Do not use the Last-Modified header to set the file modification time")
 	// youku
 	flag.StringVar(&config.YoukuCcode, "ccode", "0590", "Youku ccode")
 	flag.StringVar(

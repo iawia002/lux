@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
+
+	"github.com/iawia002/annie/config"
 )
 
-func runMergeCmd(cmd *exec.Cmd, paths []string, mergeFilePath string) error {
+func runMergeCmd(cmd *exec.Cmd, paths []string, mergeFilePath, mergedFilePath string) error {
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	err := cmd.Run()
@@ -17,6 +20,12 @@ func runMergeCmd(cmd *exec.Cmd, paths []string, mergeFilePath string) error {
 
 	if mergeFilePath != "" {
 		os.Remove(mergeFilePath)
+	}
+	if !config.NoMTime {
+		info, err := os.Stat(paths[0])
+		if err == nil {
+			os.Chtimes(mergedFilePath, time.Now(), info.ModTime())
+		}
 	}
 	// remove parts
 	for _, path := range paths {
@@ -37,7 +46,7 @@ func MergeAudioAndVideo(paths []string, mergedFilePath string) error {
 		cmds, "-c:v", "copy", "-c:a", "aac", "-strict", "experimental",
 		mergedFilePath,
 	)
-	return runMergeCmd(exec.Command("ffmpeg", cmds...), paths, "")
+	return runMergeCmd(exec.Command("ffmpeg", cmds...), paths, "", mergedFilePath)
 }
 
 // MergeToMP4 merge video parts to MP4
@@ -55,5 +64,5 @@ func MergeToMP4(paths []string, mergedFilePath string, filename string) error {
 		"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
 		"-i", mergeFilePath, "-c", "copy", "-bsf:a", "aac_adtstoasc", mergedFilePath,
 	)
-	return runMergeCmd(cmd, paths, mergeFilePath)
+	return runMergeCmd(cmd, paths, mergeFilePath, mergedFilePath)
 }
