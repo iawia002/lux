@@ -21,7 +21,6 @@ func TestTangDou(t *testing.T) {
 			args: test.Args{
 				URL:   "http://www.tangdou.com/v95/dAOQNgMjwT2D5w2.html",
 				Title: "杨丽萍广场舞《好日子天天过》喜庆双扇扇子舞",
-				Size:  87611483,
 			},
 		},
 		{
@@ -33,24 +32,7 @@ func TestTangDou(t *testing.T) {
 			},
 		},
 		{
-			name: "share url",
-			args: test.Args{
-				URL:   "https://share.tangdou.com/play.php?vid=1500667821669",
-				Title: "井岗紫薇广场舞18步双人舞《采槟榔》附分解",
-				Size:  26693149,
-			},
-		},
-		{
 			name: "playlist test",
-			args: test.Args{
-				URL:   "http://www.tangdou.com/playlist/view/1882",
-				Title: "青儿广场舞《小朋友们都被接走了》原创32步流行舞",
-				Size:  69448816,
-			},
-			playlist: true,
-		},
-		{
-			name: "playlist test2",
 			args: test.Args{
 				URL:   "http://www.tangdou.com/playlist/view/2816/page/4",
 				Title: "茉莉广场舞 我向草原问个好 原创藏族风民族舞附教学",

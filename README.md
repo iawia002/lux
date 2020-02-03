@@ -564,13 +564,6 @@ $ annie -j https://www.bilibili.com/video/av20203945
     	Youku password
 ```
 
-#### YouTube
-
-```
-  -ytb-stream2
-    	Use data in url_encoded_fmt_stream_map
-```
-
 #### aria2:
 
 > Note: If you use aria2 to download, you need to merge the multi-part videos yourself.

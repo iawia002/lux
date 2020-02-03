@@ -22,14 +22,6 @@ func TestDownload(t *testing.T) {
 				Size:  6743958,
 			},
 		},
-		{
-			name: "normal test",
-			args: test.Args{
-				URL:   "https://n.miaopai.com/media/qVWj3dVK2oSxtW~vSq2tGeBKPE--tPSp",
-				Title: "如果你家的猫喜欢咬人怎么办？",
-				Size:  3615866,
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
