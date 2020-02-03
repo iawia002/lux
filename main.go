@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/rs/zerolog"
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/downloader"
@@ -81,8 +82,6 @@ func init() {
 		"Youku ckey",
 	)
 	flag.StringVar(&config.YoukuPassword, "password", "", "Youku password")
-	// youtube
-	flag.BoolVar(&config.YouTubeStream2, "ytb-stream2", false, "Use data in url_encoded_fmt_stream_map")
 }
 
 func printError(url string, err error) {
@@ -197,8 +196,11 @@ func main() {
 		utils.PrintVersion()
 		return
 	}
+	// introduced by "github.com/rylio/ytdl"
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if config.Debug {
 		utils.PrintVersion()
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 	if config.File != "" {
 		file, err := os.Open(config.File)

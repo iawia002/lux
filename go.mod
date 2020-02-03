@@ -10,11 +10,9 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/kr/pretty v0.1.0
 	github.com/mattn/go-colorable v0.0.9 // indirect
-	github.com/mattn/go-isatty v0.0.3 // indirect
-	github.com/mattn/go-runewidth v0.0.2 // indirect
-	github.com/stretchr/testify v1.4.0 // indirect
+	github.com/rs/zerolog v1.16.0
+	github.com/rylio/ytdl v0.6.2
 	github.com/tidwall/gjson v1.3.2
-	golang.org/x/net v0.0.0-20180621144259-afe8f62b1d6b
-	golang.org/x/sys v0.0.0-20180622082034-63fc586f45fe // indirect
+	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 )

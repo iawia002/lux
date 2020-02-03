@@ -55,8 +55,6 @@ var (
 	YoukuPassword string
 	// RetryTimes how many times to retry when the download failed
 	RetryTimes int
-	// YouTubeStream2 will use data in `url_encoded_fmt_stream_map`
-	YouTubeStream2 bool
 )
 
 // FakeHeaders fake http headers
