@@ -19,62 +19,51 @@ func TestYoutube(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:     "https://www.youtube.com/watch?v=Gnbch2osEeo",
-				Title:   "Multifandom Mashup 2017",
-				Quality: `720p video/mp4; codecs="avc1.4d401f"`,
+				URL:   "https://www.youtube.com/watch?v=Gnbch2osEeo",
+				Title: "Multifandom Mashup 2017",
 			},
 		},
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:     "https://youtu.be/z8eFzkfto2w",
-				Title:   "Circle Of Love | Rudy Mancuso",
-				Size:    33060990,
-				Quality: `1080p video/webm; codecs="vp9"`,
+				URL:   "https://youtu.be/z8eFzkfto2w",
+				Title: "Circle Of Love | Rudy Mancuso",
 			},
 		},
 		{
 			name: "signature test",
 			args: test.Args{
-				URL:     "https://www.youtube.com/watch?v=ZtgzKBrU1GY",
-				Title:   "Halo Infinite - E3 2019 - Discover Hope",
-				Size:    877713473,
-				Quality: `2160p60 video/webm; codecs="vp9"`,
+				URL:   "https://www.youtube.com/watch?v=ZtgzKBrU1GY",
+				Title: "Halo Infinite - E3 2019 - Discover Hope",
 			},
 		},
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:     "https://www.youtube.com/watch?v=ASPku-eAZYs",
-				Title:   "怪獸與葛林戴華德的罪行 | HD首版電影預告大首播 (Fantastic Beasts: The Crimes of Grindelwald)",
-				Quality: `1080p60 video/mp4; codecs="avc1.64002a"`,
+				URL:   "https://www.youtube.com/watch?v=ASPku-eAZYs",
+				Title: "怪獸與葛林戴華德的罪行 | HD首版電影預告大首播 (Fantastic Beasts: The Crimes of Grindelwald)",
 			},
 		},
 		{
 			name: "playlist test",
 			args: test.Args{
-				URL:     "https://www.youtube.com/watch?v=Lt2pwLxJxgA&list=PLIYAO-qLriEtYm7UcXPH3SOJxgqjwRrIw",
-				Title:   "papi酱 - 你有酱婶儿的朋友吗？",
-				Size:    13549971,
-				Quality: `720p video/mp4; codecs="avc1.4d401f"`,
+				URL:   "https://www.youtube.com/watch?v=Lt2pwLxJxgA&list=PLIYAO-qLriEtYm7UcXPH3SOJxgqjwRrIw",
+				Title: "papi酱 - 你有酱婶儿的朋友吗？",
 			},
 			playlist: true,
 		},
 		{
 			name: "url_encoded_fmt_stream_map test",
 			args: test.Args{
-				URL:     "https://youtu.be/DNaOZovrSVo",
-				Title:   "QNAP Case Study - Scorptec",
-				Size:    25418418,
-				Quality: `1080p video/mp4; codecs="avc1.640028"`,
+				URL:   "https://youtu.be/DNaOZovrSVo",
+				Title: "QNAP Case Study - Scorptec",
 			},
 		},
 		{
 			name: "stream 404 test 1",
 			args: test.Args{
-				URL:     "https://www.youtube.com/watch?v=MRJ8NnUXacY",
-				Title:   "FreeFileSync: Mirror Synchronization",
-				Quality: `1080p60 video/mp4; codecs="avc1.64002a"`,
+				URL:   "https://www.youtube.com/watch?v=MRJ8NnUXacY",
+				Title: "FreeFileSync: Mirror Synchronization",
 			},
 		},
 	}
