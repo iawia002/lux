@@ -318,22 +318,16 @@ $ annie -c cookies.txt https://www.bilibili.com/video/av20203945
 ```
 
 ### Proxy
-#### HTTP proxy
 
-An HTTP proxy can be specified with the `-x` option:
-
-```console
-$ annie -x http://127.0.0.1:7777 -i https://www.youtube.com/watch?v=Gnbch2osEeo
-```
-
-#### SOCKS5 proxy
-
-A SOCKS5 proxy can be specified with the `-s` option:
+You can set the HTTP/SOCKS5 proxy using environment variables:
 
 ```console
-$ annie -s 127.0.0.1:1080 -i https://www.youtube.com/watch?v=Gnbch2osEeo
+$ HTTP_PROXY="http://127.0.0.1:1087/" annie -i https://www.youtube.com/watch?v=Gnbch2osEeo
 ```
 
+```console
+$ HTTP_PROXY="socks5://127.0.0.1:1080/" annie -i https://www.youtube.com/watch?v=Gnbch2osEeo
+```
 
 ### Multi-Thread
 
@@ -519,10 +513,6 @@ $ annie -j https://www.bilibili.com/video/av20203945
 #### Network:
 
 ```
-  -s string
-    	SOCKS5 proxy
-  -x string
-    	HTTP proxy
   -retry int
     	How many times to retry when the download failed (default 10)
 ```

@@ -13,10 +13,6 @@ var (
 	Playlist bool
 	// Refer use specified Referrer
 	Refer string
-	// Proxy HTTP proxy
-	Proxy string
-	// Socks5Proxy SOCKS5 proxy
-	Socks5Proxy string
 	// Stream select specified stream to download
 	Stream string
 	// OutputPath output file path

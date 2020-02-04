@@ -49,8 +49,6 @@ func init() {
 	flag.StringVar(&config.Cookie, "c", "", "Cookie")
 	flag.BoolVar(&config.Playlist, "p", false, "Download playlist")
 	flag.StringVar(&config.Refer, "r", "", "Use specified Referrer")
-	flag.StringVar(&config.Proxy, "x", "", "HTTP proxy")
-	flag.StringVar(&config.Socks5Proxy, "s", "", "SOCKS5 proxy")
 	flag.StringVar(&config.Stream, "f", "", "Select specific stream to download")
 	flag.StringVar(&config.OutputPath, "o", "", "Specify the output path")
 	flag.StringVar(&config.OutputName, "O", "", "Specify the output file name")

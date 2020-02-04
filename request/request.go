@@ -8,9 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net"
 	"net/http"
-	netURL "net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -18,7 +16,6 @@ import (
 	cookiemonster "github.com/MercuryEngineering/CookieMonster"
 	"github.com/fatih/color"
 	"github.com/kr/pretty"
-	"golang.org/x/net/proxy"
 
 	"github.com/iawia002/annie/config"
 )
@@ -28,31 +25,10 @@ func Request(
 	method, url string, body io.Reader, headers map[string]string,
 ) (*http.Response, error) {
 	transport := &http.Transport{
+		Proxy:               http.ProxyFromEnvironment,
 		DisableCompression:  true,
 		TLSHandshakeTimeout: 10 * time.Second,
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
-	}
-	if config.Proxy != "" {
-		var httpProxy, err = netURL.Parse(config.Proxy)
-		if err != nil {
-			return nil, err
-		}
-		transport.Proxy = http.ProxyURL(httpProxy)
-	}
-	if config.Socks5Proxy != "" {
-		dialer, err := proxy.SOCKS5(
-			"tcp",
-			config.Socks5Proxy,
-			nil,
-			&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			},
-		)
-		if err != nil {
-			return nil, err
-		}
-		transport.Dial = dialer.Dial
 	}
 	client := &http.Client{
 		Transport: transport,
