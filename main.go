@@ -230,7 +230,7 @@ func main() {
 				color.Red("%v", err)
 				return
 			}
-			config.Cookie = string(data)
+			config.Cookie = strings.TrimSpace(string(data))
 		}
 	}
 	var isErr bool
