@@ -34,7 +34,7 @@ func MergeAudioAndVideo(paths []string, mergedFilePath string) error {
 		cmds = append(cmds, "-i", path)
 	}
 	cmds = append(
-		cmds, "-c:v", "copy", "-c:a", "aac", "-strict", "experimental",
+		cmds, "-c:v", "copy", "-c:a", "copy",
 		mergedFilePath,
 	)
 	return runMergeCmd(exec.Command("ffmpeg", cmds...), paths, "")
