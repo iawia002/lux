@@ -84,6 +84,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]downloader.Stream
 		var urls []downloader.URL
 		var totalSize int64
 		var filename string
+		canConn := false
 		for part := 1; part < clips+1; part++ {
 			// Multiple fragments per streams
 			if fmtIDPrefix == "p" {
@@ -123,7 +124,8 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]downloader.Stream
 			realURL := fmt.Sprintf("%s%s?vkey=%s", cdn, filename, vkey)
 			size, err := request.Size(realURL, cdn)
 			if err != nil {
-				return nil, err
+				//return nil, err
+				continue
 			}
 			urlData := downloader.URL{
 				URL:  realURL,
@@ -132,11 +134,14 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]downloader.Stream
 			}
 			urls = append(urls, urlData)
 			totalSize += size
+			canConn = true
 		}
-		streams[fi.Name] = downloader.Stream{
-			URLs:    urls,
-			Size:    totalSize,
-			Quality: fi.Cname,
+		if canConn {
+			streams[fi.Name] = downloader.Stream{
+				URLs:    urls,
+				Size:    totalSize,
+				Quality: fi.Cname,
+			}
 		}
 	}
 	return streams, nil
