@@ -18,6 +18,7 @@ coverage.txt
 .vscode
 .idea
 dist/
+bin/
 *_token
 downloader/*.jpg
 
