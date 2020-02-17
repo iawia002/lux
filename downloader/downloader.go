@@ -248,7 +248,15 @@ func Download(v Data, refer string, chunkSizeMB int) error {
 	}
 
 	// Skip the complete file that has been merged
-	mergedFilePath, err := utils.FilePath(title, "mp4", false)
+	var (
+		mergedFilePath string
+		err            error
+	)
+	if v.Site == "YouTube youtube.com" {
+		mergedFilePath, err = utils.FilePath(title, data.URLs[0].Ext, false)
+	} else {
+		mergedFilePath, err = utils.FilePath(title, "mp4", false)
+	}
 	if err != nil {
 		return err
 	}
