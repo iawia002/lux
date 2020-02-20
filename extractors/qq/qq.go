@@ -125,7 +125,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]downloader.Stream
 			size, err := request.Size(realURL, cdn)
 			if err != nil {
 				//return nil, err
-				continue
+				break
 			}
 			urlData := downloader.URL{
 				URL:  realURL,
