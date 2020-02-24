@@ -241,7 +241,6 @@ func MultiThreadSave(
 			start = end + 1
 			i++
 		}
-
 	}
 	if savedSize > 0 {
 		bar.Add64(savedSize)
@@ -254,12 +253,10 @@ func MultiThreadSave(
 	wgp.Add(l)
 	sig := utils.NewSignal(threadNum)
 	lock := new(sync.Mutex)
-
 	var errs []error
 	for len(unfinishedPart) > 0 {
 		sig.Set()
 		part := unfinishedPart[0]
-
 		unfinishedPart = append(unfinishedPart[:0], unfinishedPart[1:]...)
 		go func(part *FilePartMeta) {
 			file, err := os.OpenFile(fmt.Sprintf("%s.part%f", filePath, part.Index), os.O_APPEND|os.O_CREATE, 0666)
@@ -313,7 +310,6 @@ func MultiThreadSave(
 					}
 					temp += written
 					headers["Range"] = fmt.Sprintf("bytes=%d-%d", temp, end)
-					//time.Sleep(1 * time.Second)
 				}
 				part.Cur = end + 1
 			}
