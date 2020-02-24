@@ -2,15 +2,19 @@ package downloader
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/cheggaaa/pb"
 	"io"
 	"net/http"
 	"os"
+	"path"
+	"regexp"
+	"sort"
 	"sync"
 	"time"
-
-	"github.com/cheggaaa/pb"
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
@@ -175,6 +179,267 @@ func Save(
 	return nil
 }
 
+func MultiThreadSave(
+	urlData URL, refer, fileName string, bar *pb.ProgressBar, chunkSizeMB, threadNum int,
+) error {
+	var err error
+	filePath, err := utils.FilePath(fileName, urlData.Ext, false)
+	if err != nil {
+		return err
+	}
+	fileSize, exists, err := utils.FileSize(filePath)
+	if err != nil {
+		return err
+	}
+	if bar == nil {
+		bar = progressBar(urlData.Size)
+		bar.Start()
+	}
+	// Skip segment file
+	// TODO: Live video URLs will not return the size
+	if exists && fileSize == urlData.Size {
+		bar.Add64(fileSize)
+		return nil
+	}
+	//Scan all parts
+	parts, err := ReadDirAllFilePart(fileName, urlData.Ext)
+	if err != nil {
+		return err
+	}
+
+	var completedPart, unfinishedPart []*FilePartMeta
+	savedSize := int64(0)
+	if len(parts) > 0 {
+		for _, part := range parts {
+			savedSize += part.Cur - part.Start
+			if part.Cur == part.End {
+				completedPart = append(completedPart, part)
+			} else {
+				unfinishedPart = append(unfinishedPart, part)
+			}
+		}
+	} else {
+		var start, end, partSize int64
+		var i float32
+		partSize = urlData.Size / int64(threadNum)
+		i = 0
+		for start < urlData.Size {
+			end = start + partSize - 1
+			if end > urlData.Size {
+				end = urlData.Size - 1
+			} else if int(i+1) == threadNum && end < urlData.Size {
+				end = urlData.Size - 1
+			}
+			part := &FilePartMeta{
+				Index: i,
+				Start: start,
+				End:   end,
+				Cur:   start,
+			}
+			parts = append(parts, part)
+			unfinishedPart = append(unfinishedPart, part)
+			start = end + 1
+			i++
+		}
+
+	}
+	if savedSize > 0 {
+		bar.Add64(savedSize)
+		if savedSize == urlData.Size {
+			return mergeMultiPart(filePath, parts)
+		}
+	}
+	l := len(unfinishedPart)
+	wgp := sync.WaitGroup{}
+	wgp.Add(l)
+	sig := utils.NewSignal(threadNum)
+	lock := new(sync.Mutex)
+
+	var errs []error
+	for len(unfinishedPart) > 0 {
+		sig.Set()
+		part := unfinishedPart[0]
+
+		unfinishedPart = append(unfinishedPart[:0], unfinishedPart[1:]...)
+		go func(part *FilePartMeta) {
+			file, err := os.OpenFile(fmt.Sprintf("%s.part%f", filePath, part.Index), os.O_APPEND|os.O_CREATE, 0666)
+			if err != nil {
+				errs = append(errs, err)
+				return
+			}
+			defer file.Close()
+			var end, chunkSize int64
+			headers := map[string]string{
+				"Referer": refer,
+			}
+			if chunkSizeMB <= 0 {
+				chunkSize = part.End - part.Start + 1
+			} else {
+				chunkSize = int64(chunkSizeMB) * 1024 * 1024
+			}
+			end = part.Cur + chunkSize
+			if end > part.End {
+				end = part.End
+			}
+			remainingSize := part.End - part.Cur + 1
+			err = WriteFilePartMeta(file, part)
+			if err != nil {
+				errs = append(errs, err)
+				return
+			}
+			file.Seek(int64(binary.Size(part)), 0)
+			for remainingSize > 0 {
+				end = part.Cur + chunkSize - 1
+				if end > part.End {
+					end = part.End
+				}
+				headers["Range"] = fmt.Sprintf("bytes=%d-%d", part.Cur, end)
+				temp := part.Cur
+				for i := 0; ; i++ {
+					written, err := writeFile(urlData.URL, file, headers, bar)
+					if err == nil {
+						err = WriteFilePartMeta(file, part)
+						if err == nil {
+							remainingSize -= chunkSize
+							break
+						} else {
+							errs = append(errs, err)
+							return
+						}
+
+					} else if i+1 >= config.RetryTimes {
+						errs = append(errs, err)
+						return
+					}
+					temp += written
+					headers["Range"] = fmt.Sprintf("bytes=%d-%d", temp, end)
+					//time.Sleep(1 * time.Second)
+				}
+				part.Cur = end + 1
+			}
+			lock.Lock()
+			completedPart = append(completedPart, part)
+			lock.Unlock()
+			wgp.Done()
+			sig.Release()
+		}(part)
+	}
+	wgp.Wait()
+	if len(errs) > 0 {
+		return errs[0]
+	}
+	//merge
+	return mergeMultiPart(filePath, parts)
+}
+
+func ParseFilePartMeta(filepath string) (*FilePartMeta, error) {
+	meta := new(FilePartMeta)
+	size := binary.Size(*meta)
+	buf, err := MustReadFile(filepath, 0, size)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Read(bytes.NewBuffer(buf[:size]), binary.LittleEndian, meta)
+	if err != nil {
+		return nil, err
+	}
+	return meta, nil
+}
+
+func WriteFilePartMeta(file *os.File, meta *FilePartMeta) error {
+	err := binary.Write(file, binary.LittleEndian, meta)
+	return err
+
+}
+
+func MustReadFile(filepath string, off int64, n int) ([]byte, error) {
+	file, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	var buf [1024]byte
+	readSize, err := file.ReadAt(buf[0:n], off)
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+	if readSize < n {
+		return nil, errors.New("There have no such size of chunk.\n")
+	}
+	return buf[0:n], nil
+
+}
+
+func ReadDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
+	dirPath := path.Dir(filename)
+	dir, err := os.Open(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	defer dir.Close()
+	fns, err := dir.Readdir(0)
+	if err != nil {
+		return nil, err
+	}
+	var metas []*FilePartMeta
+	reg := regexp.MustCompile(fmt.Sprintf("%s.%s.part.+", filename, extname))
+
+	for _, fn := range fns {
+		if reg.MatchString(fn.Name()) {
+			meta, err := ParseFilePartMeta(fn.Name())
+			if err != nil {
+				return nil, err
+			}
+			realSize := fn.Size() - int64(binary.Size(meta))
+			if meta.Cur-meta.Start != realSize {
+				meta.Cur = meta.Start + realSize
+			}
+			metas = append(metas, meta)
+		}
+	}
+	sort.Slice(metas, func(i, j int) bool {
+		return metas[i].Index < metas[j].Index
+	})
+	return metas, nil
+}
+
+func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
+	tempFilePath := filepath + ".download"
+	tempFile, err := os.OpenFile(tempFilePath, os.O_APPEND|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+
+	var partFiles []*os.File
+	defer func() {
+		for _, f := range partFiles {
+			f.Close()
+			os.Remove(f.Name())
+		}
+	}()
+	for _, part := range parts {
+		file, err := os.Open(fmt.Sprintf("%s.part%f", filepath, part.Index))
+		if err != nil {
+			return err
+		}
+		partFiles = append(partFiles, file)
+		_, err = file.Seek(int64(binary.Size(part)), 0)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(tempFile, file)
+		if err != nil {
+			return err
+		}
+	}
+	tempFile.Close()
+	err = os.Rename(tempFilePath, filepath)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 // Download download urls
 func Download(v Data, refer string, chunkSizeMB int) error {
 	v.genSortedStreams()
@@ -273,7 +538,13 @@ func Download(v Data, refer string, chunkSizeMB int) error {
 	bar.Start()
 	if len(data.URLs) == 1 {
 		// only one fragment
-		err := Save(data.URLs[0], refer, title, bar, chunkSizeMB)
+		var err error
+		if config.MultiThread {
+			err = MultiThreadSave(data.URLs[0], refer, title, bar, chunkSizeMB, config.ThreadNumber)
+		} else {
+			err = Save(data.URLs[0], refer, title, bar, chunkSizeMB)
+		}
+
 		if err != nil {
 			return err
 		}

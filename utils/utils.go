@@ -6,6 +6,8 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"github.com/fatih/color"
+	"github.com/tidwall/gjson"
 	"io"
 	"net/url"
 	"os"
@@ -14,9 +16,6 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
-
-	"github.com/fatih/color"
-	"github.com/tidwall/gjson"
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
@@ -283,4 +282,24 @@ func Range(min, max int) []int {
 		items[index] = min + index
 	}
 	return items
+}
+
+type Signal struct {
+	max int
+	c   chan struct{}
+}
+
+func NewSignal(max int) *Signal {
+	return &Signal{
+		max: max,
+		c:   make(chan struct{}, max),
+	}
+}
+
+func (s *Signal) Set() {
+	s.c <- struct{}{}
+}
+
+func (s *Signal) Release() {
+	_ = <-s.c
 }
