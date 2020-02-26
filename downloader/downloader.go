@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cheggaaa/pb"
 	"io"
 	"net/http"
 	"os"
@@ -15,6 +14,8 @@ import (
 	"sort"
 	"sync"
 	"time"
+
+	"github.com/cheggaaa/pb"
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
@@ -182,7 +183,6 @@ func Save(
 func MultiThreadSave(
 	urlData URL, refer, fileName string, bar *pb.ProgressBar, chunkSizeMB, threadNum int,
 ) error {
-	var err error
 	filePath, err := utils.FilePath(fileName, urlData.Ext, false)
 	if err != nil {
 		return err
@@ -201,21 +201,24 @@ func MultiThreadSave(
 		bar.Add64(fileSize)
 		return nil
 	}
-	//Scan all parts
-	parts, err := ReadDirAllFilePart(fileName, urlData.Ext)
+	// Scan all parts
+	parts, err := readDirAllFilePart(fileName, urlData.Ext)
 	if err != nil {
 		return err
 	}
 
-	var completedPart, unfinishedPart []*FilePartMeta
+	var unfinishedPart []*FilePartMeta
 	savedSize := int64(0)
 	if len(parts) > 0 {
 		for _, part := range parts {
-			savedSize += part.Cur - part.Start
-			if part.Cur == part.End {
-				completedPart = append(completedPart, part)
-			} else {
-				unfinishedPart = append(unfinishedPart, part)
+			if part.Cur <= part.End {
+				savedSize += part.Cur - part.Start
+				if part.Cur < part.End {
+					unfinishedPart = append(unfinishedPart, part)
+				}
+			} else if part.Cur > part.End {
+				// The part saved size greater than the part size, print the error and re-download the part
+				return errors.New(fmt.Sprintf("Part%f saved size greater than the size of this part, please delete the part and re-download", part.Index))
 			}
 		}
 	} else {
@@ -248,23 +251,21 @@ func MultiThreadSave(
 			return mergeMultiPart(filePath, parts)
 		}
 	}
-	l := len(unfinishedPart)
-	wgp := sync.WaitGroup{}
-	wgp.Add(l)
-	sig := utils.NewSignal(threadNum)
-	lock := new(sync.Mutex)
+
+	wgp := utils.NewWaitGroupPool(threadNum)
 	var errs []error
-	for len(unfinishedPart) > 0 {
-		sig.Set()
-		part := unfinishedPart[0]
-		unfinishedPart = append(unfinishedPart[:0], unfinishedPart[1:]...)
+	for _, part := range unfinishedPart {
+		wgp.Add()
 		go func(part *FilePartMeta) {
 			file, err := os.OpenFile(fmt.Sprintf("%s.part%f", filePath, part.Index), os.O_APPEND|os.O_CREATE, 0666)
 			if err != nil {
 				errs = append(errs, err)
 				return
 			}
-			defer file.Close()
+			defer func() {
+				file.Close()
+				wgp.Done()
+			}()
 			var end, chunkSize int64
 			headers := map[string]string{
 				"Referer": refer,
@@ -274,28 +275,26 @@ func MultiThreadSave(
 			} else {
 				chunkSize = int64(chunkSizeMB) * 1024 * 1024
 			}
-			end = part.Cur + chunkSize
-			if end > part.End {
-				end = part.End
-			}
+			end = computeEnd(part.Cur, chunkSize, part.End)
 			remainingSize := part.End - part.Cur + 1
-			err = WriteFilePartMeta(file, part)
+			err = writeFilePartMeta(file, part)
 			if err != nil {
 				errs = append(errs, err)
 				return
 			}
-			file.Seek(int64(binary.Size(part)), 0)
+			_, err = file.Seek(int64(binary.Size(part)), 0)
+			if err != nil {
+				errs = append(errs, err)
+				return
+			}
 			for remainingSize > 0 {
-				end = part.Cur + chunkSize - 1
-				if end > part.End {
-					end = part.End
-				}
+				end = computeEnd(part.Cur, chunkSize, part.End)
 				headers["Range"] = fmt.Sprintf("bytes=%d-%d", part.Cur, end)
 				temp := part.Cur
 				for i := 0; ; i++ {
 					written, err := writeFile(urlData.URL, file, headers, bar)
 					if err == nil {
-						err = WriteFilePartMeta(file, part)
+						err = writeFilePartMeta(file, part)
 						if err == nil {
 							remainingSize -= chunkSize
 							break
@@ -313,25 +312,29 @@ func MultiThreadSave(
 				}
 				part.Cur = end + 1
 			}
-			lock.Lock()
-			completedPart = append(completedPart, part)
-			lock.Unlock()
-			wgp.Done()
-			sig.Release()
+
 		}(part)
 	}
 	wgp.Wait()
 	if len(errs) > 0 {
 		return errs[0]
 	}
-	//merge
 	return mergeMultiPart(filePath, parts)
 }
 
-func ParseFilePartMeta(filepath string) (*FilePartMeta, error) {
+func computeEnd(s, chunkSize, max int64) int64 {
+	var end int64
+	end = s + chunkSize - 1
+	if end > max {
+		end = max
+	}
+	return end
+}
+
+func parseFilePartMeta(filepath string) (*FilePartMeta, error) {
 	meta := new(FilePartMeta)
 	size := binary.Size(*meta)
-	buf, err := MustReadFile(filepath, 0, size)
+	buf, err := mustReadFile(filepath, 0, size)
 	if err != nil {
 		return nil, err
 	}
@@ -342,19 +345,19 @@ func ParseFilePartMeta(filepath string) (*FilePartMeta, error) {
 	return meta, nil
 }
 
-func WriteFilePartMeta(file *os.File, meta *FilePartMeta) error {
+func writeFilePartMeta(file *os.File, meta *FilePartMeta) error {
 	err := binary.Write(file, binary.LittleEndian, meta)
 	return err
 
 }
 
-func MustReadFile(filepath string, off int64, n int) ([]byte, error) {
+func mustReadFile(filepath string, off int64, n int) ([]byte, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
-	var buf [1024]byte
+	var buf [512]byte
 	readSize, err := file.ReadAt(buf[0:n], off)
 	if err != nil && err != io.EOF {
 		return nil, err
@@ -366,7 +369,7 @@ func MustReadFile(filepath string, off int64, n int) ([]byte, error) {
 
 }
 
-func ReadDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
+func readDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
 	dirPath := path.Dir(filename)
 	dir, err := os.Open(dirPath)
 	if err != nil {
@@ -382,7 +385,7 @@ func ReadDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
 
 	for _, fn := range fns {
 		if reg.MatchString(fn.Name()) {
-			meta, err := ParseFilePartMeta(fn.Name())
+			meta, err := parseFilePartMeta(fn.Name())
 			if err != nil {
 				return nil, err
 			}

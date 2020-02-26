@@ -6,8 +6,6 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	"github.com/fatih/color"
-	"github.com/tidwall/gjson"
 	"io"
 	"net/url"
 	"os"
@@ -16,6 +14,9 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/tidwall/gjson"
 
 	"github.com/iawia002/annie/config"
 	"github.com/iawia002/annie/request"
