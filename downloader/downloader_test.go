@@ -76,12 +76,12 @@ func TestDownload(t *testing.T) {
 					"default": {
 						URLs: []URL{
 							{
-								URL:  "https://img5.bcyimg.com/coser/143767/post/c0j7x/0d713eb41a614053ac6a3b146914f6bc.jpg/w650",
+								URL:  "http://img5.bcyimg.com/coser/143767/post/c0j7x/0d713eb41a614053ac6a3b146914f6bc.jpg/w650",
 								Size: 56107,
 								Ext:  "jpg",
 							},
 							{
-								URL:  "https://img9.bcyimg.com/coser/143767/post/c0j7x/d17e9b8587794d939a1363c5f715014b.jpg/w650",
+								URL:  "http://img9.bcyimg.com/coser/143767/post/c0j7x/d17e9b8587794d939a1363c5f715014b.jpg/w650",
 								Size: 142100,
 								Ext:  "jpg",
 							},
