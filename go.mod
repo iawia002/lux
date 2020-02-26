@@ -1,6 +1,6 @@
 module github.com/iawia002/annie
 
-go 1.12
+go 1.13
 
 require (
 	github.com/MercuryEngineering/CookieMonster v0.0.0-20180304172713-1584578b3403
@@ -13,6 +13,5 @@ require (
 	github.com/rs/zerolog v1.16.0
 	github.com/rylio/ytdl v0.6.2
 	github.com/tidwall/gjson v1.3.2
-	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 )
