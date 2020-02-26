@@ -282,11 +282,6 @@ func MultiThreadSave(
 				errs = append(errs, err)
 				return
 			}
-			_, err = file.Seek(int64(binary.Size(part)), 0)
-			if err != nil {
-				errs = append(errs, err)
-				return
-			}
 			for remainingSize > 0 {
 				end = computeEnd(part.Cur, chunkSize, part.End)
 				headers["Range"] = fmt.Sprintf("bytes=%d-%d", part.Cur, end)
@@ -294,15 +289,8 @@ func MultiThreadSave(
 				for i := 0; ; i++ {
 					written, err := writeFile(urlData.URL, file, headers, bar)
 					if err == nil {
-						err = writeFilePartMeta(file, part)
-						if err == nil {
-							remainingSize -= chunkSize
-							break
-						} else {
-							errs = append(errs, err)
-							return
-						}
-
+						remainingSize -= chunkSize
+						break
 					} else if i+1 >= config.RetryTimes {
 						errs = append(errs, err)
 						return
@@ -310,9 +298,8 @@ func MultiThreadSave(
 					temp += written
 					headers["Range"] = fmt.Sprintf("bytes=%d-%d", temp, end)
 				}
-				part.Cur = end + 1
 			}
-
+			part.Cur = end + 1
 		}(part)
 	}
 	wgp.Wait()
@@ -346,9 +333,7 @@ func parseFilePartMeta(filepath string) (*FilePartMeta, error) {
 }
 
 func writeFilePartMeta(file *os.File, meta *FilePartMeta) error {
-	err := binary.Write(file, binary.LittleEndian, meta)
-	return err
-
+	return binary.Write(file, binary.LittleEndian, meta)
 }
 
 func mustReadFile(filepath string, off int64, n int) ([]byte, error) {
@@ -366,7 +351,6 @@ func mustReadFile(filepath string, off int64, n int) ([]byte, error) {
 		return nil, errors.New("There have no such size of chunk.\n")
 	}
 	return buf[0:n], nil
-
 }
 
 func readDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
@@ -408,12 +392,11 @@ func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 	if err != nil {
 		return err
 	}
-
 	var partFiles []*os.File
 	defer func() {
 		for _, f := range partFiles {
 			f.Close()
-			os.Remove(f.Name())
+			//os.Remove(f.Name())
 		}
 	}()
 	for _, part := range parts {
