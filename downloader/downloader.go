@@ -396,7 +396,7 @@ func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 	defer func() {
 		for _, f := range partFiles {
 			f.Close()
-			//os.Remove(f.Name())
+			os.Remove(f.Name())
 		}
 	}()
 	for _, part := range parts {
