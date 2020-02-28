@@ -284,23 +284,3 @@ func Range(min, max int) []int {
 	}
 	return items
 }
-
-type Signal struct {
-	max int
-	c   chan struct{}
-}
-
-func NewSignal(max int) *Signal {
-	return &Signal{
-		max: max,
-		c:   make(chan struct{}, max),
-	}
-}
-
-func (s *Signal) Set() {
-	s.c <- struct{}{}
-}
-
-func (s *Signal) Release() {
-	_ = <-s.c
-}
