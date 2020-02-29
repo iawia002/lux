@@ -328,7 +328,11 @@ func bilibiliDownload(options bilibiliOptions) downloader.Data {
 	}
 	title := parser.Title(doc)
 	if options.subtitle != "" {
-		title = fmt.Sprintf("%s P%d %s", title, options.page, options.subtitle)
+		if config.EpisodeTitleOnly {
+			title = fmt.Sprintf("P%d %s", options.page, options.subtitle)
+		} else {
+			title = fmt.Sprintf("%s P%d %s", title, options.page, options.subtitle)
+		}
 	}
 
 	err = downloader.Caption(

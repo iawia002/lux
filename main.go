@@ -69,6 +69,7 @@ func init() {
 		&config.Items, "items", "",
 		"Define wanted items from a file or playlist. Separated by commas like: 1,5,6,8-10",
 	)
+	flag.BoolVar(&config.EpisodeTitleOnly, "eto", false, "File name of each bilibili episode doesn't include the playlist title")
 	flag.BoolVar(&config.Caption, "C", false, "Download captions")
 	flag.IntVar(
 		&config.RetryTimes, "retry", 10, "How many times to retry when the download failed",
