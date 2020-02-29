@@ -225,6 +225,13 @@ You can use the `-start`, `-end` or `-items` option to specify the download rang
     	Playlist video items to download. Separated by commas like: 1,5,6,8-10
 ```
 
+For bilibili playlists only:
+
+```
+-eto
+  File name of each bilibili episode doesn't include the playlist title
+```
+
 ### Multiple inputs
 
 You can also download multiple URLs at once:
