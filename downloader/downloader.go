@@ -200,6 +200,23 @@ func MultiThreadSave(
 		bar.Add64(fileSize)
 		return nil
 	}
+	tmpFilePath := filePath + ".download"
+	tmpFileSize, tmpExists, err := utils.FileSize(tmpFilePath)
+	if err != nil {
+		return err
+	}
+	if tmpExists {
+		if tmpFileSize == urlData.Size {
+			bar.Add64(urlData.Size)
+			return os.Rename(tmpFilePath, filePath)
+		} else {
+			err = os.Remove(tmpFilePath)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	// Scan all parts
 	parts, err := readDirAllFilePart(fileName, urlData.Ext)
 	if err != nil {
@@ -209,16 +226,37 @@ func MultiThreadSave(
 	var unfinishedPart []*FilePartMeta
 	savedSize := int64(0)
 	if len(parts) > 0 {
-		for _, part := range parts {
-			if part.Cur <= part.End {
+		lastEnd := int64(-1)
+		for i, part := range parts {
+			// If some parts are lost, re-insert one part.
+			if part.Start-lastEnd != 1 {
+				newPart := &FilePartMeta{
+					Index: part.Index - 0.000001,
+					Start: lastEnd + 1,
+					End:   part.Start - 1,
+					Cur:   lastEnd + 1,
+				}
+				tmp := append([]*FilePartMeta{}, parts[:i]...)
+				tmp = append(tmp, newPart)
+				parts = append(tmp, parts[i:]...)
+				unfinishedPart = append(unfinishedPart, newPart)
+			}
+			// When the part has been downloaded in whole, part.Cur is equal to part.End + 1
+			if part.Cur <= part.End+1 {
 				savedSize += part.Cur - part.Start
-				if part.Cur < part.End {
+				if part.Cur < part.End+1 {
 					unfinishedPart = append(unfinishedPart, part)
 				}
-			} else if part.Cur > part.End {
-				// The part saved size greater than the part size, print the error and re-download the part
-				return fmt.Errorf("Part%f saved size greater than the size of this part, please delete the part and re-download\n", part.Index)
+			} else {
+				// The size of this part has been saved greater than the part size, delete it transparently and re-download.
+				err = os.Remove(filePartPath(filePath, part))
+				if err != nil {
+					return err
+				}
+				part.Cur = part.Start
+				unfinishedPart = append(unfinishedPart, part)
 			}
+			lastEnd = part.End
 		}
 	} else {
 		var start, end, partSize int64
@@ -276,10 +314,13 @@ func MultiThreadSave(
 			}
 			end = computeEnd(part.Cur, chunkSize, part.End)
 			remainingSize := part.End - part.Cur + 1
-			err = writeFilePartMeta(file, part)
-			if err != nil {
-				errs = append(errs, err)
-				return
+			if part.Cur == part.Start {
+				// Only write part to new file.
+				err = writeFilePartMeta(file, part)
+				if err != nil {
+					errs = append(errs, err)
+					return
+				}
 			}
 			for remainingSize > 0 {
 				end = computeEnd(part.Cur, chunkSize, part.End)
@@ -308,6 +349,10 @@ func MultiThreadSave(
 	return mergeMultiPart(filePath, parts)
 }
 
+func filePartPath(filepath string, part *FilePartMeta) string {
+	return fmt.Sprintf("%s.part%f", filepath, part.Index)
+}
+
 func computeEnd(s, chunkSize, max int64) int64 {
 	var end int64
 	end = s + chunkSize - 1
@@ -317,44 +362,8 @@ func computeEnd(s, chunkSize, max int64) int64 {
 	return end
 }
 
-func parseFilePartMeta(filepath string) (*FilePartMeta, error) {
-	meta := new(FilePartMeta)
-	size := binary.Size(*meta)
-	buf, err := mustReadFile(filepath, 0, size)
-	if err != nil {
-		return nil, err
-	}
-	err = binary.Read(bytes.NewBuffer(buf[:size]), binary.LittleEndian, meta)
-	if err != nil {
-		return nil, err
-	}
-	return meta, nil
-}
-
-func writeFilePartMeta(file *os.File, meta *FilePartMeta) error {
-	return binary.Write(file, binary.LittleEndian, meta)
-}
-
-func mustReadFile(filepath string, off int64, n int) ([]byte, error) {
-	file, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	var buf [512]byte
-	readSize, err := file.ReadAt(buf[0:n], off)
-	if err != nil && err != io.EOF {
-		return nil, err
-	}
-	if readSize < n {
-		return nil, fmt.Errorf("There have no such size of chunk.\n")
-	}
-	return buf[0:n], nil
-}
-
 func readDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
-	dirPath := path.Dir(filename)
-	dir, err := os.Open(dirPath)
+	dir, err := os.Open(config.OutputPath)
 	if err != nil {
 		return nil, err
 	}
@@ -365,16 +374,11 @@ func readDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
 	}
 	var metas []*FilePartMeta
 	reg := regexp.MustCompile(fmt.Sprintf("%s.%s.part.+", filename, extname))
-
 	for _, fn := range fns {
 		if reg.MatchString(fn.Name()) {
-			meta, err := parseFilePartMeta(fn.Name())
+			meta, err := parseFilePartMeta(path.Join(config.OutputPath, fn.Name()), fn.Size())
 			if err != nil {
 				return nil, err
-			}
-			realSize := fn.Size() - int64(binary.Size(meta))
-			if meta.Cur-meta.Start != realSize {
-				meta.Cur = meta.Start + realSize
 			}
 			metas = append(metas, meta)
 		}
@@ -383,6 +387,35 @@ func readDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
 		return metas[i].Index < metas[j].Index
 	})
 	return metas, nil
+}
+
+func parseFilePartMeta(filepath string, fileSize int64) (*FilePartMeta, error) {
+	meta := new(FilePartMeta)
+	size := binary.Size(*meta)
+	file, err := os.OpenFile(filepath, os.O_RDWR, 0666)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	var buf [512]byte
+	readSize, err := file.ReadAt(buf[0:size], 0)
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+	if readSize < size {
+		return nil, fmt.Errorf("The file has been broked, please delete all part files and re-download.\n")
+	}
+	err = binary.Read(bytes.NewBuffer(buf[:size]), binary.LittleEndian, meta)
+	if err != nil {
+		return nil, err
+	}
+	savedSize := fileSize - int64(binary.Size(meta))
+	meta.Cur = meta.Start + savedSize
+	return meta, nil
+}
+
+func writeFilePartMeta(file *os.File, meta *FilePartMeta) error {
+	return binary.Write(file, binary.LittleEndian, meta)
 }
 
 func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
@@ -399,7 +432,7 @@ func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 		}
 	}()
 	for _, part := range parts {
-		file, err := os.Open(fmt.Sprintf("%s.part%f", filepath, part.Index))
+		file, err := os.Open(filePartPath(filepath, part))
 		if err != nil {
 			return err
 		}
@@ -415,9 +448,6 @@ func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 	}
 	tempFile.Close()
 	err = os.Rename(tempFilePath, filepath)
-	if err != nil {
-		return err
-	}
 	return err
 }
 
