@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -218,7 +217,7 @@ func MultiThreadSave(
 				}
 			} else if part.Cur > part.End {
 				// The part saved size greater than the part size, print the error and re-download the part
-				return errors.New(fmt.Sprintf("Part%f saved size greater than the size of this part, please delete the part and re-download", part.Index))
+				return fmt.Errorf("Part%f saved size greater than the size of this part, please delete the part and re-download\n", part.Index)
 			}
 		}
 	} else {
@@ -257,7 +256,7 @@ func MultiThreadSave(
 	for _, part := range unfinishedPart {
 		wgp.Add()
 		go func(part *FilePartMeta) {
-			file, err := os.OpenFile(fmt.Sprintf("%s.part%f", filePath, part.Index), os.O_APPEND|os.O_CREATE, 0666)
+			file, err := os.OpenFile(fmt.Sprintf("%s.part%f", filePath, part.Index), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 			if err != nil {
 				errs = append(errs, err)
 				return
@@ -348,7 +347,7 @@ func mustReadFile(filepath string, off int64, n int) ([]byte, error) {
 		return nil, err
 	}
 	if readSize < n {
-		return nil, errors.New("There have no such size of chunk.\n")
+		return nil, fmt.Errorf("There have no such size of chunk.\n")
 	}
 	return buf[0:n], nil
 }
@@ -388,7 +387,7 @@ func readDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
 
 func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 	tempFilePath := filepath + ".download"
-	tempFile, err := os.OpenFile(tempFilePath, os.O_APPEND|os.O_CREATE, 0666)
+	tempFile, err := os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}
