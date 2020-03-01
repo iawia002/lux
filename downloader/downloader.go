@@ -259,11 +259,11 @@ func MultiThreadSave(
 			}
 			lastEnd = part.End
 		}
-		if lastEnd != urlData.Size {
+		if lastEnd != urlData.Size-1 {
 			newPart := &FilePartMeta{
 				Index: parts[len(parts)-1].Index + 1,
 				Start: lastEnd + 1,
-				End:   urlData.Size,
+				End:   urlData.Size - 1,
 				Cur:   lastEnd + 1,
 			}
 			parts = append(parts, newPart)
