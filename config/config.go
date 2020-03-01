@@ -53,6 +53,8 @@ var (
 	YoukuPassword string
 	// RetryTimes how many times to retry when the download failed
 	RetryTimes int
+
+	MultiThread bool
 )
 
 // FakeHeaders fake http headers

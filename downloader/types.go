@@ -138,3 +138,10 @@ type Aria2Input struct {
 	// For a simple download, only add headers
 	Header []string `json:"header"`
 }
+
+type FilePartMeta struct {
+	Index float32
+	Start int64
+	End   int64
+	Cur   int64
+}
