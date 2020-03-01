@@ -258,6 +258,16 @@ func MultiThreadSave(
 			}
 			lastEnd = part.End
 		}
+		if lastEnd != urlData.Size {
+			newPart := &FilePartMeta{
+				Index: parts[len(parts)-1].Index + 1,
+				Start: lastEnd + 1,
+				End:   urlData.Size,
+				Cur:   lastEnd + 1,
+			}
+			parts = append(parts, newPart)
+			unfinishedPart = append(unfinishedPart, newPart)
+		}
 	} else {
 		var start, end, partSize int64
 		var i float32
@@ -294,7 +304,7 @@ func MultiThreadSave(
 	for _, part := range unfinishedPart {
 		wgp.Add()
 		go func(part *FilePartMeta) {
-			file, err := os.OpenFile(fmt.Sprintf("%s.part%f", filePath, part.Index), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+			file, err := os.OpenFile(filePartPath(filePath, part), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 			if err != nil {
 				errs = append(errs, err)
 				return
