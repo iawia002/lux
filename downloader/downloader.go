@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"sync"
@@ -218,7 +219,7 @@ func MultiThreadSave(
 	}
 
 	// Scan all parts
-	parts, err := readDirAllFilePart(fileName, urlData.Ext)
+	parts, err := readDirAllFilePart(filePath, fileName, urlData.Ext)
 	if err != nil {
 		return err
 	}
@@ -372,8 +373,9 @@ func computeEnd(s, chunkSize, max int64) int64 {
 	return end
 }
 
-func readDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
-	dir, err := os.Open(config.OutputPath)
+func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, error) {
+	dirPath := filepath.Dir(filePath)
+	dir, err := os.Open(dirPath)
 	if err != nil {
 		return nil, err
 	}
@@ -386,7 +388,7 @@ func readDirAllFilePart(filename, extname string) ([]*FilePartMeta, error) {
 	reg := regexp.MustCompile(fmt.Sprintf("%s.%s.part.+", filename, extname))
 	for _, fn := range fns {
 		if reg.MatchString(fn.Name()) {
-			meta, err := parseFilePartMeta(path.Join(config.OutputPath, fn.Name()), fn.Size())
+			meta, err := parseFilePartMeta(path.Join(dirPath, fn.Name()), fn.Size())
 			if err != nil {
 				return nil, err
 			}
