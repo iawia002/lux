@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -175,6 +176,17 @@ func download(videoURL string) bool {
 		return false
 	}
 	var isErr bool
+
+	if config.ExtractedData {
+		jsonData, err := json.MarshalIndent(data, "", "\t")
+		if err != nil {
+			fmt.Printf("%s", err)
+			return isErr
+		}
+		fmt.Printf("%s\n", jsonData)
+		return !isErr
+	}
+
 	for _, item := range data {
 		if item.Err != nil {
 			// if this error occurs, the preparation step is normal, but the data extraction is wrong.
