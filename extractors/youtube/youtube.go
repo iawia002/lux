@@ -27,12 +27,27 @@ type streamFormat struct {
 
 type playerResponseType struct {
 	StreamingData struct {
-		Formats         []streamFormat `json:"formats"`
-		AdaptiveFormats []streamFormat `json:"adaptiveFormats"`
+		Formats         []streamFormat  `json:"formats"`
+		AdaptiveFormats adaptiveFormats `json:"adaptiveFormats"`
 	} `json:"streamingData"`
 	VideoDetails struct {
 		Title string `json:"title"`
 	} `json:"videoDetails"`
+}
+
+type adaptiveFormats []streamFormat
+
+func (playerAdaptiveFormats adaptiveFormats) filterPlayerAdaptiveFormats(videoInfoFormats ytdl.FormatList) (filter adaptiveFormats) {
+	videoInfoFormatMap := make(map[int]struct{}, len(videoInfoFormats))
+	for _, f := range videoInfoFormats {
+		videoInfoFormatMap[f.Number] = struct{}{}
+	}
+	for _, f := range playerAdaptiveFormats {
+		if _, ok := videoInfoFormatMap[f.Itag]; ok {
+			filter = append(filter, f)
+		}
+	}
+	return
 }
 
 type youtubeData struct {
@@ -131,6 +146,10 @@ func youtubeDownload(uri string) downloader.Data {
 		return downloader.EmptyData(uri, err)
 	}
 	title := playerResponse.VideoDetails.Title
+	playerResponse.StreamingData.AdaptiveFormats = playerResponse.
+		StreamingData.
+		AdaptiveFormats.
+		filterPlayerAdaptiveFormats(videoInfo.Formats)
 
 	streams, err := extractVideoURLS(playerResponse, videoInfo)
 	if err != nil {
@@ -156,7 +175,7 @@ func getStreamExt(streamType string) string {
 }
 
 func getRealURL(videoFormat streamFormat, videoInfo *ytdl.VideoInfo, ext string) (*downloader.URL, error) {
-	ytdlFormat := new(ytdl.Format)
+	var ytdlFormat *ytdl.Format
 	for _, f := range videoInfo.Formats {
 		if f.Itag.Number == videoFormat.Itag {
 			ytdlFormat = f
