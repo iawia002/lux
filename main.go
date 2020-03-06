@@ -86,14 +86,7 @@ func init() {
 	flag.StringVar(&config.YoukuPassword, "password", "", "Youku password")
 }
 
-func printError(url string, err error) {
-	fmt.Printf(
-		"Downloading %s error:\n%s\n",
-		color.CyanString("%s", url), color.RedString("%v", err),
-	)
-}
-
-func download(videoURL string) bool {
+func download(videoURL string) error {
 	var (
 		domain string
 		err    error
@@ -110,8 +103,7 @@ func download(videoURL string) bool {
 	} else {
 		u, err := url.ParseRequestURI(videoURL)
 		if err != nil {
-			printError(videoURL, err)
-			return false
+			return err
 		}
 		domain = utils.Domain(u.Host)
 	}
@@ -172,36 +164,42 @@ func download(videoURL string) bool {
 	if err != nil {
 		// if this error occurs, it means that an error occurred before actually starting to extract data
 		// (there is an error in the preparation step), and the data list is empty.
-		printError(videoURL, err)
-		return false
+		return err
 	}
-	var isErr bool
 
 	if config.ExtractedData {
 		jsonData, err := json.MarshalIndent(data, "", "\t")
 		if err != nil {
-			fmt.Printf("%s", err)
-			return isErr
+			return err
 		}
 		fmt.Printf("%s\n", jsonData)
-		return !isErr
+		return nil
 	}
 
+	errors := make([]error, 0)
 	for _, item := range data {
 		if item.Err != nil {
 			// if this error occurs, the preparation step is normal, but the data extraction is wrong.
 			// the data is an empty struct.
-			printError(item.URL, item.Err)
-			isErr = true
+			errors = append(errors, item.Err)
 			continue
 		}
 		err = downloader.Download(item, videoURL, config.ChunkSizeMB)
 		if err != nil {
-			printError(item.URL, err)
-			isErr = true
+			errors = append(errors, err)
 		}
 	}
-	return !isErr
+	if len(errors) != 0 {
+		return errors[0]
+	}
+	return nil
+}
+
+func printError(url string, err error) {
+	fmt.Printf(
+		"Downloading %s error:\n%s\n",
+		color.CyanString("%s", url), color.RedString("%v", err),
+	)
 }
 
 func main() {
@@ -249,7 +247,9 @@ func main() {
 	}
 	var isErr bool
 	for _, videoURL := range args {
-		if !download(strings.TrimSpace(videoURL)) {
+		u := strings.TrimSpace(videoURL)
+		if err := download(u); err != nil {
+			printError(u, err)
 			isErr = true
 		}
 	}
