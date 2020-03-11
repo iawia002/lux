@@ -599,7 +599,7 @@ Pornhub | <https://pornhub.com> | ✓ | | | |
 XVIDEOS | <https://xvideos.com> | ✓ | | | |
 聯合新聞網 | <https://udn.com> | ✓ | | | |
 TikTok | <https://www.tiktok.com> | ✓ | | | |
-Dailymotion | <www.dailymotion.com> | ✓ | | | |
+Dailymotion | <https://www.dailymotion.com> | ✓ | | | |
 
 
 ## Known issues
