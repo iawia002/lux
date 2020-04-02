@@ -16,12 +16,33 @@ type geekData struct {
 	Code  int             `json:"code"`
 	Error json.RawMessage `json:"error"`
 	Data  struct {
-		Title         string `json:"article_sharetitle"`
-		VideoMediaMap map[string]struct {
-			URL  string `json:"url"`
-			Size int64  `json:"size"`
-		} `json:"video_media_map"`
+		VideoID      string `json:"video_id"`
+		Title        string `json:"article_sharetitle"`
+		ColumnHadSub bool   `json:"column_had_sub"`
 	} `json:"data"`
+}
+
+type videoPlayAuth struct {
+	Code  int             `json:"code"`
+	Error json.RawMessage `json:"error"`
+	Data  struct {
+		PlayAuth string `json:"play_auth"`
+	} `json:"data"`
+}
+
+type playInfo struct {
+	VideoBase struct {
+		VideoID  string `json:"VideoId"`
+		Title    string `json:"Title"`
+		CoverURL string `josn:"CoverURL"`
+	} `json:"VideoBase"`
+	PlayInfoList struct {
+		PlayInfo []struct {
+			URL        string `json:"PlayURL"`
+			Size       int64  `json:"Size"`
+			Definition string `json:"Definition"`
+		} `json:"PlayInfo"`
+	} `json:"PlayInfoList"`
 }
 
 type geekURLInfo struct {
@@ -58,8 +79,9 @@ func Extract(url string) ([]downloader.Data, error) {
 		return nil, extractors.ErrURLParseFailed
 	}
 
+	//获取视频信息
 	heanders := map[string]string{"Origin": "https://time.geekbang.org", "Content-Type": "application/json", "Referer": url}
-	params := strings.NewReader("{\"id\":" + string(matches[2]+"}"))
+	params := strings.NewReader("{\"id\":" + string(matches[2]) + "}")
 	res, err := request.Request(http.MethodPost, "https://time.geekbang.org/serv/v1/article", params, heanders)
 	if err != nil {
 		return nil, err
@@ -75,11 +97,45 @@ func Extract(url string) ([]downloader.Data, error) {
 		return nil, errors.New(string(data.Error))
 	}
 
+	if data.Data.VideoID == "" && !data.Data.ColumnHadSub {
+		return nil, errors.New("请先购买课程，或使用Cookie登录。")
+	}
+
+	//获取视频授权token信息
+	params = strings.NewReader("{\"source_type\":1,\"aid\":" + string(matches[2]) + ",\"video_id\":\"" + string(data.Data.VideoID) + "\"}")
+	res, err = request.Request(http.MethodPost, "https://time.geekbang.org/serv/v3/source_auth/video_play_auth", params, heanders)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	var playAuth videoPlayAuth
+	if err = json.NewDecoder(res.Body).Decode(&playAuth); err != nil {
+		return nil, err
+	}
+
+	if playAuth.Code < 0 {
+		return nil, errors.New(string(playAuth.Error))
+	}
+
+	//获取视频的播放信息
+	heanders = map[string]string{"Accept-Encoding": ""}
+	res, err = request.Request(http.MethodGet, "http://ali.mantv.top/play/info?playAuth="+playAuth.Data.PlayAuth, nil, heanders)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	var playInfo playInfo
+	if err = json.NewDecoder(res.Body).Decode(&playInfo); err != nil {
+		return nil, err
+	}
+
 	title := data.Data.Title
 
-	streams := make(map[string]downloader.Stream, len(data.Data.VideoMediaMap))
+	streams := make(map[string]downloader.Stream, len(playInfo.PlayInfoList.PlayInfo))
 
-	for key, media := range data.Data.VideoMediaMap {
+	for _, media := range playInfo.PlayInfoList.PlayInfo {
 		m3u8URLs, err := geekM3u8(media.URL)
 
 		if err != nil {
@@ -95,10 +151,10 @@ func Extract(url string) ([]downloader.Data, error) {
 			}
 		}
 
-		streams[key] = downloader.Stream{
+		streams[media.Definition] = downloader.Stream{
 			URLs:    urls,
 			Size:    media.Size,
-			Quality: key,
+			Quality: media.Definition,
 		}
 	}
 
