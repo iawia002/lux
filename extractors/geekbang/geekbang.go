@@ -79,7 +79,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		return nil, extractors.ErrURLParseFailed
 	}
 
-	//获取视频信息
+	// Get video information
 	heanders := map[string]string{"Origin": "https://time.geekbang.org", "Content-Type": "application/json", "Referer": url}
 	params := strings.NewReader("{\"id\":" + string(matches[2]) + "}")
 	res, err := request.Request(http.MethodPost, "https://time.geekbang.org/serv/v1/article", params, heanders)
@@ -101,7 +101,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		return nil, errors.New("请先购买课程，或使用Cookie登录。")
 	}
 
-	//获取视频授权token信息
+	// Get video license token information
 	params = strings.NewReader("{\"source_type\":1,\"aid\":" + string(matches[2]) + ",\"video_id\":\"" + string(data.Data.VideoID) + "\"}")
 	res, err = request.Request(http.MethodPost, "https://time.geekbang.org/serv/v3/source_auth/video_play_auth", params, heanders)
 	if err != nil {
@@ -118,7 +118,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		return nil, errors.New(string(playAuth.Error))
 	}
 
-	//获取视频的播放信息
+	// Get video playback information
 	heanders = map[string]string{"Accept-Encoding": ""}
 	res, err = request.Request(http.MethodGet, "http://ali.mantv.top/play/info?playAuth="+playAuth.Data.PlayAuth, nil, heanders)
 	if err != nil {
