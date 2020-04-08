@@ -27,12 +27,27 @@ type streamFormat struct {
 
 type playerResponseType struct {
 	StreamingData struct {
-		Formats         []streamFormat `json:"formats"`
-		AdaptiveFormats []streamFormat `json:"adaptiveFormats"`
+		Formats         []streamFormat  `json:"formats"`
+		AdaptiveFormats adaptiveFormats `json:"adaptiveFormats"`
 	} `json:"streamingData"`
 	VideoDetails struct {
 		Title string `json:"title"`
 	} `json:"videoDetails"`
+}
+
+type adaptiveFormats []streamFormat
+
+func (playerAdaptiveFormats adaptiveFormats) filterPlayerAdaptiveFormats(videoInfoFormats ytdl.FormatList) (filter adaptiveFormats) {
+	videoInfoFormatMap := make(map[int]struct{}, len(videoInfoFormats))
+	for _, f := range videoInfoFormats {
+		videoInfoFormatMap[f.Number] = struct{}{}
+	}
+	for _, f := range playerAdaptiveFormats {
+		if _, ok := videoInfoFormatMap[f.Itag]; ok {
+			filter = append(filter, f)
+		}
+	}
+	return
 }
 
 type youtubeData struct {
@@ -131,6 +146,10 @@ func youtubeDownload(uri string) downloader.Data {
 		return downloader.EmptyData(uri, err)
 	}
 	title := playerResponse.VideoDetails.Title
+	playerResponse.StreamingData.AdaptiveFormats = playerResponse.
+		StreamingData.
+		AdaptiveFormats.
+		filterPlayerAdaptiveFormats(videoInfo.Formats)
 
 	streams, err := extractVideoURLS(playerResponse, videoInfo)
 	if err != nil {
@@ -156,7 +175,7 @@ func getStreamExt(streamType string) string {
 }
 
 func getRealURL(videoFormat streamFormat, videoInfo *ytdl.VideoInfo, ext string) (*downloader.URL, error) {
-	ytdlFormat := new(ytdl.Format)
+	var ytdlFormat *ytdl.Format
 	for _, f := range videoInfo.Formats {
 		if f.Itag.Number == videoFormat.Itag {
 			ytdlFormat = f
@@ -219,25 +238,78 @@ func extractVideoURLS(data playerResponseType, videoInfo *ytdl.VideoInfo) (map[s
 	// Unlike `url_encoded_fmt_stream_map`, all videos in `adaptive_fmts` have no sound,
 	// we need download video and audio both and then merge them.
 
-	// get audio file for videos in AdaptiveFormats
-	var audio downloader.URL
-	for _, f := range data.StreamingData.AdaptiveFormats {
-		if strings.HasPrefix(f.MimeType, "audio/mp4") {
-			audioURL, err := getRealURL(f, videoInfo, "m4a")
-			if err != nil {
-				return nil, err
+	// Get separate m4a and webm audio streams for videos in AdaptiveFormats.
+	// Prefer medium quality audio over low quality (there is no AUDIO_QUALITY_HIGH).
+	var fM4aMedium, fM4aLow, fWebmMedium, fWebmLow *streamFormat
+	for i, f := range data.StreamingData.AdaptiveFormats {
+		switch {
+		case strings.HasPrefix(f.MimeType, "audio/mp4"):
+			if f.AudioQuality == "AUDIO_QUALITY_MEDIUM" {
+				fM4aMedium = &data.StreamingData.AdaptiveFormats[i]
+			} else {
+				fM4aLow = &data.StreamingData.AdaptiveFormats[i]
 			}
-			audio = *audioURL
+		case strings.HasPrefix(f.MimeType, "audio/webm"):
+			if f.AudioQuality == "AUDIO_QUALITY_MEDIUM" {
+				fWebmMedium = &data.StreamingData.AdaptiveFormats[i]
+			} else {
+				fWebmLow = &data.StreamingData.AdaptiveFormats[i]
+			}
+		}
+
+		if fM4aMedium != nil && fWebmMedium != nil {
 			break
 		}
 	}
 
+	var audioM4a downloader.URL
+	if fM4aMedium != nil {
+		audioURL, err := getRealURL(*fM4aMedium, videoInfo, "m4a")
+		if err != nil {
+			return nil, err
+		}
+		audioM4a = *audioURL
+	} else if fM4aLow != nil {
+		audioURL, err := getRealURL(*fM4aLow, videoInfo, "m4a")
+		if err != nil {
+			return nil, err
+		}
+		audioM4a = *audioURL
+	}
+
+	var audioWebm downloader.URL
+	if fWebmMedium != nil {
+		audioURL, err := getRealURL(*fWebmMedium, videoInfo, "webm")
+		if err != nil {
+			return nil, err
+		}
+		audioWebm = *audioURL
+	} else if fM4aLow != nil {
+		audioURL, err := getRealURL(*fWebmLow, videoInfo, "webm")
+		if err != nil {
+			return nil, err
+		}
+		audioWebm = *audioURL
+	}
+
+	var emptyURL downloader.URL
 	for _, f := range data.StreamingData.AdaptiveFormats {
 		stream, err := genStream(f, videoInfo)
 		if err != nil {
 			return nil, err
 		}
-		stream.URLs = append(stream.URLs, audio)
+
+		// append audio stream only for adaptive video streams (not audio)
+		switch {
+		case strings.HasPrefix(f.MimeType, "video/mp4"):
+			if audioM4a != emptyURL {
+				stream.URLs = append(stream.URLs, audioM4a)
+			}
+		case strings.HasPrefix(f.MimeType, "video/webm"):
+			if audioWebm != emptyURL {
+				stream.URLs = append(stream.URLs, audioWebm)
+			}
+		}
 
 		streams[strconv.Itoa(f.Itag)] = *stream
 	}

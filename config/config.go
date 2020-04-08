@@ -41,6 +41,8 @@ var (
 	ItemEnd int
 	// Items Define wanted items from a file or playlist. Separated by commas like: 1,5,6,8-10
 	Items string
+	// File name of each bilibili episode doesn't include the playlist title
+	EpisodeTitleOnly bool
 	// Caption download captions
 	Caption bool
 	// YoukuCcode youku ccode
@@ -51,6 +53,8 @@ var (
 	YoukuPassword string
 	// RetryTimes how many times to retry when the download failed
 	RetryTimes int
+
+	MultiThread bool
 )
 
 // FakeHeaders fake http headers

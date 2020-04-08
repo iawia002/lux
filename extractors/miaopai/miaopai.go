@@ -2,6 +2,7 @@ package miaopai
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -35,7 +36,7 @@ func getRandomString(l int) string {
 	for i := 0; i < l; i++ {
 		s = append(s, chars[rand.Intn(len(chars)-1)])
 	}
-	return strings.Join(s, ",")
+	return strings.Join(s, "")
 }
 
 // Extract is the main function for extracting data
@@ -46,18 +47,27 @@ func Extract(url string) ([]downloader.Data, error) {
 	}
 	id := ids[1]
 
+	randomString := getRandomString(10)
+
 	var data miaopaiData
 	jsonString, err := request.Get(
-		fmt.Sprintf("https://n.miaopai.com/api/aj_media/info.json?smid=%s&appid=530&_cb=_jsonp%s", id, getRandomString(10)),
+		fmt.Sprintf("https://n.miaopai.com/api/aj_media/info.json?smid=%s&appid=530&_cb=_jsonp%s", id, randomString),
 		url, nil,
 	)
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal([]byte(jsonString), &data)
+
+	match := utils.MatchOneOf(jsonString, randomString+`\((.*)\);$`)
+	if match == nil || len(match) < 2 {
+		return nil, errors.New("获取视频信息失败。")
+	}
+
+	err = json.Unmarshal([]byte(match[1]), &data)
 	if err != nil {
 		return nil, err
 	}
+
 	realURL := data.Data.MetaData[0].URLs.M
 	size, err := request.Size(realURL, url)
 	if err != nil {
