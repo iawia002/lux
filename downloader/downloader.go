@@ -2,7 +2,9 @@ package downloader
 
 import (
 	"bytes"
+	"crypto/md5"
 	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -219,7 +221,10 @@ func MultiThreadSave(
 	}
 
 	// Scan all parts
-	parts, err := readDirAllFilePart(filePath, fileName, urlData.Ext)
+	dirPath := filepath.Dir(filePath)
+	tmpBuf := md5.Sum(bytes.NewBufferString(fileName).Bytes())
+	md5fn := fmt.Sprintf("%s.%s", hex.EncodeToString(tmpBuf[:]), urlData.Ext)
+	parts, err := readDirAllFilePart(dirPath, md5fn)
 	if err != nil {
 		return err
 	}
@@ -250,7 +255,7 @@ func MultiThreadSave(
 				}
 			} else {
 				// The size of this part has been saved greater than the part size, delete it transparently and re-download.
-				err = os.Remove(filePartPath(filePath, part))
+				err = os.Remove(filePartPath(dirPath, md5fn, part))
 				if err != nil {
 					return err
 				}
@@ -296,7 +301,7 @@ func MultiThreadSave(
 	if savedSize > 0 {
 		bar.Add64(savedSize)
 		if savedSize == urlData.Size {
-			return mergeMultiPart(filePath, parts)
+			return mergeMultiPart(filePath, dirPath, md5fn, parts)
 		}
 	}
 
@@ -305,7 +310,7 @@ func MultiThreadSave(
 	for _, part := range unfinishedPart {
 		wgp.Add()
 		go func(part *FilePartMeta) {
-			file, err := os.OpenFile(filePartPath(filePath, part), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+			file, err := os.OpenFile(filePartPath(dirPath, md5fn, part), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 			if err != nil {
 				errs = append(errs, err)
 				return
@@ -357,11 +362,11 @@ func MultiThreadSave(
 	if len(errs) > 0 {
 		return errs[0]
 	}
-	return mergeMultiPart(filePath, parts)
+	return mergeMultiPart(filePath, dirPath, md5fn, parts)
 }
 
-func filePartPath(filepath string, part *FilePartMeta) string {
-	return fmt.Sprintf("%s.part%f", filepath, part.Index)
+func filePartPath(dirPath, md5fn string, part *FilePartMeta) string {
+	return fmt.Sprintf("%s\\%s.part%f", dirPath, md5fn, part.Index)
 }
 
 func computeEnd(s, chunkSize, max int64) int64 {
@@ -373,8 +378,7 @@ func computeEnd(s, chunkSize, max int64) int64 {
 	return end
 }
 
-func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, error) {
-	dirPath := filepath.Dir(filePath)
+func readDirAllFilePart(dirPath, md5fn string) ([]*FilePartMeta, error) {
 	dir, err := os.Open(dirPath)
 	if err != nil {
 		return nil, err
@@ -385,7 +389,8 @@ func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, er
 		return nil, err
 	}
 	var metas []*FilePartMeta
-	reg := regexp.MustCompile(fmt.Sprintf("%s.%s.part.+", filename, extname))
+
+	reg := regexp.MustCompile(fmt.Sprintf("%s.part.+", md5fn))
 	for _, fn := range fns {
 		if reg.MatchString(fn.Name()) {
 			meta, err := parseFilePartMeta(path.Join(dirPath, fn.Name()), fn.Size())
@@ -430,7 +435,7 @@ func writeFilePartMeta(file *os.File, meta *FilePartMeta) error {
 	return binary.Write(file, binary.LittleEndian, meta)
 }
 
-func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
+func mergeMultiPart(filepath, dirPath, md5fn string, parts []*FilePartMeta) error {
 	tempFilePath := filepath + ".download"
 	tempFile, err := os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -444,7 +449,7 @@ func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 		}
 	}()
 	for _, part := range parts {
-		file, err := os.Open(filePartPath(filepath, part))
+		file, err := os.Open(filePartPath(dirPath, md5fn, part))
 		if err != nil {
 			return err
 		}
@@ -466,6 +471,11 @@ func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 // Download download urls
 func Download(v Data, refer string, chunkSizeMB int) error {
 	v.genSortedStreams()
+	if config.ExtractedData {
+		jsonData, _ := json.MarshalIndent(v, "", "    ")
+		fmt.Printf("%s\n", jsonData)
+		return nil
+	}
 	var (
 		title  string
 		stream string
