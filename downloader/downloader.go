@@ -471,11 +471,6 @@ func mergeMultiPart(filepath, dirPath, md5fn string, parts []*FilePartMeta) erro
 // Download download urls
 func Download(v Data, refer string, chunkSizeMB int) error {
 	v.genSortedStreams()
-	if config.ExtractedData {
-		jsonData, _ := json.MarshalIndent(v, "", "    ")
-		fmt.Printf("%s\n", jsonData)
-		return nil
-	}
 	var (
 		title  string
 		stream string
