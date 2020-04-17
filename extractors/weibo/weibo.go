@@ -5,14 +5,13 @@ import (
 	netURL "net/url"
 	"strings"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
 
-func downloadWeiboTV(url string) ([]downloader.Data, error) {
+func downloadWeiboTV(url string) ([]*types.Data, error) {
 	headers := map[string]string{
 		"Cookie": "SUB=_2AkMsZ8xOf8NxqwJRmP4RzGLqbo5xyQDEieKaOz2VJRMxHRl-yj83qlEotRB6B-fiobWQ5vdEoYw7bCoCdf4KyP8O3Ujq",
 	}
@@ -32,7 +31,7 @@ func downloadWeiboTV(url string) ([]downloader.Data, error) {
 	// &720=http://f.us.sinaimg.cn/004cqzndlx07oCX1kMOQ01040200vyxj0k010.mp4?label=mp4_720p&template=1280x720.20&Expires=1541041515&ssig=Fdasnr1aW6&KID=unistore,video&qType=720
 	realURLs := utils.MatchOneOf(html, `video-sources="fluency=(.+?)"`)
 	if realURLs == nil || len(realURLs) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 
 	realURL, err := netURL.PathUnescape(realURLs[1])
@@ -40,7 +39,7 @@ func downloadWeiboTV(url string) ([]downloader.Data, error) {
 		return nil, err
 	}
 	quality := []string{"480", "720"}
-	streams := make(map[string]downloader.Stream, len(quality))
+	streams := make(map[string]*types.Stream, len(quality))
 	for _, q := range quality {
 		urlList := strings.Split(realURL, fmt.Sprintf("&%s=", q))
 		u := urlList[len(urlList)-1]
@@ -51,8 +50,8 @@ func downloadWeiboTV(url string) ([]downloader.Data, error) {
 		if err != nil {
 			return nil, err
 		}
-		streams[q] = downloader.Stream{
-			URLs: []downloader.URL{
+		streams[q] = &types.Stream{
+			Parts: []*types.Part{
 				{
 					URL:  u,
 					Size: size,
@@ -63,19 +62,26 @@ func downloadWeiboTV(url string) ([]downloader.Data, error) {
 			Quality: q,
 		}
 	}
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "微博 weibo.com",
 			Title:   title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},
 	}, nil
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	if !strings.Contains(url, "m.weibo.cn") {
 		if strings.Contains(url, "weibo.com/tv/v/") {
 			return downloadWeiboTV(url)
@@ -90,7 +96,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		html, `"content2": "(.+?)",`, `"status_title": "(.+?)",`,
 	)
 	if titles == nil || len(titles) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	title := titles[1]
 
@@ -98,7 +104,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		html, `"stream_url_hd": "(.+?)"`, `"stream_url": "(.+?)"`,
 	)
 	if realURLs == nil || len(realURLs) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	realURL := realURLs[1]
 
@@ -106,23 +112,23 @@ func Extract(url string) ([]downloader.Data, error) {
 	if err != nil {
 		return nil, err
 	}
-	urlData := downloader.URL{
+	urlData := &types.Part{
 		URL:  realURL,
 		Size: size,
 		Ext:  "mp4",
 	}
-	streams := map[string]downloader.Stream{
+	streams := map[string]*types.Stream{
 		"default": {
-			URLs: []downloader.URL{urlData},
-			Size: size,
+			Parts: []*types.Part{urlData},
+			Size:  size,
 		},
 	}
 
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "微博 weibo.com",
 			Title:   title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

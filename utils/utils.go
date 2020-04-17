@@ -22,11 +22,8 @@ import (
 	"github.com/iawia002/annie/request"
 )
 
-// MAXLENGTH Maximum length of file name
-const MAXLENGTH = 80
-
-// GetStringFromJson get the string value from json path
-func GetStringFromJson(json, path string) string {
+// GetStringFromJSON get the string value from json path
+func GetStringFromJSON(json, path string) string {
 	return gjson.Get(json, path).String()
 }
 
@@ -78,11 +75,16 @@ func Domain(url string) string {
 	if domain != nil {
 		return domain[1]
 	}
-	return "Universal"
+	return ""
 }
 
 // LimitLength Handle overly long strings
 func LimitLength(s string, length int) string {
+	// 0 means unlimited
+	if length == 0 {
+		return s
+	}
+
 	const ELLIPSES = "..."
 	str := []rune(s)
 	if len(str) > length {
@@ -92,37 +94,34 @@ func LimitLength(s string, length int) string {
 }
 
 // FileName Converts a string to a valid filename
-func FileName(name string, ext string) string {
+func FileName(name, ext string, length int) string {
 	rep := strings.NewReplacer("\n", " ", "/", " ", "|", "-", ": ", "：", ":", "：", "'", "’")
 	name = rep.Replace(name)
 	if runtime.GOOS == "windows" {
 		rep = strings.NewReplacer("\"", " ", "?", " ", "*", " ", "\\", " ", "<", " ", ">", " ")
 		name = rep.Replace(name)
 	}
-	limitedName := LimitLength(name, MAXLENGTH)
+	limitedName := LimitLength(name, length)
 	if ext == "" {
 		return limitedName
-	} else {
-		return fmt.Sprintf("%s.%s", limitedName, ext)
 	}
+	return fmt.Sprintf("%s.%s", limitedName, ext)
 }
 
 // FilePath gen valid file path
-func FilePath(name, ext string, escape bool) (string, error) {
-	var outputPath string
-	if config.OutputPath != "" {
-		if _, err := os.Stat(config.OutputPath); err != nil {
+func FilePath(name, ext string, length int, outputPath string, escape bool) (string, error) {
+	if outputPath != "" {
+		if _, err := os.Stat(outputPath); err != nil {
 			return "", err
 		}
 	}
 	var fileName string
 	if escape {
-		fileName = FileName(name, ext)
+		fileName = FileName(name, ext, length)
 	} else {
 		fileName = fmt.Sprintf("%s.%s", name, ext)
 	}
-	outputPath = filepath.Join(config.OutputPath, fileName)
-	return outputPath, nil
+	return filepath.Join(outputPath, fileName), nil
 }
 
 // FileLineCounter Counts line in file
@@ -146,10 +145,10 @@ func FileLineCounter(r io.Reader) (int, error) {
 }
 
 // ParseInputFile Parses input file into args
-func ParseInputFile(r io.Reader) []string {
+func ParseInputFile(r io.Reader, items string, itemStart, itemEnd int) []string {
 	scanner := bufio.NewScanner(r)
 
-	var temp []string
+	temp := make([]string, 0)
 	totalLines := 0
 	for scanner.Scan() {
 		totalLines++
@@ -157,17 +156,16 @@ func ParseInputFile(r io.Reader) []string {
 		temp = append(temp, universalURL)
 	}
 
-	var wantedItems []int
-	wantedItems = NeedDownloadList(totalLines)
+	wantedItems := NeedDownloadList(items, itemStart, itemEnd, totalLines)
 
-	var items []string
+	itemList := make([]string, 0, len(wantedItems))
 	for i, item := range temp {
 		if ItemInSlice(i, wantedItems) {
-			items = append(items, item)
+			itemList = append(itemList, item)
 		}
 	}
 
-	return items
+	return itemList
 }
 
 // ItemInSlice if a item is in the list
@@ -219,7 +217,7 @@ func GetNameAndExt(uri string) (string, string, error) {
 // Md5 md5 hash
 func Md5(text string) string {
 	sign := md5.New()
-	sign.Write([]byte(text))
+	sign.Write([]byte(text)) // nolint
 	return fmt.Sprintf("%x", sign.Sum(nil))
 }
 
@@ -249,7 +247,7 @@ func M3u8URLs(uri string) ([]string, error) {
 				if err != nil {
 					continue
 				}
-				urls = append(urls, fmt.Sprintf("%s", base.ResolveReference(u)))
+				urls = append(urls, base.ResolveReference(u).String())
 			}
 		}
 	}

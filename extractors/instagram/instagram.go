@@ -3,8 +3,7 @@ package instagram
 import (
 	"encoding/json"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -30,8 +29,15 @@ type instagram struct {
 	} `json:"entry_data"`
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return nil, err
@@ -45,29 +51,32 @@ func Extract(url string) ([]downloader.Data, error) {
 
 	dataStrings := utils.MatchOneOf(html, `window\._sharedData\s*=\s*(.*);`)
 	if dataStrings == nil || len(dataStrings) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	dataString := dataStrings[1]
 
 	var data instagram
 	if err = json.Unmarshal([]byte(dataString), &data); err != nil {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 
-	var realURL, dataType string
-	var size int64
-	streams := map[string]downloader.Stream{}
+	var (
+		realURL  string
+		dataType types.DataType
+		size     int64
+	)
+	streams := make(map[string]*types.Stream)
 
 	if data.EntryData.PostPage[0].Graphql.ShortcodeMedia.VideoURL != "" {
-		// Data
-		dataType = "video"
+		// Video
+		dataType = types.DataTypeVideo
 		realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.VideoURL
 		size, err = request.Size(realURL, url)
 		if err != nil {
 			return nil, err
 		}
-		streams["default"] = downloader.Stream{
-			URLs: []downloader.URL{
+		streams["default"] = &types.Stream{
+			Parts: []*types.Part{
 				{
 					URL:  realURL,
 					Size: size,
@@ -78,7 +87,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		}
 	} else {
 		// Image
-		dataType = "image"
+		dataType = types.DataTypeImage
 		if data.EntryData.PostPage[0].Graphql.ShortcodeMedia.EdgeSidecar.Edges == nil {
 			// Single
 			realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.DisplayURL
@@ -86,8 +95,8 @@ func Extract(url string) ([]downloader.Data, error) {
 			if err != nil {
 				return nil, err
 			}
-			streams["default"] = downloader.Stream{
-				URLs: []downloader.URL{
+			streams["default"] = &types.Stream{
+				Parts: []*types.Part{
 					{
 						URL:  realURL,
 						Size: size,
@@ -99,14 +108,14 @@ func Extract(url string) ([]downloader.Data, error) {
 		} else {
 			// Album
 			var totalSize int64
-			var urls []downloader.URL
+			var urls []*types.Part
 			for _, u := range data.EntryData.PostPage[0].Graphql.ShortcodeMedia.EdgeSidecar.Edges {
 				realURL = u.Node.DisplayURL
 				size, err = request.Size(realURL, url)
 				if err != nil {
 					return nil, err
 				}
-				urlData := downloader.URL{
+				urlData := &types.Part{
 					URL:  realURL,
 					Size: size,
 					Ext:  "jpg",
@@ -114,14 +123,14 @@ func Extract(url string) ([]downloader.Data, error) {
 				urls = append(urls, urlData)
 				totalSize += size
 			}
-			streams["default"] = downloader.Stream{
-				URLs: urls,
-				Size: totalSize,
+			streams["default"] = &types.Stream{
+				Parts: urls,
+				Size:  totalSize,
 			}
 		}
 	}
 
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "Instagram instagram.com",
 			Title:   title,

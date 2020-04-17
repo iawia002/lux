@@ -5,8 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -36,8 +35,15 @@ type vimeo struct {
 	Video   vimeoVideo   `json:"video"`
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	var (
 		html, vid string
 		err       error
@@ -56,7 +62,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	}
 	jsonStrings := utils.MatchOneOf(html, `var \w+\s?=\s?({.+?});`)
 	if jsonStrings == nil || len(jsonStrings) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	jsonString := jsonStrings[1]
 
@@ -65,31 +71,30 @@ func Extract(url string) ([]downloader.Data, error) {
 		return nil, err
 	}
 
-	streams := map[string]downloader.Stream{}
+	streams := make(map[string]*types.Stream, len(vimeoData.Request.Files.Progressive))
 	var size int64
-	var urlData downloader.URL
 	for _, video := range vimeoData.Request.Files.Progressive {
 		size, err = request.Size(video.URL, url)
 		if err != nil {
 			return nil, err
 		}
-		urlData = downloader.URL{
+		urlData := &types.Part{
 			URL:  video.URL,
 			Size: size,
 			Ext:  "mp4",
 		}
-		streams[strconv.Itoa(video.Profile)] = downloader.Stream{
-			URLs:    []downloader.URL{urlData},
+		streams[strconv.Itoa(video.Profile)] = &types.Stream{
+			Parts:   []*types.Part{urlData},
 			Size:    size,
 			Quality: video.Quality,
 		}
 	}
 
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "Vimeo vimeo.com",
 			Title:   vimeoData.Video.Title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

@@ -3,13 +3,11 @@ package twitter
 import (
 	"testing"
 
-	"github.com/iawia002/annie/config"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/test"
 )
 
 func TestDownload(t *testing.T) {
-	config.InfoOnly = true
-	config.RetryTimes = 10
 	tests := []struct {
 		name string
 		args test.Args
@@ -42,7 +40,7 @@ func TestDownload(t *testing.T) {
 	// The file size changes every time (caused by CDN?), so the size is not checked here
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Extract(tt.args.URL)
+			New().Extract(tt.args.URL, types.Options{})
 		})
 	}
 }

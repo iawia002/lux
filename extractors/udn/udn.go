@@ -4,8 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -19,7 +18,7 @@ const (
 )
 
 func getCDNUrl(html string) string {
-	if cdnURLs := utils.MatchOneOf(html, startFlag+"(.+?)"+endFlag); cdnURLs != nil && len(cdnURLs) > 1 && cdnURLs[1] != "" {
+	if cdnURLs := utils.MatchOneOf(html, startFlag+"(.+?)"+endFlag); len(cdnURLs) > 1 && cdnURLs[1] != "" {
 		return cdnURLs[1]
 	}
 	return ""
@@ -36,11 +35,18 @@ func prepareEmbedURL(url string) string {
 	return url
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	url = prepareEmbedURL(url)
 	if len(url) == 0 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 
 	html, err := request.Get(url, url, nil)
@@ -50,7 +56,7 @@ func Extract(url string) ([]downloader.Data, error) {
 	var title string
 	desc := utils.MatchOneOf(html, `title: '(.+?)',
         link:`)
-	if desc != nil && len(desc) > 1 {
+	if len(desc) > 1 {
 		title = desc[1]
 	} else {
 		title = "udn"
@@ -67,24 +73,24 @@ func Extract(url string) ([]downloader.Data, error) {
 	if err != nil {
 		return nil, err
 	}
-	urlData := downloader.URL{
+	urlData := &types.Part{
 		URL:  srcURL,
 		Size: size,
 		Ext:  "mp4",
 	}
 	quality := "normal"
-	streams := map[string]downloader.Stream{
+	streams := map[string]*types.Stream{
 		quality: {
-			URLs:    []downloader.URL{urlData},
+			Parts:   []*types.Part{urlData},
 			Size:    size,
 			Quality: quality,
 		},
 	}
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "udn udn.com",
 			Title:   title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

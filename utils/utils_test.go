@@ -4,8 +4,6 @@ import (
 	"os"
 	"reflect"
 	"testing"
-
-	"github.com/iawia002/annie/config"
 )
 
 func TestGetStringFromJson(t *testing.T) {
@@ -37,8 +35,8 @@ func TestGetStringFromJson(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetStringFromJson(tt.args.json, tt.args.path); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetStringFromJson() = %v, want %v", got, tt.want)
+			if got := GetStringFromJSON(tt.args.json, tt.args.path); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetStringFromJSON() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -312,15 +310,11 @@ func TestFilePath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := FilePath(tt.args.name, tt.args.ext, tt.args.escape); got != tt.want {
+			if got, _ := FilePath(tt.args.name, tt.args.ext, "", tt.args.escape); got != tt.want {
 				t.Errorf("FilePath() = %v, want %v", got, tt.want)
 			}
 		})
 	}
-
-	// error test
-	config.OutputPath = "test"
-	FilePath("", "", true)
 }
 
 func TestItemInSlice(t *testing.T) {
@@ -602,11 +596,8 @@ func TestParsingFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config.ItemStart = tt.start
-			config.ItemEnd = tt.end
-			config.Items = tt.items
 			file, _ := os.Open(tt.args.filePath)
-			got := ParseInputFile(file)
+			got := ParseInputFile(file, tt.items, tt.start, tt.end)
 			file.Close()
 			if len(got) != tt.want {
 				t.Errorf("Got: %v - want: %v", len(got), tt.want)
@@ -616,22 +607,20 @@ func TestParsingFile(t *testing.T) {
 
 	// test for start from x
 	t.Run("start from x", func(t *testing.T) {
-		config.ItemStart = 5
-		config.ItemEnd = 0
-		config.Items = ""
-		config.File = "./utils_test.go"
-		file, _ := os.Open(config.File)
+		start := 5
+		filePath := "./utils_test.go"
+		file, _ := os.Open(filePath)
 		linesCount, _ := FileLineCounter(file)
 		file.Close()
 
-		file, _ = os.Open(config.File)
-		got := ParseInputFile(file)
+		file, _ = os.Open(filePath)
+		got := ParseInputFile(file, "", start, 0)
 		defer file.Close()
 
 		// start from line x to the end of the file
 		// remember that the slices begin with 0 thats why it finds one line less
-		if len(got) != linesCount-config.ItemStart {
-			t.Errorf("Got: %v - want: %v", len(got), linesCount-config.ItemStart)
+		if len(got) != linesCount-start {
+			t.Errorf("Got: %v - want: %v", len(got), linesCount-start)
 		}
 	})
 }

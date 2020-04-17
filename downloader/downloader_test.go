@@ -1,31 +1,25 @@
 package downloader
 
 import (
-	// "os"
 	"testing"
 
-	"github.com/iawia002/annie/config"
+	"github.com/iawia002/annie/extractors/types"
 )
-
-func init() {
-	config.RetryTimes = 100
-	config.ThreadNumber = 1
-}
 
 func TestDownload(t *testing.T) {
 	testCases := []struct {
 		name string
-		data Data
+		data *types.Data
 	}{
 		{
 			name: "normal test",
-			data: Data{
+			data: &types.Data{
 				Site:  "douyin",
 				Title: "test",
 				Type:  "video",
-				Streams: map[string]Stream{
+				Streams: map[string]*types.Stream{
 					"default": {
-						URLs: []URL{
+						Parts: []*types.Part{
 							{
 								URL:  "https://aweme.snssdk.com/aweme/v1/playwm/?video_id=v0200f9a0000bc117isuatl67cees890&line=0",
 								Size: 4927877,
@@ -38,13 +32,13 @@ func TestDownload(t *testing.T) {
 		},
 		{
 			name: "multi-stream test",
-			data: Data{
+			data: &types.Data{
 				Site:  "douyin",
 				Title: "test2",
 				Type:  "video",
-				Streams: map[string]Stream{
+				Streams: map[string]*types.Stream{
 					"miaopai": {
-						URLs: []URL{
+						Parts: []*types.Part{
 							{
 								URL:  "https://txycdn.miaopai.com/stream/KwR26jUGh2ySnVjYbQiFmomNjP14LtMU3vi6sQ__.mp4?ssig=6594aa01a78e78f50c65c164d186ba9e&time_stamp=1537070910786",
 								Size: 4011590,
@@ -54,7 +48,7 @@ func TestDownload(t *testing.T) {
 						Size: 4011590,
 					},
 					"douyin": {
-						URLs: []URL{
+						Parts: []*types.Part{
 							{
 								URL:  "https://aweme.snssdk.com/aweme/v1/playwm/?video_id=v0200f9a0000bc117isuatl67cees890&line=0",
 								Size: 4927877,
@@ -68,13 +62,13 @@ func TestDownload(t *testing.T) {
 		},
 		{
 			name: "image test",
-			data: Data{
+			data: &types.Data{
 				Site:  "bcy",
 				Title: "bcy image test",
 				Type:  "image",
-				Streams: map[string]Stream{
+				Streams: map[string]*types.Stream{
 					"default": {
-						URLs: []URL{
+						Parts: []*types.Part{
 							{
 								URL:  "http://img5.bcyimg.com/coser/143767/post/c0j7x/0d713eb41a614053ac6a3b146914f6bc.jpg/w650",
 								Size: 56107,
@@ -92,7 +86,7 @@ func TestDownload(t *testing.T) {
 		},
 	}
 	for _, testCase := range testCases {
-		err := Download(testCase.data, "", 10)
+		err := New(Options{}).Download(testCase.data)
 		if err != nil {
 			t.Error(err)
 		}

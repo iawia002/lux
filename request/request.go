@@ -20,10 +20,31 @@ import (
 	"github.com/iawia002/annie/config"
 )
 
+var (
+	retryTimes int
+	rawCookie  string
+	refer      string
+	debug      bool
+)
+
+// Options defines common request options.
+type Options struct {
+	RetryTimes int
+	Cookie     string
+	Refer      string
+	Debug      bool
+}
+
+// SetOptions sets the common request option.
+func SetOptions(opt Options) {
+	retryTimes = opt.RetryTimes
+	rawCookie = opt.Cookie
+	refer = opt.Refer
+	debug = opt.Debug
+}
+
 // Request base request
-func Request(
-	method, url string, body io.Reader, headers map[string]string,
-) (*http.Response, error) {
+func Request(method, url string, body io.Reader, headers map[string]string) (*http.Response, error) {
 	transport := &http.Transport{
 		Proxy:               http.ProxyFromEnvironment,
 		DisableCompression:  true,
@@ -34,6 +55,7 @@ func Request(
 		Transport: transport,
 		Timeout:   15 * time.Minute,
 	}
+
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
@@ -47,25 +69,24 @@ func Request(
 	if _, ok := headers["Referer"]; !ok {
 		req.Header.Set("Referer", url)
 	}
-	if config.Cookie != "" {
+	if rawCookie != "" {
 		var cookie string
-		var cookies []*http.Cookie
-		cookies, err = cookiemonster.ParseString(config.Cookie)
+		cookies, err := cookiemonster.ParseString(rawCookie)
 		if err != nil || len(cookies) == 0 {
-			cookie = config.Cookie
+			cookie = rawCookie
 		}
 		if cookie != "" {
 			req.Header.Set("Cookie", cookie)
 		}
-		if cookies != nil {
-			for _, c := range cookies {
-				req.AddCookie(c)
-			}
+		for _, c := range cookies {
+			req.AddCookie(c)
 		}
 	}
-	if config.Refer != "" {
-		req.Header.Set("Referer", config.Refer)
+
+	if refer != "" {
+		req.Header.Set("Referer", refer)
 	}
+
 	var (
 		res          *http.Response
 		requestError error
@@ -74,7 +95,7 @@ func Request(
 		res, requestError = client.Do(req)
 		if requestError == nil && res.StatusCode < 400 {
 			break
-		} else if i+1 >= config.RetryTimes {
+		} else if i+1 >= retryTimes {
 			var err error
 			if requestError != nil {
 				err = fmt.Errorf("request error: %v", requestError)
@@ -85,16 +106,16 @@ func Request(
 		}
 		time.Sleep(1 * time.Second)
 	}
-	if config.Debug {
+	if debug {
 		blue := color.New(color.FgBlue)
 		fmt.Println()
-		blue.Printf("URL:         ")
+		blue.Printf("URL:         ") // nolint
 		fmt.Printf("%s\n", url)
-		blue.Printf("Method:      ")
+		blue.Printf("Method:      ") // nolint
 		fmt.Printf("%s\n", method)
-		blue.Printf("Headers:     ")
-		pretty.Printf("%# v\n", req.Header)
-		blue.Printf("Status Code: ")
+		blue.Printf("Headers:     ")        // nolint
+		pretty.Printf("%# v\n", req.Header) // nolint
+		blue.Printf("Status Code: ")        // nolint
 		if res.StatusCode >= 400 {
 			color.Red("%d", res.StatusCode)
 		} else {
@@ -122,7 +143,7 @@ func GetByte(url, refer string, headers map[string]string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // nolint
 
 	var reader io.ReadCloser
 	switch res.Header.Get("Content-Encoding") {
@@ -133,7 +154,7 @@ func GetByte(url, refer string, headers map[string]string) ([]byte, error) {
 	default:
 		reader = res.Body
 	}
-	defer reader.Close()
+	defer reader.Close() // nolint
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil && err != io.EOF {
