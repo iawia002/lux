@@ -64,7 +64,7 @@ The following dependencies are required and must be installed separately.
 To install Annie, use `go get`, or download the binary file from [Releases](https://github.com/iawia002/annie/releases) page.
 
 ```bash
-$ go get github.com/iawia002/annie
+$ GO111MODULE=on go get github.com/iawia002/annie
 ```
 
 ### Homebrew (macOS only)
