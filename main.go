@@ -27,6 +27,7 @@ import (
 	"github.com/iawia002/annie/extractors/netease"
 	"github.com/iawia002/annie/extractors/pixivision"
 	"github.com/iawia002/annie/extractors/pornhub"
+	"github.com/iawia002/annie/extractors/qingting"
 	"github.com/iawia002/annie/extractors/qq"
 	"github.com/iawia002/annie/extractors/tangdou"
 	"github.com/iawia002/annie/extractors/tiktok"
@@ -158,6 +159,8 @@ func download(videoURL string) error {
 		data, err = udn.Extract(videoURL)
 	case "tiktok":
 		data, err = tiktok.Extract(videoURL)
+	case "qingting":
+		data, err = qingting.Extract(videoURL)
 	default:
 		data, err = universal.Extract(videoURL)
 	}

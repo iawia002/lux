@@ -606,6 +606,7 @@ Pornhub | <https://pornhub.com> | ✓ | | | |
 XVIDEOS | <https://xvideos.com> | ✓ | | | |
 聯合新聞網 | <https://udn.com> | ✓ | | | |
 TikTok | <https://www.tiktok.com> | ✓ | | | |
+蜻蜓fm | <https://www.qingting.fm/> |  | |✓ | |
 
 
 ## Known issues
