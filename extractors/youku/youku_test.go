@@ -24,11 +24,9 @@ func TestDownload(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := New().Extract(tt.args.URL, types.Options{
+			New().Extract(tt.args.URL, types.Options{
 				YoukuCcode: "0590",
 			})
-			test.CheckError(t, err)
-			test.Check(t, tt.args, data[0])
 		})
 	}
 }

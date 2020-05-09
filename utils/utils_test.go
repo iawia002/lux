@@ -271,7 +271,7 @@ func TestFileName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := FileName(tt.args.name, ""); got != tt.want {
+			if got := FileName(tt.args.name, "", 80); got != tt.want {
 				t.Errorf("FileName() = %v, want %v", got, tt.want)
 			}
 		})
@@ -310,7 +310,7 @@ func TestFilePath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := FilePath(tt.args.name, tt.args.ext, "", tt.args.escape); got != tt.want {
+			if got, _ := FilePath(tt.args.name, tt.args.ext, 80, "", tt.args.escape); got != tt.want {
 				t.Errorf("FilePath() = %v, want %v", got, tt.want)
 			}
 		})

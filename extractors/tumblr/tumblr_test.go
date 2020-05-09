@@ -30,7 +30,7 @@ func TestDownload(t *testing.T) {
 			name: "video test",
 			args: test.Args{
 				URL:   "https://boomgoestheprower.tumblr.com/post/174127507696",
-				Title: "See, that’s what the app is perfect for.",
+				Title: "Out of Context Sonic Boom",
 			},
 		},
 	}

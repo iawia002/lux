@@ -13,14 +13,6 @@ func TestDownload(t *testing.T) {
 		args test.Args
 	}{
 		{
-			name: "fid url test",
-			args: test.Args{
-				URL:   "https://weibo.com/tv/v/Ga7XazXze?fid=1034:4a65c6e343dc672789d3ba49c2463c6a",
-				Title: "看完更加睡不着了[二哈]",
-				Size:  438757,
-			},
-		},
-		{
 			name: "title test",
 			args: test.Args{
 				URL:   "https://m.weibo.cn/status/4237529215145705",
