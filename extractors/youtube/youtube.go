@@ -1,6 +1,7 @@
 package youtube
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -124,7 +125,7 @@ func youtubeDownload(uri string) *types.Data {
 		vid[1],
 	)
 
-	videoInfo, err := ytdl.GetVideoInfo(uri)
+	videoInfo, err := ytdl.DefaultClient.GetVideoInfo(context.TODO(), uri)
 	if err != nil {
 		return types.EmptyData(uri, err)
 	}
@@ -192,7 +193,7 @@ func getRealURL(videoFormat *streamFormat, videoInfo *ytdl.VideoInfo, ext string
 		return nil, fmt.Errorf("unable to get info for itag %d", videoFormat.Itag)
 	}
 
-	realURL, err := videoInfo.GetDownloadURL(ytdlFormat)
+	realURL, err := ytdl.DefaultClient.GetDownloadURL(context.TODO(), videoInfo, ytdlFormat)
 	if err != nil {
 		return nil, err
 	}

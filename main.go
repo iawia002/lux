@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/rs/zerolog"
 
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/extractors"
@@ -206,12 +205,8 @@ func main() {
 		return
 	}
 
-	// introduced by "github.com/rylio/ytdl"
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-
 	if debug {
 		utils.PrintVersion()
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
 	if file != "" {
