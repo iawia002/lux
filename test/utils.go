@@ -4,8 +4,16 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors/types"
 )
+
+// Args Arguments for extractor tests
+type Args struct {
+	URL     string
+	Title   string
+	Quality string
+	Size    int64
+}
 
 // CheckData check the given data
 func CheckData(args, data Args) bool {
@@ -23,9 +31,9 @@ func CheckData(args, data Args) bool {
 }
 
 // Check check the result
-func Check(t *testing.T, args Args, data downloader.Data) {
+func Check(t *testing.T, args Args, data *types.Data) {
 	// get the default stream
-	sortedStreams := make([]downloader.Stream, 0, len(data.Streams))
+	sortedStreams := make([]*types.Stream, 0, len(data.Streams))
 	for _, s := range data.Streams {
 		sortedStreams = append(sortedStreams, s)
 	}

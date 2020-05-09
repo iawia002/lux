@@ -7,9 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/iawia002/annie/config"
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -32,13 +30,13 @@ const referer = "https://www.bilibili.com"
 
 var utoken string
 
-func genAPI(aid, cid int, bangumi bool, quality string, seasonType string) (string, error) {
+func genAPI(aid, cid int, bangumi bool, quality, seasonType, cookie string) (string, error) {
 	var (
 		err        error
 		baseAPIURL string
 		params     string
 	)
-	if config.Cookie != "" && utoken == "" {
+	if cookie != "" && utoken == "" {
 		utoken, err = request.Get(
 			fmt.Sprintf("%said=%d&cid=%d", bilibiliTokenAPI, aid, cid),
 			referer,
@@ -83,18 +81,18 @@ func genAPI(aid, cid int, bangumi bool, quality string, seasonType string) (stri
 	return api, nil
 }
 
-func genURL(durl []dURLData) ([]downloader.URL, int64) {
+func genParts(durl []dURLData) ([]*types.Part, int64) {
 	var size int64
-	urls := make([]downloader.URL, len(durl))
+	parts := make([]*types.Part, len(durl))
 	for index, data := range durl {
 		size += data.Size
-		urls[index] = downloader.URL{
+		parts[index] = &types.Part{
 			URL:  data.URL,
 			Size: data.Size,
 			Ext:  "flv",
 		}
 	}
-	return urls, size
+	return parts, size
 }
 
 type bilibiliOptions struct {
@@ -105,16 +103,17 @@ type bilibiliOptions struct {
 	cid      int
 	page     int
 	subtitle string
+	cookie   string
 }
 
-func extractBangumi(url, html string) ([]downloader.Data, error) {
+func extractBangumi(url, html string, extractOption types.Options) ([]*types.Data, error) {
 	dataString := utils.MatchOneOf(html, `window.__INITIAL_STATE__=(.+?);\(function`)[1]
 	var data bangumiData
 	err := json.Unmarshal([]byte(dataString), &data)
 	if err != nil {
 		return nil, err
 	}
-	if !config.Playlist {
+	if !extractOption.Playlist {
 		options := bilibiliOptions{
 			url:     url,
 			html:    html,
@@ -122,13 +121,13 @@ func extractBangumi(url, html string) ([]downloader.Data, error) {
 			aid:     data.EpInfo.Aid,
 			cid:     data.EpInfo.Cid,
 		}
-		return []downloader.Data{bilibiliDownload(options)}, nil
+		return []*types.Data{bilibiliDownload(options, extractOption)}, nil
 	}
 
 	// handle bangumi playlist
-	needDownloadItems := utils.NeedDownloadList(len(data.EpList))
-	extractedData := make([]downloader.Data, len(needDownloadItems))
-	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
+	needDownloadItems := utils.NeedDownloadList(extractOption.Items, extractOption.ItemStart, extractOption.ItemEnd, len(data.EpList))
+	extractedData := make([]*types.Data, len(needDownloadItems))
+	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
 	dataIndex := 0
 	for index, u := range data.EpList {
 		if !utils.ItemInSlice(index+1, needDownloadItems) {
@@ -146,9 +145,9 @@ func extractBangumi(url, html string) ([]downloader.Data, error) {
 			aid:     u.Aid,
 			cid:     u.Cid,
 		}
-		go func(index int, options bilibiliOptions, extractedData []downloader.Data) {
+		go func(index int, options bilibiliOptions, extractedData []*types.Data) {
 			defer wgp.Done()
-			extractedData[index] = bilibiliDownload(options)
+			extractedData[index] = bilibiliDownload(options, extractOption)
 		}(dataIndex, options, extractedData)
 		dataIndex++
 	}
@@ -171,12 +170,12 @@ func getMultiPageData(html string) (*multiPage, error) {
 	return &data, nil
 }
 
-func extractNormalVideo(url, html string) ([]downloader.Data, error) {
+func extractNormalVideo(url, html string, extractOption types.Options) ([]*types.Data, error) {
 	pageData, err := getMultiPageData(html)
 	if err != nil {
 		return nil, err
 	}
-	if !config.Playlist {
+	if !extractOption.Playlist {
 		// handle URL that has a playlist, mainly for unified titles
 		// <h1> tag does not include subtitles
 		// bangumi doesn't need this
@@ -191,7 +190,7 @@ func extractNormalVideo(url, html string) ([]downloader.Data, error) {
 		}
 
 		if len(pageData.VideoData.Pages) < p || p < 1 {
-			return nil, extractors.ErrURLParseFailed
+			return nil, types.ErrURLParseFailed
 		}
 
 		page := pageData.VideoData.Pages[p-1]
@@ -208,14 +207,14 @@ func extractNormalVideo(url, html string) ([]downloader.Data, error) {
 		} else {
 			options.subtitle = page.Part
 		}
-		return []downloader.Data{bilibiliDownload(options)}, nil
+		return []*types.Data{bilibiliDownload(options, extractOption)}, nil
 	}
 
 	// handle normal video playlist
 	// https://www.bilibili.com/video/av20827366/?p=1
-	needDownloadItems := utils.NeedDownloadList(len(pageData.VideoData.Pages))
-	extractedData := make([]downloader.Data, len(needDownloadItems))
-	wgp := utils.NewWaitGroupPool(config.ThreadNumber)
+	needDownloadItems := utils.NeedDownloadList(extractOption.Items, extractOption.ItemStart, extractOption.ItemEnd, len(pageData.VideoData.Pages))
+	extractedData := make([]*types.Data, len(needDownloadItems))
+	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
 	dataIndex := 0
 	for index, u := range pageData.VideoData.Pages {
 		if !utils.ItemInSlice(index+1, needDownloadItems) {
@@ -230,9 +229,9 @@ func extractNormalVideo(url, html string) ([]downloader.Data, error) {
 			subtitle: u.Part,
 			page:     u.Page,
 		}
-		go func(index int, options bilibiliOptions, extractedData []downloader.Data) {
+		go func(index int, options bilibiliOptions, extractedData []*types.Data) {
 			defer wgp.Done()
-			extractedData[index] = bilibiliDownload(options)
+			extractedData[index] = bilibiliDownload(options, extractOption)
 		}(dataIndex, options, extractedData)
 		dataIndex++
 	}
@@ -240,8 +239,15 @@ func extractNormalVideo(url, html string) ([]downloader.Data, error) {
 	return extractedData, nil
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	var err error
 	html, err := request.Get(url, referer, nil)
 	if err != nil {
@@ -249,14 +255,14 @@ func Extract(url string) ([]downloader.Data, error) {
 	}
 	if strings.Contains(url, "bangumi") {
 		// handle bangumi
-		return extractBangumi(url, html)
+		return extractBangumi(url, html, option)
 	}
 	// handle normal video
-	return extractNormalVideo(url, html)
+	return extractNormalVideo(url, html, option)
 }
 
 // bilibiliDownload is the download function for a single URL
-func bilibiliDownload(options bilibiliOptions) downloader.Data {
+func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *types.Data {
 	var (
 		err        error
 		html       string
@@ -268,7 +274,7 @@ func bilibiliDownload(options bilibiliOptions) downloader.Data {
 	} else {
 		html, err = request.Get(options.url, referer, nil)
 		if err != nil {
-			return downloader.EmptyData(options.url, err)
+			return types.EmptyData(options.url, err)
 		}
 	}
 	if options.bangumi {
@@ -278,34 +284,34 @@ func bilibiliDownload(options bilibiliOptions) downloader.Data {
 	// Get "accept_quality" and "accept_description"
 	// "accept_description":["高清 1080P","高清 720P","清晰 480P","流畅 360P"],
 	// "accept_quality":[80,48,32,16],
-	api, err := genAPI(options.aid, options.cid, options.bangumi, "15", seasonType)
+	api, err := genAPI(options.aid, options.cid, options.bangumi, "15", seasonType, options.cookie)
 	if err != nil {
-		return downloader.EmptyData(options.url, err)
+		return types.EmptyData(options.url, err)
 	}
 	jsonString, err := request.Get(api, referer, nil)
 	if err != nil {
-		return downloader.EmptyData(options.url, err)
+		return types.EmptyData(options.url, err)
 	}
 	var quality qualityInfo
 	err = json.Unmarshal([]byte(jsonString), &quality)
 	if err != nil {
-		return downloader.EmptyData(options.url, err)
+		return types.EmptyData(options.url, err)
 	}
 
-	streams := make(map[string]downloader.Stream, len(quality.Quality))
+	streams := make(map[string]*types.Stream, len(quality.Quality))
 	for _, q := range quality.Quality {
-		apiURL, err := genAPI(options.aid, options.cid, options.bangumi, strconv.Itoa(q), seasonType)
+		apiURL, err := genAPI(options.aid, options.cid, options.bangumi, strconv.Itoa(q), seasonType, options.cookie)
 		if err != nil {
-			return downloader.EmptyData(options.url, err)
+			return types.EmptyData(options.url, err)
 		}
 		jsonString, err := request.Get(apiURL, referer, nil)
 		if err != nil {
-			return downloader.EmptyData(options.url, err)
+			return types.EmptyData(options.url, err)
 		}
 		var data bilibiliData
 		err = json.Unmarshal([]byte(jsonString), &data)
 		if err != nil {
-			return downloader.EmptyData(options.url, err)
+			return types.EmptyData(options.url, err)
 		}
 
 		// Avoid duplicate streams
@@ -313,9 +319,9 @@ func bilibiliDownload(options bilibiliOptions) downloader.Data {
 			continue
 		}
 
-		urls, size := genURL(data.DURL)
-		streams[strconv.Itoa(data.Quality)] = downloader.Stream{
-			URLs:    urls,
+		parts, size := genParts(data.DURL)
+		streams[strconv.Itoa(data.Quality)] = &types.Stream{
+			Parts:   parts,
 			Size:    size,
 			Quality: qualityString[data.Quality],
 		}
@@ -324,30 +330,26 @@ func bilibiliDownload(options bilibiliOptions) downloader.Data {
 	// get the title
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return downloader.EmptyData(options.url, err)
+		return types.EmptyData(options.url, err)
 	}
 	title := parser.Title(doc)
 	if options.subtitle != "" {
-		if config.EpisodeTitleOnly {
+		if extractOption.EpisodeTitleOnly {
 			title = fmt.Sprintf("P%d %s", options.page, options.subtitle)
 		} else {
 			title = fmt.Sprintf("%s P%d %s", title, options.page, options.subtitle)
 		}
 	}
 
-	err = downloader.Caption(
-		fmt.Sprintf("https://comment.bilibili.com/%d.xml", options.cid),
-		options.url, title, "xml",
-	)
-	if err != nil {
-		return downloader.EmptyData(options.url, err)
-	}
-
-	return downloader.Data{
+	return &types.Data{
 		Site:    "哔哩哔哩 bilibili.com",
 		Title:   title,
-		Type:    "video",
+		Type:    types.DataTypeVideo,
 		Streams: streams,
-		URL:     options.url,
+		Caption: &types.Part{
+			URL: fmt.Sprintf("https://comment.bilibili.com/%d.xml", options.cid),
+			Ext: "xml",
+		},
+		URL: options.url,
 	}
 }

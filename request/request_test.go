@@ -2,8 +2,6 @@ package request
 
 import (
 	"testing"
-
-	"github.com/iawia002/annie/config"
 )
 
 func TestGet(t *testing.T) {
@@ -52,14 +50,12 @@ func TestGet(t *testing.T) {
 	}
 
 	// with config
-	config.Debug = true
-	config.Cookie = "name: value;"
-	config.Refer = "https://google.com"
+	debug = true
+	rawCookie = "name: value;"
 	_, err = Get("https://google.com", "", nil)
 	if err != nil {
 		t.Error()
 	}
-
 }
 
 func TestHeaders(t *testing.T) {

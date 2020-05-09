@@ -5,8 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -21,8 +20,15 @@ func genAPI(action string, param string) string {
 	return fmt.Sprintf("%s%s?json=true&%s", yinyuetaiAPI, action, param)
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	vid := utils.MatchOneOf(
 		url,
 		`https?://v.yinyuetai.com/video/(\d+)(?:\?vid=\d+)?`,
@@ -34,16 +40,16 @@ func Extract(url string) ([]downloader.Data, error) {
 	}
 	params := fmt.Sprintf("videoId=%s", vid[1])
 	// generate api url
-	apiUrl := genAPI(actionGetMvInfo, params)
+	apiURL := genAPI(actionGetMvInfo, params)
 	var err error
-	html, err := request.Get(apiUrl, url, nil)
+	html, err := request.Get(apiURL, url, nil)
 	if err != nil {
 		return nil, err
 	}
 	// parse yinyuetai data
 	data := yinyuetaiMvData{}
 	if err = json.Unmarshal([]byte(html), &data); err != nil {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	// handle api error
 	if data.Error {
@@ -53,25 +59,25 @@ func Extract(url string) ([]downloader.Data, error) {
 		return nil, errors.New(data.VideoInfo.CoreVideoInfo.ErrorMsg)
 	}
 	title := data.VideoInfo.CoreVideoInfo.VideoName
-	streams := map[string]downloader.Stream{}
+	streams := make(map[string]*types.Stream, len(data.VideoInfo.CoreVideoInfo.VideoURLModels))
 	// set streams
 	for _, model := range data.VideoInfo.CoreVideoInfo.VideoURLModels {
-		urlData := downloader.URL{
+		urlData := &types.Part{
 			URL:  model.VideoURL,
 			Size: model.FileSize,
 			Ext:  "mp4",
 		}
-		streams[model.QualityLevel] = downloader.Stream{
-			URLs:    []downloader.URL{urlData},
+		streams[model.QualityLevel] = &types.Stream{
+			Parts:   []*types.Part{urlData},
 			Size:    model.FileSize,
 			Quality: model.QualityLevelName,
 		}
 	}
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "音悦台 yinyuetai.com",
 			Title:   title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

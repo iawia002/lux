@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -48,8 +47,15 @@ func douyuM3u8(url string) ([]douyuURLInfo, int64, error) {
 	return data, totalSize, nil
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	var err error
 	liveVid := utils.MatchOneOf(url, `https?://www.douyu.com/(\S+)`)
 	if liveVid != nil {
@@ -62,13 +68,13 @@ func Extract(url string) ([]downloader.Data, error) {
 	}
 	titles := utils.MatchOneOf(html, `<title>(.*?)</title>`)
 	if titles == nil || len(titles) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	title := titles[1]
 
 	vids := utils.MatchOneOf(url, `https?://v.douyu.com/show/(\S+)`)
 	if vids == nil || len(vids) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	vid := vids[1]
 
@@ -76,33 +82,35 @@ func Extract(url string) ([]downloader.Data, error) {
 	if err != nil {
 		return nil, err
 	}
-	var dataDict douyuData
-	json.Unmarshal([]byte(dataString), &dataDict)
+	dataDict := new(douyuData)
+	if err := json.Unmarshal([]byte(dataString), dataDict); err != nil {
+		return nil, err
+	}
 
 	m3u8URLs, totalSize, err := douyuM3u8(dataDict.Data.VideoURL)
 	if err != nil {
 		return nil, err
 	}
-	urls := make([]downloader.URL, len(m3u8URLs))
+	urls := make([]*types.Part, len(m3u8URLs))
 	for index, u := range m3u8URLs {
-		urls[index] = downloader.URL{
+		urls[index] = &types.Part{
 			URL:  u.URL,
 			Size: u.Size,
 			Ext:  "ts",
 		}
 	}
 
-	streams := map[string]downloader.Stream{
+	streams := map[string]*types.Stream{
 		"default": {
-			URLs: urls,
-			Size: totalSize,
+			Parts: urls,
+			Size:  totalSize,
 		},
 	}
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "斗鱼 douyu.com",
 			Title:   title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

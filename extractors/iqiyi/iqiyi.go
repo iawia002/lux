@@ -8,8 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -74,7 +73,7 @@ func getVF(params string) string {
 	return utils.Md5(params)
 }
 
-func getVPS(tvid, vid string) (iqiyi, error) {
+func getVPS(tvid, vid string) (*iqiyi, error) {
 	t := time.Now().Unix() * 1000
 	host := "http://cache.video.qiyi.com"
 	params := fmt.Sprintf(
@@ -85,15 +84,24 @@ func getVPS(tvid, vid string) (iqiyi, error) {
 	apiURL := fmt.Sprintf("%s%s&vf=%s", host, params, vf)
 	info, err := request.Get(apiURL, iqiyiReferer, nil)
 	if err != nil {
-		return iqiyi{}, err
+		return nil, err
 	}
-	var data iqiyi
-	json.Unmarshal([]byte(info), &data)
+	data := new(iqiyi)
+	if err := json.Unmarshal([]byte(info), data); err != nil {
+		return nil, err
+	}
 	return data, nil
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) {
 	html, err := request.Get(url, iqiyiReferer, nil)
 	if err != nil {
 		return nil, err
@@ -112,7 +120,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		)
 	}
 	if tvid == nil || len(tvid) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 
 	vid := utils.MatchOneOf(
@@ -129,7 +137,7 @@ func Extract(url string) ([]downloader.Data, error) {
 		)
 	}
 	if vid == nil || len(vid) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 
 	doc, err := parser.GetDoc(html)
@@ -155,10 +163,11 @@ func Extract(url string) ([]downloader.Data, error) {
 	if videoDatas.Code != "A00000" {
 		return nil, fmt.Errorf("can't play this video: %s", videoDatas.Msg)
 	}
-	streams := map[string]downloader.Stream{}
+
+	streams := make(map[string]*types.Stream)
 	urlPrefix := videoDatas.Data.VP.Du
 	for _, video := range videoDatas.Data.VP.Tkl[0].Vs {
-		urls := make([]downloader.URL, len(video.Fs))
+		urls := make([]*types.Part, len(video.Fs))
 		for index, v := range video.Fs {
 			realURLData, err := request.Get(urlPrefix+v.L, iqiyiReferer, nil)
 			if err != nil {
@@ -172,24 +181,24 @@ func Extract(url string) ([]downloader.Data, error) {
 			if err != nil {
 				return nil, err
 			}
-			urls[index] = downloader.URL{
+			urls[index] = &types.Part{
 				URL:  realURL.L,
 				Size: v.B,
 				Ext:  ext,
 			}
 		}
-		streams[strconv.Itoa(video.Bid)] = downloader.Stream{
-			URLs:    urls,
+		streams[strconv.Itoa(video.Bid)] = &types.Stream{
+			Parts:   urls,
 			Size:    video.Vsize,
 			Quality: video.Scrsz,
 		}
 	}
 
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "爱奇艺 iqiyi.com",
 			Title:   title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},
