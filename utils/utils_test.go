@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestGetStringFromJson(t *testing.T) {
+func TestGetStringFromJSON(t *testing.T) {
 	type args struct {
 		json string
 		path string
@@ -190,7 +190,7 @@ func TestDomain(t *testing.T) {
 			args: args{
 				url: "http://aa",
 			},
-			want: "Universal",
+			want: "",
 		},
 	}
 	for _, tt := range tests {

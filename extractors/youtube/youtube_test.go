@@ -21,24 +21,10 @@ func TestYoutube(t *testing.T) {
 			},
 		},
 		{
-			name: "normal test",
-			args: test.Args{
-				URL:   "https://youtu.be/z8eFzkfto2w",
-				Title: "Circle Of Love | Rudy Mancuso",
-			},
-		},
-		{
 			name: "signature test",
 			args: test.Args{
 				URL:   "https://www.youtube.com/watch?v=ZtgzKBrU1GY",
 				Title: "Halo Infinite - E3 2019 - Discover Hope",
-			},
-		},
-		{
-			name: "normal test",
-			args: test.Args{
-				URL:   "https://www.youtube.com/watch?v=ASPku-eAZYs",
-				Title: "怪獸與葛林戴華德的罪行 | HD首版電影預告大首播 (Fantastic Beasts: The Crimes of Grindelwald)",
 			},
 		},
 		{
