@@ -404,7 +404,7 @@ func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, er
 		return nil, err
 	}
 	var metas []*FilePartMeta
-	reg := regexp.MustCompile(fmt.Sprintf("%s.%s.part.+", filename, extname))
+	reg := regexp.MustCompile(fmt.Sprintf("%s.%s.part.+", regexp.QuoteMeta(filename), extname))
 	for _, fn := range fns {
 		if reg.MatchString(fn.Name()) {
 			meta, err := parseFilePartMeta(path.Join(dirPath, fn.Name()), fn.Size())
