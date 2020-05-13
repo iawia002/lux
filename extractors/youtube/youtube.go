@@ -291,7 +291,7 @@ func extractVideoURLS(data playerResponseType, videoInfo *ytdl.VideoInfo) (map[s
 			return nil, err
 		}
 		audioWebm = audioURL
-	} else if fM4aLow != nil {
+	} else if fWebmLow != nil {
 		audioURL, err := getRealURL(fWebmLow, videoInfo, "webm")
 		if err != nil {
 			return nil, err
