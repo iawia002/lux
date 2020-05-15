@@ -15,4 +15,4 @@ require (
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 )
 
-replace github.com/rylio/ytdl => github.com/mihaiav/ytdl v0.6.3-0.20200404090417-9348375550c1
+replace github.com/rylio/ytdl => github.com/mihaiav/ytdl v0.6.3-0.20200510100116-5f2bf8b4fec0
