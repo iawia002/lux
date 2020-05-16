@@ -5,8 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -24,34 +23,33 @@ type tumblrImage struct {
 	Image string `json:"image"`
 }
 
-func genURLData(url, referer string) (downloader.URL, int64, error) {
+func genURLData(url, referer string) (*types.Part, int64, error) {
 	size, err := request.Size(url, referer)
 	if err != nil {
-		return downloader.URL{}, 0, err
+		return nil, 0, err
 	}
 	_, ext, err := utils.GetNameAndExt(url)
 	if err != nil {
-		return downloader.URL{}, 0, err
+		return nil, 0, err
 	}
-	data := downloader.URL{
+	return &types.Part{
 		URL:  url,
 		Size: size,
 		Ext:  ext,
-	}
-	return data, size, nil
+	}, size, nil
 }
 
-func tumblrImageDownload(url, html, title string) ([]downloader.Data, error) {
+func tumblrImageDownload(url, html, title string) ([]*types.Data, error) {
 	jsonStrings := utils.MatchOneOf(
 		html, `<script type="application/ld\+json">\s*(.+?)</script>`,
 	)
 	if jsonStrings == nil || len(jsonStrings) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	jsonString := jsonStrings[1]
 
 	var totalSize int64
-	var urls []downloader.URL
+	urls := make([]*types.Part, 0, 1)
 	if strings.Contains(jsonString, `"image":{"@list"`) {
 		// there are two data structures in the same field(image)
 		var imageList tumblrImageList
@@ -79,28 +77,28 @@ func tumblrImageDownload(url, html, title string) ([]downloader.Data, error) {
 		totalSize = size
 		urls = append(urls, urlData)
 	}
-	streams := map[string]downloader.Stream{
+	streams := map[string]*types.Stream{
 		"default": {
-			URLs: urls,
-			Size: totalSize,
+			Parts: urls,
+			Size:  totalSize,
 		},
 	}
 
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "Tumblr tumblr.com",
 			Title:   title,
-			Type:    "image",
+			Type:    types.DataTypeImage,
 			Streams: streams,
 			URL:     url,
 		},
 	}, nil
 }
 
-func tumblrVideoDownload(url, html, title string) ([]downloader.Data, error) {
+func tumblrVideoDownload(url, html, title string) ([]*types.Data, error) {
 	videoURLs := utils.MatchOneOf(html, `<iframe src='(.+?)'`)
 	if videoURLs == nil || len(videoURLs) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	videoURL := videoURLs[1]
 
@@ -114,7 +112,7 @@ func tumblrVideoDownload(url, html, title string) ([]downloader.Data, error) {
 
 	realURLs := utils.MatchOneOf(videoHTML, `source src="(.+?)"`)
 	if realURLs == nil || len(realURLs) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	realURL := realURLs[1]
 
@@ -122,26 +120,33 @@ func tumblrVideoDownload(url, html, title string) ([]downloader.Data, error) {
 	if err != nil {
 		return nil, err
 	}
-	streams := map[string]downloader.Stream{
+	streams := map[string]*types.Stream{
 		"default": {
-			URLs: []downloader.URL{urlData},
-			Size: size,
+			Parts: []*types.Part{urlData},
+			Size:  size,
 		},
 	}
 
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "Tumblr tumblr.com",
 			Title:   title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},
 	}, nil
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return nil, err

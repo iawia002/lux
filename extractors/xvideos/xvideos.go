@@ -1,11 +1,10 @@
 package xvideos
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 
-	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -76,42 +75,49 @@ func getSrc(html string) []*src {
 	return srcs
 }
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return nil, err
 	}
 	var title string
 	desc := utils.MatchOneOf(html, `<title>(.+?)</title>`)
-	if desc != nil && len(desc) > 1 {
+	if len(desc) > 1 {
 		title = desc[1]
 	} else {
 		title = "xvideos"
 	}
 
-	streams := make(map[string]downloader.Stream)
+	streams := make(map[string]*types.Stream, len(getSrc(html)))
 	for _, src := range getSrc(html) {
 		size, err := request.Size(src.url, url)
 		if err != nil {
 			return nil, err
 		}
-		urlData := downloader.URL{
+		urlData := &types.Part{
 			URL:  src.url,
 			Size: size,
 			Ext:  "mp4",
 		}
-		streams[src.quality] = downloader.Stream{
-			URLs:    []downloader.URL{urlData},
+		streams[src.quality] = &types.Stream{
+			Parts:   []*types.Part{urlData},
 			Size:    size,
-			Quality: fmt.Sprintf("%s", src.quality),
+			Quality: src.quality,
 		}
 	}
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "XVIDEOS xvideos.com",
 			Title:   title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

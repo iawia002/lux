@@ -6,8 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
@@ -20,22 +19,29 @@ type twitter struct {
 	Username string
 }
 
-// Extract is the main function for extracting data
-func Extract(uri string) ([]downloader.Data, error) {
-	html, err := request.Get(uri, uri, nil)
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	usernames := utils.MatchOneOf(html, `property="og:title"\s+content="(.+)"`)
 	if usernames == nil || len(usernames) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	username := usernames[1]
 
-	tweetIDs := utils.MatchOneOf(uri, `(status|statuses)/(\d+)`)
+	tweetIDs := utils.MatchOneOf(url, `(status|statuses)/(\d+)`)
 	if tweetIDs == nil || len(tweetIDs) < 3 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	tweetID := tweetIDs[2]
 
@@ -45,30 +51,30 @@ func Extract(uri string) ([]downloader.Data, error) {
 	headers := map[string]string{
 		"Authorization": "Bearer AAAAAAAAAAAAAAAAAAAAAIK1zgAAAAAA2tUWuhGZ2JceoId5GwYWU5GspY4%3DUq7gzFoCZs1QfwGoVdvSac3IniczZEYXIcDyumCauIXpcAPorE",
 	}
-	jsonString, err := request.Get(api, uri, headers)
+	jsonString, err := request.Get(api, url, headers)
 	if err != nil {
 		return nil, err
 	}
 
 	var twitterData twitter
 	if err := json.Unmarshal([]byte(jsonString), &twitterData); err != nil {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	twitterData.TweetID = tweetID
 	twitterData.Username = username
-	extractedData, err := download(twitterData, uri)
+	extractedData, err := download(twitterData, url)
 	if err != nil {
 		return nil, err
 	}
 	return extractedData, nil
 }
 
-func download(data twitter, uri string) ([]downloader.Data, error) {
+func download(data twitter, uri string) ([]*types.Data, error) {
 	var (
 		err  error
 		size int64
 	)
-	streams := make(map[string]downloader.Stream)
+	streams := make(map[string]*types.Stream)
 	switch {
 	// if video file is m3u8 and ts
 	case strings.Contains(data.Track.URL, ".m3u8"):
@@ -78,17 +84,17 @@ func download(data twitter, uri string) ([]downloader.Data, error) {
 		}
 		for index, m3u8 := range m3u8urls {
 			var totalSize int64
-			var urls []downloader.URL
 			ts, err := utils.M3u8URLs(m3u8)
 			if err != nil {
 				return nil, err
 			}
+			urls := make([]*types.Part, 0, len(ts))
 			for _, i := range ts {
 				size, err := request.Size(i, uri)
 				if err != nil {
 					return nil, err
 				}
-				temp := downloader.URL{
+				temp := &types.Part{
 					URL:  i,
 					Size: size,
 					Ext:  "ts",
@@ -98,10 +104,10 @@ func download(data twitter, uri string) ([]downloader.Data, error) {
 			}
 			qualityString := utils.MatchOneOf(m3u8, `/(\d+x\d+)/`)[1]
 			quality := strconv.Itoa(index + 1)
-			streams[quality] = downloader.Stream{
-				Quality: qualityString,
-				URLs:    urls,
+			streams[quality] = &types.Stream{
+				Parts:   urls,
 				Size:    totalSize,
+				Quality: qualityString,
 			}
 		}
 
@@ -111,22 +117,22 @@ func download(data twitter, uri string) ([]downloader.Data, error) {
 		if err != nil {
 			return nil, err
 		}
-		urlData := downloader.URL{
+		urlData := &types.Part{
 			URL:  data.Track.URL,
 			Size: size,
 			Ext:  "mp4",
 		}
-		streams["default"] = downloader.Stream{
-			URLs: []downloader.URL{urlData},
-			Size: size,
+		streams["default"] = &types.Stream{
+			Parts: []*types.Part{urlData},
+			Size:  size,
 		}
 	}
 
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "Twitter twitter.com",
 			Title:   fmt.Sprintf("%s %s", data.Username, data.TweetID),
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     uri,
 		},

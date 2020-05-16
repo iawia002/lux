@@ -3,8 +3,6 @@ package utils
 import (
 	"reflect"
 	"testing"
-
-	"github.com/iawia002/annie/config"
 )
 
 func TestNeedDownloadList(t *testing.T) {
@@ -89,10 +87,7 @@ func TestNeedDownloadList(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config.ItemStart = tt.start
-			config.ItemEnd = tt.end
-			config.Items = tt.items
-			if got := NeedDownloadList(tt.args.len); !reflect.DeepEqual(got, tt.want) {
+			if got := NeedDownloadList(tt.items, tt.start, tt.end, tt.args.len); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NeedDownloadList() = %v, want %v", got, tt.want)
 			}
 		})

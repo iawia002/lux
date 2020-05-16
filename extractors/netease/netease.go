@@ -5,14 +5,20 @@ import (
 	netURL "net/url"
 	"strings"
 
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
 )
 
-// Extract is the main function for extracting data
-func Extract(url string) ([]downloader.Data, error) {
+type extractor struct{}
+
+// New returns a youtube extractor.
+func New() types.Extractor {
+	return &extractor{}
+}
+
+// Extract is the main function to extract the data.
+func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	url = strings.Replace(url, "/#/", "/", 1)
 	vid := utils.MatchOneOf(url, `/(mv|video)\?id=(\w+)`)
 	if vid == nil {
@@ -29,13 +35,13 @@ func Extract(url string) ([]downloader.Data, error) {
 
 	titles := utils.MatchOneOf(html, `<meta property="og:title" content="(.+?)" />`)
 	if titles == nil || len(titles) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	title := titles[1]
 
 	realURLs := utils.MatchOneOf(html, `<meta property="og:video" content="(.+?)" />`)
 	if realURLs == nil || len(realURLs) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, types.ErrURLParseFailed
 	}
 	realURL, _ := netURL.QueryUnescape(realURLs[1])
 
@@ -43,22 +49,22 @@ func Extract(url string) ([]downloader.Data, error) {
 	if err != nil {
 		return nil, err
 	}
-	urlData := downloader.URL{
+	urlData := &types.Part{
 		URL:  realURL,
 		Size: size,
 		Ext:  "mp4",
 	}
-	streams := map[string]downloader.Stream{
+	streams := map[string]*types.Stream{
 		"default": {
-			URLs: []downloader.URL{urlData},
-			Size: size,
+			Parts: []*types.Part{urlData},
+			Size:  size,
 		},
 	}
-	return []downloader.Data{
+	return []*types.Data{
 		{
 			Site:    "网易云音乐 music.163.com",
 			Title:   title,
-			Type:    "video",
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

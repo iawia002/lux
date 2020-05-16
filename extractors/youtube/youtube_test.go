@@ -3,14 +3,11 @@ package youtube
 import (
 	"testing"
 
-	"github.com/iawia002/annie/config"
-	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/test"
 )
 
 func TestYoutube(t *testing.T) {
-	config.InfoOnly = true
-	config.ThreadNumber = 9
 	tests := []struct {
 		name     string
 		args     test.Args
@@ -24,24 +21,10 @@ func TestYoutube(t *testing.T) {
 			},
 		},
 		{
-			name: "normal test",
-			args: test.Args{
-				URL:   "https://youtu.be/z8eFzkfto2w",
-				Title: "Circle Of Love | Rudy Mancuso",
-			},
-		},
-		{
 			name: "signature test",
 			args: test.Args{
 				URL:   "https://www.youtube.com/watch?v=ZtgzKBrU1GY",
 				Title: "Halo Infinite - E3 2019 - Discover Hope",
-			},
-		},
-		{
-			name: "normal test",
-			args: test.Args{
-				URL:   "https://www.youtube.com/watch?v=ASPku-eAZYs",
-				Title: "怪獸與葛林戴華德的罪行 | HD首版電影預告大首播 (Fantastic Beasts: The Crimes of Grindelwald)",
 			},
 		},
 		{
@@ -70,17 +53,18 @@ func TestYoutube(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var (
-				data []downloader.Data
+				data []*types.Data
 				err  error
 			)
 			if tt.playlist {
 				// playlist mode
-				config.Playlist = true
-				_, err = Extract(tt.args.URL)
+				_, err = New().Extract(tt.args.URL, types.Options{
+					Playlist:     true,
+					ThreadNumber: 9,
+				})
 				test.CheckError(t, err)
 			} else {
-				config.Playlist = false
-				data, err = Extract(tt.args.URL)
+				data, err = New().Extract(tt.args.URL, types.Options{})
 				test.CheckError(t, err)
 				test.Check(t, tt.args, data[0])
 			}

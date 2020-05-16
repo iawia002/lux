@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -33,31 +34,29 @@ func TestGetDoc(t *testing.T) {
 }
 
 func TestGetImages(t *testing.T) {
-	type args struct {
-		html     string
-		url      string
-		imgClass string
-	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name      string
+		html      string
+		imgClass  string
+		wantTitle string
+		wantURLs  []string
 	}{
 		{
-			name: "fail test",
-			args: args{
-				html:     `<html><head><title>hello</title></head><body><img class="test" src="test" /></body></html>`,
-				url:      "test",
-				imgClass: "test",
-			},
-			want: "",
+			name:      "fail test",
+			html:      `<html><head><title>hello</title></head><body><img class="test" src="test.jpg" /><img class="test2" src="test2.jpg" /></body></html>`,
+			imgClass:  "test",
+			wantTitle: "hello",
+			wantURLs:  []string{"test.jpg"},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			title, _, _ := GetImages(tt.args.url, tt.args.html, tt.args.imgClass, nil)
-			if title != tt.want {
-				t.Errorf("GetImages() = %s, want %s", title, tt.want)
+			title, urls, _ := GetImages(tt.html, tt.imgClass, nil)
+			if title != tt.wantTitle {
+				t.Errorf("GetImages() = %s, want %s", title, tt.wantTitle)
+			}
+			if !reflect.DeepEqual(urls, tt.wantURLs) {
+				t.Errorf("GetImages() = %v, want %v", urls, tt.wantURLs)
 			}
 		})
 	}

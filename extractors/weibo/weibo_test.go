@@ -3,25 +3,15 @@ package weibo
 import (
 	"testing"
 
-	"github.com/iawia002/annie/config"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/test"
 )
 
 func TestDownload(t *testing.T) {
-	config.InfoOnly = true
-	config.RetryTimes = 10
 	tests := []struct {
 		name string
 		args test.Args
 	}{
-		{
-			name: "fid url test",
-			args: test.Args{
-				URL:   "https://weibo.com/tv/v/Ga7XazXze?fid=1034:4a65c6e343dc672789d3ba49c2463c6a",
-				Title: "看完更加睡不着了[二哈]",
-				Size:  438757,
-			},
-		},
 		{
 			name: "title test",
 			args: test.Args{
@@ -50,7 +40,7 @@ func TestDownload(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := Extract(tt.args.URL)
+			data, err := New().Extract(tt.args.URL, types.Options{})
 			test.CheckError(t, err)
 			test.Check(t, tt.args, data[0])
 		})

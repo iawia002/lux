@@ -1,0 +1,24 @@
+run:
+  concurrency: 2
+  timeout: 5m
+
+linter-settings:
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+
+linters:
+  enable:
+    - golint
+    - goconst
+    - gofmt
+    - goimports
+    - misspell
+    - unparam
+
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - path: _test.go
+      linters:
+        - errcheck

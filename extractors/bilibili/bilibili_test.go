@@ -3,14 +3,11 @@ package bilibili
 import (
 	"testing"
 
-	"github.com/iawia002/annie/config"
-	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/test"
 )
 
 func TestBilibili(t *testing.T) {
-	config.InfoOnly = true
-	config.ThreadNumber = 9 // travis out of memory issue
 	tests := []struct {
 		name     string
 		args     test.Args
@@ -72,18 +69,18 @@ func TestBilibili(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var (
-				data []downloader.Data
+				data []*types.Data
 				err  error
 			)
-
 			if tt.playlist {
 				// for playlist, we don't check the data
-				config.Playlist = true
-				_, err = Extract(tt.args.URL)
+				_, err = New().Extract(tt.args.URL, types.Options{
+					Playlist:     true,
+					ThreadNumber: 9,
+				})
 				test.CheckError(t, err)
 			} else {
-				config.Playlist = false
-				data, err = Extract(tt.args.URL)
+				data, err = New().Extract(tt.args.URL, types.Options{})
 				test.CheckError(t, err)
 				test.Check(t, tt.args, data[0])
 			}
