@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
+
+	"github.com/robertkrimen/otto"
 )
 
 type pornhubData struct {
@@ -48,9 +51,28 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 
+	scripts := utils.MatchAll(html, `<script type="text/javascript">(?s)(.+?)</script>`)
+	var flashvarJS string
+	for _, s := range scripts {
+		for _, js := range s[1:] {
+			if strings.Contains(js, "flashvars_") {
+				flashvarJS = js
+				break
+			}
+		}
+	}
+	vm := otto.New()
+	vm.Run(flashvarJS) // nolint
+	var urls []string
+	for i := 0; i < len(pornhubs); i++ {
+		if value, err := vm.Get(fmt.Sprintf("media_%d", i)); err == nil {
+			urls = append(urls, value.String())
+		}
+	}
+
 	streams := make(map[string]*types.Stream, len(pornhubs))
-	for _, data := range pornhubs {
-		if data.Format == "hls" {
+	for i, data := range pornhubs {
+		if data.Format != "mp4" {
 			continue
 		}
 
@@ -65,7 +87,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		}
 		quality := string(data.Quality)
 
-		realURL := data.VideoURL
+		realURL := urls[i]
 		if len(realURL) == 0 {
 			continue
 		}
