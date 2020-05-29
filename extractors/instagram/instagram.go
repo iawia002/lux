@@ -2,6 +2,9 @@ package instagram
 
 import (
 	"encoding/json"
+	netURL "net/url"
+	"path"
+	"strings"
 
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/parser"
@@ -10,23 +13,17 @@ import (
 )
 
 type instagram struct {
-	EntryData struct {
-		PostPage []struct {
-			Graphql struct {
-				ShortcodeMedia struct {
-					DisplayURL  string `json:"display_url"`
-					VideoURL    string `json:"video_url"`
-					EdgeSidecar struct {
-						Edges []struct {
-							Node struct {
-								DisplayURL string `json:"display_url"`
-							} `json:"node"`
-						} `json:"edges"`
-					} `json:"edge_sidecar_to_children"`
-				} `json:"shortcode_media"`
-			} `json:"graphql"`
-		} `json:"PostPage"`
-	} `json:"entry_data"`
+	ShortcodeMedia struct {
+		EdgeSidecar struct {
+			Edges []struct {
+				Node struct {
+					DisplayURL string `json:"display_url"`
+					IsVideo    bool   `json:"is_video"`
+					VideoURL   string `json:"video_url"`
+				} `json:"node"`
+			} `json:"edges"`
+		} `json:"edge_sidecar_to_children"`
+	} `json:"shortcode_media"`
 }
 
 type extractor struct{}
@@ -36,105 +33,110 @@ func New() types.Extractor {
 	return &extractor{}
 }
 
+func extractImageFromPage(html, url string) (map[string]*types.Stream, error) {
+	_, realURLs, err := parser.GetImages(html, "EmbeddedMediaImage", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	urls := make([]*types.Part, 0, len(realURLs))
+	var totalSize int64
+	for _, realURL := range realURLs {
+		size, err := request.Size(realURL, url)
+		if err != nil {
+			return nil, err
+		}
+		urlData := &types.Part{
+			URL:  realURL,
+			Size: size,
+			Ext:  "jpg",
+		}
+		urls = append(urls, urlData)
+		totalSize += size
+	}
+
+	return map[string]*types.Stream{
+		"default": {
+			Parts: urls,
+			Size:  totalSize,
+		},
+	}, nil
+}
+
+func extractFromData(dataString, url string) (map[string]*types.Stream, error) {
+	var data instagram
+	if err := json.Unmarshal([]byte(dataString), &data); err != nil {
+		return nil, err
+	}
+
+	urls := make([]*types.Part, 0, len(data.ShortcodeMedia.EdgeSidecar.Edges))
+	var totalSize int64
+	for _, u := range data.ShortcodeMedia.EdgeSidecar.Edges {
+		// Image
+		realURL := u.Node.DisplayURL
+		ext := "jpg"
+		if u.Node.IsVideo {
+			// Video
+			realURL = u.Node.VideoURL
+			ext = "mp4"
+		}
+
+		size, err := request.Size(realURL, url)
+		if err != nil {
+			return nil, err
+		}
+		urlData := &types.Part{
+			URL:  realURL,
+			Size: size,
+			Ext:  ext,
+		}
+		urls = append(urls, urlData)
+		totalSize += size
+	}
+
+	return map[string]*types.Stream{
+		"default": {
+			Parts: urls,
+			Size:  totalSize,
+		},
+	}, nil
+}
+
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
-	html, err := request.Get(url, url, nil)
+	// Instagram is forcing a login to access the page, so we use the embed page to bypass that.
+	u, err := netURL.Parse(url)
 	if err != nil {
 		return nil, err
 	}
-	// get the title
-	doc, err := parser.GetDoc(html)
-	if err != nil {
-		return nil, err
-	}
-	title := parser.Title(doc)
+	id := u.Path[strings.LastIndex(u.Path, "/")+1:]
+	u.Path = path.Join(u.Path, "embed")
 
-	dataStrings := utils.MatchOneOf(html, `window\._sharedData\s*=\s*(.*);`)
+	html, err := request.Get(u.String(), url, nil)
+	if err != nil {
+		return nil, err
+	}
+	dataStrings := utils.MatchOneOf(html, `window\.__additionalDataLoaded\('graphql',(.*)\);`)
 	if dataStrings == nil || len(dataStrings) < 2 {
 		return nil, types.ErrURLParseFailed
 	}
 	dataString := dataStrings[1]
 
-	var data instagram
-	if err = json.Unmarshal([]byte(dataString), &data); err != nil {
-		return nil, types.ErrURLParseFailed
-	}
-
-	var (
-		realURL  string
-		dataType types.DataType
-		size     int64
-	)
-	streams := make(map[string]*types.Stream)
-
-	if data.EntryData.PostPage[0].Graphql.ShortcodeMedia.VideoURL != "" {
-		// Video
-		dataType = types.DataTypeVideo
-		realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.VideoURL
-		size, err = request.Size(realURL, url)
-		if err != nil {
-			return nil, err
-		}
-		streams["default"] = &types.Stream{
-			Parts: []*types.Part{
-				{
-					URL:  realURL,
-					Size: size,
-					Ext:  "mp4",
-				},
-			},
-			Size: size,
-		}
+	var streams map[string]*types.Stream
+	if dataString == "" || dataString == "null" {
+		streams, err = extractImageFromPage(html, url)
 	} else {
-		// Image
-		dataType = types.DataTypeImage
-		if data.EntryData.PostPage[0].Graphql.ShortcodeMedia.EdgeSidecar.Edges == nil {
-			// Single
-			realURL = data.EntryData.PostPage[0].Graphql.ShortcodeMedia.DisplayURL
-			size, err = request.Size(realURL, url)
-			if err != nil {
-				return nil, err
-			}
-			streams["default"] = &types.Stream{
-				Parts: []*types.Part{
-					{
-						URL:  realURL,
-						Size: size,
-						Ext:  "jpg",
-					},
-				},
-				Size: size,
-			}
-		} else {
-			// Album
-			var totalSize int64
-			var urls []*types.Part
-			for _, u := range data.EntryData.PostPage[0].Graphql.ShortcodeMedia.EdgeSidecar.Edges {
-				realURL = u.Node.DisplayURL
-				size, err = request.Size(realURL, url)
-				if err != nil {
-					return nil, err
-				}
-				urlData := &types.Part{
-					URL:  realURL,
-					Size: size,
-					Ext:  "jpg",
-				}
-				urls = append(urls, urlData)
-				totalSize += size
-			}
-			streams["default"] = &types.Stream{
-				Parts: urls,
-				Size:  totalSize,
-			}
-		}
+		streams, err = extractFromData(dataString, url)
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	return []*types.Data{
 		{
 			Site:    "Instagram instagram.com",
-			Title:   title,
-			Type:    dataType,
+			Title:   "Instagram " + id,
+			Type:    types.DataTypeImage,
 			Streams: streams,
 			URL:     url,
 		},
