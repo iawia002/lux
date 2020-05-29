@@ -16,15 +16,15 @@ func TestDownload(t *testing.T) {
 			name: "video test",
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/BlIka1ZFCNr",
-				Title: "P!NK on Instagram: “AFL got us hyped! #adelaideadventures #iwanttoplay”",
-				Size:  2741413,
+				Title: "Instagram BlIka1ZFCNr",
+				Size:  3096378,
 			},
 		},
 		{
 			name: "image test",
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/Bl5oVUyl9Yx",
-				Title: "P!NK on Instagram: “Australia:heaven”",
+				Title: "Instagram Bl5oVUyl9Yx",
 				Size:  250596,
 			},
 		},
@@ -32,7 +32,7 @@ func TestDownload(t *testing.T) {
 			name: "image album test",
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/Bjyr-gxF4Rb",
-				Title: "P!NK on Instagram: “Nature. Nurture.\nKiddos. Gratitude”",
+				Title: "Instagram Bjyr-gxF4Rb",
 				Size:  4599909,
 			},
 		},
