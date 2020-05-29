@@ -1,10 +1,16 @@
 project_name: annie
 env:
   - GO111MODULE=on
+before:
+  hooks:
+    - go mod download
 builds:
 - env:
     - CGO_ENABLED=0
   binary: annie
+  # Disable ldflags: https://github.com/goreleaser/goreleaser/issues/1255
+  ldflags:
+    - "-X 'main.aa=aa'"
   goos:
     - windows
     - darwin
@@ -21,6 +27,8 @@ builds:
     - goos: freebsd
       goarch: arm
       goarm: 6
+    - goos: freebsd
+      goarch: arm64
     - goos: openbsd
       goarch: arm
       goarm: 6
@@ -38,8 +46,8 @@ changelog:
       - '^tests'
       - Merge pull request
       - Merge branch
-archive:
-  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}'
+archives:
+- name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}'
   format: tar.gz
   format_overrides:
     - goos: windows
