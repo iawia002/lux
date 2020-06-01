@@ -63,7 +63,7 @@ func (d *Data) FillUpStreamsData() {
 			// The file extension in `Parts` is used as the merged file extension by default, except for the following formats
 			switch ext {
 			// ts and flv files should be merged into an mp4 file
-			case "ts", "flv":
+			case "ts", "flv", "f4v":
 				ext = "mp4"
 			}
 			stream.Ext = ext

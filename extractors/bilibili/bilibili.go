@@ -103,7 +103,6 @@ type bilibiliOptions struct {
 	cid      int
 	page     int
 	subtitle string
-	cookie   string
 }
 
 func extractBangumi(url, html string, extractOption types.Options) ([]*types.Data, error) {
@@ -284,7 +283,7 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 	// Get "accept_quality" and "accept_description"
 	// "accept_description":["高清 1080P","高清 720P","清晰 480P","流畅 360P"],
 	// "accept_quality":[80,48,32,16],
-	api, err := genAPI(options.aid, options.cid, options.bangumi, "15", seasonType, options.cookie)
+	api, err := genAPI(options.aid, options.cid, options.bangumi, "15", seasonType, extractOption.Cookie)
 	if err != nil {
 		return types.EmptyData(options.url, err)
 	}
@@ -300,7 +299,7 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 
 	streams := make(map[string]*types.Stream, len(quality.Quality))
 	for _, q := range quality.Quality {
-		apiURL, err := genAPI(options.aid, options.cid, options.bangumi, strconv.Itoa(q), seasonType, options.cookie)
+		apiURL, err := genAPI(options.aid, options.cid, options.bangumi, strconv.Itoa(q), seasonType, extractOption.Cookie)
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
