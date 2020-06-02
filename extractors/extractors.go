@@ -1,6 +1,7 @@
 package extractors
 
 import (
+	"github.com/iawia002/annie/extractors/haokan"
 	"net/url"
 	"strings"
 
@@ -70,6 +71,7 @@ func init() {
 		"xvideos":    xvideos.New(),
 		"udn":        udn.New(),
 		"tiktok":     tiktok.New(),
+		"haokan":     haokan.New(),
 	}
 }
 
@@ -92,7 +94,11 @@ func Extract(u string, option types.Options) ([]*types.Data, error) {
 		if err != nil {
 			return nil, err
 		}
-		domain = utils.Domain(u.Host)
+		if u.Host == "haokan.baidu.com" {
+			domain = "haokan"
+		} else {
+			domain = utils.Domain(u.Host)
+		}
 	}
 	extractor := extractorMap[domain]
 	videos, err := extractor.Extract(u, option)
