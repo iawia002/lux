@@ -39,6 +39,9 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 
 	_, ext, err := utils.GetNameAndExt(playurl)
+	if err != nil {
+		return nil, err
+	}
 
 	streams := map[string]*types.Stream{
 		"default": {
