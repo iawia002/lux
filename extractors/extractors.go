@@ -10,6 +10,7 @@ import (
 	"github.com/iawia002/annie/extractors/douyu"
 	"github.com/iawia002/annie/extractors/facebook"
 	"github.com/iawia002/annie/extractors/geekbang"
+	"github.com/iawia002/annie/extractors/haokan"
 	"github.com/iawia002/annie/extractors/instagram"
 	"github.com/iawia002/annie/extractors/iqiyi"
 	"github.com/iawia002/annie/extractors/mgtv"
@@ -70,6 +71,7 @@ func init() {
 		"xvideos":    xvideos.New(),
 		"udn":        udn.New(),
 		"tiktok":     tiktok.New(),
+		"haokan":     haokan.New(),
 	}
 }
 
@@ -92,7 +94,11 @@ func Extract(u string, option types.Options) ([]*types.Data, error) {
 		if err != nil {
 			return nil, err
 		}
-		domain = utils.Domain(u.Host)
+		if u.Host == "haokan.baidu.com" {
+			domain = "haokan"
+		} else {
+			domain = utils.Domain(u.Host)
+		}
 	}
 	extractor := extractorMap[domain]
 	videos, err := extractor.Extract(u, option)
