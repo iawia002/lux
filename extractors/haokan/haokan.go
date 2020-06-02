@@ -55,16 +55,12 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 			Size: size,
 		},
 	}
-	contentType, err := request.ContentType(playurl, url)
-	if err != nil {
-		return nil, err
-	}
 
 	return []*types.Data{
 		{
-			Site:    "百度好看 haokan.baidu.com",
+			Site:    "好看视频 haokan.baidu.com",
 			Title:   title,
-			Type:    types.DataType(contentType),
+			Type:    types.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},
