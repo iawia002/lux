@@ -110,7 +110,7 @@ func (downloader *Downloader) writeFile(url string, file *os.File, headers map[s
 	return written, nil
 }
 
-func (downloader *Downloader) save(part *types.Part, fileName string) error {
+func (downloader *Downloader) save(part *types.Part, refer, fileName string) error {
 	filePath, err := utils.FilePath(fileName, part.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, false)
 	if err != nil {
 		return err
@@ -131,7 +131,9 @@ func (downloader *Downloader) save(part *types.Part, fileName string) error {
 	if err != nil {
 		return err
 	}
-	headers := make(map[string]string, 1)
+	headers := map[string]string{
+		"Referer": refer,
+	}
 	var (
 		file      *os.File
 		fileError error
@@ -206,7 +208,7 @@ func (downloader *Downloader) save(part *types.Part, fileName string) error {
 	return nil
 }
 
-func (downloader *Downloader) multiThreadSave(dataPart *types.Part, fileName string) error {
+func (downloader *Downloader) multiThreadSave(dataPart *types.Part, refer, fileName string) error {
 	filePath, err := utils.FilePath(fileName, dataPart.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, false)
 	if err != nil {
 		return err
@@ -336,7 +338,9 @@ func (downloader *Downloader) multiThreadSave(dataPart *types.Part, fileName str
 			}()
 
 			var end, chunkSize int64
-			headers := make(map[string]string, 1)
+			headers := map[string]string{
+				"Referer": refer,
+			}
 			if downloader.option.ChunkSizeMB <= 0 {
 				chunkSize = part.End - part.Start + 1
 			} else {
@@ -579,9 +583,9 @@ func (downloader *Downloader) Download(data *types.Data) error {
 		// only one fragment
 		var err error
 		if downloader.option.MultiThread {
-			err = downloader.multiThreadSave(stream.Parts[0], title)
+			err = downloader.multiThreadSave(stream.Parts[0], data.URL, title)
 		} else {
-			err = downloader.save(stream.Parts[0], title)
+			err = downloader.save(stream.Parts[0], data.URL, title)
 		}
 
 		if err != nil {
@@ -611,7 +615,7 @@ func (downloader *Downloader) Download(data *types.Data) error {
 		wgp.Add()
 		go func(part *types.Part, fileName string) {
 			defer wgp.Done()
-			err := downloader.save(part, fileName)
+			err := downloader.save(part, data.URL, fileName)
 			if err != nil {
 				lock.Lock()
 				errs = append(errs, err)
