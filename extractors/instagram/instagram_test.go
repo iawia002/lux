@@ -17,7 +17,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/BlIka1ZFCNr",
 				Title: "Instagram BlIka1ZFCNr",
-				Size:  3096378,
+				Size:  3003662,
 			},
 		},
 		{

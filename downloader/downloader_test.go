@@ -17,6 +17,7 @@ func TestDownload(t *testing.T) {
 				Site:  "douyin",
 				Title: "test",
 				Type:  types.DataTypeVideo,
+				URL:   "https://www.douyin.com",
 				Streams: map[string]*types.Stream{
 					"default": {
 						ID: "default",
@@ -37,6 +38,7 @@ func TestDownload(t *testing.T) {
 				Site:  "douyin",
 				Title: "test2",
 				Type:  types.DataTypeVideo,
+				URL:   "https://www.douyin.com",
 				Streams: map[string]*types.Stream{
 					"miaopai": {
 						ID: "miaopai",
@@ -69,6 +71,7 @@ func TestDownload(t *testing.T) {
 				Site:  "bcy",
 				Title: "bcy image test",
 				Type:  types.DataTypeImage,
+				URL:   "https://www.bcyimg.com",
 				Streams: map[string]*types.Stream{
 					"default": {
 						ID: "default",
