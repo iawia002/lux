@@ -48,36 +48,63 @@ type qqKeyInfo struct {
 
 const qqPlayerVersion string = "3.2.19.333"
 
+func getVinfo(vid, defn, refer string) (qqVideoInfo, error) {
+	html, err := request.Get(
+		fmt.Sprintf(
+			"http://vv.video.qq.com/getinfo?otype=json&platform=11&defnpayver=1&appver=%s&defn=%s&vid=%s",
+			qqPlayerVersion, defn, vid,
+		), refer, nil,
+	)
+	if err != nil {
+		return qqVideoInfo{}, err
+	}
+	jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
+	if jsonStrings == nil || len(jsonStrings) < 2 {
+		return qqVideoInfo{}, types.ErrURLParseFailed
+	}
+	jsonString := jsonStrings[1]
+	var data qqVideoInfo
+	if err = json.Unmarshal([]byte(jsonString), &data); err != nil {
+		return qqVideoInfo{}, err
+	}
+	return data, nil
+}
+
 func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*types.Stream, error) {
 	streams := make(map[string]*types.Stream)
 	var vkey string
 	// number of fragments
-	clips := data.Vl.Vi[0].Cl.Fc
-	if clips == 0 {
-		clips = 1
-	}
+	var clips int
 
 	for _, fi := range data.Fl.Fi {
 		var fmtIDPrefix string
-		fns := strings.Split(data.Vl.Vi[0].Fn, ".")
-		if fi.ID > 100000 {
-			fmtIDPrefix = "m"
-		} else if fi.ID > 10000 {
+		var fns []string
+		if utils.ItemInSlice(fi.Name, []string{"shd", "fhd"}) {
 			fmtIDPrefix = "p"
-		}
-		if fmtIDPrefix != "" {
 			fmtIDName := fmt.Sprintf("%s%d", fmtIDPrefix, fi.ID%10000)
-			if len(fns) < 3 {
-				// v0739eolv38.mp4 -> v0739eolv38.m701.mp4
-				fns = append(fns[:1], append([]string{fmtIDName}, fns[1:]...)...)
-			} else {
-				// n0687peq62x.p709.mp4 -> n0687peq62x.m709.mp4
-				fns[1] = fmtIDName
+			fns = []string{strings.Split(data.Vl.Vi[0].Fn, ".")[0], fmtIDName, "mp4"}
+			if len(fns) > 3 {
+				// delete ID part
+				// e0765r4mwcr.2.mp4 -> e0765r4mwcr.mp4
+				fns = append(fns[:1], fns[2:]...)
 			}
-		} else if len(fns) >= 3 {
-			// delete ID part
-			// e0765r4mwcr.2.mp4 -> e0765r4mwcr.mp4
-			fns = append(fns[:1], fns[2:]...)
+			clips = data.Vl.Vi[0].Cl.Fc
+			if clips == 0 {
+				clips = 1
+			}
+		} else {
+			tmpData, err := getVinfo(vid, fi.Name, cdn)
+			if err != nil {
+				return nil, err
+			}
+			fns = strings.Split(tmpData.Vl.Vi[0].Fn, ".")
+			if len(fns) >= 3 && utils.MatchOneOf(fns[1], `^p(\d{3})$`) != nil {
+				fmtIDPrefix = "p"
+			}
+			clips = tmpData.Vl.Vi[0].Cl.Fc
+			if clips == 0 {
+				clips = 1
+			}
 		}
 
 		var urls []*types.Part
@@ -170,23 +197,9 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		}
 		vid = vids[1]
 	}
-	html, err := request.Get(
-		fmt.Sprintf(
-			"http://vv.video.qq.com/getinfo?otype=json&platform=11&defnpayver=1&appver=%s&defn=shd&vid=%s",
-			qqPlayerVersion, vid,
-		), url, nil,
-	)
-	if err != nil {
-		return nil, err
-	}
-	jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
-	if jsonStrings == nil || len(jsonStrings) < 2 {
-		return nil, types.ErrURLParseFailed
-	}
-	jsonString := jsonStrings[1]
 
-	var data qqVideoInfo
-	if err = json.Unmarshal([]byte(jsonString), &data); err != nil {
+	data, err := getVinfo(vid, "shd", url)
+	if err != nil {
 		return nil, err
 	}
 
