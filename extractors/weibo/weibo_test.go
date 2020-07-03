@@ -7,6 +7,12 @@ import (
 	"github.com/iawia002/annie/test"
 )
 
+func TestToken(t *testing.T) {
+	t.Run(
+		"XSRF token test", func(t *testing.T) { getXSRFToken() },
+	)
+}
+
 func TestDownload(t *testing.T) {
 	tests := []struct {
 		name string
@@ -31,9 +37,9 @@ func TestDownload(t *testing.T) {
 		{
 			name: "weibo.com/tv test",
 			args: test.Args{
-				URL:     "https://weibo.com/tv/v/jGz6llNZ1?fid=1034:4298353237002268",
-				Title:   "做了这么一个屌炸天的视频我也不知道起什么标题好 @DRock-Art @毒液-致命守护者 @漫威影业 #绘画# #blender# #漫威#",
-				Quality: "720",
+				URL:     "https://weibo.com/tv/show/1034:4298353237002268?from=old_pc_videoshow",
+				Title:   "毒液插图Blender+Photoshop2.5小时工作流",
+				Quality: "720p",
 				Size:    7520929,
 			},
 		},
