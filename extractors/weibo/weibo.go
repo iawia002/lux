@@ -17,9 +17,11 @@ type playInfo struct {
 	Title string            `json:"title"`
 	URLs  map[string]string `json:"urls"`
 }
+
 type playData struct {
 	PlayInfo playInfo `json:"Component_Play_Playinfo"`
 }
+
 type weiboData struct {
 	Code string   `json:"code"`
 	Data playData `json:"data"`
