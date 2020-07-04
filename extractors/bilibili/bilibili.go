@@ -22,7 +22,7 @@ const (
 const (
 	// BiliBili blocks keys from time to time.
 	// You can extract from the Android client or bilibiliPlayer.min.js
-	appKey = "iVGUTjsxvpLeuDCf"
+	// appKey = "iVGUTjsxvpLeuDCf"
 	secKey = "aHRmhWMLkdeMuILqORnYZocwMBpMEOdt"
 )
 
@@ -30,7 +30,7 @@ const referer = "https://www.bilibili.com"
 
 var utoken string
 
-func genAPI(aid, cid, quality int, bangumi bool, seasonType, cookie string) (string, error) {
+func genAPI(aid, cid, quality int, bangumi bool, cookie string) (string, error) {
 	var (
 		err        error
 		baseAPIURL string
@@ -64,14 +64,13 @@ func genAPI(aid, cid, quality int, bangumi bool, seasonType, cookie string) (str
 			"avid=%d&cid=%d&bvid=&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=16",
 			aid, cid, quality,
 		)
-		baseAPIURL = bilibiliAPI
+		baseAPIURL = bilibiliBangumiAPI
 	} else {
 		params = fmt.Sprintf(
 			"avid=%d&cid=%d&bvid=&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=16",
 			aid, cid, quality,
 		)
 		baseAPIURL = bilibiliAPI
-
 	}
 	api = baseAPIURL + params
 	// bangumi utoken also need to put in params to sign, but the ordinary video doesn't need
@@ -294,7 +293,6 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 	var (
 		err        error
 		html       string
-		seasonType string
 	)
 	if options.html != "" {
 		// reuse html string, but this can't be reused in case of playlist
@@ -305,15 +303,11 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 			return types.EmptyData(options.url, err)
 		}
 	}
-	if options.bangumi {
-		seasonType = utils.MatchOneOf(html, `"season_type":(\d+)`, `"ssType":(\d+)`)[1]
-
-	}
 
 	// Get "accept_quality" and "accept_description"
 	// "accept_description":["高清 1080P","高清 720P","清晰 480P","流畅 360P"],
 	// "accept_quality":[120,112,80,48,32,16],
-	api, err := genAPI(options.aid, options.cid, 120, options.bangumi, seasonType, extractOption.Cookie)
+	api, err := genAPI(options.aid, options.cid, 120, options.bangumi, extractOption.Cookie)
 	if err != nil {
 		return types.EmptyData(options.url, err)
 	}
@@ -339,7 +333,7 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		if _, ok := streams[strconv.Itoa(q)]; ok {
 			continue
 		}
-		api, err := genAPI(options.aid, options.cid, q, options.bangumi, seasonType, extractOption.Cookie)
+		api, err := genAPI(options.aid, options.cid, q, options.bangumi, extractOption.Cookie)
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
