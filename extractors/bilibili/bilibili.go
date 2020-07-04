@@ -14,8 +14,7 @@ import (
 )
 
 const (
-	bilibiliAPI = "https://api.bilibili.com/x/player/playurl?"
-	// bilibiliBangumiAPI = "https://bangumi.bilibili.com/player/web_api/v2/playurl?"
+	bilibiliAPI        = "https://api.bilibili.com/x/player/playurl?"
 	bilibiliBangumiAPI = "https://api.bilibili.com/pgc/player/web/playurl?"
 	bilibiliTokenAPI   = "https://api.bilibili.com/x/player/playurl/token?"
 )
@@ -56,55 +55,32 @@ func genAPI(aid, cid, quality int, bangumi bool, seasonType, cookie string) (str
 		}
 		utoken = t.Data.Token
 	}
+	var api string
 	if bangumi {
 		// The parameters need to be sorted by name
 		// qn=0 flag makes the CDN address different every time
-		// quality=116(1080P 60) is the highest quality so far
-		// params = fmt.Sprintf(
-		// 	"appkey=%s&cid=%d&module=bangumi&otype=json&qn=%s&quality=%s&season_type=%s&type=",
-		// 	appKey, cid, quality, quality, seasonType,
-		// )
-		// baseAPIURL = bilibiliBangumiAPI
+		// quality=120(4k) is the highest quality so far
 		params = fmt.Sprintf(
 			"avid=%d&cid=%d&bvid=&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=16",
 			aid, cid, quality,
 		)
 		baseAPIURL = bilibiliAPI
-		api := baseAPIURL + params
-		return api, nil
 	} else {
-		//avid=200079093&cid=172854601&bvid=&qn=120&type=&otype=json&fourk=1&fnver=0&fnval=16
 		params = fmt.Sprintf(
 			"avid=%d&cid=%d&bvid=&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=16",
 			aid, cid, quality,
 		)
 		baseAPIURL = bilibiliAPI
-		api := baseAPIURL + params
-		return api, nil
+
 	}
+	api = baseAPIURL + params
 	// bangumi utoken also need to put in params to sign, but the ordinary video doesn't need
-	api := fmt.Sprintf(
-		"%s%s&sign=%s", baseAPIURL, params, utils.Md5(params+secKey),
-	)
 	if !bangumi && utoken != "" {
 		api = fmt.Sprintf("%s&utoken=%s", api, utoken)
 	}
 	return api, nil
 }
 
-// func genBangumiParts(durl []dURLData) ([]*types.Part, int64) {
-// 	var size int64
-// 	parts := make([]*types.Part, len(durl))
-// 	for index, data := range durl {
-// 		size += data.Size
-// 		parts[index] = &types.Part{
-// 			URL:  data.URL,
-// 			Size: data.Size,
-// 			Ext:  "flv",
-// 		}
-// 	}
-// 	return parts, size
-// }
 func genParts(dashData *dashInfo, quality int, referer string) ([]*types.Part, error) {
 	parts := make([]*types.Part, 2)
 	checked := false
