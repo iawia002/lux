@@ -19,13 +19,6 @@ const (
 	bilibiliTokenAPI   = "https://api.bilibili.com/x/player/playurl/token?"
 )
 
-const (
-	// BiliBili blocks keys from time to time.
-	// You can extract from the Android client or bilibiliPlayer.min.js
-	// appKey = "iVGUTjsxvpLeuDCf"
-	secKey = "aHRmhWMLkdeMuILqORnYZocwMBpMEOdt"
-)
-
 const referer = "https://www.bilibili.com"
 
 var utoken string
@@ -291,8 +284,8 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 // bilibiliDownload is the download function for a single URL
 func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *types.Data {
 	var (
-		err        error
-		html       string
+		err  error
+		html string
 	)
 	if options.html != "" {
 		// reuse html string, but this can't be reused in case of playlist
@@ -358,9 +351,13 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
+		var size int64
+		for _, part := range parts {
+			size += part.Size
+		}
 		streams[strconv.Itoa(q)] = &types.Stream{
 			Parts:   parts,
-			Size:    0,
+			Size:    size,
 			Quality: qualityString[q],
 		}
 	}
