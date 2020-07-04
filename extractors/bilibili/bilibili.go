@@ -337,7 +337,7 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 	// Get "accept_quality" and "accept_description"
 	// "accept_description":["高清 1080P","高清 720P","清晰 480P","流畅 360P"],
 	// "accept_quality":[120,112,80,48,32,16],
-	api, err := genAPI(options.aid, options.cid, 15, options.bangumi, seasonType, extractOption.Cookie)
+	api, err := genAPI(options.aid, options.cid, 120, options.bangumi, seasonType, extractOption.Cookie)
 	if err != nil {
 		return types.EmptyData(options.url, err)
 	}
@@ -363,25 +363,23 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		if _, ok := streams[strconv.Itoa(q)]; ok {
 			continue
 		}
-		if options.bangumi {
-			api, err := genAPI(options.aid, options.cid, q, options.bangumi, seasonType, extractOption.Cookie)
-			if err != nil {
-				return types.EmptyData(options.url, err)
-			}
-			jsonString, err := request.Get(api, referer, nil)
-			if err != nil {
-				return types.EmptyData(options.url, err)
-			}
+		api, err := genAPI(options.aid, options.cid, q, options.bangumi, seasonType, extractOption.Cookie)
+		if err != nil {
+			return types.EmptyData(options.url, err)
+		}
+		jsonString, err := request.Get(api, referer, nil)
+		if err != nil {
+			return types.EmptyData(options.url, err)
+		}
 
-			err = json.Unmarshal([]byte(jsonString), &data)
-			if err != nil {
-				return types.EmptyData(options.url, err)
-			}
-			if data.Data.Description == nil {
-				dashData = data.Result
-			} else {
-				dashData = data.Data
-			}
+		err = json.Unmarshal([]byte(jsonString), &data)
+		if err != nil {
+			return types.EmptyData(options.url, err)
+		}
+		if data.Data.Description == nil {
+			dashData = data.Result
+		} else {
+			dashData = data.Data
 		}
 		parts, err := genParts(&dashData, q, options.url)
 		if parts == nil {
@@ -391,9 +389,9 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 			return types.EmptyData(options.url, err)
 		}
 		streams[strconv.Itoa(q)] = &types.Stream{
-			Parts:     parts,
-			Size:      0,
-			Quality:   qualityString[q],
+			Parts:   parts,
+			Size:    0,
+			Quality: qualityString[q],
 		}
 	}
 
