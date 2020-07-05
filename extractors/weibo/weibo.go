@@ -3,9 +3,11 @@ package weibo
 import (
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	netURL "net/url"
+	"strconv"
 	"strings"
 
 	"github.com/iawia002/annie/extractors/types"
@@ -50,6 +52,79 @@ func getXSRFToken() (string, error) {
 	return token, nil
 }
 
+func downloadWeiboVideo(url string) ([]*types.Data, error) {
+	urldata, err := netURL.Parse(url)
+	if err != nil {
+		return nil, err
+	}
+	api := fmt.Sprintf(
+		"https://video.h5.weibo.cn/s/video/object?object_id=%s&mid=%s",
+		strings.Split(urldata.Path, "/")[1], strings.Split(urldata.Path, "/")[2],
+	)
+	jsonString, err := request.Get(api, "", nil)
+
+	if err != nil {
+		return nil, err
+	}
+	rawSummary := utils.MatchOneOf(jsonString, `"summary":"(.+?)",`)[1]
+	summary, err := strconv.Unquote(strings.Replace(strconv.Quote(rawSummary), `\\u`, `\u`, -1))
+	if err != nil {
+		return nil, err
+	}
+	rawhdURL := utils.MatchOneOf(jsonString, `"hd_url":"([^"]+)",`)[1]
+	unescapedhdURL, err := strconv.Unquote(strings.Replace(strconv.Quote(rawhdURL), `\\u`, `\u`, -1))
+	if err != nil {
+		return nil, err
+	}
+	realhdURL := strings.ReplaceAll(unescapedhdURL, `\/`, `/`)
+	hdsize, err := request.Size(realhdURL, "")
+	if err != nil {
+		return nil, err
+	}
+	streams := make(map[string]*types.Stream, 2)
+	streams["hd"] = &types.Stream{
+		Parts: []*types.Part{
+			{
+				URL:  realhdURL,
+				Size: hdsize,
+				Ext:  "mp4",
+			},
+		},
+		Size:    hdsize,
+		Quality: "hd",
+	}
+	rawURL := utils.MatchOneOf(jsonString, `"url":"([^"]+)",`)[1]
+	unescapedURL, err := strconv.Unquote(strings.Replace(strconv.Quote(rawURL), `\\u`, `\u`, -1))
+	if err != nil {
+		return nil, err
+	}
+	realURL := strings.ReplaceAll(unescapedURL, `\/`, `/`)
+	size, err := request.Size(realURL, "")
+	if err != nil {
+		return nil, err
+	}
+	streams["sd"] = &types.Stream{
+		Parts: []*types.Part{
+			{
+				URL:  realhdURL,
+				Size: size,
+				Ext:  "mp4",
+			},
+		},
+		Size:    size,
+		Quality: "sd",
+	}
+	return []*types.Data{
+		{
+			Site:    "微博 weibo.com",
+			Title:   summary,
+			Type:    types.DataTypeVideo,
+			Streams: streams,
+			URL:     url,
+		},
+	}, nil
+}
+
 func downloadWeiboTV(url string) ([]*types.Data, error) {
 	APIEndpoint := "https://weibo.com/tv/api/component?page="
 	urldata, err := netURL.Parse(url)
@@ -75,7 +150,7 @@ func downloadWeiboTV(url string) ([]*types.Data, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // nolint
 	var dataReader io.ReadCloser
 	if res.Header.Get("Content-Encoding") == "gzip" {
 		dataReader, err = gzip.NewReader(res.Body)
@@ -142,6 +217,8 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if !strings.Contains(url, "m.weibo.cn") {
 		if strings.Contains(url, "weibo.com/tv/show/") {
 			return downloadWeiboTV(url)
+		} else if strings.Contains(url, "video.h5.weibo.cn") {
+			return downloadWeiboVideo(url)
 		}
 		url = strings.Replace(url, "weibo.com", "m.weibo.cn", 1)
 	}

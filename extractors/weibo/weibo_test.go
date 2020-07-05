@@ -43,6 +43,15 @@ func TestDownload(t *testing.T) {
 				Size:    7520929,
 			},
 		},
+		{
+			name: "video.h5.weibo.cn test",
+			args: test.Args{
+				URL:     "https://video.h5.weibo.cn/1034:4444720957745002/4444721306607329",
+				Title:   "【#高通CEO否认中国5G超美国#：技术上还没有，只是首次并驾齐驱】中国5G已经超越美国了吗？高通CEO史蒂夫·莫伦科夫近日对此表示，在技术上还没有，但中国在5G的部署上，尤其是基站的建设，发展很快。这是有史以来第一次中美并驾齐驱，以前的话都会慢个2年或者5年。",
+				Quality: "hd",
+				Size:    1523895,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
