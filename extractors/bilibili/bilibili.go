@@ -54,8 +54,8 @@ func genAPI(aid, cid, quality int, bangumi bool, cookie string) (string, error) 
 		// qn=0 flag makes the CDN address different every time
 		// quality=120(4k) is the highest quality so far
 		params = fmt.Sprintf(
-			"avid=%d&cid=%d&bvid=&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=16",
-			aid, cid, quality,
+			"cid=%d&bvid=&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=16",
+			cid, quality,
 		)
 		baseAPIURL = bilibiliBangumiAPI
 	} else {
@@ -134,12 +134,18 @@ func extractBangumi(url, html string, extractOption types.Options) ([]*types.Dat
 		return nil, err
 	}
 	if !extractOption.Playlist {
+		aid := data.EpInfo.Aid
+		cid := data.EpInfo.Cid
+		if aid <= 0 || cid <= 0 {
+			aid = data.EpList[0].Aid
+			cid = data.EpList[0].Cid
+		}
 		options := bilibiliOptions{
 			url:     url,
 			html:    html,
 			bangumi: true,
-			aid:     data.EpInfo.Aid,
-			cid:     data.EpInfo.Cid,
+			aid:     aid,
+			cid:     cid,
 		}
 		return []*types.Data{bilibiliDownload(options, extractOption)}, nil
 	}
