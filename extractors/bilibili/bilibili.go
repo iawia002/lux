@@ -94,25 +94,6 @@ func genParts(dashData *dashInfo, quality int, referer string) ([]*types.Part, e
 	if !checked {
 		return nil, nil
 	}
-	var audioID int
-	audios := map[int]string{}
-	bandwidth := 0
-	for _, stream := range dashData.Streams.Audio {
-		if stream.Bandwidth > bandwidth {
-			audioID = stream.ID
-		}
-		audios[stream.ID] = stream.BaseURL
-		bandwidth = stream.Bandwidth
-	}
-	s, err := request.Size(audios[audioID], referer)
-	if err != nil {
-		return nil, err
-	}
-	parts[1] = &types.Part{
-		URL:  audios[audioID],
-		Size: s,
-		Ext:  "m4a",
-	}
 	return parts, nil
 }
 
@@ -326,6 +307,28 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 	} else {
 		dashData = data.Data
 	}
+
+	// Get audio part
+	var audioID int
+	audios := map[int]string{}
+	bandwidth := 0
+	for _, stream := range dashData.Streams.Audio {
+		if stream.Bandwidth > bandwidth {
+			audioID = stream.ID
+		}
+		audios[stream.ID] = stream.BaseURL
+		bandwidth = stream.Bandwidth
+	}
+	s, err := request.Size(audios[audioID], referer)
+	if err != nil {
+		return types.EmptyData(options.url, err)
+	}
+	audioPart := &types.Part{
+		URL:  audios[audioID],
+		Size: s,
+		Ext:  "m4a",
+	}
+
 	streams := make(map[string]*types.Stream, len(dashData.Quality))
 	for _, q := range dashData.Quality {
 		// Avoid duplicate streams
@@ -357,6 +360,7 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
+		parts[1] = audioPart
 		var size int64
 		for _, part := range parts {
 			size += part.Size
