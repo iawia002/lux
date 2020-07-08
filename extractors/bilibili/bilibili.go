@@ -14,23 +14,16 @@ import (
 )
 
 const (
-	bilibiliAPI        = "https://interface.bilibili.com/v2/playurl?"
-	bilibiliBangumiAPI = "https://bangumi.bilibili.com/player/web_api/v2/playurl?"
+	bilibiliAPI        = "https://api.bilibili.com/x/player/playurl?"
+	bilibiliBangumiAPI = "https://api.bilibili.com/pgc/player/web/playurl?"
 	bilibiliTokenAPI   = "https://api.bilibili.com/x/player/playurl/token?"
-)
-
-const (
-	// BiliBili blocks keys from time to time.
-	// You can extract from the Android client or bilibiliPlayer.min.js
-	appKey = "iVGUTjsxvpLeuDCf"
-	secKey = "aHRmhWMLkdeMuILqORnYZocwMBpMEOdt"
 )
 
 const referer = "https://www.bilibili.com"
 
 var utoken string
 
-func genAPI(aid, cid int, bangumi bool, quality, seasonType, cookie string) (string, error) {
+func genAPI(aid, cid, quality int, bangumi bool, cookie string) (string, error) {
 	var (
 		err        error
 		baseAPIURL string
@@ -55,44 +48,53 @@ func genAPI(aid, cid int, bangumi bool, quality, seasonType, cookie string) (str
 		}
 		utoken = t.Data.Token
 	}
+	var api string
 	if bangumi {
 		// The parameters need to be sorted by name
 		// qn=0 flag makes the CDN address different every time
-		// quality=116(1080P 60) is the highest quality so far
+		// quality=120(4k) is the highest quality so far
 		params = fmt.Sprintf(
-			"appkey=%s&cid=%d&module=bangumi&otype=json&qn=%s&quality=%s&season_type=%s&type=",
-			appKey, cid, quality, quality, seasonType,
+			"cid=%d&bvid=&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=16",
+			cid, quality,
 		)
 		baseAPIURL = bilibiliBangumiAPI
 	} else {
 		params = fmt.Sprintf(
-			"appkey=%s&cid=%d&otype=json&qn=%s&quality=%s&type=",
-			appKey, cid, quality, quality,
+			"avid=%d&cid=%d&bvid=&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=16",
+			aid, cid, quality,
 		)
 		baseAPIURL = bilibiliAPI
 	}
+	api = baseAPIURL + params
 	// bangumi utoken also need to put in params to sign, but the ordinary video doesn't need
-	api := fmt.Sprintf(
-		"%s%s&sign=%s", baseAPIURL, params, utils.Md5(params+secKey),
-	)
 	if !bangumi && utoken != "" {
 		api = fmt.Sprintf("%s&utoken=%s", api, utoken)
 	}
 	return api, nil
 }
 
-func genParts(durl []dURLData) ([]*types.Part, int64) {
-	var size int64
-	parts := make([]*types.Part, len(durl))
-	for index, data := range durl {
-		size += data.Size
-		parts[index] = &types.Part{
-			URL:  data.URL,
-			Size: data.Size,
-			Ext:  "flv",
+func genParts(dashData *dashInfo, quality int, referer string) ([]*types.Part, error) {
+	parts := make([]*types.Part, 2)
+	checked := false
+	for _, stream := range dashData.Streams.Video {
+		if stream.ID == quality {
+			s, err := request.Size(stream.BaseURL, referer)
+			if err != nil {
+				return nil, err
+			}
+			parts[0] = &types.Part{
+				URL:  stream.BaseURL,
+				Size: s,
+				Ext:  "mp4",
+			}
+			checked = true
+			break
 		}
 	}
-	return parts, size
+	if !checked {
+		return nil, nil
+	}
+	return parts, nil
 }
 
 type bilibiliOptions struct {
@@ -113,12 +115,18 @@ func extractBangumi(url, html string, extractOption types.Options) ([]*types.Dat
 		return nil, err
 	}
 	if !extractOption.Playlist {
+		aid := data.EpInfo.Aid
+		cid := data.EpInfo.Cid
+		if aid <= 0 || cid <= 0 {
+			aid = data.EpList[0].Aid
+			cid = data.EpList[0].Cid
+		}
 		options := bilibiliOptions{
 			url:     url,
 			html:    html,
 			bangumi: true,
-			aid:     data.EpInfo.Aid,
-			cid:     data.EpInfo.Cid,
+			aid:     aid,
+			cid:     cid,
 		}
 		return []*types.Data{bilibiliDownload(options, extractOption)}, nil
 	}
@@ -263,9 +271,8 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 // bilibiliDownload is the download function for a single URL
 func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *types.Data {
 	var (
-		err        error
-		html       string
-		seasonType string
+		err  error
+		html string
 	)
 	if options.html != "" {
 		// reuse html string, but this can't be reused in case of playlist
@@ -276,14 +283,11 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 			return types.EmptyData(options.url, err)
 		}
 	}
-	if options.bangumi {
-		seasonType = utils.MatchOneOf(html, `"season_type":(\d+)`, `"ssType":(\d+)`)[1]
-	}
 
 	// Get "accept_quality" and "accept_description"
 	// "accept_description":["高清 1080P","高清 720P","清晰 480P","流畅 360P"],
-	// "accept_quality":[80,48,32,16],
-	api, err := genAPI(options.aid, options.cid, options.bangumi, "15", seasonType, extractOption.Cookie)
+	// "accept_quality":[120,112,80,48,32,16],
+	api, err := genAPI(options.aid, options.cid, 120, options.bangumi, extractOption.Cookie)
 	if err != nil {
 		return types.EmptyData(options.url, err)
 	}
@@ -291,38 +295,80 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 	if err != nil {
 		return types.EmptyData(options.url, err)
 	}
-	var quality qualityInfo
-	err = json.Unmarshal([]byte(jsonString), &quality)
+
+	var data dash
+	err = json.Unmarshal([]byte(jsonString), &data)
 	if err != nil {
 		return types.EmptyData(options.url, err)
 	}
+	var dashData dashInfo
+	if data.Data.Description == nil {
+		dashData = data.Result
+	} else {
+		dashData = data.Data
+	}
 
-	streams := make(map[string]*types.Stream, len(quality.Quality))
-	for _, q := range quality.Quality {
-		apiURL, err := genAPI(options.aid, options.cid, options.bangumi, strconv.Itoa(q), seasonType, extractOption.Cookie)
+	// Get audio part
+	var audioID int
+	audios := map[int]string{}
+	bandwidth := 0
+	for _, stream := range dashData.Streams.Audio {
+		if stream.Bandwidth > bandwidth {
+			audioID = stream.ID
+		}
+		audios[stream.ID] = stream.BaseURL
+		bandwidth = stream.Bandwidth
+	}
+	s, err := request.Size(audios[audioID], referer)
+	if err != nil {
+		return types.EmptyData(options.url, err)
+	}
+	audioPart := &types.Part{
+		URL:  audios[audioID],
+		Size: s,
+		Ext:  "m4a",
+	}
+
+	streams := make(map[string]*types.Stream, len(dashData.Quality))
+	for _, q := range dashData.Quality {
+		// Avoid duplicate streams
+		if _, ok := streams[strconv.Itoa(q)]; ok {
+			continue
+		}
+		api, err := genAPI(options.aid, options.cid, q, options.bangumi, extractOption.Cookie)
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
-		jsonString, err := request.Get(apiURL, referer, nil)
+		jsonString, err := request.Get(api, referer, nil)
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
-		var data bilibiliData
+
 		err = json.Unmarshal([]byte(jsonString), &data)
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
-
-		// Avoid duplicate streams
-		if _, ok := streams[strconv.Itoa(data.Quality)]; ok {
+		if data.Data.Description == nil {
+			dashData = data.Result
+		} else {
+			dashData = data.Data
+		}
+		parts, err := genParts(&dashData, q, options.url)
+		if parts == nil {
 			continue
 		}
-
-		parts, size := genParts(data.DURL)
-		streams[strconv.Itoa(data.Quality)] = &types.Stream{
+		if err != nil {
+			return types.EmptyData(options.url, err)
+		}
+		parts[1] = audioPart
+		var size int64
+		for _, part := range parts {
+			size += part.Size
+		}
+		streams[strconv.Itoa(q)] = &types.Stream{
 			Parts:   parts,
 			Size:    size,
-			Quality: qualityString[data.Quality],
+			Quality: qualityString[q],
 		}
 	}
 

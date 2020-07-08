@@ -20,17 +20,17 @@ func TestBilibili(t *testing.T) {
 				Title:   "【2018拜年祭单品】相遇day by day",
 				Quality: "高清 1080P",
 			},
-			playlist: true,
+			playlist: false,
 		},
 		{
 			name: "normal test 2",
 			args: test.Args{
 				URL:     "https://www.bilibili.com/video/av41301960",
 				Title:   "【英雄联盟】2019赛季CG 《觉醒》",
-				Size:    85790602,
+				Size:    65774670,
 				Quality: "高清 1080P",
 			},
-			playlist: true,
+			playlist: false,
 		},
 		{
 			name: "bangumi test",
@@ -45,7 +45,7 @@ func TestBilibili(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.bilibili.com/bangumi/play/ss5050",
 				Title:   "一人之下：第1话 异人刀兵起，道炁携阴阳",
-				Quality: "高清 1080P",
+				Quality: "高清 720P",
 			},
 			playlist: true,
 		},
