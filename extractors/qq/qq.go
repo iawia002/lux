@@ -126,7 +126,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*types.Stream, er
 				fmt.Sprintf(
 					"http://vv.video.qq.com/getkey?otype=json&platform=11&appver=%s&filename=%s&format=%d&vid=%s",
 					qqPlayerVersion, filename, fi.ID, vid,
-				), cdn, nil,
+				), "", nil,
 			)
 			if err != nil {
 				return nil, err
