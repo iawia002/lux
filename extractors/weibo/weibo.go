@@ -165,7 +165,7 @@ func downloadWeiboTV(url string) ([]*types.Data, error) {
 		return nil, err
 	}
 
-	if data.Data.PlayInfo.URLs == nil || len(data.Data.PlayInfo.URLs) < 3 {
+	if data.Data.PlayInfo.URLs == nil {
 		return nil, types.ErrURLParseFailed
 	}
 	realURLs := map[string]string{}
