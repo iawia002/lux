@@ -20,6 +20,7 @@ import (
 	"github.com/iawia002/annie/extractors/pornhub"
 	"github.com/iawia002/annie/extractors/qq"
 	"github.com/iawia002/annie/extractors/tangdou"
+	"github.com/iawia002/annie/extractors/threemovs"
 	"github.com/iawia002/annie/extractors/tiktok"
 	"github.com/iawia002/annie/extractors/tumblr"
 	"github.com/iawia002/annie/extractors/twitter"
@@ -44,6 +45,7 @@ func init() {
 	extractorMap = map[string]types.Extractor{
 		"": universal.New(), // universal extractor
 
+		"3movs":      threemovs.New(),
 		"douyin":     douyinExtractor,
 		"iesdouyin":  douyinExtractor,
 		"bilibili":   bilibili.New(),
