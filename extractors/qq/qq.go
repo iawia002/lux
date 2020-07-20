@@ -207,7 +207,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if data.Msg != "" {
 		return nil, errors.New(data.Msg)
 	}
-	cdn := data.Vl.Vi[0].Ul.UI[len(data.Vl.Vi[0].Ul.UI)-1].URL
+	cdn := data.Vl.Vi[0].Ul.UI[0].URL
 	streams, err := genStreams(vid, cdn, data)
 	if err != nil {
 		return nil, err
