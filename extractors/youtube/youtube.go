@@ -228,6 +228,7 @@ func genStream(videoFormat *streamFormat, videoInfo *ytdl.VideoInfo) (*types.Str
 		ID:      strconv.Itoa(videoFormat.Itag),
 		Parts:   []*types.Part{video},
 		Quality: quality,
+		NeedMux: true,
 	}, nil
 }
 
