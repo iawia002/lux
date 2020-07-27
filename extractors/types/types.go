@@ -21,6 +21,8 @@ type Stream struct {
 	Size int64 `json:"size"`
 	// the file extension after video parts merged
 	Ext string `json:"ext"`
+	// if the parts need mux
+	NeedMux bool
 }
 
 // DataType indicates the type of extracted data, eg: video or image.

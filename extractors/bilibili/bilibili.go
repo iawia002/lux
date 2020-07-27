@@ -74,25 +74,40 @@ func genAPI(aid, cid, quality int, bangumi bool, cookie string) (string, error) 
 }
 
 func genParts(dashData *dashInfo, quality int, referer string) ([]*types.Part, error) {
-	parts := make([]*types.Part, 2)
-	checked := false
-	for _, stream := range dashData.Streams.Video {
-		if stream.ID == quality {
-			s, err := request.Size(stream.BaseURL, referer)
-			if err != nil {
-				return nil, err
-			}
-			parts[0] = &types.Part{
-				URL:  stream.BaseURL,
-				Size: s,
-				Ext:  "mp4",
-			}
-			checked = true
-			break
+	parts := make([]*types.Part, 1)
+	if dashData.Streams.Audio == nil {
+		url := dashData.DURL[0].URL
+		_, ext, err := utils.GetNameAndExt(url)
+		if err != nil {
+			return nil, err
 		}
-	}
-	if !checked {
-		return nil, nil
+		parts[0] = &types.Part{
+			URL:  url,
+			Size: dashData.DURL[0].Size,
+			Ext:  ext,
+		}
+
+	} else {
+
+		checked := false
+		for _, stream := range dashData.Streams.Video {
+			if stream.ID == quality {
+				s, err := request.Size(stream.BaseURL, referer)
+				if err != nil {
+					return nil, err
+				}
+				parts[0] = &types.Part{
+					URL:  stream.BaseURL,
+					Size: s,
+					Ext:  "mp4",
+				}
+				checked = true
+				break
+			}
+		}
+		if !checked {
+			return nil, nil
+		}
 	}
 	return parts, nil
 }
@@ -308,25 +323,28 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		dashData = data.Data
 	}
 
-	// Get audio part
-	var audioID int
-	audios := map[int]string{}
-	bandwidth := 0
-	for _, stream := range dashData.Streams.Audio {
-		if stream.Bandwidth > bandwidth {
-			audioID = stream.ID
+	var audioPart *types.Part
+	if dashData.Streams.Audio != nil {
+		// Get audio part
+		var audioID int
+		audios := map[int]string{}
+		bandwidth := 0
+		for _, stream := range dashData.Streams.Audio {
+			if stream.Bandwidth > bandwidth {
+				audioID = stream.ID
+			}
+			audios[stream.ID] = stream.BaseURL
+			bandwidth = stream.Bandwidth
 		}
-		audios[stream.ID] = stream.BaseURL
-		bandwidth = stream.Bandwidth
-	}
-	s, err := request.Size(audios[audioID], referer)
-	if err != nil {
-		return types.EmptyData(options.url, err)
-	}
-	audioPart := &types.Part{
-		URL:  audios[audioID],
-		Size: s,
-		Ext:  "m4a",
+		s, err := request.Size(audios[audioID], referer)
+		if err != nil {
+			return types.EmptyData(options.url, err)
+		}
+		audioPart = &types.Part{
+			URL:  audios[audioID],
+			Size: s,
+			Ext:  "m4a",
+		}
 	}
 
 	streams := make(map[string]*types.Stream, len(dashData.Quality))
@@ -360,15 +378,20 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
-		parts[1] = audioPart
 		var size int64
 		for _, part := range parts {
 			size += part.Size
+		}
+		if audioPart != nil {
+			parts = append(parts, audioPart)
 		}
 		streams[strconv.Itoa(q)] = &types.Stream{
 			Parts:   parts,
 			Size:    size,
 			Quality: qualityString[q],
+		}
+		if audioPart != nil {
+			streams[strconv.Itoa(q)].NeedMux = true
 		}
 	}
 

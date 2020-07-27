@@ -51,11 +51,17 @@ type dashStreams struct {
 	Audio []dashStream `json:"audio"`
 }
 
+type dURL struct {
+	Size int64  `json:"size"`
+	URL  string `json:"url"`
+}
+
 type dashInfo struct {
 	CurQuality  int         `json:"quality"`
 	Description []string    `json:"accept_description"`
 	Quality     []int       `json:"accept_quality"`
 	Streams     dashStreams `json:"dash"`
+	DURL        []dURL      `json:"durl"`
 }
 
 type dash struct {
