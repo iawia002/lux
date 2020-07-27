@@ -634,7 +634,7 @@ func (downloader *Downloader) Download(data *types.Data) error {
 	}
 
 	fmt.Printf("Merging video parts into %s\n", mergedFilePath)
-	if stream.Ext != "mp4" || stream.NeedMux == true {
+	if stream.Ext != "mp4" || stream.NeedMux {
 		return utils.MergeFilesWithSameExtension(parts, mergedFilePath)
 	}
 	return utils.MergeToMP4(parts, mergedFilePath, title)
