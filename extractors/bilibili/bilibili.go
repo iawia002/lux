@@ -275,6 +275,12 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
+
+	// set thread number to 1 constantly to avoid http 412 error 
+	option.ThreadNumber = 1
+	fmt.Printf("Warning: Multi thread download is no longer supported by BiliBili, use single thread instead.\n")
+	fmt.Printf("Thread Number: %d\n", option.ThreadNumber)
+
 	if strings.Contains(url, "bangumi") {
 		// handle bangumi
 		return extractBangumi(url, html, option)
