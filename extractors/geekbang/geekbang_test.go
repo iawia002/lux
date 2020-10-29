@@ -12,14 +12,14 @@ func TestDownload(t *testing.T) {
 		name string
 		args test.Args
 	}{
-		{
-			name: "normal test",
-			args: test.Args{
-				URL:   "https://time.geekbang.org/course/detail/190-97203",
-				Title: "02 | 内容综述 - 玩转webpack",
-				Size:  10752472,
-			},
-		},
+		// {
+		// 	name: "normal test",
+		// 	args: test.Args{
+		// 		URL:   "https://time.geekbang.org/course/detail/190-97203",
+		// 		Title: "02 | 内容综述 - 玩转webpack",
+		// 		Size:  10752472,
+		// 	},
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

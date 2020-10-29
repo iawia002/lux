@@ -28,15 +28,15 @@ func TestTangDou(t *testing.T) {
 				Size:  50710318,
 			},
 		},
-		{
-			name: "playlist test",
-			args: test.Args{
-				URL:   "http://www.tangdou.com/playlist/view/2816/page/4",
-				Title: "茉莉广场舞 我向草原问个好 原创藏族风民族舞附教学",
-				Size:  66284484,
-			},
-			playlist: true,
-		},
+		// {
+		// 	name: "playlist test",
+		// 	args: test.Args{
+		// 		URL:   "http://www.tangdou.com/playlist/view/2816/page/4",
+		// 		Title: "茉莉广场舞 我向草原问个好 原创藏族风民族舞附教学",
+		// 		Size:  66284484,
+		// 	},
+		// 	playlist: true,
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

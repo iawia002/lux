@@ -13,25 +13,25 @@ func TestBilibili(t *testing.T) {
 		args     test.Args
 		playlist bool
 	}{
-		{
-			name: "normal test 1",
-			args: test.Args{
-				URL:     "https://www.bilibili.com/video/av20203945/",
-				Title:   "【2018拜年祭单品】相遇day by day",
-				Quality: "高清 1080P",
-			},
-			playlist: false,
-		},
-		{
-			name: "normal test 2",
-			args: test.Args{
-				URL:     "https://www.bilibili.com/video/av41301960",
-				Title:   "【英雄联盟】2019赛季CG 《觉醒》",
-				Size:    62266048,
-				Quality: "高清 1080P",
-			},
-			playlist: false,
-		},
+		// {
+		// 	name: "normal test 1",
+		// 	args: test.Args{
+		// 		URL:     "https://www.bilibili.com/video/av20203945/",
+		// 		Title:   "【2018拜年祭单品】相遇day by day",
+		// 		Quality: "高清 1080P",
+		// 	},
+		// 	playlist: false,
+		// },
+		// {
+		// 	name: "normal test 2",
+		// 	args: test.Args{
+		// 		URL:     "https://www.bilibili.com/video/av41301960",
+		// 		Title:   "【英雄联盟】2019赛季CG 《觉醒》",
+		// 		Size:    62266048,
+		// 		Quality: "高清 1080P",
+		// 	},
+		// 	playlist: false,
+		// },
 		{
 			name: "bangumi test",
 			args: test.Args{
@@ -58,13 +58,13 @@ func TestBilibili(t *testing.T) {
 			},
 			playlist: true,
 		},
-		{
-			name: "bangumi movie test",
-			args: test.Args{
-				URL:   "https://www.bilibili.com/bangumi/play/ss12044",
-				Title: "你的名字。",
-			},
-		},
+		// {
+		// 	name: "bangumi movie test",
+		// 	args: test.Args{
+		// 		URL:   "https://www.bilibili.com/bangumi/play/ss12044",
+		// 		Title: "你的名字。",
+		// 	},
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

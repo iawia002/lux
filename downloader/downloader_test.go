@@ -11,27 +11,27 @@ func TestDownload(t *testing.T) {
 		name string
 		data *types.Data
 	}{
-		{
-			name: "normal test",
-			data: &types.Data{
-				Site:  "douyin",
-				Title: "test",
-				Type:  types.DataTypeVideo,
-				URL:   "https://www.douyin.com",
-				Streams: map[string]*types.Stream{
-					"default": {
-						ID: "default",
-						Parts: []*types.Part{
-							{
-								URL:  "https://aweme.snssdk.com/aweme/v1/playwm/?video_id=v0200f9a0000bc117isuatl67cees890&line=0",
-								Size: 4927877,
-								Ext:  "mp4",
-							},
-						},
-					},
-				},
-			},
-		},
+		// {
+		// 	name: "normal test",
+		// 	data: &types.Data{
+		// 		Site:  "douyin",
+		// 		Title: "test",
+		// 		Type:  types.DataTypeVideo,
+		// 		URL:   "https://www.douyin.com",
+		// 		Streams: map[string]*types.Stream{
+		// 			"default": {
+		// 				ID: "default",
+		// 				Parts: []*types.Part{
+		// 					{
+		// 						URL:  "https://aweme.snssdk.com/aweme/v1/playwm/?video_id=v0200f9a0000bc117isuatl67cees890&line=0",
+		// 						Size: 4927877,
+		// 						Ext:  "mp4",
+		// 					},
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// },
 		{
 			name: "multi-stream test",
 			data: &types.Data{

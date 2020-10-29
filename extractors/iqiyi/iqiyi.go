@@ -65,7 +65,7 @@ func getVF(params string) string {
 			} else {
 				v8 = v4 + 49
 			}
-			suffix += string(v8) // string(97) -> "a"
+			suffix += fmt.Sprint(v8) // string(97) -> "a"
 		}
 	}
 	params += suffix
