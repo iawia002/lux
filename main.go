@@ -9,7 +9,9 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/go-rod/rod"
 
+	"github.com/iawia002/annie/cookier"
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/extractors/types"
@@ -239,6 +241,11 @@ func main() {
 			}
 			cookie = strings.TrimSpace(string(data))
 		}
+	} else {
+		// Try to use current user's cookie if possible, if failed empty cookie will be used
+		_ = rod.Try(func() {
+			cookie = cookier.Get(args...)
+		})
 	}
 
 	request.SetOptions(request.Options{
