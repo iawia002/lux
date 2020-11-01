@@ -324,6 +324,9 @@ As a text file:
 $ annie -c cookies.txt https://www.bilibili.com/video/av20203945
 ```
 
+If the `-c` is not set, `annie` will try to get the cookies from the current user's Chrome or Edge automatically.
+To use this feature, you need to shutdown your Chrome or Edge for only one time and let `annie` launch the browser for you.
+
 ### Proxy
 
 You can set the HTTP/SOCKS5 proxy using environment variables:
