@@ -276,7 +276,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 
-	// set thread number to 1 manually to avoid http 412 error 
+	// set thread number to 1 manually to avoid http 412 error
 	option.ThreadNumber = 1
 	fmt.Printf("Warning: Multi thread download is no longer supported by BiliBili, use single thread instead.\n")
 
@@ -337,9 +337,9 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		for _, stream := range dashData.Streams.Audio {
 			if stream.Bandwidth > bandwidth {
 				audioID = stream.ID
+				bandwidth = stream.Bandwidth
 			}
 			audios[stream.ID] = stream.BaseURL
-			bandwidth = stream.Bandwidth
 		}
 		s, err := request.Size(audios[audioID], referer)
 		if err != nil {
@@ -383,12 +383,12 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
+		if audioPart != nil {
+			parts = append(parts, audioPart)
+		}
 		var size int64
 		for _, part := range parts {
 			size += part.Size
-		}
-		if audioPart != nil {
-			parts = append(parts, audioPart)
 		}
 		streams[strconv.Itoa(q)] = &types.Stream{
 			Parts:   parts,
