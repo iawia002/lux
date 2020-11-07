@@ -1,6 +1,8 @@
 package haokan
 
 import (
+	"strings"
+
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -26,12 +28,19 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 	title := titles[1]
 
+	// 之前的好看网页中，视频地址是放在 video 标签下
 	urls := utils.MatchOneOf(html, `<video\s*class="video"\s*src="?(.+?)"?\s*>`)
+
+	if urls == nil || len(urls) < 2 {
+		// fallbak: 新的好看网页中，视频地址在 json 数据里
+		urls = utils.MatchOneOf(html, `"playurl":"(http.+?)"`)
+	}
 
 	if urls == nil || len(urls) < 2 {
 		return nil, types.ErrURLParseFailed
 	}
-	playurl := urls[1]
+
+	playurl := strings.Replace(urls[1], `\/`, `/`, -1)
 
 	size, err := request.Size(playurl, url)
 	if err != nil {
