@@ -27,7 +27,7 @@ func TestBilibili(t *testing.T) {
 			args: test.Args{
 				URL:     "https://www.bilibili.com/video/av41301960",
 				Title:   "【英雄联盟】2019赛季CG 《觉醒》",
-				Size:    62266048,
+				Size:    70696896,
 				Quality: "高清 1080P",
 			},
 			playlist: false,
