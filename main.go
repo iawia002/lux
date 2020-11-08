@@ -193,7 +193,8 @@ func download(videoURL string) error {
 }
 
 func printError(url string, err error) {
-	fmt.Printf(
+	fmt.Fprintf(
+		color.Output,
 		"Downloading %s error:\n%s\n",
 		color.CyanString("%s", url), color.RedString("%v", err),
 	)
