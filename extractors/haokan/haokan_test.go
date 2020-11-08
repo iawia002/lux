@@ -15,9 +15,9 @@ func TestDownload(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:   "https://haokan.baidu.com/v?vid=12153099833589381848",
-				Title: "你知道吗，十元人民币背后有人的名字，有十元的抓紧看一下吧",
-				Size:  7260836,
+				URL:   "https://haokan.baidu.com/v?vid=10057409468467026969",
+				Title: "听歌学英语小学篇（6）：my new pen pal",
+				Size:  2027354,
 			},
 		},
 	}
