@@ -13,10 +13,11 @@ type token struct {
 }
 
 type bangumiEpData struct {
-	Aid  int `json:"aid"`
-	Cid  int `json:"cid"`
-	ID   int `json:"id"`
-	EpID int `json:"ep_id"`
+	Aid  int    `json:"aid"`
+	Cid  int    `json:"cid"`
+	BVid string `json:"bvid"`
+	ID   int    `json:"id"`
+	EpID int    `json:"ep_id"`
 }
 
 type bangumiData struct {
@@ -37,6 +38,7 @@ type multiPageVideoData struct {
 
 type multiPage struct {
 	Aid       int                `json:"aid"`
+	BVid      string             `json:"bvid"`
 	VideoData multiPageVideoData `json:"videoData"`
 }
 
