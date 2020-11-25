@@ -10,6 +10,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/go-rod/rod"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 
 	"github.com/iawia002/annie/cookier"
 	"github.com/iawia002/annie/downloader"
@@ -82,6 +84,32 @@ var (
 	// File name of each bilibili episode doesn't include the playlist title
 	episodeTitleOnly bool
 )
+
+func readConfig() {
+	viper.SetConfigName(".annie")
+	cur, err := os.Getwd()
+
+	if err != nil {
+		fmt.Printf("could not find current directory, omit it: %v", err)
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Printf("could not find home directory, omit it: %v", err)
+	}
+	con, err := os.UserConfigDir()
+	if err != nil {
+		fmt.Printf("could not find user configuration directory, omit it: %v", err)
+	}
+
+	viper.AddConfigPath(cur)
+	viper.AddConfigPath(home)
+	viper.AddConfigPath(con)
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		fmt.Printf("could not read configuration file: %v", err)
+	}
+}
 
 func init() {
 	flag.BoolVar(&version, "v", false, "Show version")
@@ -200,9 +228,53 @@ func printError(url string, err error) {
 	)
 }
 
+func assginVar() {
+	version = viper.GetBool("v")
+	debug = viper.GetBool("d")
+	infoOnly = viper.GetBool("i")
+	extractedData = viper.GetBool("j")
+
+	cookie = viper.GetString("c")
+	playlist = viper.GetBool("p")
+	refer = viper.GetString("r")
+	stream = viper.GetString("f")
+	file = viper.GetString("F")
+	outputPath = viper.GetString("o")
+	outputName = viper.GetString("O")
+	fileNameLength = viper.GetInt("file-name-length")
+	caption = viper.GetBool("C")
+
+	itemStart = viper.GetInt("start")
+	itemEnd = viper.GetInt("end")
+	items = viper.GetString("items")
+
+	multiThread = viper.GetBool("m")
+	retryTimes = viper.GetInt("retry")
+	chunkSizeMB = viper.GetInt("cs")
+	threadNumber = viper.GetInt("n")
+
+	useAria2RPC = viper.GetBool("aria2")
+	aria2Token = viper.GetString("aria2token")
+	aria2Addr = viper.GetString("aria2addr")
+	aria2Method = viper.GetString("aria2method")
+
+	youkuCcode = viper.GetString("ccode")
+
+	youkuCkey = viper.GetString("ckey")
+	youkuPassword = viper.GetString("password")
+
+	episodeTitleOnly = viper.GetBool("eto")
+}
+
 func main() {
-	flag.Parse()
-	args := flag.Args()
+	readConfig()
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+
+	viper.BindPFlags(pflag.CommandLine)
+
+	assginVar()
+	args := pflag.Args()
 	if version {
 		utils.PrintVersion()
 		return
@@ -227,7 +299,7 @@ func main() {
 	if len(args) < 1 {
 		fmt.Println("Too few arguments")
 		fmt.Println("Usage: annie [args] URLs...")
-		flag.PrintDefaults()
+		pflag.PrintDefaults()
 		return
 	}
 
