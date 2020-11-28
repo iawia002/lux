@@ -24,29 +24,45 @@
 
 👾 Annie is a fast, simple and clean video downloader built with Go.
 
-* [Installation](#installation)
-* [Getting Started](#getting-started)
-  * [Download a video](#download-a-video)
-  * [Download anything else](#download-anything-else)
-  * [Download playlist](#download-playlist)
-  * [Multiple inputs](#multiple-inputs)
-  * [Resume a download](#resume-a-download)
-  * [Cookies](#cookies)
-  * [Auto retry](#auto-retry)
-  * [Proxy](#proxy)
-  * [Multi-Thread](#multi-thread)
-  * [Short link](#short-link)
-  * [Use specified Referrer](#use-specified-referrer)
-  * [Specify the output path and name](#specify-the-output-path-and-name)
-  * [Debug Mode](#debug-mode)
-  * [Reuse extracted data](#reuse-extracted-data)
-  * [Options](#options)
-* [Supported Sites](#supported-sites)
-* [Known issues](#known-issues)
-* [Contributing](#contributing)
-* [Authors](#authors)
-* [Similar projects](#similar-projects)
-* [License](#license)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Install via `go get`](#install-via-go-get)
+  - [Homebrew (macOS only)](#homebrew-macos-only)
+  - [Arch Linux](#arch-linux)
+  - [Void Linux](#void-linux)
+  - [Scoop on Windows](#scoop-on-windows)
+  - [Chocolatey on Windows](#chocolatey-on-windows)
+- [Getting Started](#getting-started)
+  - [Download a video](#download-a-video)
+  - [Download anything else](#download-anything-else)
+  - [Download playlist](#download-playlist)
+  - [Multiple inputs](#multiple-inputs)
+  - [Resume a download](#resume-a-download)
+  - [Auto retry](#auto-retry)
+  - [Cookies](#cookies)
+  - [Proxy](#proxy)
+  - [Multi-Thread](#multi-thread)
+  - [Short link](#short-link)
+    - [bilibili](#bilibili)
+  - [Use specified Referrer](#use-specified-referrer)
+  - [Specify the output path and name](#specify-the-output-path-and-name)
+  - [Debug Mode](#debug-mode)
+  - [Reuse extracted data](#reuse-extracted-data)
+  - [Options](#options)
+    - [Download:](#download)
+    - [Network:](#network)
+    - [Playlist:](#playlist)
+    - [Filesystem:](#filesystem)
+    - [Subtitle:](#subtitle)
+    - [Youku:](#youku)
+    - [aria2:](#aria2)
+- [Supported Sites](#supported-sites)
+- [Known issues](#known-issues)
+  - [优酷](#优酷)
+- [Contributing](#contributing)
+- [Authors](#authors)
+- [Similar projects](#similar-projects)
+- [License](#license)
 
 
 ## Installation
@@ -610,6 +626,7 @@ XVIDEOS | <https://xvideos.com> | ✓ | | | |
 聯合新聞網 | <https://udn.com> | ✓ | | | |
 TikTok | <https://www.tiktok.com> | ✓ | | | |
 好看视频 | <https://haokan.baidu.com> | ✓ | | | |
+AcFun | <https://www.acfun.cn> | ✓ | | ✓ | |
 
 
 ## Known issues

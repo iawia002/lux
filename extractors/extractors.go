@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/iawia002/annie/extractors/acfun"
 	"github.com/iawia002/annie/extractors/bcy"
 	"github.com/iawia002/annie/extractors/bilibili"
 	"github.com/iawia002/annie/extractors/douyin"
@@ -72,6 +73,7 @@ func init() {
 		"udn":        udn.New(),
 		"tiktok":     tiktok.New(),
 		"haokan":     haokan.New(),
+		"acfun":      acfun.New(),
 	}
 }
 
