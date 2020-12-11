@@ -11,10 +11,7 @@ import (
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
-	"gopkg.in/xmlpath.v1"
 )
-
-var node *xmlpath.Node
 
 // .video.play_addr.url_list
 type data struct {
@@ -39,6 +36,7 @@ func New() types.Extractor {
 func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	var err error
 	if err != nil {
+		return nil, err
 	}
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -84,7 +82,6 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err = json.Unmarshal([]byte(apiDataString), &apiData); err != nil {
 		return nil, err
 	}
-	//item_list[0].video.play_addr.url_list
 	awemeURL := apiData.ItemList[0].Video.PlayAddr.URLList[0]
 	awemeURL = strings.Replace(awemeURL, "/playwm/", "/play/", 1)
 	videoReq, err := http.NewRequest("GET", awemeURL, nil)
