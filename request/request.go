@@ -172,6 +172,7 @@ func Headers(url, refer string) (http.Header, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close() // nolint
 	return res.Header, nil
 }
 
