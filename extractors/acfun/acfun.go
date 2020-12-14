@@ -110,9 +110,7 @@ func extractBangumi(URL string, option types.Options) *types.Data {
 			}
 		}
 
-		// These is no size information in m3u8 file,
-		// and calculating casts too much time,
-		// just omit it.
+		// There is no size information in the m3u8 file and the calculation will take too much time, just ignore it.
 		parts := make([]*types.Part, 0)
 		for _, u := range urls {
 			if err != nil {
