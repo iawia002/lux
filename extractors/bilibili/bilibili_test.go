@@ -65,6 +65,24 @@ func TestBilibili(t *testing.T) {
 				Title: "你的名字。",
 			},
 		},
+		{
+			name: "subtitle test 1",
+			args: test.Args{
+				URL:     "https://www.bilibili.com/video/BV1A4411e78d",
+				Title:   "惠比寿麝香葡萄新曲《EBISU ANIMAL ANTHEM》官方MV",
+				Quality: "高清 1080P",
+			},
+			playlist: false,
+		},
+		{
+			name: "subtitle test 2",
+			args: test.Args{
+				URL:     "https://www.bilibili.com/video/BV1rh411o7uR/",
+				Title:   "人工智能与大数据】Spark + AI Summit 2020北美峰会 合集",
+				Quality: "高清 1080P",
+			},
+			playlist: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

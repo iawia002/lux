@@ -73,6 +73,44 @@ type dash struct {
 	Result  dashInfo `json:"result"`
 }
 
+type captionData struct {
+	From     float32 `json:"from"`
+	To       float32 `json:"to"`
+	Location int     `json:"location"`
+	Content  string  `json:"content"`
+}
+
+type bilibiliCaptionFormat struct {
+	FontSize        float32       `json:"font_size"`
+	FontColor       string        `json:"font_color"`
+	BackgroundAlpha float32       `json:"background_alpha"`
+	BackgroundColor string        `json:"background_color"`
+	Stroke          string        `json:"Stroke"`
+	Body            []captionData `json:"body"`
+}
+
+type subtitleProperty struct {
+	ID          int64  `json:"id"`
+	Lan         string `json:"lan"`
+	LanDoc      string `json:"lan_doc"`
+	SubtitleUrl string `json:"subtitle_url"`
+}
+
+type subtitleInfo struct {
+	AllowSubmit  bool               `json:"allow_submit"`
+	SubtitleList []subtitleProperty `json:"list"`
+}
+
+type bilibiliWebInterfaceData struct {
+	Bvid         string       `json:"bvid"`
+	SubtitleInfo subtitleInfo `json:"subtitle"`
+}
+
+type bilibiliWebInterface struct {
+	Code int                      `json:"code"`
+	Data bilibiliWebInterfaceData `json:"data"`
+}
+
 var qualityString = map[int]string{
 	120: "超清 4K",
 	116: "高清 1080P60",

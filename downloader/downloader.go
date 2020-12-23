@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb"
-
+	"github.com/iawia002/annie/extractors/bilibili"
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -66,7 +66,7 @@ func New(option Options) *Downloader {
 }
 
 // caption downloads danmaku, subtitles, etc
-func (downloader *Downloader) caption(url, fileName, ext string) error {
+func (downloader *Downloader) caption(site string, url, fileName, ext string) error {
 	fmt.Println("\nDownloading captions...")
 
 	refer := downloader.option.Refer
@@ -76,6 +76,14 @@ func (downloader *Downloader) caption(url, fileName, ext string) error {
 	body, err := request.GetByte(url, refer, nil)
 	if err != nil {
 		return err
+	}
+	if site == "哔哩哔哩 bilibili.com" {
+		ext = "srt"
+		s, err := bilibili.CaptionTransformer(body)
+		if err != nil {
+			return err
+		}
+		body = s
 	}
 	filePath, err := utils.FilePath(fileName, ext, downloader.option.FileNameLength, downloader.option.OutputPath, true)
 	if err != nil {
@@ -138,6 +146,7 @@ func (downloader *Downloader) save(part *types.Part, refer, fileName string) err
 		file      *os.File
 		fileError error
 	)
+
 	if tempFileSize > 0 {
 		// range start from 0, 0-1023 means the first 1024 bytes of the file
 		headers["Range"] = fmt.Sprintf("bytes=%d-", tempFileSize)
@@ -554,7 +563,7 @@ func (downloader *Downloader) Download(data *types.Data) error {
 
 	// download caption
 	if downloader.option.Caption && data.Caption != nil {
-		downloader.caption(data.Caption.URL, title, data.Caption.Ext) // nolint
+		downloader.caption(data.Site, data.Caption.URL, title, data.Caption.Ext) // nolint
 	}
 
 	// Use aria2 rpc to download
