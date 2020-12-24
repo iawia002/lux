@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/iawia002/annie/extractors/acfun"
 	"github.com/iawia002/annie/extractors/bcy"
 	"github.com/iawia002/annie/extractors/bilibili"
 	"github.com/iawia002/annie/extractors/douyin"
@@ -13,6 +14,7 @@ import (
 	"github.com/iawia002/annie/extractors/haokan"
 	"github.com/iawia002/annie/extractors/instagram"
 	"github.com/iawia002/annie/extractors/iqiyi"
+	"github.com/iawia002/annie/extractors/ixigua"
 	"github.com/iawia002/annie/extractors/mgtv"
 	"github.com/iawia002/annie/extractors/miaopai"
 	"github.com/iawia002/annie/extractors/netease"
@@ -72,6 +74,8 @@ func init() {
 		"udn":        udn.New(),
 		"tiktok":     tiktok.New(),
 		"haokan":     haokan.New(),
+		"acfun":      acfun.New(),
+		"ixigua":     ixigua.New(),
 	}
 }
 
