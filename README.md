@@ -627,6 +627,7 @@ XVIDEOS | <https://xvideos.com> | ✓ | | | |
 TikTok | <https://www.tiktok.com> | ✓ | | | |
 好看视频 | <https://haokan.baidu.com> | ✓ | | | |
 AcFun | <https://www.acfun.cn> | ✓ | | ✓ | |
+Eporner | <https://eporner.com> | ✓ | | | |
 
 
 ## Known issues
