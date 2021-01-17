@@ -16,8 +16,6 @@ const (
 	downloadclass = ".dloaddivcol"
 )
 
-var ()
-
 type src struct {
 	url     string
 	quality string
