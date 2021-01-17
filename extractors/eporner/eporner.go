@@ -51,7 +51,7 @@ func getSrcMeta(text string) *src {
 	unit := valunit[1]
 	switch unit {
 	case "KB":
-		s.size = int64(val * 1024.0)
+		s.size = int64(val * 1024)
 	case "MB":
 		s.size = int64(val * 1024 * 1024)
 	case "GB":
@@ -76,7 +76,6 @@ func getSrc(html string) []*src {
 				if n.Data == "a" {
 					var sr *src
 					if n.FirstChild != nil {
-						// fmt.Printf("data: %d %+v", i, *n.FirstChild)
 						sr = getSrcMeta(n.FirstChild.Data)
 					}
 					for _, a := range n.Attr {
@@ -86,9 +85,7 @@ func getSrc(html string) []*src {
 					}
 					srcs = append(srcs, sr)
 				}
-				// fmt.Printf("%d %+v\n", i, n)
 			}
-			// fmt.Printf("%d %+v\n", i, s.Get(1))
 		})
 	})
 
@@ -97,7 +94,7 @@ func getSrc(html string) []*src {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a eporner extractor.
 func New() types.Extractor {
 	return &extractor{}
 }
@@ -119,11 +116,11 @@ func (e *extractor) Extract(u string, option types.Options) ([]*types.Data, erro
 	if err != nil {
 		return nil, err
 	}
-
-	streams := make(map[string]*types.Stream, len(getSrc(html)))
-	for _, src := range getSrc(html) {
-		// fmt.Printf("src: %+v\n", src)
+	srcs := getSrc(html)
+	streams := make(map[string]*types.Stream, len(srcs))
+	for _, src := range srcs {
 		srcurl := uu.Scheme + "://" + uu.Host + src.url
+		// skipping an extra HEAD request to the URL.
 		// size, err := request.Size(srcurl, u)
 		if err != nil {
 			return nil, err
