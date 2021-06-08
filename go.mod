@@ -8,7 +8,7 @@ require (
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/cheggaaa/pb v1.0.25
 	github.com/fatih/color v1.7.0
-	github.com/go-rod/rod v0.77.1
+	github.com/go-rod/rod v0.101.0
 	github.com/json-iterator/go v1.1.11
 	github.com/kr/pretty v0.1.0
 	github.com/mattn/go-colorable v0.1.8 // indirect
