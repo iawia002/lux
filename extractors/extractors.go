@@ -9,6 +9,7 @@ import (
 	"github.com/iawia002/annie/extractors/bilibili"
 	"github.com/iawia002/annie/extractors/douyin"
 	"github.com/iawia002/annie/extractors/douyu"
+	"github.com/iawia002/annie/extractors/eporner"
 	"github.com/iawia002/annie/extractors/facebook"
 	"github.com/iawia002/annie/extractors/geekbang"
 	"github.com/iawia002/annie/extractors/haokan"
@@ -74,6 +75,7 @@ func init() {
 		"tiktok":     tiktok.New(),
 		"haokan":     haokan.New(),
 		"acfun":      acfun.New(),
+		"eporner":    eporner.New(),
 	}
 }
 
