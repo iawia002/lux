@@ -25,7 +25,9 @@ jobs:
         go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.0
         golangci-lint --version
     - name: Lint
-      run: golangci-lint run ./... -v
+      run: |
+        go mod tidy
+        golangci-lint run ./... -v
     - name: Test
       env:
         GOFLAGS: -mod=mod

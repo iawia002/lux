@@ -10,7 +10,6 @@ linter-settings:
 linters:
   enable:
     - goconst
-    - gofmt
     - goimports
     - misspell
     - unparam
