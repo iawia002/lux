@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cheggaaa/pb"
+	"github.com/cheggaaa/pb/v3"
 
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
@@ -50,11 +50,11 @@ type Downloader struct {
 }
 
 func progressBar(size int64) *pb.ProgressBar {
-	bar := pb.New64(size).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
-	bar.ShowSpeed = true
-	bar.ShowFinalTime = true
-	bar.SetMaxWidth(1000)
-	return bar
+	tmpl := `{{counters .}} {{bar . "[" "=" ">" "-" "]"}} {{speed .}} {{percent . | green}} {{rtime .}}`
+	return pb.New64(size).
+		Set(pb.Bytes, true).
+		SetMaxWidth(1000).
+		SetTemplate(pb.ProgressBarTemplate(tmpl))
 }
 
 // New returns a new Downloader implementation.
@@ -100,10 +100,10 @@ func (downloader *Downloader) writeFile(url string, file *os.File, headers map[s
 	}
 	defer res.Body.Close() // nolint
 
-	writer := io.MultiWriter(file, downloader.bar)
+	barWriter := downloader.bar.NewProxyWriter(file)
 	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
 	// So don't worry about memory.
-	written, copyErr := io.Copy(writer, res.Body)
+	written, copyErr := io.Copy(barWriter, res.Body)
 	if copyErr != nil && copyErr != io.EOF {
 		return written, fmt.Errorf("file copy error: %s", copyErr)
 	}
