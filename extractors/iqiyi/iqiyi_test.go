@@ -16,7 +16,7 @@ func TestDownload(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/v_19rrbdmaj0.html",
-				Title:   "新一轮降水将至 冷空气影响中东部地区-资讯-完整版视频在线观看-爱奇艺",
+				Title:   "新一轮降水将至 冷空气影响中东部地区-资讯-搜索最新资讯-爱奇艺",
 				Size:    2952228,
 				Quality: "896x504",
 			},

@@ -162,7 +162,7 @@ func main() {
 			&cli.StringFlag{
 				Name:    "youku-ccode",
 				Aliases: []string{"ccode"},
-				Value:   "0590",
+				Value:   "0532",
 				Usage:   "Youku ccode",
 			},
 			&cli.StringFlag{
