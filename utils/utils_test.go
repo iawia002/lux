@@ -443,10 +443,6 @@ func TestMd5(t *testing.T) {
 	}
 }
 
-func TestPrintVersion(t *testing.T) {
-	PrintVersion()
-}
-
 func TestReverse(t *testing.T) {
 	type args struct {
 		text string

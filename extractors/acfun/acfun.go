@@ -5,23 +5,21 @@ import (
 	"net/url"
 	"regexp"
 
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/parser"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
-	jsoniter "github.com/json-iterator/go"
 )
 
 const (
-	bangumiDataPattern   = "window.pageInfo = window.bangumiData = (.*);"
-	qualityConfigPattern = "window.qualityConfig = (.*);"
-	bangumiListPattern   = "window.bangumiList = (.*);"
+	bangumiDataPattern = "window.pageInfo = window.bangumiData = (.*);"
+	bangumiListPattern = "window.bangumiList = (.*);"
 
-	bangumiHTMLURL  = "https://www.acfun.cn/bangumi/aa%d_36188_%d"
-	bangumiVideoURL = "https://%s/mediacloud/acfun/acfun_video/hls/"
+	bangumiHTMLURL = "https://www.acfun.cn/bangumi/aa%d_36188_%d"
 
 	referer = "https://www.acfun.cn"
-	host    = "https://www.acfun.cn"
 )
 
 type extractor struct{}
@@ -31,6 +29,7 @@ func New() types.Extractor {
 	return &extractor{}
 }
 
+// Extract ...
 func (e *extractor) Extract(URL string, option types.Options) ([]*types.Data, error) {
 	html, err := request.GetByte(URL, referer, nil)
 	if err != nil {
@@ -65,7 +64,7 @@ func (e *extractor) Extract(URL string, option types.Options) ([]*types.Data, er
 		wgp.Add()
 		go func() {
 			defer wgp.Done()
-			datas = append(datas, extractBangumi(concatURL(t), option))
+			datas = append(datas, extractBangumi(concatURL(t)))
 		}()
 	}
 	wgp.Wait()
@@ -76,7 +75,7 @@ func concatURL(epData *episodeData) string {
 	return fmt.Sprintf(bangumiHTMLURL, epData.BangumiID, epData.ItemID)
 }
 
-func extractBangumi(URL string, option types.Options) *types.Data {
+func extractBangumi(URL string) *types.Data {
 	var err error
 	html, err := request.GetByte(URL, referer, nil)
 	if err != nil {
@@ -98,8 +97,7 @@ func extractBangumi(URL string, option types.Options) *types.Data {
 
 		urls, err := utils.M3u8URLs(m3u8URL.String())
 		if err != nil {
-
-			m3u8URL, err = url.Parse(stm.URL)
+			_, err = url.Parse(stm.URL)
 			if err != nil {
 				return types.EmptyData(URL, err)
 			}
