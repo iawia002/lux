@@ -533,7 +533,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
   -r string
     	Use specified Referrer
   -cs int
-    	HTTP chunk size for downloading (in MB) (default 0)
+    	HTTP chunk size for downloading (in MB) (default 1)
 ```
 
 #### Network:

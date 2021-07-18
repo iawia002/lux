@@ -128,7 +128,7 @@ func main() {
 			&cli.UintFlag{
 				Name:    "chunk-size",
 				Aliases: []string{"cs"},
-				Value:   0,
+				Value:   1,
 				Usage:   "HTTP chunk size for downloading (in MB)",
 			},
 			&cli.UintFlag{
