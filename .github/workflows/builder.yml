@@ -1,0 +1,140 @@
+name: Builder
+
+on:
+  push:
+    branches: "*"
+    paths:
+      - "**/*.go"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/builder.yml"
+  pull_request:
+    branches: "*"
+    paths:
+      - "**/*.go"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/builder.yml"
+  workflow_dispatch:
+
+env:
+  PRODUCT: annie
+  CGO_ENABLED: 0
+  GO111MODULE: on
+
+jobs:
+  build:
+    name: Build
+    strategy:
+      matrix:
+        os: [ linux, freebsd, openbsd, dragonfly, windows, darwin ]
+        arch: [ amd64, 386 ]
+        include:
+          - os: linux
+            arch: arm
+            arm: 5
+          - os: linux
+            arch: arm
+            arm: 6
+          - os: linux
+            arch: arm
+            arm: 7
+          - os: linux
+            arch: arm64
+          - os: linux
+            arch: mips
+            mips: softfloat
+          - os: linux
+            arch: mips
+            mips: hardfloat
+          - os: linux
+            arch: mipsle
+            mipsle: softfloat
+          - os: linux
+            arch: mipsle
+            mipsle: hardfloat
+          - os: linux
+            arch: mips64
+          - os: linux
+            arch: mips64le
+          - os: linux
+            arch: ppc64
+          - os: linux
+            arch: ppc64le
+          - os: linux
+            arch: s390x
+          - os: windows
+            arch: arm
+          - os: android
+            arch: arm64
+          - os: darwin
+            arch: arm64
+          - os: freebsd
+            arch: arm64
+        exclude:
+          - os: darwin
+            arch: 386
+          - os: dragonfly
+            arch: 386
+      fail-fast: false
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      GOOS: ${{ matrix.os }}
+      GOARCH: ${{ matrix.arch }}
+      GOARM: ${{ matrix.arm }}
+      GOMIPS: ${{ matrix.mips }}
+      GOMIPS64: ${{ matrix.mips64 }}
+      GOMIPSLE: ${{ matrix.mipsle }}
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.16
+
+    - name: Check out code base
+      if: github.event_name == 'push'
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Check out code base
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Cache go module
+      uses: actions/cache@v2
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: ${{ runner.os }}-go-
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+
+    - name: Build binary
+      id: builder
+      run: |
+        ARGS="${GOOS}-${GOARCH}"
+        if [[ -n "${GOARM}" ]]; then
+          ARGS="${ARGS}v${GOARM}"
+        elif [[ -n "${GOMIPS}" ]]; then
+          ARGS="${ARGS}-${GOMIPS}"
+        elif [[ -n "${GOMIPS64}" ]]; then
+          ARGS="${ARGS}-${GOMIPS64}"
+        elif [[ -n "${GOMIPSLE}" ]]; then
+          ARGS="${ARGS}-${GOMIPSLE}"
+        fi
+        go build -trimpath --ldflags "-s -w -buildid=" -v -o ./bin/${{ env.PRODUCT }}-${ARGS}
+        echo "::set-output name=filename::${{ env.PRODUCT }}-${ARGS}"
+
+    - name: Upload binary artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ steps.builder.outputs.filename }}
+        path: ./bin/${{ env.PRODUCT }}*
+        if-no-files-found: error
