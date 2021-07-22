@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         go: ["1.16"]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest]
     name: Go ${{ matrix.go }} in ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
