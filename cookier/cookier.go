@@ -12,13 +12,14 @@ import (
 // Get gets cookies from the user's Chrome or Edge automatically.
 // The urls is the list of URLs for which applicable cookies will be fetched.
 func Get(urls ...string) string {
-	path, has := launcher.NewBrowser().LookPath()
+	path, has := launcher.LookPath()
 	if !has {
 		return ""
 	}
 
-	u := launcher.NewUserMode().Bin(path).MustLaunch()
-	browser := rod.New().ControlURL(u).MustConnect().DefaultDevice(devices.Clear, false)
+	u := launcher.NewUserMode().Bin(path).Headless(true).MustLaunch()
+	browser := rod.New().ControlURL(u).MustConnect().DefaultDevice(devices.Clear)
+	defer browser.MustClose()
 
 	var page *rod.Page
 	pages := browser.MustPages()

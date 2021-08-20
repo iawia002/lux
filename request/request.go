@@ -168,7 +168,7 @@ func Headers(url, refer string) (http.Header, error) {
 	headers := map[string]string{
 		"Referer": refer,
 	}
-	res, err := Request(http.MethodHead, url, nil, headers)
+	res, err := Request(http.MethodGet, url, nil, headers)
 	if err != nil {
 		return nil, err
 	}

@@ -4,8 +4,8 @@
   <a href="https://codecov.io/gh/iawia002/annie">
     <img src="https://img.shields.io/codecov/c/github/iawia002/annie.svg?style=flat-square" alt="Codecov">
   </a>
-  <a href="https://travis-ci.com/iawia002/annie">
-    <img src="https://img.shields.io/travis/iawia002/annie.svg?style=flat-square" alt="Build Status">
+  <a href="https://github.com/iawia002/annie/actions">
+    <img src="https://img.shields.io/github/workflow/status/iawia002/annie/ci?style=flat-square" alt="GitHub Workflow Status">
   </a>
   <a href="https://goreportcard.com/report/github.com/iawia002/annie">
     <img src="https://goreportcard.com/badge/github.com/iawia002/annie?style=flat-square" alt="Go Report Card">
@@ -131,7 +131,7 @@ $ annie https://www.youtube.com/watch?v=dQw4w9WgXcQ
  Site:      YouTube youtube.com
  Title:     Rick Astley - Never Gonna Give You Up (Video)
  Type:      video
- Stream:   
+ Stream:
      [248]  -------------------
      Quality:         1080p video/webm; codecs="vp9"
      Size:            63.93 MiB (67038963 Bytes)
@@ -533,7 +533,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
   -r string
     	Use specified Referrer
   -cs int
-    	HTTP chunk size for downloading (in MB) (default 0)
+    	HTTP chunk size for downloading (in MB) (default 1)
 ```
 
 #### Network:
@@ -598,35 +598,36 @@ $ annie -j https://www.bilibili.com/video/av20203945
 
 ## Supported Sites
 
-Site | URL | 🎬 Videos | 🌁 Images | 📚 Playlist | 🍪 VIP adaptation
---- | --- | ---------| -------- | -------- | --------------
-抖音 | <https://www.douyin.com> | ✓ | | | |
-哔哩哔哩 | <https://www.bilibili.com> | ✓ | | ✓ | ✓ |
-半次元 | <https://bcy.net> | | ✓ | | |
-pixivision | <https://www.pixivision.net> | | ✓ | | |
-优酷 | <https://www.youku.com> | ✓ | | | ✓ |
-YouTube | <https://www.youtube.com> | ✓ | | ✓ | |
-爱奇艺 | <https://www.iqiyi.com> | ✓ | | | |
-芒果TV | <https://www.mgtv.com> | ✓ | | | |
-糖豆广场舞 | <http://www.tangdou.com> | ✓ | | ✓ | |
-Tumblr | <https://www.tumblr.com> | ✓ | ✓ | | |
-Vimeo | <https://vimeo.com> | ✓ | | | |
-Facebook | <https://facebook.com> | ✓ | | | |
-斗鱼视频 | <https://v.douyu.com> | ✓ | | | |
-秒拍 | <https://www.miaopai.com> | ✓ | | | |
-微博 | <https://weibo.com> | ✓ | | | |
-Instagram | <https://www.instagram.com> | ✓ | ✓ | | |
-Twitter | <https://twitter.com> | ✓ | | | |
-腾讯视频 | <https://v.qq.com> | ✓ | | | |
-网易云音乐 | <https://music.163.com> | ✓ | | | |
-音悦台 | <https://yinyuetai.com> | ✓ | | | |
-极客时间 | <https://time.geekbang.org> | ✓ | | | |
-Pornhub | <https://pornhub.com> | ✓ | | | |
-XVIDEOS | <https://xvideos.com> | ✓ | | | |
-聯合新聞網 | <https://udn.com> | ✓ | | | |
-TikTok | <https://www.tiktok.com> | ✓ | | | |
-好看视频 | <https://haokan.baidu.com> | ✓ | | | |
-AcFun | <https://www.acfun.cn> | ✓ | | ✓ | |
+| Site       | URL                          | 🎬 Videos | 🌁 Images | 📚 Playlist | 🍪 VIP adaptation |
+| ---------- | ---------------------------- | -------- | -------- | ---------- | ---------------- |
+| 抖音       | <https://www.douyin.com>     | ✓        |          |            |                  |
+| 哔哩哔哩   | <https://www.bilibili.com>   | ✓        |          | ✓          | ✓                |
+| 半次元     | <https://bcy.net>            |          | ✓        |            |                  |
+| pixivision | <https://www.pixivision.net> |          | ✓        |            |                  |
+| 优酷       | <https://www.youku.com>      | ✓        |          |            | ✓                |
+| YouTube    | <https://www.youtube.com>    | ✓        |          | ✓          |                  |
+| 爱奇艺     | <https://www.iqiyi.com>      | ✓        |          |            |                  |
+| 芒果TV     | <https://www.mgtv.com>       | ✓        |          |            |                  |
+| 糖豆广场舞 | <http://www.tangdou.com>     | ✓        |          | ✓          |                  |
+| Tumblr     | <https://www.tumblr.com>     | ✓        | ✓        |            |                  |
+| Vimeo      | <https://vimeo.com>          | ✓        |          |            |                  |
+| Facebook   | <https://facebook.com>       | ✓        |          |            |                  |
+| 斗鱼视频   | <https://v.douyu.com>        | ✓        |          |            |                  |
+| 秒拍       | <https://www.miaopai.com>    | ✓        |          |            |                  |
+| 微博       | <https://weibo.com>          | ✓        |          |            |                  |
+| Instagram  | <https://www.instagram.com>  | ✓        | ✓        |            |                  |
+| Twitter    | <https://twitter.com>        | ✓        |          |            |                  |
+| 腾讯视频   | <https://v.qq.com>           | ✓        |          |            |                  |
+| 网易云音乐 | <https://music.163.com>      | ✓        |          |            |                  |
+| 音悦台     | <https://yinyuetai.com>      | ✓        |          |            |                  |
+| 极客时间   | <https://time.geekbang.org>  | ✓        |          |            |                  |
+| Pornhub    | <https://pornhub.com>        | ✓        |          |            |                  |
+| XVIDEOS    | <https://xvideos.com>        | ✓        |          |            |                  |
+| 聯合新聞網 | <https://udn.com>            | ✓        |          |            |                  |
+| TikTok     | <https://www.tiktok.com>     | ✓        |          |            |                  |
+| 好看视频   | <https://haokan.baidu.com>   | ✓        |          |            |                  |
+| AcFun      | <https://www.acfun.cn>       | ✓        |          | ✓          |                  |
+| Eporner    | <https://eporner.com>        | ✓        |          |            |                  |
 
 
 ## Known issues

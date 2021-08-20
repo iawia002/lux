@@ -39,7 +39,17 @@ type iqiyiURL struct {
 	L string `json:"l"`
 }
 
-const iqiyiReferer = "https://www.iqiyi.com"
+// SiteType indicates the site type of iqiyi
+type SiteType int
+
+const (
+	// SiteTypeIQ indicates the site is iq.com
+	SiteTypeIQ SiteType = iota
+	// SiteTypeIqiyi indicates the site is iqiyi.com
+	SiteTypeIqiyi
+	iqReferer    = "https://www.iq.com"
+	iqiyiReferer = "https://www.iqiyi.com"
+)
 
 func getMacID() string {
 	var macID string
@@ -65,7 +75,7 @@ func getVF(params string) string {
 			} else {
 				v8 = v4 + 49
 			}
-			suffix += string(v8) // string(97) -> "a"
+			suffix += string(rune(v8)) // string(97) -> "a"
 		}
 	}
 	params += suffix
@@ -73,7 +83,7 @@ func getVF(params string) string {
 	return utils.Md5(params)
 }
 
-func getVPS(tvid, vid string) (*iqiyi, error) {
+func getVPS(tvid, vid, refer string) (*iqiyi, error) {
 	t := time.Now().Unix() * 1000
 	host := "http://cache.video.qiyi.com"
 	params := fmt.Sprintf(
@@ -82,7 +92,7 @@ func getVPS(tvid, vid string) (*iqiyi, error) {
 	)
 	vf := getVF(params)
 	apiURL := fmt.Sprintf("%s%s&vf=%s", host, params, vf)
-	info, err := request.Get(apiURL, iqiyiReferer, nil)
+	info, err := request.Get(apiURL, refer, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -93,16 +103,28 @@ func getVPS(tvid, vid string) (*iqiyi, error) {
 	return data, nil
 }
 
-type extractor struct{}
+type extractor struct {
+	siteType SiteType
+}
 
 // New returns a youtube extractor.
-func New() types.Extractor {
-	return &extractor{}
+func New(siteType SiteType) types.Extractor {
+	return &extractor{
+		siteType: siteType,
+	}
 }
 
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) {
-	html, err := request.Get(url, iqiyiReferer, nil)
+	refer := iqiyiReferer
+	headers := make(map[string]string)
+	if e.siteType == SiteTypeIQ {
+		headers = map[string]string{
+			"Accept-Language": "zh-TW",
+		}
+		refer = iqReferer
+	}
+	html, err := request.Get(url, refer, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -117,6 +139,7 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 			`data-player-tvid="([^"]+)"`,
 			`param\['tvid'\]\s*=\s*"(.+?)"`,
 			`"tvid":"(\d+)"`,
+			`"tvId":(\d+)`,
 		)
 	}
 	if tvid == nil || len(tvid) < 2 {
@@ -144,19 +167,28 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 	if err != nil {
 		return nil, err
 	}
-	title := strings.TrimSpace(doc.Find("h1>a").First().Text())
-	var sub string
-	for _, k := range []string{"span", "em"} {
-		if sub != "" {
-			break
+	var title string
+	if e.siteType == SiteTypeIqiyi {
+		title = strings.TrimSpace(doc.Find("h1>a").First().Text())
+		var sub string
+		for _, k := range []string{"span", "em"} {
+			if sub != "" {
+				break
+			}
+			sub = strings.TrimSpace(doc.Find("h1>" + k).First().Text())
 		}
-		sub = strings.TrimSpace(doc.Find("h1>" + k).First().Text())
+		title += sub
+	} else {
+		title = strings.TrimSpace(doc.Find("span#pageMetaTitle").First().Text())
+		sub := utils.MatchOneOf(html, `"subTitle":"([^"]+)","isoDuration":`)
+		if len(sub) > 1 {
+			title += fmt.Sprintf(" %s", sub[1])
+		}
 	}
-	title += sub
 	if title == "" {
 		title = doc.Find("title").Text()
 	}
-	videoDatas, err := getVPS(tvid[1], vid[1])
+	videoDatas, err := getVPS(tvid[1], vid[1], refer)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +201,7 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 	for _, video := range videoDatas.Data.VP.Tkl[0].Vs {
 		urls := make([]*types.Part, len(video.Fs))
 		for index, v := range video.Fs {
-			realURLData, err := request.Get(urlPrefix+v.L, iqiyiReferer, nil)
+			realURLData, err := request.Get(urlPrefix+v.L, refer, nil)
 			if err != nil {
 				return nil, err
 			}
@@ -194,9 +226,13 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 		}
 	}
 
+	siteName := "爱奇艺 iqiyi.com"
+	if e.siteType == SiteTypeIQ {
+		siteName = "爱奇艺 iq.com"
+	}
 	return []*types.Data{
 		{
-			Site:    "爱奇艺 iqiyi.com",
+			Site:    siteName,
 			Title:   title,
 			Type:    types.DataTypeVideo,
 			Streams: streams,

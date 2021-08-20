@@ -9,6 +9,7 @@ import (
 	"github.com/iawia002/annie/extractors/bilibili"
 	"github.com/iawia002/annie/extractors/douyin"
 	"github.com/iawia002/annie/extractors/douyu"
+	"github.com/iawia002/annie/extractors/eporner"
 	"github.com/iawia002/annie/extractors/facebook"
 	"github.com/iawia002/annie/extractors/geekbang"
 	"github.com/iawia002/annie/extractors/haokan"
@@ -53,7 +54,8 @@ func init() {
 		"youku":      youku.New(),
 		"youtube":    youtubeExtractor,
 		"youtu":      youtubeExtractor, // youtu.be
-		"iqiyi":      iqiyi.New(),
+		"iqiyi":      iqiyi.New(iqiyi.SiteTypeIqiyi),
+		"iq":         iqiyi.New(iqiyi.SiteTypeIQ),
 		"mgtv":       mgtv.New(),
 		"tangdou":    tangdou.New(),
 		"tumblr":     tumblr.New(),
@@ -74,6 +76,7 @@ func init() {
 		"tiktok":     tiktok.New(),
 		"haokan":     haokan.New(),
 		"acfun":      acfun.New(),
+		"eporner":    eporner.New(),
 	}
 }
 
@@ -103,6 +106,9 @@ func Extract(u string, option types.Options) ([]*types.Data, error) {
 		}
 	}
 	extractor := extractorMap[domain]
+	if extractor == nil {
+		extractor = extractorMap[""]
+	}
 	videos, err := extractor.Extract(u, option)
 	if err != nil {
 		return nil, err
