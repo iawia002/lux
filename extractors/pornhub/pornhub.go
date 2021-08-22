@@ -62,7 +62,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 			// ]
 			continue
 		}
-		quality := string(data.Quality)
+		quality := strings.ReplaceAll(string(data.Quality), "\"", "")
 
 		size, err := request.Size(data.VideoURL, data.VideoURL)
 		if err != nil {
