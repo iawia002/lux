@@ -29,7 +29,6 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 	itemId := itemIds[len(itemIds)-1]
 	jsonData, err := request.Get("https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids="+itemId, url, nil)
-	print(jsonData)
 	var douyin douyinData
 	err = json.Unmarshal([]byte(jsonData), &douyin)
 	if err != nil {
