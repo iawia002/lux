@@ -29,3 +29,7 @@ annie_*
 
 # macOS
 .DS_Store
+
+*.mp4
+*.mkv
+*.webm

@@ -44,6 +44,11 @@ func main() {
 				Usage:   "Debug mode",
 			},
 			&cli.BoolFlag{
+				Name:    "silent",
+				Aliases: []string{"s"},
+				Usage:   "Minimum outputs",
+			},
+			&cli.BoolFlag{
 				Name:    "info",
 				Aliases: []string{"i"},
 				Usage:   "Information only",
@@ -228,6 +233,7 @@ func main() {
 				Cookie:     cookie,
 				Refer:      c.String("refer"),
 				Debug:      c.Bool("debug"),
+				Silent:     c.Bool("silent"),
 			})
 
 			var isErr bool
@@ -291,6 +297,7 @@ func download(c *cli.Context, videoURL string) error {
 	}
 
 	defaultDownloader := downloader.New(downloader.Options{
+		Silent:         c.Bool("silent"),
 		InfoOnly:       c.Bool("info"),
 		Stream:         c.String("stream-format"),
 		Refer:          c.String("refer"),

@@ -33,6 +33,7 @@ type Options struct {
 	Cookie     string
 	Refer      string
 	Debug      bool
+	Silent     bool
 }
 
 // SetOptions sets the common request option.
