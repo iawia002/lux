@@ -3,20 +3,16 @@ package pornhub
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
-
-	"github.com/robertkrimen/otto"
 )
 
 type pornhubData struct {
-	Format   string          `json:"format"`
-	Quality  json.RawMessage `json:"quality"`
-	VideoURL string          `json:"videoUrl"`
+	Quality  json.RawMessage `json:"text"`
+	VideoURL string          `json:"url"`
 }
 
 type extractor struct{}
@@ -41,7 +37,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		title = "pornhub video"
 	}
 
-	realURLs := utils.MatchOneOf(html, `"mediaDefinitions":(.+?),"isVertical"`)
+	realURLs := utils.MatchOneOf(html, `qualityItems_\d+\s=\s([^;]+)`)
 	if realURLs == nil || len(realURLs) < 2 {
 		return nil, types.ErrURLParseFailed
 	}
@@ -51,28 +47,9 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 
-	scripts := utils.MatchAll(html, `<script type="text/javascript">(?s)(.+?)</script>`)
-	var flashvarJS string
-	for _, s := range scripts {
-		for _, js := range s[1:] {
-			if strings.Contains(js, "flashvars_") {
-				flashvarJS = js
-				break
-			}
-		}
-	}
-	vm := otto.New()
-	vm.Run(flashvarJS) // nolint
-	var urls []string
-	for i := 0; i < len(pornhubs); i++ {
-		if value, err := vm.Get(fmt.Sprintf("media_%d", i)); err == nil {
-			urls = append(urls, value.String())
-		}
-	}
-
 	streams := make(map[string]*types.Stream, len(pornhubs))
-	for i, data := range pornhubs {
-		if data.Format != "mp4" {
+	for _, data := range pornhubs {
+		if !strings.Contains(data.VideoURL, "mp4") {
 			continue
 		}
 
@@ -85,25 +62,21 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 			// ]
 			continue
 		}
-		quality := string(data.Quality)
+		quality := strings.ReplaceAll(string(data.Quality), "\"", "")
 
-		realURL := urls[i]
-		if len(realURL) == 0 {
-			continue
-		}
-		size, err := request.Size(realURL, url)
+		size, err := request.Size(data.VideoURL, data.VideoURL)
 		if err != nil {
 			return nil, err
 		}
 		urlData := &types.Part{
-			URL:  realURL,
+			URL:  data.VideoURL,
 			Size: size,
 			Ext:  "mp4",
 		}
 		streams[quality] = &types.Stream{
 			Parts:   []*types.Part{urlData},
 			Size:    size,
-			Quality: fmt.Sprintf("%sP", quality),
+			Quality: quality,
 		}
 	}
 
