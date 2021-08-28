@@ -50,15 +50,11 @@ type Downloader struct {
 	option Options
 }
 
-func (downloader *Downloader) progressBar(size int64) *pb.ProgressBar {
+func progressBar(size int64) *pb.ProgressBar {
 	tmpl := `{{counters .}} {{bar . "[" "=" ">" "-" "]"}} {{speed .}} {{percent . | green}} {{rtime .}}`
-	width := 1000
-	if downloader.option.Silent {
-		tmpl, width = ``, 0
-	}
 	return pb.New64(size).
 		Set(pb.Bytes, true).
-		SetMaxWidth(width).
+		SetMaxWidth(1000).
 		SetTemplate(pb.ProgressBarTemplate(tmpl))
 }
 
@@ -584,8 +580,10 @@ func (downloader *Downloader) Download(data *types.Data) error {
 		return nil
 	}
 
-	downloader.bar = downloader.progressBar(stream.Size)
-	downloader.bar.Start()
+	downloader.bar = progressBar(stream.Size)
+	if !downloader.option.Silent {
+		downloader.bar.Start()
+	}
 	if len(stream.Parts) == 1 {
 		// only one fragment
 		var err error

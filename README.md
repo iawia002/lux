@@ -517,6 +517,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
     	URLs file path
   -d	Debug mode
   -j	Print extracted data
+  -s	Minimum outputs
   -v	Show version
 ```
 
