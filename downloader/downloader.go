@@ -25,6 +25,7 @@ import (
 // Options defines options used in downloading.
 type Options struct {
 	InfoOnly       bool
+	Silent         bool
 	Stream         string
 	Refer          string
 	OutputPath     string
@@ -550,7 +551,9 @@ func (downloader *Downloader) Download(data *types.Data) error {
 		return fmt.Errorf("no stream named %s", streamName)
 	}
 
-	printStreamInfo(data, stream)
+	if !downloader.option.Silent {
+		printStreamInfo(data, stream)
+	}
 
 	// download caption
 	if downloader.option.Caption && data.Caption != nil {
@@ -578,7 +581,9 @@ func (downloader *Downloader) Download(data *types.Data) error {
 	}
 
 	downloader.bar = progressBar(stream.Size)
-	downloader.bar.Start()
+	if !downloader.option.Silent {
+		downloader.bar.Start()
+	}
 	if len(stream.Parts) == 1 {
 		// only one fragment
 		var err error
@@ -633,7 +638,9 @@ func (downloader *Downloader) Download(data *types.Data) error {
 		return nil
 	}
 
-	fmt.Printf("Merging video parts into %s\n", mergedFilePath)
+	if !downloader.option.Silent {
+		fmt.Printf("Merging video parts into %s\n", mergedFilePath)
+	}
 	if stream.Ext != "mp4" || stream.NeedMux {
 		return utils.MergeFilesWithSameExtension(parts, mergedFilePath)
 	}
