@@ -73,45 +73,6 @@ func genAPI(aid, cid, quality int, bvid string, bangumi bool, cookie string) (st
 	return api, nil
 }
 
-func genParts(dashData *dashInfo, quality int, referer string) ([]*types.Part, error) {
-	parts := make([]*types.Part, 1)
-	if dashData.Streams.Audio == nil {
-		url := dashData.DURL[0].URL
-		_, ext, err := utils.GetNameAndExt(url)
-		if err != nil {
-			return nil, err
-		}
-		parts[0] = &types.Part{
-			URL:  url,
-			Size: dashData.DURL[0].Size,
-			Ext:  ext,
-		}
-
-	} else {
-
-		checked := false
-		for _, stream := range dashData.Streams.Video {
-			if stream.ID == quality {
-				s, err := request.Size(stream.BaseURL, referer)
-				if err != nil {
-					return nil, err
-				}
-				parts[0] = &types.Part{
-					URL:  stream.BaseURL,
-					Size: s,
-					Ext:  "mp4",
-				}
-				checked = true
-				break
-			}
-		}
-		if !checked {
-			return nil, nil
-		}
-	}
-	return parts, nil
-}
-
 type bilibiliOptions struct {
 	url      string
 	html     string
@@ -359,36 +320,17 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 	}
 
 	streams := make(map[string]*types.Stream, len(dashData.Quality))
-	for _, q := range dashData.Quality {
-		// Avoid duplicate streams
-		if _, ok := streams[strconv.Itoa(q)]; ok {
-			continue
-		}
-		api, err := genAPI(options.aid, options.cid, q, options.bvid, options.bangumi, extractOption.Cookie)
+	for _, stream := range dashData.Streams.Video {
+		s, err := request.Size(stream.BaseURL, referer)
 		if err != nil {
 			return types.EmptyData(options.url, err)
 		}
-		jsonString, err := request.Get(api, referer, nil)
-		if err != nil {
-			return types.EmptyData(options.url, err)
-		}
-
-		err = json.Unmarshal([]byte(jsonString), &data)
-		if err != nil {
-			return types.EmptyData(options.url, err)
-		}
-		if data.Data.Description == nil {
-			dashData = data.Result
-		} else {
-			dashData = data.Data
-		}
-		parts, err := genParts(&dashData, q, options.url)
-		if parts == nil {
-			continue
-		}
-		if err != nil {
-			return types.EmptyData(options.url, err)
-		}
+		parts := make([]*types.Part, 0, 2)
+		parts = append(parts, &types.Part{
+			URL:  stream.BaseURL,
+			Size: s,
+			Ext:  getExtFromMimeType(stream.MimeType),
+		})
 		if audioPart != nil {
 			parts = append(parts, audioPart)
 		}
@@ -396,13 +338,14 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		for _, part := range parts {
 			size += part.Size
 		}
-		streams[strconv.Itoa(q)] = &types.Stream{
+		id := fmt.Sprintf("%d-%d", stream.ID, stream.Codecid)
+		streams[id] = &types.Stream{
 			Parts:   parts,
 			Size:    size,
-			Quality: qualityString[q],
+			Quality: fmt.Sprintf("%s %s", qualityString[stream.ID], stream.Codecs),
 		}
 		if audioPart != nil {
-			streams[strconv.Itoa(q)].NeedMux = true
+			streams[id].NeedMux = true
 		}
 	}
 
@@ -431,4 +374,12 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		},
 		URL: options.url,
 	}
+}
+
+func getExtFromMimeType(mimeType string) string {
+	exts := strings.Split(mimeType, "/")
+	if len(exts) == 2 {
+		return exts[1]
+	}
+	return "mp4"
 }

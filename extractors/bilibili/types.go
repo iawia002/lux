@@ -46,6 +46,9 @@ type dashStream struct {
 	ID        int    `json:"id"`
 	BaseURL   string `json:"baseUrl"`
 	Bandwidth int    `json:"bandwidth"`
+	MimeType  string `json:"mimeType"`
+	Codecid   int    `json:"codecid"`
+	Codecs    string `json:"codecs"`
 }
 
 type dashStreams struct {
@@ -63,7 +66,6 @@ type dashInfo struct {
 	Description []string    `json:"accept_description"`
 	Quality     []int       `json:"accept_quality"`
 	Streams     dashStreams `json:"dash"`
-	DURL        []dURL      `json:"durl"`
 }
 
 type dash struct {
