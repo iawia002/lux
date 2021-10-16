@@ -50,7 +50,7 @@ func MergeToMP4(paths []string, mergedFilePath string, filename string) error {
 	mergeFile.Close() // nolint
 
 	cmd := exec.Command(
-		"ffmpeg", "-y", "-f", "concat", "-safe", "-1",
+		"ffmpeg", "-y", "-f", "concat", "-safe", "0",
 		"-i", mergeFilePath, "-c", "copy", "-bsf:a", "aac_adtstoasc", mergedFilePath,
 	)
 	return runMergeCmd(cmd, paths, mergeFilePath)
