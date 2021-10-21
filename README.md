@@ -26,7 +26,7 @@
 
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
-  - [Install via `go get`](#install-via-go-get)
+  - [Install via `go install`](#install-via-go-install)
   - [Homebrew (macOS only)](#homebrew-macos-only)
   - [Arch Linux](#arch-linux)
   - [Void Linux](#void-linux)
@@ -75,12 +75,12 @@ The following dependencies are required and must be installed separately.
 
 > **Note**: FFmpeg does not affect the download, only affects the final file merge.
 
-### Install via `go get`
+### Install via `go install`
 
-To install Annie, use `go get`, or download the binary file from [Releases](https://github.com/iawia002/annie/releases) page.
+To install Annie, use `go install`, or download the binary file from [Releases](https://github.com/iawia002/annie/releases) page.
 
 ```bash
-$ GO111MODULE=on go get github.com/iawia002/annie
+$ go install github.com/iawia002/annie@latest
 ```
 
 ### Homebrew (macOS only)
