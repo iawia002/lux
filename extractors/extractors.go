@@ -1,6 +1,7 @@
 package extractors
 
 import (
+	"github.com/iawia002/annie/extractors/streamtape"
 	"net/url"
 	"strings"
 
@@ -77,6 +78,7 @@ func init() {
 		"haokan":     haokan.New(),
 		"acfun":      acfun.New(),
 		"eporner":    eporner.New(),
+		"streamtape": streamtape.New(),
 	}
 }
 
