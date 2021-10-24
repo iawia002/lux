@@ -629,6 +629,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
 | 好看视频   | <https://haokan.baidu.com>   | ✓        |          |            |                  |
 | AcFun      | <https://www.acfun.cn>       | ✓        |          | ✓          |                  |
 | Eporner    | <https://eporner.com>        | ✓        |          |            |                  |
+| StreamTape | <https://streamtape.com>     | ✓        |          |            |                  |
 
 
 ## Known issues
