@@ -22,8 +22,17 @@ func TestStreamtape(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if _, err := New().Extract(tt.args.URL, types.Options{}); err != nil {
+			data, err := New().Extract(tt.args.URL, types.Options{})
+			if err != nil {
 				t.Error(err)
+				return
+			}
+			if len(data) == 0 {
+				t.Error("extractor returned empty data")
+				return
+			}
+			if data[0].Title != tt.args.Title {
+				t.Errorf("expected title '%s' got '%s'", tt.args.Title, data[0].Title)
 			}
 		})
 	}

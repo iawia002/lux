@@ -1,11 +1,12 @@
 package streamtape
 
 import (
+	"regexp"
+	"strings"
+
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
-	"regexp"
-	"strings"
 )
 
 const prefix = "document.getElementById('robotlink').innerHTML = '"
@@ -14,6 +15,7 @@ var pattern = regexp.MustCompile(`\((.*?)\)`)
 
 type extractor struct{}
 
+// New returns a StreamTape extractor
 func New() types.Extractor {
 	return &extractor{}
 }
