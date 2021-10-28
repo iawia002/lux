@@ -12,6 +12,6 @@ require (
 	github.com/json-iterator/go v1.1.11
 	github.com/kkdai/youtube/v2 v2.7.2
 	github.com/kr/pretty v0.1.0
-	github.com/tidwall/gjson v1.8.1
+	github.com/tidwall/gjson v1.9.3
 	github.com/urfave/cli/v2 v2.3.0
 )
