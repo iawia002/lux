@@ -48,7 +48,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
-	realURL := "https://aweme.snssdk.com/aweme/v1/play/?video_id=" + douyin.ItemList[0].Video.PlayAddr.Uri + "&ratio=720p&line=0"
+	realURL := "https://aweme.snssdk.com/aweme/v1/play/?video_id=" + douyin.ItemList[0].Video.PlayAddr.URI + "&ratio=720p&line=0"
 	size, err := request.Size(realURL, url)
 	if err != nil {
 		return nil, err
