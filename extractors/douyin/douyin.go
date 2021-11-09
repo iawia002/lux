@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"strings"
 
+	"net/http"
+	"strings"
+
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -19,6 +22,7 @@ func New() types.Extractor {
 
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+	var err error
 	if strings.Contains(url, "v.douyin.com") {
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
@@ -30,12 +34,8 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 			},
 		}
 		resp, err := c.Do(req)
-		if err != nil {
-			return nil, err
-		}
 		url = resp.Header.Get("location")
 	}
-
 	itemIds := utils.MatchOneOf(url, `/video/(\d+)`)
 	if len(itemIds) == 0 {
 		return nil, errors.New("unable to get video ID")
