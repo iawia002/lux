@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 
+	"net/http"
+	"strings"
+
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
@@ -19,11 +22,23 @@ func New() types.Extractor {
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
 	var err error
+	if strings.Contains(url, "v.douyin.com") {
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return nil, err
+		}
+		c := http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		}
+		resp, err := c.Do(req)
+		url = resp.Header.Get("location")
+	}
 	itemIds := utils.MatchOneOf(url, `/video/(\d+)`)
 	if len(itemIds) == 0 {
 		return nil, errors.New("unable to get video ID")
 	}
-
 	if itemIds == nil || len(itemIds) < 2 {
 		return nil, types.ErrURLParseFailed
 	}
