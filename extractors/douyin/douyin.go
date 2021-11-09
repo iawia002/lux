@@ -3,10 +3,10 @@ package douyin
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
-	"strings"
 )
 
 type extractor struct{}
@@ -34,7 +34,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
-	realURL := strings.Replace(douyin.ItemList[0].Video.PlayAddr.URLList[0], "playwm", "play", -1)
+	realURL := "https://aweme.snssdk.com/aweme/v1/play/?video_id=" + douyin.ItemList[0].Video.PlayAddr.URI + "&ratio=720p&line=0"
 	size, err := request.Size(realURL, url)
 	if err != nil {
 		return nil, err
