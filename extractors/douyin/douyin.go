@@ -32,6 +32,9 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 			},
 		}
 		resp, err := c.Do(req)
+		if err != nil {
+			return nil, err
+		}
 		url = resp.Header.Get("location")
 	}
 	itemIds := utils.MatchOneOf(url, `/video/(\d+)`)
