@@ -5,9 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"net/http"
-	"strings"
-
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/request"
 	"github.com/iawia002/annie/utils"
