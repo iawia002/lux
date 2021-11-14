@@ -51,20 +51,45 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
-	realURL := "https://aweme.snssdk.com/aweme/v1/play/?video_id=" + douyin.ItemList[0].Video.PlayAddr.URI + "&ratio=720p&line=0"
-	size, err := request.Size(realURL, url)
-	if err != nil {
-		return nil, err
-	}
-	urlData := &types.Part{
-		URL:  realURL,
-		Size: size,
-		Ext:  "mp4",
+	urlData := make([]*types.Part, 0)
+	var totalSize int64
+	var types string
+	//AwemeType: 2:image 4:video
+	if douyin.ItemList[0].AwemeType == 2 {
+		types = types.DataTypeImage
+		for _, img := range douyin.ItemList[0].Images {
+			size, err := request.Size(img.URLList[0], url)
+			if err != nil {
+				return nil, err
+			}
+			totalSize += size
+			_, ext, err := utils.GetNameAndExt(img.URLList[0])
+			if err != nil {
+				return nil, err
+			}
+			urlData = append(urlData, &types.Part{
+				URL:  img.URLList[0],
+				Size: size,
+				Ext:  ext,
+			})
+		}
+	} else {
+		types = types.DataTypeVideo
+		realURL := "https://aweme.snssdk.com/aweme/v1/play/?video_id=" + douyin.ItemList[0].Video.PlayAddr.URI + "&ratio=720p&line=0"
+		totalSize, err := request.Size(realURL, url)
+		if err != nil {
+			return nil, err
+		}
+		urlData = append(urlData, &types.Part{
+			URL:  realURL,
+			Size: totalSize,
+			Ext:  "mp4",
+		})
 	}
 	streams := map[string]*types.Stream{
 		"default": {
-			Parts: []*types.Part{urlData},
-			Size:  size,
+			Parts: urlData,
+			Size:  totalSize,
 		},
 	}
 
