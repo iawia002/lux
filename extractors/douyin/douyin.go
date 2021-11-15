@@ -49,9 +49,11 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 	urlData := make([]*types.Part, 0)
+	var douyinType types.DataType
 	var totalSize int64
 	//AwemeType: 2:image 4:video
 	if douyin.ItemList[0].AwemeType == 2 {
+		douyinType = types.DataTypeImage
 		for _, img := range douyin.ItemList[0].Images {
 			size, err := request.Size(img.URLList[0], url)
 			if err != nil {
@@ -69,6 +71,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 			})
 		}
 	} else {
+		douyinType = types.DataTypeVideo
 		realURL := "https://aweme.snssdk.com/aweme/v1/play/?video_id=" + douyin.ItemList[0].Video.PlayAddr.URI + "&ratio=720p&line=0"
 		totalSize, err := request.Size(realURL, url)
 		if err != nil {
