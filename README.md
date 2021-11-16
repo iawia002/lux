@@ -601,7 +601,7 @@ $ annie -j https://www.bilibili.com/video/av20203945
 
 | Site       | URL                          | 🎬 Videos | 🌁 Images | 📚 Playlist | 🍪 VIP adaptation |
 | ---------- | ---------------------------- | -------- | -------- | ---------- | ---------------- |
-| 抖音       | <https://www.douyin.com>     | ✓        |          |            |                  |
+| 抖音       | <https://www.douyin.com>     | ✓        | ✓        |            |                  |
 | 哔哩哔哩   | <https://www.bilibili.com>   | ✓        |          | ✓          | ✓                |
 | 半次元     | <https://bcy.net>            |          | ✓        |            |                  |
 | pixivision | <https://www.pixivision.net> |          | ✓        |            |                  |

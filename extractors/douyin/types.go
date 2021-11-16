@@ -13,8 +13,14 @@ type douyinData struct {
 			ShareDesc      string `json:"share_desc"`
 			ShareTitle     string `json:"share_title"`
 		} `json:"share_info"`
-		IsPreview int         `json:"is_preview"`
-		Images    interface{} `json:"images"`
+		IsPreview int `json:"is_preview"`
+		Images    []struct {
+			URI       string   `json:"uri"`
+			URLList   []string `json:"url_list"`
+			DLURLList []string `json:"download_url_list"`
+			Height    int64    `json:"height"`
+			Width     int64    `json:"width"`
+		} `json:"images"`
 		RiskInfos struct {
 			Type    int    `json:"type"`
 			Content string `json:"content"`
