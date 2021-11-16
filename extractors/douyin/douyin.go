@@ -20,7 +20,6 @@ func New() types.Extractor {
 
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
-	var err error
 	if strings.Contains(url, "v.douyin.com") {
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
@@ -37,6 +36,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		}
 		url = resp.Header.Get("location")
 	}
+
 	itemIds := utils.MatchOneOf(url, `/video/(\d+)`)
 	if len(itemIds) == 0 {
 		return nil, errors.New("unable to get video ID")
@@ -46,11 +46,14 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 	itemId := itemIds[len(itemIds)-1]
 	jsonData, err := request.Get("https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids="+itemId, url, nil)
-	var douyin douyinData
-	err = json.Unmarshal([]byte(jsonData), &douyin)
 	if err != nil {
 		return nil, err
 	}
+	var douyin douyinData
+	if err = json.Unmarshal([]byte(jsonData), &douyin); err != nil {
+		return nil, err
+	}
+
 	urlData := make([]*types.Part, 0)
 	var douyinType types.DataType
 	var totalSize int64

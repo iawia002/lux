@@ -19,6 +19,7 @@ type extractor struct{}
 func New() types.Extractor {
 	return &extractor{}
 }
+
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) {
 	html, err := request.Get(url, url, nil)

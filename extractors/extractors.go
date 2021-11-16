@@ -1,7 +1,6 @@
 package extractors
 
 import (
-	"github.com/iawia002/annie/extractors/streamtape"
 	"net/url"
 	"strings"
 
@@ -22,6 +21,7 @@ import (
 	"github.com/iawia002/annie/extractors/pixivision"
 	"github.com/iawia002/annie/extractors/pornhub"
 	"github.com/iawia002/annie/extractors/qq"
+	"github.com/iawia002/annie/extractors/streamtape"
 	"github.com/iawia002/annie/extractors/tangdou"
 	"github.com/iawia002/annie/extractors/tiktok"
 	"github.com/iawia002/annie/extractors/tumblr"
