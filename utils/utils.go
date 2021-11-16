@@ -158,7 +158,7 @@ func ParseInputFile(r io.Reader, items string, itemStart, itemEnd int) []string 
 
 	itemList := make([]string, 0, len(wantedItems))
 	for i, item := range temp {
-		if ItemInSlice(i, wantedItems) {
+		if ItemInSlice(i+1, wantedItems) {
 			itemList = append(itemList, item)
 		}
 	}
