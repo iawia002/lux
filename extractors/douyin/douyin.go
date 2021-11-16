@@ -58,17 +58,17 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if douyin.ItemList[0].AwemeType == 2 {
 		douyinType = types.DataTypeImage
 		for _, img := range douyin.ItemList[0].Images {
-			size, err := request.Size(img.URLList[0], url)
+			size, err := request.Size(img.URLList[3], url)
 			if err != nil {
 				return nil, err
 			}
 			totalSize += size
-			_, ext, err := utils.GetNameAndExt(img.URLList[0])
+			_, ext, err := utils.GetNameAndExt(img.URLList[3])
 			if err != nil {
 				return nil, err
 			}
 			urlData = append(urlData, &types.Part{
-				URL:  img.URLList[0],
+				URL:  img.URLList[3],
 				Size: size,
 				Ext:  ext,
 			})
