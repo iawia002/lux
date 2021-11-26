@@ -140,8 +140,6 @@ $ annie "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
  41.88 MiB / 63.93 MiB [=================>-------------]  65.51% 4.22 MiB/s 00m05s
 ```
 
-> Note: the URL is recommended to be always wrapped in quotation marks as it may fail if it contains special characters. (thanks [@lonycc](https://github.com/lonycc) for pointing this out)
-
 The `-i` option displays all available quality of video without downloading.
 
 ```console
@@ -335,7 +333,7 @@ $ annie -c "name=value; name2=value2" "https://www.bilibili.com/video/av20203945
 As a text file:
 
 ```console
-$ annie -c cookies.txt https://www.bilibili.com/video/av20203945
+$ annie -c cookies.txt "https://www.bilibili.com/video/av20203945"
 ```
 
 If the `-c` is not set, `annie` will try to get the cookies from the current user's Chrome or Edge automatically.
@@ -346,11 +344,11 @@ To use this feature, you need to shutdown your Chrome or Edge for only one time 
 You can set the HTTP/SOCKS5 proxy using environment variables:
 
 ```console
-$ HTTP_PROXY="http://127.0.0.1:1087/" annie -i https://www.youtube.com/watch?v=Gnbch2osEeo
+$ HTTP_PROXY="http://127.0.0.1:1087/" annie -i "https://www.youtube.com/watch?v=Gnbch2osEeo"
 ```
 
 ```console
-$ HTTP_PROXY="socks5://127.0.0.1:1080/" annie -i https://www.youtube.com/watch?v=Gnbch2osEeo
+$ HTTP_PROXY="socks5://127.0.0.1:1080/" annie -i "https://www.youtube.com/watch?v=Gnbch2osEeo"
 ```
 
 ### Multi-Thread
@@ -393,9 +391,7 @@ A Referrer can be used for the request with the `-r` option:
 
 
 ```console
-$ annie -r https://www.bilibili.com/video/av20383055/ http://cn-scnc1-dx.acgvideo.com/...
-
-...
+$ annie -r "https://www.bilibili.com/video/av20383055/" "http://cn-scnc1-dx.acgvideo.com/"
 ```
 
 ### Specify the output path and name
@@ -403,7 +399,7 @@ $ annie -r https://www.bilibili.com/video/av20383055/ http://cn-scnc1-dx.acgvide
 The `-o` option sets the path, and `-O` option sets the name of the downloaded file:
 
 ```console
-$ annie -o ../ -O "hello" https://...
+$ annie -o ../ -O "hello" "https://example.com"
 ```
 
 ### Debug Mode
@@ -411,7 +407,7 @@ $ annie -o ../ -O "hello" https://...
 The `-d` option outputs network request messages:
 
 ```console
-$ annie -i -d http://www.bilibili.com/video/av20088587
+$ annie -i -d "http://www.bilibili.com/video/av20088587"
 
 URL:         http://www.bilibili.com/video/av20088587
 Method:      GET
@@ -452,7 +448,7 @@ Status Code: 200
 The `-j` option will print the extracted data in JSON format.
 
 ```console
-$ annie -j https://www.bilibili.com/video/av20203945
+$ annie -j "https://www.bilibili.com/video/av20203945"
 
 {
     "site": "哔哩哔哩 bilibili.com",
