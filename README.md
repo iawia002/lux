@@ -126,7 +126,7 @@ annie [OPTIONS] URL [URL...]
 ### Download a video
 
 ```console
-$ annie https://www.youtube.com/watch?v=dQw4w9WgXcQ
+$ annie "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
  Site:      YouTube youtube.com
  Title:     Rick Astley - Never Gonna Give You Up (Video)
@@ -140,14 +140,12 @@ $ annie https://www.youtube.com/watch?v=dQw4w9WgXcQ
  41.88 MiB / 63.93 MiB [=================>-------------]  65.51% 4.22 MiB/s 00m05s
 ```
 
-> Note: wrap the URL in quotation marks if it contains special characters. (thanks @tonyxyl for pointing this out)
->
-> `$ annie 'https://...'`
+> Note: the URL is recommended to be always wrapped in quotation marks as it may fail if it contains special characters. (thanks [@lonycc](https://github.com/lonycc) for pointing this out)
 
 The `-i` option displays all available quality of video without downloading.
 
 ```console
-$ annie -i https://www.youtube.com/watch?v=dQw4w9WgXcQ
+$ annie -i "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
  Site:      YouTube youtube.com
  Title:     Rick Astley - Never Gonna Give You Up (Video)
@@ -186,7 +184,7 @@ Use `annie -f stream "URL"` to download a specific stream listed in the output o
 If Annie is provided the URL of a specific resource, then it will be downloaded directly:
 
 ```console
-$ annie https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg
+$ annie "https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg"
 
 annie doesn't support this URL right now, but it will try to download it directly
 
@@ -206,7 +204,7 @@ annie doesn't support this URL right now, but it will try to download it directl
 The `-p` option downloads an entire playlist instead of a single video.
 
 ```console
-$ annie -i -p https://www.bilibili.com/bangumi/play/ep198061
+$ annie -i -p "https://www.bilibili.com/bangumi/play/ep198061"
 
  Site:      哔哩哔哩 bilibili.com
  Title:     Doctor X 第四季：第一集
@@ -253,7 +251,7 @@ For bilibili playlists only:
 You can also download multiple URLs at once:
 
 ```console
-$ annie -i https://www.bilibili.com/video/av21877586 https://www.bilibili.com/video/av21990740
+$ annie -i "https://www.bilibili.com/video/av21877586" "https://www.bilibili.com/video/av21990740"
 
  Site:      哔哩哔哩 bilibili.com
  Title:     【莓机会了】甜到虐哭的13集单集MAD「我现在什么都不想干,更不想看14集」
@@ -331,7 +329,7 @@ Cookies can be a string or a text file, supply cookies in one of the two followi
 As a string:
 
 ```console
-$ annie -c "name=value; name2=value2" https://www.bilibili.com/video/av20203945
+$ annie -c "name=value; name2=value2" "https://www.bilibili.com/video/av20203945"
 ```
 
 As a text file:
