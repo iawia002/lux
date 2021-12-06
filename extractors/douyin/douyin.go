@@ -36,10 +36,6 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		}
 		url = resp.Header.Get("location")
 	}
-	var douyin douyinData
-	if err = json.Unmarshal([]byte(jsonData), &douyin); err != nil {
-		return nil, err
-	}
 
 	itemIds := utils.MatchOneOf(url, `/video/(\d+)`)
 	if len(itemIds) == 0 {
@@ -53,6 +49,11 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
+	var douyin douyinData
+	if err = json.Unmarshal([]byte(jsonData), &douyin); err != nil {
+		return nil, err
+	}
+
 	urlData := make([]*types.Part, 0)
 	var douyinType types.DataType
 	var totalSize int64
