@@ -26,13 +26,6 @@ func TestDownload(t *testing.T) {
 				Title: "树叶只有树 树却有很多树叶",
 			},
 		},
-		{
-			name: "image test",
-			args: test.Args{
-				URL:   "https://v.douyin.com/RHanxuR/",
-				Title: "树叶只有树 树却有很多树叶",
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

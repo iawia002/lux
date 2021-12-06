@@ -1,6 +1,7 @@
 package douyin
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -19,7 +20,6 @@ func New() types.Extractor {
 
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
-	var err error
 	if strings.Contains(url, "v.douyin.com") {
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
@@ -36,6 +36,11 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		}
 		url = resp.Header.Get("location")
 	}
+	var douyin douyinData
+	if err = json.Unmarshal([]byte(jsonData), &douyin); err != nil {
+		return nil, err
+	}
+
 	itemIds := utils.MatchOneOf(url, `/video/(\d+)`)
 	if len(itemIds) == 0 {
 		return nil, errors.New("unable to get video ID")
