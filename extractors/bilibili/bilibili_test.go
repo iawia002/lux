@@ -60,6 +60,13 @@ func TestBilibili(t *testing.T) {
 				Title: "你的名字。",
 			},
 		},
+		{
+			name: "8k test",
+			args: test.Args{
+				URL:   "https://www.bilibili.com/video/BV1qM4y1w716",
+				Title: "【8K演示片】B站首发！你的设备还顶得住吗？",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

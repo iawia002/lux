@@ -71,6 +71,7 @@ type dash struct {
 }
 
 var qualityString = map[int]string{
+	127: "超高清 8K",
 	120: "超清 4K",
 	116: "高清 1080P60",
 	74:  "高清 720P60",
