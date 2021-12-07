@@ -60,7 +60,7 @@ func genAPI(aid, cid, quality int, bvid string, bangumi bool, cookie string) (st
 		baseAPIURL = bilibiliBangumiAPI
 	} else {
 		params = fmt.Sprintf(
-			"avid=%d&cid=%d&bvid=%s&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=16",
+			"avid=%d&cid=%d&bvid=%s&qn=%d&type=&otype=json&fourk=1&fnver=0&fnval=2000",
 			aid, cid, bvid, quality,
 		)
 		baseAPIURL = bilibiliAPI
@@ -272,9 +272,9 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 	}
 
 	// Get "accept_quality" and "accept_description"
-	// "accept_description":["高清 1080P","高清 720P","清晰 480P","流畅 360P"],
-	// "accept_quality":[120,112,80,48,32,16],
-	api, err := genAPI(options.aid, options.cid, 120, options.bvid, options.bangumi, extractOption.Cookie)
+	// "accept_description":["超高清 8K","超清 4K","高清 1080P+","高清 1080P","高清 720P","清晰 480P","流畅 360P"],
+	// "accept_quality":[127，120,112,80,48,32,16],
+	api, err := genAPI(options.aid, options.cid, 127, options.bvid, options.bangumi, extractOption.Cookie)
 	if err != nil {
 		return types.EmptyData(options.url, err)
 	}
