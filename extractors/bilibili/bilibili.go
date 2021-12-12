@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/parser"
@@ -368,9 +369,15 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		Title:   title,
 		Type:    types.DataTypeVideo,
 		Streams: streams,
-		Caption: &types.Part{
-			URL: fmt.Sprintf("https://comment.bilibili.com/%d.xml", options.cid),
-			Ext: "xml",
+		Captions: map[string]*types.CaptionPart{
+			"danmaku": {
+				Part: types.Part{
+					URL:  fmt.Sprintf("https://comment.bilibili.com/%d.xml", options.cid),
+					Ext:  "xml",
+				},
+				Transform: danmakuTransform,
+			},
+			"subtitle": getSubTitleCaptionPart(options.aid, options.cid),
 		},
 		URL: options.url,
 	}
@@ -382,4 +389,50 @@ func getExtFromMimeType(mimeType string) string {
 		return exts[1]
 	}
 	return "mp4"
+}
+
+func getSubTitleCaptionPart(aid int, cid int) *types.CaptionPart {
+	jsonString, err := request.Get(
+		fmt.Sprintf("http://api.bilibili.com/x/web-interface/view?aid=%d&cid=%d", aid, cid), referer, nil,
+	)
+	if err != nil {
+		return nil
+	}
+	stu := bilibiliWebInterface{}
+	err = json.Unmarshal([]byte(jsonString), &stu)
+	if err != nil || len(stu.Data.SubtitleInfo.SubtitleList) == 0 {
+		return nil
+	}
+	return &types.CaptionPart{
+		Part:  types.Part{
+			URL: stu.Data.SubtitleInfo.SubtitleList[0].SubtitleUrl,
+			Ext: "srt",
+		},
+		Transform: subtitleTransform,
+	}
+
+}
+
+func danmakuTransform(body []byte) ([]byte, error) {
+	return body, nil
+}
+
+func subtitleTransform(body []byte) ([]byte, error) {
+	bytes := ""
+	captionData := bilibiliSubtitleFormat{}
+	err := json.Unmarshal(body, &captionData)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	for i := 0; i < len(captionData.Body); i++ {
+		bytes += fmt.Sprintf("%d\n%s --> %s\n%s\n\n",
+			i,
+			time.Unix(0, int64(captionData.Body[i].From*1000)*int64(time.Millisecond)).UTC().Format("15:04:05.000"),
+			time.Unix(0, int64(captionData.Body[i].To*1000)*int64(time.Millisecond)).UTC().Format("15:04:05.000"),
+			captionData.Body[i].Content,
+		)
+	}
+	return []byte(bytes), nil
 }
