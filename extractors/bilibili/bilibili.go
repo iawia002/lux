@@ -372,10 +372,9 @@ func bilibiliDownload(options bilibiliOptions, extractOption types.Options) *typ
 		Captions: map[string]*types.CaptionPart{
 			"danmaku": {
 				Part: types.Part{
-					URL:  fmt.Sprintf("https://comment.bilibili.com/%d.xml", options.cid),
-					Ext:  "xml",
+					URL: fmt.Sprintf("https://comment.bilibili.com/%d.xml", options.cid),
+					Ext: "xml",
 				},
-				Transform: danmakuTransform,
 			},
 			"subtitle": getSubTitleCaptionPart(options.aid, options.cid),
 		},
@@ -404,7 +403,7 @@ func getSubTitleCaptionPart(aid int, cid int) *types.CaptionPart {
 		return nil
 	}
 	return &types.CaptionPart{
-		Part:  types.Part{
+		Part: types.Part{
 			URL: stu.Data.SubtitleInfo.SubtitleList[0].SubtitleUrl,
 			Ext: "srt",
 		},
@@ -413,16 +412,11 @@ func getSubTitleCaptionPart(aid int, cid int) *types.CaptionPart {
 
 }
 
-func danmakuTransform(body []byte) ([]byte, error) {
-	return body, nil
-}
-
 func subtitleTransform(body []byte) ([]byte, error) {
 	bytes := ""
 	captionData := bilibiliSubtitleFormat{}
 	err := json.Unmarshal(body, &captionData)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 

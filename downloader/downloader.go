@@ -78,9 +78,11 @@ func (downloader *Downloader) caption(url, fileName, ext string, transform func(
 		return err
 	}
 
-	body, err = transform(body)
-	if err != nil {
-		return err
+	if transform != nil {
+		body, err = transform(body)
+		if err != nil {
+			return err
+		}
 	}
 
 	filePath, err := utils.FilePath(fileName, ext, downloader.option.FileNameLength, downloader.option.OutputPath, true)
@@ -564,8 +566,10 @@ func (downloader *Downloader) Download(data *types.Data) error {
 	if downloader.option.Caption && data.Captions != nil {
 		fmt.Println("\nDownloading captions...")
 		for k, v := range data.Captions {
-			fmt.Printf("Downloading %s ...\n", k)
-			downloader.caption(v.URL, title, v.Ext, v.Transform)
+			if v != nil {
+				fmt.Printf("Downloading %s ...\n", k)
+				downloader.caption(v.URL, title, v.Ext, v.Transform) // nolint
+			}
 		}
 	}
 
