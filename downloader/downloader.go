@@ -67,8 +67,7 @@ func New(option Options) *Downloader {
 }
 
 // caption downloads danmaku, subtitles, etc
-func (downloader *Downloader) caption(url, fileName, ext string) error {
-	fmt.Println("\nDownloading captions...")
+func (downloader *Downloader) caption(url, fileName, ext string, transform func([]byte) ([]byte, error)) error {
 
 	refer := downloader.option.Refer
 	if refer == "" {
@@ -78,6 +77,14 @@ func (downloader *Downloader) caption(url, fileName, ext string) error {
 	if err != nil {
 		return err
 	}
+
+	if transform != nil {
+		body, err = transform(body)
+		if err != nil {
+			return err
+		}
+	}
+
 	filePath, err := utils.FilePath(fileName, ext, downloader.option.FileNameLength, downloader.option.OutputPath, true)
 	if err != nil {
 		return err
@@ -556,8 +563,14 @@ func (downloader *Downloader) Download(data *types.Data) error {
 	}
 
 	// download caption
-	if downloader.option.Caption && data.Caption != nil {
-		downloader.caption(data.Caption.URL, title, data.Caption.Ext) // nolint
+	if downloader.option.Caption && data.Captions != nil {
+		fmt.Println("\nDownloading captions...")
+		for k, v := range data.Captions {
+			if v != nil {
+				fmt.Printf("Downloading %s ...\n", k)
+				downloader.caption(v.URL, title, v.Ext, v.Transform) // nolint
+			}
+		}
 	}
 
 	// Use aria2 rpc to download

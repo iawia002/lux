@@ -7,6 +7,11 @@ type Part struct {
 	Ext  string `json:"ext"`
 }
 
+type CaptionPart struct {
+	Part
+	Transform func([]byte) ([]byte, error)
+}
+
 // Stream is the data structure for each video stream, eg: 720P, 1080P.
 type Stream struct {
 	// eg: "1080"
@@ -45,7 +50,7 @@ type Data struct {
 	// each stream has it's own Parts and Quality
 	Streams map[string]*Stream `json:"streams"`
 	// danmaku, subtitles, etc
-	Caption *Part `json:"caption"`
+	Captions map[string]*CaptionPart `json:"caption"`
 	// Err is used to record whether an error occurred when extracting the list data
 	Err error `json:"err"`
 }
