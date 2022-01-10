@@ -1,6 +1,7 @@
 package extractors
 
 import (
+	"github.com/iawia002/annie/extractors/hupu"
 	"net/url"
 	"strings"
 
@@ -81,6 +82,7 @@ func init() {
 		"eporner":    eporner.New(),
 		"streamtape": stExtractor,
 		"streamta":   stExtractor, // streamta.pe
+		"hupu":       hupu.New(),
 	}
 }
 
