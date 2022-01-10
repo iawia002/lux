@@ -70,6 +70,11 @@ func main() {
 				Usage:   "Download playlist",
 			},
 			&cli.StringFlag{
+				Name:    "user-agent",
+				Aliases: []string{"u"},
+				Usage:   "Use specified User-Agent",
+			},
+			&cli.StringFlag{
 				Name:    "refer",
 				Aliases: []string{"r"},
 				Usage:   "Use specified Referrer",
