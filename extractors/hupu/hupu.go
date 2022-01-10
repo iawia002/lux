@@ -12,7 +12,7 @@ type hupuData struct {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a hupu extractor.
 func New() types.Extractor {
 	return &extractor{}
 }
