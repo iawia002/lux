@@ -1,9 +1,10 @@
 package hupu
 
 import (
+	"testing"
+
 	"github.com/iawia002/annie/extractors/types"
 	"github.com/iawia002/annie/test"
-	"testing"
 )
 
 func TestHupu(t *testing.T) {

@@ -36,12 +36,9 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if len(urlDesc) > 1 {
 		videoUrl = urlDesc[1]
 	} else {
-		videoUrl = ""
-	}
-
-	if len(videoUrl) < 2 {
 		return nil, types.ErrURLParseFailed
 	}
+
 	size, err := request.Size(videoUrl, url)
 	if err != nil {
 		return nil, err
@@ -61,7 +58,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 	return []*types.Data{
 		{
-			Site:    "Hupu hupu.com",
+			Site:    "虎扑 hupu.com",
 			Title:   title,
 			Type:    types.DataTypeVideo,
 			Streams: streams,
