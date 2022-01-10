@@ -6,10 +6,6 @@ import (
 	"github.com/iawia002/annie/utils"
 )
 
-type hupuData struct {
-	VideoURL string `json:"url"`
-}
-
 type extractor struct{}
 
 // New returns a hupu extractor.
