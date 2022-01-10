@@ -624,6 +624,7 @@ $ annie -j "https://www.bilibili.com/video/av20203945"
 | AcFun      | <https://www.acfun.cn>       | ✓        |          | ✓          |                  |
 | Eporner    | <https://eporner.com>        | ✓        |          |            |                  |
 | StreamTape | <https://streamtape.com>     | ✓        |          |            |                  |
+| 虎扑       | https://hupu.com             | ✓        |          |            |                  |
 
 
 ## Known issues
