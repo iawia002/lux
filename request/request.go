@@ -23,6 +23,7 @@ import (
 var (
 	retryTimes int
 	rawCookie  string
+	userAgent
 	refer      string
 	debug      bool
 )
@@ -31,6 +32,7 @@ var (
 type Options struct {
 	RetryTimes int
 	Cookie     string
+	UserAgent  string
 	Refer      string
 	Debug      bool
 	Silent     bool
@@ -40,6 +42,7 @@ type Options struct {
 func SetOptions(opt Options) {
 	retryTimes = opt.RetryTimes
 	rawCookie = opt.Cookie
+	userAgent = opt.UserAgent
 	refer = opt.Refer
 	debug = opt.Debug
 }
@@ -84,6 +87,10 @@ func Request(method, url string, body io.Reader, headers map[string]string) (*ht
 		}
 	}
 
+	if userAgent != "" {
+		req.Header.Set("User-Agent", userAgent)
+	}
+	
 	if refer != "" {
 		req.Header.Set("Referer", refer)
 	}
