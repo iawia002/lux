@@ -23,7 +23,7 @@ import (
 var (
 	retryTimes int
 	rawCookie  string
-	userAgent
+	userAgent  string
 	refer      string
 	debug      bool
 )
