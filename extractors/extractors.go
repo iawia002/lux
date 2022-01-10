@@ -1,7 +1,6 @@
 package extractors
 
 import (
-	"github.com/iawia002/annie/extractors/hupu"
 	"net/url"
 	"strings"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/iawia002/annie/extractors/facebook"
 	"github.com/iawia002/annie/extractors/geekbang"
 	"github.com/iawia002/annie/extractors/haokan"
+	"github.com/iawia002/annie/extractors/hupu"
 	"github.com/iawia002/annie/extractors/instagram"
 	"github.com/iawia002/annie/extractors/iqiyi"
 	"github.com/iawia002/annie/extractors/mgtv"
