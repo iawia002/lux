@@ -13,6 +13,7 @@ import (
 	"github.com/iawia002/annie/extractors/facebook"
 	"github.com/iawia002/annie/extractors/geekbang"
 	"github.com/iawia002/annie/extractors/haokan"
+	"github.com/iawia002/annie/extractors/hupu"
 	"github.com/iawia002/annie/extractors/instagram"
 	"github.com/iawia002/annie/extractors/iqiyi"
 	"github.com/iawia002/annie/extractors/mgtv"
@@ -81,6 +82,7 @@ func init() {
 		"eporner":    eporner.New(),
 		"streamtape": stExtractor,
 		"streamta":   stExtractor, // streamta.pe
+		"hupu":       hupu.New(),
 	}
 }
 
