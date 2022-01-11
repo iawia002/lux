@@ -236,6 +236,7 @@ func main() {
 			request.SetOptions(request.Options{
 				RetryTimes: int(c.Uint("retry")),
 				Cookie:     cookie,
+				UserAgent:  c.String("user-agent"),
 				Refer:      c.String("refer"),
 				Debug:      c.Bool("debug"),
 				Silent:     c.Bool("silent"),
