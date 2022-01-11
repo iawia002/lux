@@ -90,7 +90,7 @@ func Request(method, url string, body io.Reader, headers map[string]string) (*ht
 	if userAgent != "" {
 		req.Header.Set("User-Agent", userAgent)
 	}
-	
+
 	if refer != "" {
 		req.Header.Set("Referer", refer)
 	}
