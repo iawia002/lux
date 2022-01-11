@@ -70,6 +70,11 @@ func main() {
 				Usage:   "Download playlist",
 			},
 			&cli.StringFlag{
+				Name:    "user-agent",
+				Aliases: []string{"u"},
+				Usage:   "Use specified User-Agent",
+			},
+			&cli.StringFlag{
 				Name:    "refer",
 				Aliases: []string{"r"},
 				Usage:   "Use specified Referrer",
@@ -231,6 +236,7 @@ func main() {
 			request.SetOptions(request.Options{
 				RetryTimes: int(c.Uint("retry")),
 				Cookie:     cookie,
+				UserAgent:  c.String("user-agent"),
 				Refer:      c.String("refer"),
 				Debug:      c.Bool("debug"),
 				Silent:     c.Bool("silent"),
