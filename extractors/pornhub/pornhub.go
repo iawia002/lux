@@ -17,7 +17,7 @@ type pornhubData struct {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a pornhub extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

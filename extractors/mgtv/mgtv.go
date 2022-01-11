@@ -96,7 +96,7 @@ func encodeTk2(str string) string {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a mgtv extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

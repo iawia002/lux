@@ -37,7 +37,7 @@ type vimeo struct {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a vimeo extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

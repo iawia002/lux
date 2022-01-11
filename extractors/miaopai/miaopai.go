@@ -40,7 +40,7 @@ func getRandomString(l int) string {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a miaopai extractor.
 func New() types.Extractor {
 	return &extractor{}
 }
