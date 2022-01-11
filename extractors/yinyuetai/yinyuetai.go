@@ -22,7 +22,7 @@ func genAPI(action string, param string) string {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a yinyuetai extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

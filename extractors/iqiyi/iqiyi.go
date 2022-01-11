@@ -107,7 +107,7 @@ type extractor struct {
 	siteType SiteType
 }
 
-// New returns a youtube extractor.
+// New returns a iqiyi extractor.
 func New(siteType SiteType) types.Extractor {
 	return &extractor{
 		siteType: siteType,

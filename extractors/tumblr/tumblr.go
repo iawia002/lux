@@ -140,7 +140,7 @@ func tumblrVideoDownload(url, html, title string) ([]*types.Data, error) {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a tumblr extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

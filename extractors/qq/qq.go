@@ -170,7 +170,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*types.Stream, er
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a qq extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

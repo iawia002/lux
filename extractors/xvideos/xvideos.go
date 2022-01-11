@@ -77,7 +77,7 @@ func getSrc(html string) []*src {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a xvideos extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

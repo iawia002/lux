@@ -13,7 +13,7 @@ import (
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a douyin extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

@@ -8,7 +8,7 @@ import (
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a universal extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

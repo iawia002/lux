@@ -73,7 +73,7 @@ func geekM3u8(url string) ([]geekURLInfo, error) {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a geekbang extractor.
 func New() types.Extractor {
 	return &extractor{}
 }
