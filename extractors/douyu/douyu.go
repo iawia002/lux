@@ -49,7 +49,7 @@ func douyuM3u8(url string) ([]douyuURLInfo, int64, error) {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a douyu extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

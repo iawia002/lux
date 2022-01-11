@@ -207,7 +207,7 @@ func downloadWeiboTV(url string) ([]*types.Data, error) {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a weibo extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

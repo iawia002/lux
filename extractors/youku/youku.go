@@ -206,7 +206,7 @@ func genData(youkuData data) map[string]*types.Stream {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a youku extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

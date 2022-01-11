@@ -28,7 +28,7 @@ type instagram struct {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a instagram extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

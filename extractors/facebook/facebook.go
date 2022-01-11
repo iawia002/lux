@@ -10,7 +10,7 @@ import (
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a facebook extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

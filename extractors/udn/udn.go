@@ -37,7 +37,7 @@ func prepareEmbedURL(url string) string {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a udn extractor.
 func New() types.Extractor {
 	return &extractor{}
 }

@@ -10,7 +10,7 @@ const referer = "http://www.tangdou.com/html/playlist/view/4173"
 
 type extractor struct{}
 
-// New returns a youtube extractor.
+// New returns a tangdou extractor.
 func New() types.Extractor {
 	return &extractor{}
 }
