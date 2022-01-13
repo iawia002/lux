@@ -5,10 +5,10 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/parser"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/parser"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
 
 type imageList struct {
@@ -103,7 +103,7 @@ func tumblrVideoDownload(url, html, title string) ([]*types.Data, error) {
 	videoURL := videoURLs[1]
 
 	if !strings.Contains(videoURL, "tumblr.com/video") {
-		return nil, errors.New("annie doesn't support this URL right now")
+		return nil, errors.New("lux doesn't support this URL right now")
 	}
 	videoHTML, err := request.Get(videoURL, url, nil)
 	if err != nil {

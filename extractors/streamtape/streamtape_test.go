@@ -3,8 +3,8 @@ package streamtape
 import (
 	"testing"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/test"
+	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/test"
 )
 
 func TestStreamtape(t *testing.T) {
@@ -16,7 +16,7 @@ func TestStreamtape(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:   "https://streamtape.com/e/vkoKlwYPo9F4mRo",
-				Title: "annie.mp4",
+				Title: "lux.mp4",
 			},
 		},
 	}

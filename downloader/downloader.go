@@ -17,9 +17,9 @@ import (
 
 	"github.com/cheggaaa/pb/v3"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
 
 // Options defines options used in downloading.
@@ -497,7 +497,7 @@ func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 func (downloader *Downloader) aria2(title string, stream *types.Stream) error {
 	rpcData := Aria2RPCData{
 		JSONRPC: "2.0",
-		ID:      "annie", // can be modified
+		ID:      "lux", // can be modified
 		Method:  "aria2.addUri",
 	}
 	rpcData.Params[0] = "token:" + downloader.option.Aria2Token
