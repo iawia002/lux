@@ -4,7 +4,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/iawia002/annie/extractors/types"
+	"github.com/iawia002/lux/extractors/types"
 )
 
 // Args Arguments for extractor tests

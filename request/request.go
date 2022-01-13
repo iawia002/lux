@@ -17,7 +17,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/kr/pretty"
 
-	"github.com/iawia002/annie/config"
+	"github.com/iawia002/lux/config"
 )
 
 var (

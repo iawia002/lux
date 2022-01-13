@@ -3,8 +3,8 @@ package weibo
 import (
 	"testing"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/test"
+	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/test"
 )
 
 func TestToken(t *testing.T) {

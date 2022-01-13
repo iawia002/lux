@@ -13,12 +13,12 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/urfave/cli/v2"
 
-	"github.com/iawia002/annie/cookier"
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/iawia002/lux/cookier"
+	"github.com/iawia002/lux/downloader"
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
 
 func main() {
@@ -27,15 +27,15 @@ func main() {
 		cyan := color.New(color.FgCyan)
 		fmt.Fprintf(
 			color.Output,
-			"\n%s: version %s, A fast, simple and clean video downloader.\n\n",
-			cyan.Sprintf("annie"),
+			"\n%s: version %s, A fast and simple video downloader.\n\n",
+			cyan.Sprintf("lux"),
 			blue.Sprintf(c.App.Version),
 		)
 	}
 
 	app := &cli.App{
-		Name:    "annie",
-		Usage:   "A fast, simple and clean video downloader.",
+		Name:    "lux",
+		Usage:   "A fast and simple video downloader.",
 		Version: "v0.11.0",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{

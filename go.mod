@@ -1,4 +1,4 @@
-module github.com/iawia002/annie
+module github.com/iawia002/lux
 
 go 1.16
 

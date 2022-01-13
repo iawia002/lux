@@ -6,7 +6,7 @@ import (
 
 	"github.com/fatih/color"
 
-	"github.com/iawia002/annie/extractors/types"
+	"github.com/iawia002/lux/extractors/types"
 )
 
 var (
@@ -46,7 +46,7 @@ func printStream(stream *types.Stream) {
 	cyan.Printf("     Size:            ") // nolint
 	fmt.Printf("%.2f MiB (%d Bytes)\n", float64(stream.Size)/(1024*1024), stream.Size)
 	cyan.Printf("     # download with: ") // nolint
-	fmt.Printf("annie -f %s ...\n\n", stream.ID)
+	fmt.Printf("lux -f %s ...\n\n", stream.ID)
 }
 
 func printInfo(data *types.Data, sortedStreams []*types.Stream) {

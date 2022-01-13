@@ -3,9 +3,9 @@ package facebook
 import (
 	"fmt"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
 
 type extractor struct{}
