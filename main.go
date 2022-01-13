@@ -36,7 +36,7 @@ func main() {
 	app := &cli.App{
 		Name:    "lux",
 		Usage:   "A fast and simple video downloader.",
-		Version: "v0.11.0",
+		Version: "v0.12.0",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "debug",
