@@ -537,6 +537,10 @@ func (downloader *Downloader) aria2(title string, stream *types.Stream) error {
 
 // Download download urls
 func (downloader *Downloader) Download(data *types.Data) error {
+	if len(data.Streams) == 0 {
+		return fmt.Errorf("no streams in title %s", data.Title)
+	}
+
 	sortedStreams := genSortedStreams(data.Streams)
 	if downloader.option.InfoOnly {
 		printInfo(data, sortedStreams)
