@@ -32,6 +32,7 @@ import (
 	"github.com/iawia002/lux/extractors/universal"
 	"github.com/iawia002/lux/extractors/vimeo"
 	"github.com/iawia002/lux/extractors/weibo"
+	"github.com/iawia002/lux/extractors/ximalaya"
 	"github.com/iawia002/lux/extractors/xvideos"
 	"github.com/iawia002/lux/extractors/yinyuetai"
 	"github.com/iawia002/lux/extractors/youku"
@@ -68,6 +69,7 @@ func init() {
 		"miaopai":    miaopai.New(),
 		"163":        netease.New(),
 		"weibo":      weibo.New(),
+		"ximalaya":   ximalaya.New(),
 		"instagram":  instagram.New(),
 		"twitter":    twitter.New(),
 		"qq":         qq.New(),
