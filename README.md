@@ -621,6 +621,7 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 | Eporner    | <https://eporner.com>        | ✓        |          |            |                  |
 | StreamTape | <https://streamtape.com>     | ✓        |          |            |                  |
 | 虎扑       | https://hupu.com             | ✓        |          |            |                  |
+| 喜马拉雅   | https://www.ximalaya.com/    | ✓        |          |            |                  |
 
 
 ## Known issues
