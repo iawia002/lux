@@ -30,7 +30,6 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 
 	var videoUrl string
-
 	videoDesc := utils.MatchOneOf(html, `//videotx-platform.cdn.huya.com/(.*)" poster=(.+?)`)
 	if len(videoDesc) > 1 {
 		videoUrl = huyaVideoHost + videoDesc[1]
