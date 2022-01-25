@@ -51,9 +51,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 
 	realURL := ximalaya.Data.Src
 	urlData := make([]*types.Part, 0)
-	var totalSize int64
-
-	totalSize, err = request.Size(realURL, url)
+	totalSize, err := request.Size(realURL, url)
 	if err != nil {
 		return nil, err
 	}
