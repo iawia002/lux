@@ -55,11 +55,14 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
-
+	_, ext, err := utils.GetNameAndExt(realURL)
+	if err != nil {
+		return nil, err
+	}
 	urlData = append(urlData, &types.Part{
 		URL:  realURL,
 		Size: totalSize,
-		Ext:  "m4a",
+		Ext:  ext,
 	})
 	streams := map[string]*types.Stream{
 		"default": {
