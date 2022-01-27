@@ -89,7 +89,7 @@ $ brew install lux
 
 ### Arch Linux
 
-For Arch Users [AUR](https://aur.archlinux.org/packages/lux) package is available.
+For Arch Users [AUR](https://aur.archlinux.org/packages/lux-dl/) package is available.
 
 ### Void Linux
 
