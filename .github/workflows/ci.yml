@@ -1,5 +1,10 @@
 name: ci
-on: [pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    # run ci weekly
+    - cron: "0 0 * * 0"
 jobs:
   ci:
     runs-on: ${{ matrix.os }}
