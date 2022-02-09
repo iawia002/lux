@@ -12,10 +12,11 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/robertkrimen/otto"
+
 	"github.com/iawia002/lux/extractors/types"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
-	"github.com/robertkrimen/otto"
 )
 
 type pornhubData struct {
