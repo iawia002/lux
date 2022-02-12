@@ -332,12 +332,15 @@ func (downloader *Downloader) multiThreadSave(dataPart *types.Part, refer, fileN
 
 	wgp := utils.NewWaitGroupPool(downloader.option.ThreadNumber)
 	var errs []error
+	var mu sync.Mutex
 	for _, part := range unfinishedPart {
 		wgp.Add()
 		go func(part *FilePartMeta) {
 			file, err := os.OpenFile(filePartPath(filePath, part), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 			if err != nil {
+				mu.Lock()
 				errs = append(errs, err)
+				mu.Unlock()
 				return
 			}
 			defer func() {
@@ -360,7 +363,9 @@ func (downloader *Downloader) multiThreadSave(dataPart *types.Part, refer, fileN
 				// Only write part to new file.
 				err = writeFilePartMeta(file, part)
 				if err != nil {
+					mu.Lock()
 					errs = append(errs, err)
+					mu.Unlock()
 					return
 				}
 			}
@@ -374,7 +379,9 @@ func (downloader *Downloader) multiThreadSave(dataPart *types.Part, refer, fileN
 						remainingSize -= chunkSize
 						break
 					} else if i+1 >= downloader.option.RetryTimes {
+						mu.Lock()
 						errs = append(errs, err)
+						mu.Unlock()
 						return
 					}
 					temp += written
