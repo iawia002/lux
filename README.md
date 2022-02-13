@@ -60,14 +60,13 @@
 - [Similar projects](#similar-projects)
 - [License](#license)
 
-
 ## Installation
 
 ### Prerequisites
 
 The following dependencies are required and must be installed separately.
 
-* **[FFmpeg](https://www.ffmpeg.org)**
+- **[FFmpeg](https://www.ffmpeg.org)**
 
 > **Note**: FFmpeg does not affect the download, only affects the final file merge.
 
@@ -354,6 +353,7 @@ Use `-n` option to set the number of download threads(default is 10, only works 
 > **Special Tips:** Use too many threads in **mgtv** download will cause HTTP 403 error, we recommend setting the number of threads to **1**.
 
 ### Short link
+
 #### bilibili
 
 You can just use `av` or `ep` number to download bilibili's video:
@@ -384,7 +384,6 @@ $ lux -i ep198381 av21877586
 ### Use specified Referrer
 
 A Referrer can be used for the request with the `-r` option:
-
 
 ```console
 $ lux -r "https://www.bilibili.com/video/av20383055/" "http://cn-scnc1-dx.acgvideo.com/"
@@ -586,44 +585,42 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
     	Aria2 RPC Token
 ```
 
-
 ## Supported Sites
 
-| Site       | URL                          | 🎬 Videos | 🌁 Images | 🔊 Audio | 📚 Playlist | 🍪 VIP adaptation |
-| ---------- | ---------------------------- | --------- | --------- | -------- | ----------- | ----------------- |
-| 抖音       | <https://www.douyin.com>     | ✓         | ✓         |          |             |                   |
-| 哔哩哔哩   | <https://www.bilibili.com>   | ✓         |           |          | ✓           | ✓                 |
-| 半次元     | <https://bcy.net>            |           | ✓         |          |             |                   |
-| pixivision | <https://www.pixivision.net> |           | ✓         |          |             |                   |
-| 优酷       | <https://www.youku.com>      | ✓         |           |          |             | ✓                 |
-| YouTube    | <https://www.youtube.com>    | ✓         |           |          | ✓           |                   |
-| 爱奇艺     | <https://www.iqiyi.com>      | ✓         |           |          |             |                   |
-| 芒果TV     | <https://www.mgtv.com>       | ✓         |           |          |             |                   |
-| 糖豆广场舞 | <http://www.tangdou.com>     | ✓         |           |          | ✓           |                   |
-| Tumblr     | <https://www.tumblr.com>     | ✓         | ✓         |          |             |                   |
-| Vimeo      | <https://vimeo.com>          | ✓         |           |          |             |                   |
-| Facebook   | <https://facebook.com>       | ✓         |           |          |             |                   |
-| 斗鱼视频   | <https://v.douyu.com>        | ✓         |           |          |             |                   |
-| 秒拍       | <https://www.miaopai.com>    | ✓         |           |          |             |                   |
-| 微博       | <https://weibo.com>          | ✓         |           |          |             |                   |
-| Instagram  | <https://www.instagram.com>  | ✓         | ✓         |          |             |                   |
-| Twitter    | <https://twitter.com>        | ✓         |           |          |             |                   |
-| 腾讯视频   | <https://v.qq.com>           | ✓         |           |          |             |                   |
-| 网易云音乐 | <https://music.163.com>      | ✓         |           |          |             |                   |
-| 音悦台     | <https://yinyuetai.com>      | ✓         |           |          |             |                   |
-| 极客时间   | <https://time.geekbang.org>  | ✓         |           |          |             |                   |
-| Pornhub    | <https://pornhub.com>        | ✓         |           |          |             |                   |
-| XVIDEOS    | <https://xvideos.com>        | ✓         |           |          |             |                   |
-| 聯合新聞網 | <https://udn.com>            | ✓         |           |          |             |                   |
-| TikTok     | <https://www.tiktok.com>     | ✓         |           |          |             |                   |
-| 好看视频   | <https://haokan.baidu.com>   | ✓         |           |          |             |                   |
-| AcFun      | <https://www.acfun.cn>       | ✓         |           |          | ✓           |                   |
-| Eporner    | <https://eporner.com>        | ✓         |           |          |             |                   |
-| StreamTape | <https://streamtape.com>     | ✓         |           |          |             |                   |
-| 虎扑       | <https://hupu.com>           | ✓         |           |          |             |                   |
-| 虎牙视频   | <https://v.huya.com>         | ✓         |           |          |             |                   |
-| 喜马拉雅   | <https://www.ximalaya.com>   |           |           | ✓        |             |                   |
-
+| Site       | URL                          | 🎬 Videos | 🌁 Images | 🔊 Audio | 📚 Playlist | 🍪 VIP adaptation | Build Status                                                                                                                                                                |
+| ---------- | ---------------------------- | --------- | --------- | -------- | ----------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 抖音       | <https://www.douyin.com>     | ✓         | ✓         |          |             |                   | [![douyin](https://github.com/iawia002/lux/actions/workflows/stream_douyin.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_douyin.yml)             |
+| 哔哩哔哩   | <https://www.bilibili.com>   | ✓         |           |          | ✓           | ✓                 | [![bilibili](https://github.com/iawia002/lux/actions/workflows/stream_bilibili.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_bilibili.yml)       |
+| 半次元     | <https://bcy.net>            |           | ✓         |          |             |                   | [![bcy](https://github.com/iawia002/lux/actions/workflows/stream_bcy.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_bcy.yml)                      |
+| pixivision | <https://www.pixivision.net> |           | ✓         |          |             |                   | [![pixivision](https://github.com/iawia002/lux/actions/workflows/stream_pixivision.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_pixivision.yml) |
+| 优酷       | <https://www.youku.com>      | ✓         |           |          |             | ✓                 | [![youku](https://github.com/iawia002/lux/actions/workflows/stream_youku.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_youku.yml)                |
+| YouTube    | <https://www.youtube.com>    | ✓         |           |          | ✓           |                   | [![youtube](https://github.com/iawia002/lux/actions/workflows/stream_youtube.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_youtube.yml)          |
+| 爱奇艺     | <https://www.iqiyi.com>      | ✓         |           |          |             |                   | [![iqiyi](https://github.com/iawia002/lux/actions/workflows/stream_iqiyi.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_iqiyi.yml)                |
+| 芒果 TV    | <https://www.mgtv.com>       | ✓         |           |          |             |                   | [![mgtv](https://github.com/iawia002/lux/actions/workflows/stream_mgtv.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_mgtv.yml)                   |
+| 糖豆广场舞 | <http://www.tangdou.com>     | ✓         |           |          | ✓           |                   | [![tangdou](https://github.com/iawia002/lux/actions/workflows/stream_tangdou.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_tangdou.yml)          |
+| Tumblr     | <https://www.tumblr.com>     | ✓         | ✓         |          |             |                   | [![tumblr](https://github.com/iawia002/lux/actions/workflows/stream_tumblr.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_tumblr.yml)             |
+| Vimeo      | <https://vimeo.com>          | ✓         |           |          |             |                   | [![vimeo](https://github.com/iawia002/lux/actions/workflows/stream_vimeo.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_vimeo.yml)                |
+| Facebook   | <https://facebook.com>       | ✓         |           |          |             |                   | [![facebook](https://github.com/iawia002/lux/actions/workflows/stream_facebook.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_facebook.yml)       |
+| 斗鱼视频   | <https://v.douyu.com>        | ✓         |           |          |             |                   | [![douyu](https://github.com/iawia002/lux/actions/workflows/stream_douyu.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_douyu.yml)                |
+| 秒拍       | <https://www.miaopai.com>    | ✓         |           |          |             |                   | [![miaopai](https://github.com/iawia002/lux/actions/workflows/stream_miaopai.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_miaopai.yml)          |
+| 微博       | <https://weibo.com>          | ✓         |           |          |             |                   | [![weibo](https://github.com/iawia002/lux/actions/workflows/stream_weibo.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_weibo.yml)                |
+| Instagram  | <https://www.instagram.com>  | ✓         | ✓         |          |             |                   | [![instagram](https://github.com/iawia002/lux/actions/workflows/stream_instagram.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_instagram.yml)    |
+| Twitter    | <https://twitter.com>        | ✓         |           |          |             |                   | [![twitter](https://github.com/iawia002/lux/actions/workflows/stream_twitter.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_twitter.yml)          |
+| 腾讯视频   | <https://v.qq.com>           | ✓         |           |          |             |                   | [![qq](https://github.com/iawia002/lux/actions/workflows/stream_qq.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_qq.yml)                         |
+| 网易云音乐 | <https://music.163.com>      | ✓         |           |          |             |                   | [![netease](https://github.com/iawia002/lux/actions/workflows/stream_netease.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_netease.yml)          |
+| 音悦台     | <https://yinyuetai.com>      | ✓         |           |          |             |                   | [![yinyuetai](https://github.com/iawia002/lux/actions/workflows/stream_yinyuetai.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_yinyuetai.yml)    |
+| 极客时间   | <https://time.geekbang.org>  | ✓         |           |          |             |                   | [![geekbang](https://github.com/iawia002/lux/actions/workflows/stream_geekbang.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_geekbang.yml)       |
+| Pornhub    | <https://pornhub.com>        | ✓         |           |          |             |                   | [![pornhub](https://github.com/iawia002/lux/actions/workflows/stream_pornhub.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_pornhub.yml)          |
+| XVIDEOS    | <https://xvideos.com>        | ✓         |           |          |             |                   | [![xvideos](https://github.com/iawia002/lux/actions/workflows/stream_xvideos.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_xvideos.yml)          |
+| 聯合新聞網 | <https://udn.com>            | ✓         |           |          |             |                   | [![udn](https://github.com/iawia002/lux/actions/workflows/stream_udn.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_udn.yml)                      |
+| TikTok     | <https://www.tiktok.com>     | ✓         |           |          |             |                   | [![tiktok](https://github.com/iawia002/lux/actions/workflows/stream_tiktok.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_tiktok.yml)             |
+| 好看视频   | <https://haokan.baidu.com>   | ✓         |           |          |             |                   | [![haokan](https://github.com/iawia002/lux/actions/workflows/stream_haokan.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_haokan.yml)             |
+| AcFun      | <https://www.acfun.cn>       | ✓         |           |          | ✓           |                   | [![acfun](https://github.com/iawia002/lux/actions/workflows/stream_acfun.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_acfun.yml)                |
+| Eporner    | <https://eporner.com>        | ✓         |           |          |             |                   | [![eporner](https://github.com/iawia002/lux/actions/workflows/stream_eporner.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_eporner.yml)          |
+| StreamTape | <https://streamtape.com>     | ✓         |           |          |             |                   | [![streamtape](https://github.com/iawia002/lux/actions/workflows/stream_streamtape.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_streamtape.yml) |
+| 虎扑       | <https://hupu.com>           | ✓         |           |          |             |                   | [![hupu](https://github.com/iawia002/lux/actions/workflows/stream_hupu.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_hupu.yml)                   |
+| 虎牙视频   | <https://v.huya.com>         | ✓         |           |          |             |                   | [![huya](https://github.com/iawia002/lux/actions/workflows/stream_huya.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_huya.yml)                   |
+| 喜马拉雅   | <https://www.ximalaya.com>   |           |           | ✓        |             |                   | [![ximalaya](https://github.com/iawia002/lux/actions/workflows/stream_ximalaya.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_ximalaya.yml)       |
 
 ## Known issues
 
@@ -632,7 +629,6 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 优酷的 `ccode` 经常变化导致 lux 不可用，如果你知道有新的可用的 `ccode`，可以直接使用 `lux -ccode ...` 而不用等待 lux 更新（当然，也欢迎你给我们提一个 Pull request 来更新默认的 `ccode`）
 
 最好是每次下载都附带登录过的 Cookie 以避免部分 `ccode` 的问题
-
 
 ## Contributing
 
@@ -646,13 +642,11 @@ Thanks for [JetBrains](https://www.jetbrains.com/?from=lux) for the wonderful ID
 
 Code with ❤️ by [iawia002](https://github.com/iawia002) and lovely [contributors](https://github.com/iawia002/lux/graphs/contributors)
 
-
 ## Similar projects
 
-* [youtube-dl](https://github.com/rg3/youtube-dl)
-* [you-get](https://github.com/soimort/you-get)
-* [ytdl](https://github.com/rylio/ytdl)
-
+- [youtube-dl](https://github.com/rg3/youtube-dl)
+- [you-get](https://github.com/soimort/you-get)
+- [ytdl](https://github.com/rylio/ytdl)
 
 ## License
 
