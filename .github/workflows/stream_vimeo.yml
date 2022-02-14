@@ -3,11 +3,11 @@ name: vimeo
 on:
   push:
     paths:
-      - "extractors/vimeo/*.go"
+      - "extractors/stream/vimeo/*.go"
       - ".github/workflows/stream_vimeo.yml"
   pull_request:
     paths:
-      - "extractors/vimeo/*.go"
+      - "extractors/stream/vimeo/*.go"
       - ".github/workflows/stream_vimeo.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/vimeo
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/vimeo
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)

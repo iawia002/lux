@@ -3,11 +3,11 @@ name: weibo
 on:
   push:
     paths:
-      - "extractors/weibo/*.go"
+      - "extractors/stream/weibo/*.go"
       - ".github/workflows/stream_weibo.yml"
   pull_request:
     paths:
-      - "extractors/weibo/*.go"
+      - "extractors/stream/weibo/*.go"
       - ".github/workflows/stream_weibo.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/weibo
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/weibo
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)

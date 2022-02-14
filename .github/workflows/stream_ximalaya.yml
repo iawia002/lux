@@ -3,11 +3,11 @@ name: ximalaya
 on:
   push:
     paths:
-      - "extractors/ximalaya/*.go"
+      - "extractors/stream/ximalaya/*.go"
       - ".github/workflows/stream_ximalaya.yml"
   pull_request:
     paths:
-      - "extractors/ximalaya/*.go"
+      - "extractors/stream/ximalaya/*.go"
       - ".github/workflows/stream_ximalaya.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/ximalaya
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/ximalaya
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)

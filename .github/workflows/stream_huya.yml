@@ -3,11 +3,11 @@ name: huya
 on:
   push:
     paths:
-      - "extractors/huya/*.go"
+      - "extractors/stream/huya/*.go"
       - ".github/workflows/stream_huya.yml"
   pull_request:
     paths:
-      - "extractors/huya/*.go"
+      - "extractors/stream/huya/*.go"
       - ".github/workflows/stream_huya.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/huya
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/huya
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)

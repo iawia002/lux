@@ -3,11 +3,11 @@ name: miaopai
 on:
   push:
     paths:
-      - "extractors/miaopai/*.go"
+      - "extractors/stream/miaopai/*.go"
       - ".github/workflows/stream_miaopai.yml"
   pull_request:
     paths:
-      - "extractors/miaopai/*.go"
+      - "extractors/stream/miaopai/*.go"
       - ".github/workflows/stream_miaopai.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/miaopai
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/miaopai
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)

@@ -3,11 +3,11 @@ name: geekbang
 on:
   push:
     paths:
-      - "extractors/geekbang/*.go"
+      - "extractors/stream/geekbang/*.go"
       - ".github/workflows/stream_geekbang.yml"
   pull_request:
     paths:
-      - "extractors/geekbang/*.go"
+      - "extractors/stream/geekbang/*.go"
       - ".github/workflows/stream_geekbang.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/geekbang
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/geekbang
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)

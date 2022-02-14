@@ -3,11 +3,11 @@ name: yinyuetai
 on:
   push:
     paths:
-      - "extractors/yinyuetai/*.go"
+      - "extractors/stream/yinyuetai/*.go"
       - ".github/workflows/stream_yinyuetai.yml"
   pull_request:
     paths:
-      - "extractors/yinyuetai/*.go"
+      - "extractors/stream/yinyuetai/*.go"
       - ".github/workflows/stream_yinyuetai.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/yinyuetai
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/yinyuetai
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)

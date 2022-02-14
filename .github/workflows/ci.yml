@@ -36,6 +36,6 @@ jobs:
     - name: Test
       env:
         GOFLAGS: -mod=mod
-      run: go test $(go list ./... | grep -v /extractors/) -race -coverpkg=./... -coverprofile=coverage.txt
+      run: go test $(go list ./... | grep -v /extractors/stream) -race -coverpkg=./... -coverprofile=coverage.txt
     - name: Send coverage
       run: bash <(curl -s https://codecov.io/bash)

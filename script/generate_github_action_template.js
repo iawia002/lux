@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 
-const extractorDir = path.join(__dirname, "..", "extractors");
+const extractorDir = path.join(__dirname, "..", "extractors", "stream");
 const githubCIDir = path.join(__dirname, "..", ".github", "workflows");
 const CITemplate = fs.readFileSync(path.join(__dirname, "github_action_template.yml"), {
   encoding: "utf-8",

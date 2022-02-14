@@ -3,11 +3,11 @@ name: qq
 on:
   push:
     paths:
-      - "extractors/qq/*.go"
+      - "extractors/stream/qq/*.go"
       - ".github/workflows/stream_qq.yml"
   pull_request:
     paths:
-      - "extractors/qq/*.go"
+      - "extractors/stream/qq/*.go"
       - ".github/workflows/stream_qq.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/qq
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/qq
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)

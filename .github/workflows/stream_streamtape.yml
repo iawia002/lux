@@ -3,11 +3,11 @@ name: streamtape
 on:
   push:
     paths:
-      - "extractors/streamtape/*.go"
+      - "extractors/stream/streamtape/*.go"
       - ".github/workflows/stream_streamtape.yml"
   pull_request:
     paths:
-      - "extractors/streamtape/*.go"
+      - "extractors/stream/streamtape/*.go"
       - ".github/workflows/stream_streamtape.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/streamtape
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/streamtape
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)

@@ -3,11 +3,11 @@ name: bcy
 on:
   push:
     paths:
-      - "extractors/bcy/*.go"
+      - "extractors/stream/bcy/*.go"
       - ".github/workflows/stream_bcy.yml"
   pull_request:
     paths:
-      - "extractors/bcy/*.go"
+      - "extractors/stream/bcy/*.go"
       - ".github/workflows/stream_bcy.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,7 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/bcy
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/bcy
 
       - name: Send coverage
         run: bash <(curl -s https://codecov.io/bash)
