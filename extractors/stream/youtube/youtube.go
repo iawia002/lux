@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/kkdai/youtube/v2"
+	youtube "github.com/kkdai/youtube/v2"
 
 	"github.com/iawia002/lux/extractors/types"
 	"github.com/iawia002/lux/request"
