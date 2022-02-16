@@ -3,12 +3,12 @@ name: { { module } }
 on:
   push:
     paths:
-      - "extractors/tiktok/*.go"
-      - ".github/workflows/stream_tiktok.yml"
+      - "extractors/types/*.go"
+      - ".github/workflows/stream_types.yml"
   pull_request:
     paths:
-      - "extractors/tiktok/*.go"
-      - ".github/workflows/stream_tiktok.yml"
+      - "extractors/types/*.go"
+      - ".github/workflows/stream_types.yml"
   schedule:
     # run ci weekly
     - cron: "0 0 * * 0"
@@ -28,4 +28,4 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/tiktok
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/types

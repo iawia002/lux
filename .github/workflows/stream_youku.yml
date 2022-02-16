@@ -1,13 +1,13 @@
-name: youku
+name: { { module } }
 
 on:
   push:
     paths:
-      - "extractors/stream/youku/*.go"
+      - "extractors/youku/*.go"
       - ".github/workflows/stream_youku.yml"
   pull_request:
     paths:
-      - "extractors/stream/youku/*.go"
+      - "extractors/youku/*.go"
       - ".github/workflows/stream_youku.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,4 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/youku
-
-      - name: Send coverage
-        run: bash <(curl -s https://codecov.io/bash)
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/youku

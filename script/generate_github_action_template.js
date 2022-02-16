@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 
-const extractorDir = path.join(__dirname, "..", "extractors", "stream");
+const extractorDir = path.join(__dirname, "..", "extractors");
 const githubCIDir = path.join(__dirname, "..", ".github", "workflows");
 const CITemplate = fs.readFileSync(path.join(__dirname, "github_action_template.yml"), {
   encoding: "utf-8",
@@ -12,6 +12,8 @@ function generateCITemplate(moduleName) {
 }
 
 const modules = fs.readdirSync(extractorDir);
+
+const ignoreFolder = ['types', 'universal']
 
 for (const m of modules) {
   const filepath = path.join(extractorDir, m);

@@ -1,13 +1,13 @@
-name: douyin
+name: { { module } }
 
 on:
   push:
     paths:
-      - "extractors/stream/douyin/*.go"
+      - "extractors/douyin/*.go"
       - ".github/workflows/stream_douyin.yml"
   pull_request:
     paths:
-      - "extractors/stream/douyin/*.go"
+      - "extractors/douyin/*.go"
       - ".github/workflows/stream_douyin.yml"
   schedule:
     # run ci weekly
@@ -28,7 +28,4 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/stream/douyin
-
-      - name: Send coverage
-        run: bash <(curl -s https://codecov.io/bash)
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/douyin
