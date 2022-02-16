@@ -1,4 +1,4 @@
-name: { { module } }
+name: youtube
 
 on:
   push:

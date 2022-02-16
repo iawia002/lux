@@ -1,4 +1,4 @@
-name: { { module } }
+name: tumblr
 
 on:
   push:

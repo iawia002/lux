@@ -1,4 +1,4 @@
-name: { { module } }
+name: hupu
 
 on:
   push:

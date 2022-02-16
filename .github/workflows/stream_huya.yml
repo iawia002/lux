@@ -1,4 +1,4 @@
-name: { { module } }
+name: huya
 
 on:
   push:

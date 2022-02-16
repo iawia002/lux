@@ -18,7 +18,7 @@ const ignoreFolder = ['types', 'universal']
 for (const m of modules) {
   const filepath = path.join(extractorDir, m);
 
-  if (ignoreFolder.includes(n)) continue
+  if (ignoreFolder.includes(m)) continue
 
   const statInfo = fs.statSync(filepath);
 

@@ -1,4 +1,4 @@
-name: { { module } }
+name: instagram
 
 on:
   push:
