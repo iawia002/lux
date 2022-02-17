@@ -3,20 +3,24 @@ package facebook
 import (
 	"fmt"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
 
+func init() {
+	extractors.Register("facebook", New())
+}
+
 type extractor struct{}
 
 // New returns a facebook extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	var err error
 	html, err := request.Get(url, url, nil)
 	if err != nil {
@@ -24,11 +28,11 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 	titles := utils.MatchOneOf(html, `<title id="pageTitle">(.+)</title>`)
 	if titles == nil || len(titles) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 	title := titles[1]
 
-	streams := make(map[string]*types.Stream, 2)
+	streams := make(map[string]*extractors.Stream, 2)
 	for _, quality := range []string{"sd", "hd"} {
 		srcElement := utils.MatchOneOf(
 			html, fmt.Sprintf(`%s_src_no_ratelimit:"(.+?)"`, quality),
@@ -42,23 +46,23 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		if err != nil {
 			return nil, err
 		}
-		urlData := &types.Part{
+		urlData := &extractors.Part{
 			URL:  u,
 			Size: size,
 			Ext:  "mp4",
 		}
-		streams[quality] = &types.Stream{
-			Parts:   []*types.Part{urlData},
+		streams[quality] = &extractors.Stream{
+			Parts:   []*extractors.Part{urlData},
 			Size:    size,
 			Quality: quality,
 		}
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "Facebook facebook.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

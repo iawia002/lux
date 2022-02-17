@@ -7,10 +7,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("qq", New())
+}
 
 type qqVideoInfo struct {
 	Fl struct {
@@ -60,7 +64,7 @@ func getVinfo(vid, defn, refer string) (qqVideoInfo, error) {
 	}
 	jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
 	if jsonStrings == nil || len(jsonStrings) < 2 {
-		return qqVideoInfo{}, types.ErrURLParseFailed
+		return qqVideoInfo{}, extractors.ErrURLParseFailed
 	}
 	jsonString := jsonStrings[1]
 	var data qqVideoInfo
@@ -70,8 +74,8 @@ func getVinfo(vid, defn, refer string) (qqVideoInfo, error) {
 	return data, nil
 }
 
-func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*types.Stream, error) {
-	streams := make(map[string]*types.Stream)
+func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*extractors.Stream, error) {
+	streams := make(map[string]*extractors.Stream)
 	var vkey string
 	// number of fragments
 	var clips int
@@ -107,7 +111,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*types.Stream, er
 			}
 		}
 
-		var urls []*types.Part
+		var urls []*extractors.Part
 		var totalSize int64
 		var filename string
 		for part := 1; part < clips+1; part++ {
@@ -133,7 +137,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*types.Stream, er
 			}
 			jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
 			if jsonStrings == nil || len(jsonStrings) < 2 {
-				return nil, types.ErrURLParseFailed
+				return nil, extractors.ErrURLParseFailed
 			}
 			jsonString := jsonStrings[1]
 
@@ -151,7 +155,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*types.Stream, er
 			if err != nil {
 				return nil, err
 			}
-			urlData := &types.Part{
+			urlData := &extractors.Part{
 				URL:  realURL,
 				Size: size,
 				Ext:  "mp4",
@@ -159,7 +163,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*types.Stream, er
 			urls = append(urls, urlData)
 			totalSize += size
 		}
-		streams[fi.Name] = &types.Stream{
+		streams[fi.Name] = &extractors.Stream{
 			Parts:   urls,
 			Size:    totalSize,
 			Quality: fi.Cname,
@@ -171,15 +175,15 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*types.Stream, er
 type extractor struct{}
 
 // New returns a qq extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	vids := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)
 	if vids == nil || len(vids) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 	vid := vids[1]
 
@@ -193,7 +197,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 			u, `vid=(\w+)`, `vid:\s*["'](\w+)`, `vid\s*=\s*["']\s*(\w+)`,
 		)
 		if vids == nil || len(vids) < 2 {
-			return nil, types.ErrURLParseFailed
+			return nil, extractors.ErrURLParseFailed
 		}
 		vid = vids[1]
 	}
@@ -213,11 +217,11 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "腾讯视频 v.qq.com",
 			Title:   data.Vl.Vi[0].Ti,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

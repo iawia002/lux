@@ -5,10 +5,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("vimeo", New())
+}
 
 type vimeoProgressive struct {
 	Profile int    `json:"profile"`
@@ -38,12 +42,12 @@ type vimeo struct {
 type extractor struct{}
 
 // New returns a vimeo extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	var (
 		html, vid string
 		err       error
@@ -62,7 +66,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 	jsonStrings := utils.MatchOneOf(html, `var \w+\s?=\s?({.+?});`)
 	if jsonStrings == nil || len(jsonStrings) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 	jsonString := jsonStrings[1]
 
@@ -71,30 +75,30 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 
-	streams := make(map[string]*types.Stream, len(vimeoData.Request.Files.Progressive))
+	streams := make(map[string]*extractors.Stream, len(vimeoData.Request.Files.Progressive))
 	var size int64
 	for _, video := range vimeoData.Request.Files.Progressive {
 		size, err = request.Size(video.URL, url)
 		if err != nil {
 			return nil, err
 		}
-		urlData := &types.Part{
+		urlData := &extractors.Part{
 			URL:  video.URL,
 			Size: size,
 			Ext:  "mp4",
 		}
-		streams[strconv.Itoa(video.Profile)] = &types.Stream{
-			Parts:   []*types.Part{urlData},
+		streams[strconv.Itoa(video.Profile)] = &extractors.Stream{
+			Parts:   []*extractors.Part{urlData},
 			Size:    size,
 			Quality: video.Quality,
 		}
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "Vimeo vimeo.com",
 			Title:   vimeoData.Video.Title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

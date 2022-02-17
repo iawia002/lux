@@ -17,7 +17,7 @@ import (
 
 	"github.com/cheggaaa/pb/v3"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
@@ -118,7 +118,7 @@ func (downloader *Downloader) writeFile(url string, file *os.File, headers map[s
 	return written, nil
 }
 
-func (downloader *Downloader) save(part *types.Part, refer, fileName string) error {
+func (downloader *Downloader) save(part *extractors.Part, refer, fileName string) error {
 	filePath, err := utils.FilePath(fileName, part.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, false)
 	if err != nil {
 		return err
@@ -216,7 +216,7 @@ func (downloader *Downloader) save(part *types.Part, refer, fileName string) err
 	return nil
 }
 
-func (downloader *Downloader) multiThreadSave(dataPart *types.Part, refer, fileName string) error {
+func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, fileName string) error {
 	filePath, err := utils.FilePath(fileName, dataPart.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, false)
 	if err != nil {
 		return err
@@ -501,7 +501,7 @@ func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 	return err
 }
 
-func (downloader *Downloader) aria2(title string, stream *types.Stream) error {
+func (downloader *Downloader) aria2(title string, stream *extractors.Stream) error {
 	rpcData := Aria2RPCData{
 		JSONRPC: "2.0",
 		ID:      "lux", // can be modified
@@ -543,7 +543,7 @@ func (downloader *Downloader) aria2(title string, stream *types.Stream) error {
 }
 
 // Download download urls
-func (downloader *Downloader) Download(data *types.Data) error {
+func (downloader *Downloader) Download(data *extractors.Data) error {
 	if len(data.Streams) == 0 {
 		return fmt.Errorf("no streams in title %s", data.Title)
 	}
@@ -642,7 +642,7 @@ func (downloader *Downloader) Download(data *types.Data) error {
 		parts[index] = partFilePath
 
 		wgp.Add()
-		go func(part *types.Part, fileName string) {
+		go func(part *extractors.Part, fileName string) {
 			defer wgp.Done()
 			err := downloader.save(part, data.URL, fileName)
 			if err != nil {
@@ -658,7 +658,7 @@ func (downloader *Downloader) Download(data *types.Data) error {
 	}
 	downloader.bar.Finish()
 
-	if data.Type != types.DataTypeVideo {
+	if data.Type != extractors.DataTypeVideo {
 		return nil
 	}
 

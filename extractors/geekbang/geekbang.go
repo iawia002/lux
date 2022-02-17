@@ -7,10 +7,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("geekbang", New())
+}
 
 type geekData struct {
 	Code  int             `json:"code"`
@@ -74,16 +78,16 @@ func geekM3u8(url string) ([]geekURLInfo, error) {
 type extractor struct{}
 
 // New returns a geekbang extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Data, error) {
 	var err error
 	matches := utils.MatchOneOf(url, `https?://time.geekbang.org/course/detail/(\d+)-(\d+)`)
 	if matches == nil || len(matches) < 3 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 
 	// Get video information
@@ -140,7 +144,7 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 
 	title := data.Data.Title
 
-	streams := make(map[string]*types.Stream, len(playInfo.PlayInfoList.PlayInfo))
+	streams := make(map[string]*extractors.Stream, len(playInfo.PlayInfoList.PlayInfo))
 
 	for _, media := range playInfo.PlayInfoList.PlayInfo {
 		m3u8URLs, err := geekM3u8(media.URL)
@@ -149,26 +153,26 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 			return nil, err
 		}
 
-		urls := make([]*types.Part, len(m3u8URLs))
+		urls := make([]*extractors.Part, len(m3u8URLs))
 		for index, u := range m3u8URLs {
-			urls[index] = &types.Part{
+			urls[index] = &extractors.Part{
 				URL:  u.URL,
 				Size: u.Size,
 				Ext:  "ts",
 			}
 		}
 
-		streams[media.Definition] = &types.Stream{
+		streams[media.Definition] = &extractors.Stream{
 			Parts: urls,
 			Size:  media.Size,
 		}
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "极客时间 geekbang.org",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

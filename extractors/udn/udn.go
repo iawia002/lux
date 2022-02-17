@@ -4,10 +4,14 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("udn", New())
+}
 
 const (
 	startFlag = `',
@@ -38,15 +42,15 @@ func prepareEmbedURL(url string) string {
 type extractor struct{}
 
 // New returns a udn extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	url = prepareEmbedURL(url)
 	if len(url) == 0 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 
 	html, err := request.Get(url, url, nil)
@@ -73,24 +77,24 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
-	urlData := &types.Part{
+	urlData := &extractors.Part{
 		URL:  srcURL,
 		Size: size,
 		Ext:  "mp4",
 	}
 	quality := "normal"
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		quality: {
-			Parts:   []*types.Part{urlData},
+			Parts:   []*extractors.Part{urlData},
 			Size:    size,
 			Quality: quality,
 		},
 	}
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "udn udn.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

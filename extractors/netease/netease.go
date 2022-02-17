@@ -5,20 +5,24 @@ import (
 	netURL "net/url"
 	"strings"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
 
+func init() {
+	extractors.Register("163", New())
+}
+
 type extractor struct{}
 
 // New returns a netease extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	url = strings.Replace(url, "/#/", "/", 1)
 	vid := utils.MatchOneOf(url, `/(mv|video)\?id=(\w+)`)
 	if vid == nil {
@@ -35,13 +39,13 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 
 	titles := utils.MatchOneOf(html, `<meta property="og:title" content="(.+?)" />`)
 	if titles == nil || len(titles) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 	title := titles[1]
 
 	realURLs := utils.MatchOneOf(html, `<meta property="og:video" content="(.+?)" />`)
 	if realURLs == nil || len(realURLs) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 	realURL, _ := netURL.QueryUnescape(realURLs[1])
 
@@ -49,22 +53,22 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
-	urlData := &types.Part{
+	urlData := &extractors.Part{
 		URL:  realURL,
 		Size: size,
 		Ext:  "mp4",
 	}
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		"default": {
-			Parts: []*types.Part{urlData},
+			Parts: []*extractors.Part{urlData},
 			Size:  size,
 		},
 	}
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "网易云音乐 music.163.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

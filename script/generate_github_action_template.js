@@ -13,7 +13,7 @@ function generateCITemplate(moduleName) {
 
 const modules = fs.readdirSync(extractorDir);
 
-const ignoreFolder = ['types', 'universal']
+const ignoreFolder = ['universal']
 
 for (const m of modules) {
   const filepath = path.join(extractorDir, m);

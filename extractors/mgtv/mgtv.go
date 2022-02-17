@@ -9,10 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("mgtv", New())
+}
 
 type mgtvVideoStream struct {
 	Name string `json:"name"`
@@ -97,12 +101,12 @@ func encodeTk2(str string) string {
 type extractor struct{}
 
 // New returns a mgtv extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return nil, err
@@ -116,7 +120,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		vid = utils.MatchOneOf(html, `vid: (\d+),`)
 	}
 	if vid == nil || len(vid) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 
 	// API extract from https://js.mgtv.com/imgotv-miniv6/global/page/play-tv.js
@@ -166,7 +170,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	)
 	mgtvStreams := mgtvData.Data.Stream
 	var addr mgtvVideoAddr
-	streams := make(map[string]*types.Stream)
+	streams := make(map[string]*extractors.Stream)
 	for _, stream := range mgtvStreams {
 		if stream.URL == "" {
 			continue
@@ -185,26 +189,26 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		if err != nil {
 			return nil, err
 		}
-		urls := make([]*types.Part, len(m3u8URLs))
+		urls := make([]*extractors.Part, len(m3u8URLs))
 		for index, u := range m3u8URLs {
-			urls[index] = &types.Part{
+			urls[index] = &extractors.Part{
 				URL:  u.URL,
 				Size: u.Size,
 				Ext:  "ts",
 			}
 		}
-		streams[stream.Def] = &types.Stream{
+		streams[stream.Def] = &extractors.Stream{
 			Parts:   urls,
 			Size:    totalSize,
 			Quality: stream.Name,
 		}
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "芒果TV mgtv.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

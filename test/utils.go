@@ -4,7 +4,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 )
 
 // Args Arguments for extractor tests
@@ -31,9 +31,9 @@ func CheckData(args, data Args) bool {
 }
 
 // Check check the result
-func Check(t *testing.T, args Args, data *types.Data) {
+func Check(t *testing.T, args Args, data *extractors.Data) {
 	// get the default stream
-	sortedStreams := make([]*types.Stream, 0, len(data.Streams))
+	sortedStreams := make([]*extractors.Stream, 0, len(data.Streams))
 	for _, s := range data.Streams {
 		sortedStreams = append(sortedStreams, s)
 	}

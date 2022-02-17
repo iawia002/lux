@@ -1,21 +1,25 @@
 package huya
 
 import (
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("huya", New())
+}
 
 type extractor struct{}
 
 const huyaVideoHost = "https://videotx-platform.cdn.huya.com/"
 
 // New returns a huya extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return nil, err
@@ -34,31 +38,31 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if len(videoDesc) > 1 {
 		videoUrl = huyaVideoHost + videoDesc[1]
 	} else {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 
 	size, err := request.Size(videoUrl, url)
 	if err != nil {
 		return nil, err
 	}
-	urlData := &types.Part{
+	urlData := &extractors.Part{
 		URL:  videoUrl,
 		Size: size,
 		Ext:  "mp4",
 	}
 	quality := "normal"
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		quality: {
-			Parts:   []*types.Part{urlData},
+			Parts:   []*extractors.Part{urlData},
 			Size:    size,
 			Quality: quality,
 		},
 	}
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "虎牙 huya.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

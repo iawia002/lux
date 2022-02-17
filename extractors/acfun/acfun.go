@@ -7,11 +7,15 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("acfun", New())
+}
 
 const (
 	bangumiDataPattern = "window.pageInfo = window.bangumiData = (.*);"
@@ -25,12 +29,12 @@ const (
 type extractor struct{}
 
 // New returns a new acfun bangumi extractor
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract ...
-func (e *extractor) Extract(URL string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(URL string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.GetByte(URL, referer, nil)
 	if err != nil {
 		return nil, err
@@ -56,7 +60,7 @@ func (e *extractor) Extract(URL string, option types.Options) ([]*types.Data, er
 		epDatas = append(epDatas, &bgData.episodeData)
 	}
 
-	datas := make([]*types.Data, 0)
+	datas := make([]*extractors.Data, 0)
 
 	wgp := utils.NewWaitGroupPool(option.ThreadNumber)
 	for _, epData := range epDatas {
@@ -75,48 +79,48 @@ func concatURL(epData *episodeData) string {
 	return fmt.Sprintf(bangumiHTMLURL, epData.BangumiID, epData.ItemID)
 }
 
-func extractBangumi(URL string) *types.Data {
+func extractBangumi(URL string) *extractors.Data {
 	var err error
 	html, err := request.GetByte(URL, referer, nil)
 	if err != nil {
-		return types.EmptyData(URL, err)
+		return extractors.EmptyData(URL, err)
 	}
 
 	_, vInfo, err := resolvingData(html)
 	if err != nil {
-		return types.EmptyData(URL, err)
+		return extractors.EmptyData(URL, err)
 	}
 
-	streams := make(map[string]*types.Stream)
+	streams := make(map[string]*extractors.Stream)
 
 	for _, stm := range vInfo.AdaptationSet[0].Streams {
 		m3u8URL, err := url.Parse(stm.URL)
 		if err != nil {
-			return types.EmptyData(URL, err)
+			return extractors.EmptyData(URL, err)
 		}
 
 		urls, err := utils.M3u8URLs(m3u8URL.String())
 		if err != nil {
 			_, err = url.Parse(stm.URL)
 			if err != nil {
-				return types.EmptyData(URL, err)
+				return extractors.EmptyData(URL, err)
 			}
 
 			urls, err = utils.M3u8URLs(stm.BackURL)
 			if err != nil {
-				return types.EmptyData(URL, err)
+				return extractors.EmptyData(URL, err)
 			}
 		}
 
 		// There is no size information in the m3u8 file and the calculation will take too much time, just ignore it.
-		parts := make([]*types.Part, 0)
+		parts := make([]*extractors.Part, 0)
 		for _, u := range urls {
-			parts = append(parts, &types.Part{
+			parts = append(parts, &extractors.Part{
 				URL: u,
 				Ext: "ts",
 			})
 		}
-		streams[stm.QualityLabel] = &types.Stream{
+		streams[stm.QualityLabel] = &extractors.Stream{
 			ID:      stm.QualityType,
 			Parts:   parts,
 			Quality: stm.QualityType,
@@ -126,12 +130,12 @@ func extractBangumi(URL string) *types.Data {
 
 	doc, err := parser.GetDoc(string(html))
 	if err != nil {
-		return types.EmptyData(URL, err)
+		return extractors.EmptyData(URL, err)
 	}
-	data := &types.Data{
+	data := &extractors.Data{
 		Site:    "AcFun acfun.cn",
 		Title:   parser.Title(doc),
-		Type:    types.DataTypeVideo,
+		Type:    extractors.DataTypeVideo,
 		Streams: streams,
 		URL:     URL,
 	}

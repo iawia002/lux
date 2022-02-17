@@ -6,11 +6,15 @@ import (
 	"path"
 	"strings"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("instagram", New())
+}
 
 type instagram struct {
 	ShortcodeMedia struct {
@@ -29,24 +33,24 @@ type instagram struct {
 type extractor struct{}
 
 // New returns a instagram extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
-func extractImageFromPage(html, url string) (map[string]*types.Stream, error) {
+func extractImageFromPage(html, url string) (map[string]*extractors.Stream, error) {
 	_, realURLs, err := parser.GetImages(html, "EmbeddedMediaImage", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	urls := make([]*types.Part, 0, len(realURLs))
+	urls := make([]*extractors.Part, 0, len(realURLs))
 	var totalSize int64
 	for _, realURL := range realURLs {
 		size, err := request.Size(realURL, url)
 		if err != nil {
 			return nil, err
 		}
-		urlData := &types.Part{
+		urlData := &extractors.Part{
 			URL:  realURL,
 			Size: size,
 			Ext:  "jpg",
@@ -55,7 +59,7 @@ func extractImageFromPage(html, url string) (map[string]*types.Stream, error) {
 		totalSize += size
 	}
 
-	return map[string]*types.Stream{
+	return map[string]*extractors.Stream{
 		"default": {
 			Parts: urls,
 			Size:  totalSize,
@@ -63,13 +67,13 @@ func extractImageFromPage(html, url string) (map[string]*types.Stream, error) {
 	}, nil
 }
 
-func extractFromData(dataString, url string) (map[string]*types.Stream, error) {
+func extractFromData(dataString, url string) (map[string]*extractors.Stream, error) {
 	var data instagram
 	if err := json.Unmarshal([]byte(dataString), &data); err != nil {
 		return nil, err
 	}
 
-	urls := make([]*types.Part, 0, len(data.ShortcodeMedia.EdgeSidecar.Edges))
+	urls := make([]*extractors.Part, 0, len(data.ShortcodeMedia.EdgeSidecar.Edges))
 	var totalSize int64
 	for _, u := range data.ShortcodeMedia.EdgeSidecar.Edges {
 		// Image
@@ -85,7 +89,7 @@ func extractFromData(dataString, url string) (map[string]*types.Stream, error) {
 		if err != nil {
 			return nil, err
 		}
-		urlData := &types.Part{
+		urlData := &extractors.Part{
 			URL:  realURL,
 			Size: size,
 			Ext:  ext,
@@ -94,7 +98,7 @@ func extractFromData(dataString, url string) (map[string]*types.Stream, error) {
 		totalSize += size
 	}
 
-	return map[string]*types.Stream{
+	return map[string]*extractors.Stream{
 		"default": {
 			Parts: urls,
 			Size:  totalSize,
@@ -103,7 +107,7 @@ func extractFromData(dataString, url string) (map[string]*types.Stream, error) {
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	// Instagram is forcing a login to access the page, so we use the embed page to bypass that.
 	u, err := netURL.Parse(url)
 	if err != nil {
@@ -118,11 +122,11 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 	dataStrings := utils.MatchOneOf(html, `window\.__additionalDataLoaded\('graphql',(.*)\);`)
 	if dataStrings == nil || len(dataStrings) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 	dataString := dataStrings[1]
 
-	var streams map[string]*types.Stream
+	var streams map[string]*extractors.Stream
 	if dataString == "" || dataString == "null" {
 		streams, err = extractImageFromPage(html, url)
 	} else {
@@ -132,11 +136,11 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "Instagram instagram.com",
 			Title:   "Instagram " + id,
-			Type:    types.DataTypeImage,
+			Type:    extractors.DataTypeImage,
 			Streams: streams,
 			URL:     url,
 		},

@@ -8,10 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("miaopai", New())
+}
 
 type miaopaiData struct {
 	Data struct {
@@ -41,15 +45,15 @@ func getRandomString(l int) string {
 type extractor struct{}
 
 // New returns a miaopai extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	ids := utils.MatchOneOf(url, `/media/([^\./]+)`, `/show(?:/channel)?/([^\./]+)`)
 	if ids == nil || len(ids) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 	id := ids[1]
 
@@ -79,23 +83,23 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
-	urlData := &types.Part{
+	urlData := &extractors.Part{
 		URL:  realURL,
 		Size: size,
 		Ext:  "mp4",
 	}
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		"default": {
-			Parts: []*types.Part{urlData},
+			Parts: []*extractors.Part{urlData},
 			Size:  size,
 		},
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "秒拍 miaopai.com",
 			Title:   data.Data.Description,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

@@ -1,20 +1,24 @@
 package universal
 
 import (
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
 
+func init() {
+	extractors.Register("", New())
+}
+
 type extractor struct{}
 
 // New returns a universal extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	filename, ext, err := utils.GetNameAndExt(url)
 	if err != nil {
 		return nil, err
@@ -23,9 +27,9 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		"default": {
-			Parts: []*types.Part{
+			Parts: []*extractors.Part{
 				{
 					URL:  url,
 					Size: size,
@@ -40,11 +44,11 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "Universal",
 			Title:   filename,
-			Type:    types.DataType(contentType),
+			Type:    extractors.DataType(contentType),
 			Streams: streams,
 			URL:     url,
 		},
