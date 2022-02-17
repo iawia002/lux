@@ -1,0 +1,31 @@
+name: pixivision
+
+on:
+  push:
+    paths:
+      - "extractors/pixivision/*.go"
+      - ".github/workflows/stream_pixivision.yml"
+  pull_request:
+    paths:
+      - "extractors/pixivision/*.go"
+      - ".github/workflows/stream_pixivision.yml"
+  schedule:
+    # run ci weekly
+    - cron: "0 0 * * 0"
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go: ["1.16"]
+        os: [ubuntu-latest]
+    name: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Test
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/pixivision

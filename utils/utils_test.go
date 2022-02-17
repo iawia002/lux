@@ -613,10 +613,9 @@ func TestParsingFile(t *testing.T) {
 		got := ParseInputFile(file, "", start, 0)
 		defer file.Close()
 
-		// start from line x to the end of the file
-		// remember that the slices begin with 0 thats why it finds one line less
-		if len(got) != linesCount-start {
-			t.Errorf("Got: %v - want: %v", len(got), linesCount-start)
+		wanted := linesCount - start + 1
+		if len(got) != wanted {
+			t.Errorf("Got: %v - want: %v", len(got), wanted)
 		}
 	})
 }
