@@ -6,7 +6,7 @@ import (
 
 	"github.com/fatih/color"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 )
 
 var (
@@ -14,8 +14,8 @@ var (
 	cyan = color.New(color.FgCyan)
 )
 
-func genSortedStreams(streams map[string]*types.Stream) []*types.Stream {
-	sortedStreams := make([]*types.Stream, 0, len(streams))
+func genSortedStreams(streams map[string]*extractors.Stream) []*extractors.Stream {
+	sortedStreams := make([]*extractors.Stream, 0, len(streams))
 	for _, data := range streams {
 		sortedStreams = append(sortedStreams, data)
 	}
@@ -27,7 +27,7 @@ func genSortedStreams(streams map[string]*types.Stream) []*types.Stream {
 	return sortedStreams
 }
 
-func printHeader(data *types.Data) {
+func printHeader(data *extractors.Data) {
 	fmt.Println()
 	cyan.Printf(" Site:      ") // nolint
 	fmt.Println(data.Site)
@@ -37,7 +37,7 @@ func printHeader(data *types.Data) {
 	fmt.Println(data.Type)
 }
 
-func printStream(stream *types.Stream) {
+func printStream(stream *extractors.Stream) {
 	blue.Println(fmt.Sprintf("     [%s]  -------------------", stream.ID)) // nolint
 	if stream.Quality != "" {
 		cyan.Printf("     Quality:         ") // nolint
@@ -49,7 +49,7 @@ func printStream(stream *types.Stream) {
 	fmt.Printf("lux -f %s ...\n\n", stream.ID)
 }
 
-func printInfo(data *types.Data, sortedStreams []*types.Stream) {
+func printInfo(data *extractors.Data, sortedStreams []*extractors.Stream) {
 	printHeader(data)
 
 	cyan.Printf(" Streams:   ") // nolint
@@ -59,7 +59,7 @@ func printInfo(data *types.Data, sortedStreams []*types.Stream) {
 	}
 }
 
-func printStreamInfo(data *types.Data, stream *types.Stream) {
+func printStreamInfo(data *extractors.Data, stream *extractors.Stream) {
 	printHeader(data)
 
 	cyan.Printf(" Stream:   ") // nolint

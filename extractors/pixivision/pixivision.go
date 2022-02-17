@@ -1,21 +1,25 @@
 package pixivision
 
 import (
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
 
+func init() {
+	extractors.Register("pixivision", New())
+}
+
 type extractor struct{}
 
 // New returns a pixivision extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return nil, err
@@ -25,7 +29,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 
-	parts := make([]*types.Part, 0, len(urls))
+	parts := make([]*extractors.Part, 0, len(urls))
 	for _, u := range urls {
 		_, ext, err := utils.GetNameAndExt(u)
 		if err != nil {
@@ -35,24 +39,24 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		if err != nil {
 			return nil, err
 		}
-		parts = append(parts, &types.Part{
+		parts = append(parts, &extractors.Part{
 			URL:  u,
 			Size: size,
 			Ext:  ext,
 		})
 	}
 
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		"default": {
 			Parts: parts,
 		},
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "pixivision pixivision.net",
 			Title:   title,
-			Type:    types.DataTypeImage,
+			Type:    extractors.DataTypeImage,
 			Streams: streams,
 			URL:     url,
 		},

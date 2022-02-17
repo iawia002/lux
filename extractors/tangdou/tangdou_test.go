@@ -3,7 +3,7 @@ package tangdou
 import (
 	"testing"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/test"
 )
 
@@ -41,18 +41,18 @@ func TestTangDou(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var (
-				data []*types.Data
+				data []*extractors.Data
 				err  error
 			)
 			if tt.playlist {
 				// playlist mode
-				_, err = New().Extract(tt.args.URL, types.Options{
+				_, err = New().Extract(tt.args.URL, extractors.Options{
 					Playlist:     true,
 					ThreadNumber: 9,
 				})
 				test.CheckError(t, err)
 			} else {
-				data, err = New().Extract(tt.args.URL, types.Options{})
+				data, err = New().Extract(tt.args.URL, extractors.Options{})
 				test.CheckError(t, err)
 				test.Check(t, tt.args, data[0])
 			}

@@ -4,21 +4,25 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
 
+func init() {
+	extractors.Register("ximalaya", New())
+}
+
 type extractor struct{}
 
 // New returns a ximalaya extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return nil, err
@@ -36,7 +40,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, errors.New("unable to get audio ID")
 	}
 	if itemIds == nil || len(itemIds) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, extractors.ErrURLParseFailed
 	}
 	itemId := itemIds[len(itemIds)-1]
 
@@ -50,7 +54,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 
 	realURL := ximalaya.Data.Src
-	urlData := make([]*types.Part, 0)
+	urlData := make([]*extractors.Part, 0)
 	totalSize, err := request.Size(realURL, url)
 	if err != nil {
 		return nil, err
@@ -59,23 +63,23 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	if err != nil {
 		return nil, err
 	}
-	urlData = append(urlData, &types.Part{
+	urlData = append(urlData, &extractors.Part{
 		URL:  realURL,
 		Size: totalSize,
 		Ext:  ext,
 	})
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		"default": {
 			Parts: urlData,
 			Size:  totalSize,
 		},
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "喜马拉雅 ximalaya.com",
 			Title:   title,
-			Type:    types.DataTypeAudio,
+			Type:    extractors.DataTypeAudio,
 			Streams: streams,
 			URL:     url,
 		},

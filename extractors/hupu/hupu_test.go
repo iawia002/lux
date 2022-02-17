@@ -3,7 +3,7 @@ package hupu
 import (
 	"testing"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/test"
 )
 
@@ -22,7 +22,7 @@ func TestHupu(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			New().Extract(tt.args.URL, types.Options{})
+			New().Extract(tt.args.URL, extractors.Options{})
 		})
 	}
 }

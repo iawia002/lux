@@ -14,10 +14,14 @@ import (
 
 	"github.com/robertkrimen/otto"
 
-	"github.com/iawia002/lux/extractors/types"
+	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("pornhub", New())
+}
 
 type pornhubData struct {
 	DefaultQuality bool   `json:"defaultQuality"`
@@ -29,12 +33,12 @@ type pornhubData struct {
 type extractor struct{}
 
 // New returns a pornhub extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	res, err := request.Request(http.MethodGet, url, nil, nil)
 	if err != nil {
 		return nil, err
@@ -77,7 +81,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 
 	reg, err := regexp.Compile(`<script\b[^>]*>([\s\S]*?)<\/script>`)
 	if err != nil {
-		return nil, types.ErrInvalidRegularExpression
+		return nil, extractors.ErrInvalidRegularExpression
 	}
 
 	matchers := reg.FindAllStringSubmatch(html, -1)
@@ -146,7 +150,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, err
 	}
 
-	streams := make(map[string]*types.Stream, len(pornhubs))
+	streams := make(map[string]*extractors.Stream, len(pornhubs))
 
 	for _, data := range pornhubs {
 		size, err := request.Size(data.VideoURL, data.VideoURL)
@@ -154,24 +158,24 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 			return nil, err
 		}
 
-		urlData := &types.Part{
+		urlData := &extractors.Part{
 			URL:  data.VideoURL,
 			Size: size,
 			Ext:  data.Format,
 		}
 
-		streams[data.Quality] = &types.Stream{
-			Parts:   []*types.Part{urlData},
+		streams[data.Quality] = &extractors.Stream{
+			Parts:   []*extractors.Part{urlData},
 			Size:    size,
 			Quality: data.Quality,
 		}
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "Pornhub pornhub.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

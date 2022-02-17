@@ -1,4 +1,4 @@
-package types
+package extractors
 
 // Part is the data structure for a single part of the video stream information.
 type Part struct {
