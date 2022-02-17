@@ -22,8 +22,8 @@ func TestDownload(t *testing.T) {
 		{
 			name: "image test",
 			args: test.Args{
-				URL:   "https://v.douyin.com/RHanxuR/",
-				Title: "树叶只有树 树却有很多树叶",
+				URL:   "https://v.douyin.com/LvCYKvV",
+				Title: "黑发限定#开春必备",
 			},
 		},
 	}

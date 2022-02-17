@@ -54,13 +54,6 @@ func TestBilibili(t *testing.T) {
 			playlist: true,
 		},
 		{
-			name: "bangumi movie test",
-			args: test.Args{
-				URL:   "https://www.bilibili.com/bangumi/play/ss12044",
-				Title: "你的名字。",
-			},
-		},
-		{
 			name: "8k test",
 			args: test.Args{
 				URL:   "https://www.bilibili.com/video/BV1qM4y1w716",

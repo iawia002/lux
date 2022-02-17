@@ -39,7 +39,7 @@ func TestYoutube(t *testing.T) {
 			name: "url_encoded_fmt_stream_map test",
 			args: test.Args{
 				URL:   "https://youtu.be/DNaOZovrSVo",
-				Title: "QNAP Case Study - Scorptec",
+				Title: "QNAP Customer Story | Scorptec",
 			},
 		},
 		{
