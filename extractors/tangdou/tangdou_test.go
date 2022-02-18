@@ -14,16 +14,9 @@ func TestTangDou(t *testing.T) {
 		playlist bool
 	}{
 		{
-			name: "contains video URL test directly and can get title from body's div tag",
-			args: test.Args{
-				URL:   "http://www.tangdou.com/v95/dAOQNgMjwT2D5w2.html",
-				Title: "杨丽萍广场舞《好日子天天过》喜庆双扇扇子舞",
-			},
-		},
-		{
 			name: "need call share url first and get the signed video URL test and can get title from head's title tag",
 			args: test.Args{
-				URL:   "http://m.tangdou.com/v94/dAOMMYNjwT1T2Q2.html",
+				URL:   "https://m.tangdou.com/v94/dAOMMYNjwT1T2Q2.html",
 				Title: "吉美广场舞《再唱山歌给党听》民族形体舞 附教学视频在线观看",
 				Size:  50710318,
 			},
@@ -31,7 +24,7 @@ func TestTangDou(t *testing.T) {
 		{
 			name: "playlist test",
 			args: test.Args{
-				URL:   "http://www.tangdou.com/playlist/view/2816/page/4",
+				URL:   "https://www.tangdou.com/playlist/view/2816/page/4",
 				Title: "茉莉广场舞 我向草原问个好 原创藏族风民族舞附教学",
 				Size:  66284484,
 			},

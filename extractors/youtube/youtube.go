@@ -55,14 +55,14 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		}
 
 		wgp.Add()
-		go func(index int, extractedData []*extractors.Data) {
+		go func(index int, entry *youtube.PlaylistEntry, extractedData []*extractors.Data) {
 			defer wgp.Done()
-			video, err := e.client.VideoFromPlaylistEntry(videoEntry)
+			video, err := e.client.VideoFromPlaylistEntry(entry)
 			if err != nil {
 				return
 			}
 			extractedData[index] = e.youtubeDownload(url, video)
-		}(dataIndex, extractedData)
+		}(dataIndex, videoEntry, extractedData)
 		dataIndex++
 	}
 	wgp.Wait()

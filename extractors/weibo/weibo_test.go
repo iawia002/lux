@@ -27,20 +27,11 @@ func TestDownload(t *testing.T) {
 			},
 		},
 		{
-			name: "weibo.com test",
-			args: test.Args{
-				URL:   "https://weibo.com/1642500775/GjbO5ByzE",
-				Title: "让人怦然心动的小姐姐们 via@大懒糖",
-				Size:  2002420,
-			},
-		},
-		{
 			name: "weibo.com/tv test",
 			args: test.Args{
-				URL:     "https://weibo.com/tv/show/1034:4298353237002268?from=old_pc_videoshow",
-				Title:   "毒液插图Blender+Photoshop2.5小时工作流",
-				Quality: "720p",
-				Size:    7520929,
+				URL:   "https://weibo.com/tv/show/1034:4298353237002268?from=old_pc_videoshow",
+				Title: "毒液插图Blender+Photoshop2.5小时工作流",
+				Size:  7520929,
 			},
 		},
 		{
