@@ -30,7 +30,7 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 		return nil, err
 	}
 
-	scripts := utils.MatchOneOf(html, `document.getElementById\('ideoooolink'\).innerHTML = (.+?);`)
+	scripts := utils.MatchOneOf(html, `document.getElementById\('norobotlink'\).innerHTML = (.+?);`)
 	if len(scripts) < 2 {
 		return nil, extractors.ErrURLParseFailed
 	}
@@ -44,11 +44,11 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 	if err != nil {
 		return nil, err
 	}
-	u, err := value.ToString() // /streamtape.com/get_viddeo?id=xx&expires=xx&ip=xx&token=xx
+	u, err := value.ToString() // //streamtape.com/get_video?id=xx&expires=xx&ip=xx&token=xx
 	if err != nil {
 		return nil, err
 	}
-	u = fmt.Sprintf("https:/%s", u)
+	u = fmt.Sprintf("https:%s&stream=1", u)
 
 	// get title
 	var title = "StreamTape Video"
