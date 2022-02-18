@@ -1,8 +1,9 @@
 package streamtape
 
 import (
-	"regexp"
-	"strings"
+	"fmt"
+
+	"github.com/robertkrimen/otto"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -14,10 +15,6 @@ func init() {
 	extractors.Register("streamtape", e)
 	extractors.Register("streamta", e) // streamta.pe
 }
-
-const prefix = "document.getElementById('robotlink').innerHTML = '"
-
-var pattern = regexp.MustCompile(`\((.*?)\)`)
 
 type extractor struct{}
 
@@ -33,27 +30,25 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 		return nil, err
 	}
 
-	var u string
-	for _, line := range strings.Split(html, "\n") {
-		if !strings.HasPrefix(line, prefix) {
-			continue
-		}
-		start := line[len(prefix):]
-
-		domain := "https:" + start[:strings.Index(start, "'")]
-		paramsMatches := pattern.FindAllStringSubmatch(start, -1)
-		if len(paramsMatches) < 2 {
-			return nil, extractors.ErrURLParseFailed
-		}
-		params := paramsMatches[0][1]
-		params = params[1 : len(params)-1]
-
-		u = domain + params[3:] + "&stream=1"
-		break
-	}
-	if u == "" {
+	scripts := utils.MatchOneOf(html, `document.getElementById\('ideoooolink'\).innerHTML = (.+?);`)
+	if len(scripts) < 2 {
 		return nil, extractors.ErrURLParseFailed
 	}
+
+	vm := otto.New()
+	_, err = vm.Run(fmt.Sprintf("var __VM__OUTPUT = %s", scripts[1]))
+	if err != nil {
+		return nil, err
+	}
+	value, err := vm.Get("__VM__OUTPUT")
+	if err != nil {
+		return nil, err
+	}
+	u, err := value.ToString() // /streamtape.com/get_viddeo?id=xx&expires=xx&ip=xx&token=xx
+	if err != nil {
+		return nil, err
+	}
+	u = fmt.Sprintf("https:/%s", u)
 
 	// get title
 	var title = "StreamTape Video"

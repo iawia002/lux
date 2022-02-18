@@ -15,8 +15,8 @@ func TestStreamtape(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:   "https://streamtape.com/e/vkoKlwYPo9F4mRo",
-				Title: "lux.mp4",
+				URL:   "https://streamtape.com/v/YKLDrr4X9gSvm9q/00819gb0ly1gd4okz3fqbg30b405jnpj.mp4",
+				Title: "00819gb0ly1gd4okz3fqbg30b405jnpj.mp4",
 			},
 		},
 	}
