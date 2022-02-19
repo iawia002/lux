@@ -15,10 +15,10 @@ func TestDownload(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:     "https://www.facebook.com/groups/314070194112/permalink/10155168902769113/",
-				Title:   "Ukrainian Scientists Worldwide Public Group | Facebook",
-				Size:    336975453,
-				Quality: "hd",
+				URL:     "https://www.facebook.com/100058251872436/videos/424557726111987",
+				Title:   "Роман Грищук - Підтримка з Японії 🇯🇵 Гурт Yokohama Sisters 👏",
+				Size:    1441128,
+				Quality: "sd",
 			},
 		},
 	}

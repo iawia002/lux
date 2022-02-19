@@ -1,7 +1,8 @@
 package facebook
 
 import (
-	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -26,26 +27,35 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	if err != nil {
 		return nil, err
 	}
-	titles := utils.MatchOneOf(html, `<title id="pageTitle">(.+)</title>`)
+	titles := utils.MatchOneOf(html, `<title>([^<]+)</title>`)
 	if titles == nil || len(titles) < 2 {
 		return nil, extractors.ErrURLParseFailed
 	}
-	title := titles[1]
+
+	title := strings.TrimSpace(titles[1])
+
+	title = regexp.MustCompile(`\n+`).ReplaceAllString(title, " ")
+
+	qualityRegMap := map[string]*regexp.Regexp{
+		"sd": regexp.MustCompile(`"playable_url":\s*"([^"]+)"`),
+		// "hd": regexp.MustCompile(`"playable_url_quality_hd":\s*"([^"]+)"`),
+	}
 
 	streams := make(map[string]*extractors.Stream, 2)
-	for _, quality := range []string{"sd", "hd"} {
-		srcElement := utils.MatchOneOf(
-			html, fmt.Sprintf(`%s_src_no_ratelimit:"(.+?)"`, quality),
-		)
-		if srcElement == nil || len(srcElement) < 2 {
+	for quality, qualityReg := range qualityRegMap {
+		matcher := qualityReg.FindStringSubmatch(html)
+
+		if len(matcher) == 0 {
 			continue
 		}
 
-		u := srcElement[1]
+		u := strings.ReplaceAll(matcher[1], "\\", "")
+
 		size, err := request.Size(u, url)
 		if err != nil {
 			return nil, err
 		}
+
 		urlData := &extractors.Part{
 			URL:  u,
 			Size: size,
