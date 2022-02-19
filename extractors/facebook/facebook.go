@@ -49,9 +49,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			continue
 		}
 
-		u := matcher[1]
-
-		u = strings.ReplaceAll(u, "\\", "")
+		u := strings.ReplaceAll(matcher[1], "\\", "")
 
 		size, err := request.Size(u, url)
 		if err != nil {
