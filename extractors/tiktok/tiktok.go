@@ -1,9 +1,11 @@
 package tiktok
 
 import (
+	"regexp"
+	"strings"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
-	"github.com/iawia002/lux/utils"
 )
 
 func init() {
@@ -19,29 +21,37 @@ func New() extractors.Extractor {
 
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
-	html, err := request.Get(url, url, nil)
+	html, err := request.Get(url, url, map[string]string{
+		// tiktok require a user agent
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	// There are a few json objects loaded into the html that are useful. We're able to parse the video url from the
-	// videoObject json.
+	urlMatcherRegExp := regexp.MustCompile(`"downloadAddr":\s*"([^"]+)"`)
 
-	videoScriptTag := utils.MatchOneOf(html, `<script type="application\/ld\+json" id="videoObject">(.*?)<\/script>`)
-	if videoScriptTag == nil || len(videoScriptTag) < 2 {
+	downloadURLMatcher := urlMatcherRegExp.FindStringSubmatch(html)
+
+	if len(downloadURLMatcher) == 0 {
 		return nil, extractors.ErrURLParseFailed
 	}
-	videoJSON := videoScriptTag[1]
-	videoURL := utils.GetStringFromJSON(videoJSON, "contentUrl")
 
-	// We can receive the title directly from this __NEXT_DATA__ object.
+	videoURL := strings.ReplaceAll(downloadURLMatcher[1], `\u002F`, "/")
 
-	nextScriptTag := utils.MatchOneOf(html, `<script id="__NEXT_DATA__" type="application\/json" crossorigin="anonymous">(.*?)<\/script>`)
-	if nextScriptTag == nil || len(nextScriptTag) < 2 {
+	titleMatcherRegExp := regexp.MustCompile(`<title[^>]*>([^<]+)</title>`)
+
+	titleMatcher := titleMatcherRegExp.FindStringSubmatch(html)
+
+	if len(titleMatcher) == 0 {
 		return nil, extractors.ErrURLParseFailed
 	}
-	nextJSON := nextScriptTag[1]
-	title := utils.GetStringFromJSON(nextJSON, "props.pageProps.videoData.itemInfos.text")
+
+	title := titleMatcher[1]
+
+	titleArr := strings.Split(title, "|")
+
+	title = strings.TrimSpace(strings.Join(titleArr[:len(titleArr)-1], "|"))
 
 	streams := make(map[string]*extractors.Stream)
 
