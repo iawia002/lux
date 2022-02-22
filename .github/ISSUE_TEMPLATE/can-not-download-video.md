@@ -13,7 +13,7 @@ assignees: ''
 **Website name**: name
 
 <!-- 你的操作系统 -->
-<!-- your operate system -->
+<!-- your operating system -->
 
 **OS:**: window/linux/macOS
 
