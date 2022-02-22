@@ -32,7 +32,7 @@ error message here
 ```
 
 <!-- 如果能提供截图，则对于解决你的问题非常有帮助 -->
-<!-- if applicable, add screenshots to help explain your problem. -->
+<!-- If you can provide screenshots, it will be very helpful to solve your problem. -->
 
 **Screenshots**
 
