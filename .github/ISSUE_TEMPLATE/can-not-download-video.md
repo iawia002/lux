@@ -23,7 +23,7 @@ assignees: ''
 **Video URL:**: url
 
 <!-- 请输入下载时显示的错误信息 -->
-<!-- enter the error message when download -->
+<!-- enter the error message when downloading -->
 
 **Stack overflow**
 
