@@ -1,6 +1,6 @@
 ---
 name: Support a new website
-about: If you want to support a new website
+about: If you want to request support for a new website
 title: "[new website require]: the website name"
 labels: enhancement
 assignees: ''
