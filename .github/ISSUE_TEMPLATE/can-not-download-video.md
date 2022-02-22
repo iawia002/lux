@@ -15,7 +15,7 @@ assignees: ''
 <!-- 你的操作系统 -->
 <!-- your operating system -->
 
-**OS:**: window/linux/macOS
+**OS:**: Windows/Linux/macOS
 
 <!-- 视频链接地址 -->
 <!-- the video url -->
