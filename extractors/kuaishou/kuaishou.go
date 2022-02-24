@@ -73,7 +73,6 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	streams := make(map[string]*extractors.Stream, 1)
 	for quality, qualityReg := range qualityRegMap {
 		matcher := qualityReg.FindStringSubmatch(html)
-
 		if len(matcher) != 2 {
 			return nil, extractors.ErrURLParseFailed
 		}
