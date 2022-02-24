@@ -2,12 +2,12 @@ package ximalaya
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -25,13 +25,13 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	// get the title
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	title := parser.Title(doc)
 
@@ -40,28 +40,28 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.New("unable to get audio ID")
 	}
 	if itemIds == nil || len(itemIds) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	itemId := itemIds[len(itemIds)-1]
 
 	jsonData, err := request.Get("https://www.ximalaya.com/revision/play/v1/audio?id="+itemId+"&ptype=1", url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var ximalaya ximalayaData
 	if err = json.Unmarshal([]byte(jsonData), &ximalaya); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	realURL := ximalaya.Data.Src
 	urlData := make([]*extractors.Part, 0)
 	totalSize, err := request.Size(realURL, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	_, ext, err := utils.GetNameAndExt(realURL)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	urlData = append(urlData, &extractors.Part{
 		URL:  realURL,

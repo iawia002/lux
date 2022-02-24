@@ -2,13 +2,13 @@ package tumblr
 
 import (
 	"encoding/json"
-	"errors"
 	"strings"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -48,7 +48,7 @@ func tumblrImageDownload(url, html, title string) ([]*extractors.Data, error) {
 		html, `<script type="application/ld\+json">\s*(.+?)</script>`,
 	)
 	if jsonStrings == nil || len(jsonStrings) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	jsonString := jsonStrings[1]
 
@@ -58,12 +58,12 @@ func tumblrImageDownload(url, html, title string) ([]*extractors.Data, error) {
 		// there are two data structures in the same field(image)
 		var imageList tumblrImageList
 		if err := json.Unmarshal([]byte(jsonString), &imageList); err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		for _, u := range imageList.Image.List {
 			urlData, size, err := genURLData(u, url)
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			totalSize += size
 			urls = append(urls, urlData)
@@ -71,12 +71,12 @@ func tumblrImageDownload(url, html, title string) ([]*extractors.Data, error) {
 	} else {
 		var image tumblrImage
 		if err := json.Unmarshal([]byte(jsonString), &image); err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		urlData, size, err := genURLData(image.Image, url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		totalSize = size
 		urls = append(urls, urlData)
@@ -102,7 +102,7 @@ func tumblrImageDownload(url, html, title string) ([]*extractors.Data, error) {
 func tumblrVideoDownload(url, html, title string) ([]*extractors.Data, error) {
 	videoURLs := utils.MatchOneOf(html, `<iframe src='(.+?)'`)
 	if videoURLs == nil || len(videoURLs) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	videoURL := videoURLs[1]
 
@@ -111,18 +111,18 @@ func tumblrVideoDownload(url, html, title string) ([]*extractors.Data, error) {
 	}
 	videoHTML, err := request.Get(videoURL, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	realURLs := utils.MatchOneOf(videoHTML, `source src="(.+?)"`)
 	if realURLs == nil || len(realURLs) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	realURL := realURLs[1]
 
 	urlData, size, err := genURLData(realURL, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	streams := map[string]*extractors.Stream{
 		"default": {
@@ -153,12 +153,12 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	// get the title
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	title := parser.Title(doc)
 	if strings.Contains(html, "<iframe src=") {

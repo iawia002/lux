@@ -255,9 +255,10 @@ func New() *cli.App {
 				if err := download(c, videoURL); err != nil {
 					fmt.Fprintf(
 						color.Output,
-						"Downloading %s error:\n%s\n",
-						color.CyanString("%s", videoURL), color.RedString("%v", err),
+						"Downloading %s error:\n",
+						color.CyanString("%s", videoURL),
 					)
+					fmt.Printf("%+v\n", err)
 					isErr = true
 				}
 			}

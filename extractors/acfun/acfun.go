@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	jsoniter "github.com/json-iterator/go"
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
@@ -37,7 +38,7 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(URL string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.GetByte(URL, referer, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	epDatas := make([]*episodeData, 0)
@@ -45,7 +46,7 @@ func (e *extractor) Extract(URL string, option extractors.Options) ([]*extractor
 	if option.Playlist {
 		list, err := resolvingEpisodes(html)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		items := utils.NeedDownloadList(option.Items, option.ItemStart, option.ItemEnd, len(list.Episodes))
 
@@ -55,7 +56,7 @@ func (e *extractor) Extract(URL string, option extractors.Options) ([]*extractor
 	} else {
 		bgData, _, err := resolvingData(html)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		epDatas = append(epDatas, &bgData.episodeData)
 	}
@@ -151,12 +152,12 @@ func resolvingData(html []byte) (*bangumiData, *videoInfo, error) {
 	groups := pattern.FindSubmatch(html)
 	err := jsoniter.Unmarshal(groups[1], bgData)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.WithStack(err)
 	}
 
 	err = jsoniter.UnmarshalFromString(bgData.CurrentVideoInfo.KsPlayJSON, vInfo)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.WithStack(err)
 	}
 	return bgData, vInfo, nil
 }
@@ -168,7 +169,7 @@ func resolvingEpisodes(html []byte) (*episodeList, error) {
 	groups := pattern.FindSubmatch(html)
 	err := jsoniter.Unmarshal(groups[1], list)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return list, nil
 }

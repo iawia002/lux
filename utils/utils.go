@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -15,6 +14,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
 	"github.com/iawia002/lux/request"
@@ -227,7 +227,7 @@ func M3u8URLs(uri string) ([]string, error) {
 
 	html, err := request.Get(uri, "", nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	lines := strings.Split(html, "\n")
 	var urls []string

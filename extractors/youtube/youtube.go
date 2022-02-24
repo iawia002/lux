@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/kkdai/youtube/v2"
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -35,14 +36,14 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	if !option.Playlist {
 		video, err := e.client.GetVideo(url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		return []*extractors.Data{e.youtubeDownload(url, video)}, nil
 	}
 
 	playlist, err := e.client.GetPlaylist(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	needDownloadItems := utils.NeedDownloadList(option.Items, option.ItemStart, option.ItemEnd, len(playlist.Videos))
@@ -131,7 +132,7 @@ func (e *extractor) genPartByFormat(video *youtube.Video, f *youtube.Format) (*e
 	ext := getStreamExt(f.MimeType)
 	url, err := e.client.GetStreamURL(video, f)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	size := f.ContentLength
 	if size == 0 {
@@ -147,7 +148,7 @@ func (e *extractor) genPartByFormat(video *youtube.Video, f *youtube.Format) (*e
 func getVideoAudio(v *youtube.Video, mimeType string) (*youtube.Format, error) {
 	audioFormats := v.Formats.Type(mimeType).Type("audio")
 	if len(audioFormats) == 0 {
-		return nil, fmt.Errorf("no audio format found after filtering")
+		return nil, errors.New("no audio format found after filtering")
 	}
 	audioFormats.Sort()
 	return &audioFormats[0], nil

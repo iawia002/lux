@@ -1,7 +1,6 @@
 package kuaishou
 
 import (
-	"errors"
 	"net/http"
 	"regexp"
 	"strings"
@@ -9,6 +8,7 @@ import (
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -49,14 +49,14 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	cookies, err := fetchCookies(url, headers)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	headers["Cookie"] = cookies
 
 	html, err := request.Get(url, url, headers)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	titles := utils.MatchOneOf(html, `<title>([^<]+)</title>`)
@@ -74,14 +74,14 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	for quality, qualityReg := range qualityRegMap {
 		matcher := qualityReg.FindStringSubmatch(html)
 		if len(matcher) != 2 {
-			return nil, extractors.ErrURLParseFailed
+			return nil, errors.WithStack(extractors.ErrURLParseFailed)
 		}
 
 		u := strings.ReplaceAll(matcher[1], `\u002F`, "/")
 
 		size, err := request.Size(u, url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		urlData := &extractors.Part{

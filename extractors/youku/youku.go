@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/rand"
 	netURL "net/url"
@@ -17,6 +16,7 @@ import (
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -94,13 +94,13 @@ func youkuUps(vid string, option extractors.Options) (*youkuData, error) {
 	} else {
 		headers, err := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		setCookie := headers.Get("Set-Cookie")
 		utids = utils.MatchOneOf(setCookie, `cna=(.+?);`)
 	}
 	if utids == nil || len(utids) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	utid = utids[1]
 
@@ -119,12 +119,12 @@ func youkuUps(vid string, option extractors.Options) (*youkuData, error) {
 		}
 		html, err := request.GetByte(url, youkuReferer, nil)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		// data must be emptied before reassignment, otherwise it will contain the previous value(the 'error' data)
 		data = youkuData{}
 		if err = json.Unmarshal(html, &data); err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		if data.Data.Error == (errorData{}) {
 			return &data, nil
@@ -221,13 +221,13 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		url, `id_(.+?)\.html`, `id_(.+)`,
 	)
 	if vids == nil || len(vids) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	vid := vids[1]
 
 	youkuData, err := youkuUps(vid, option)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if youkuData.Data.Error.Code != 0 {
 		return nil, errors.New(youkuData.Data.Error.Note)

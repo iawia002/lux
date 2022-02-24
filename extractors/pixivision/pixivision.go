@@ -5,6 +5,7 @@ import (
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -22,22 +23,22 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	title, urls, err := parser.GetImages(html, "am__work__illust  ", nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	parts := make([]*extractors.Part, 0, len(urls))
 	for _, u := range urls {
 		_, ext, err := utils.GetNameAndExt(u)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		size, err := request.Size(u, url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		parts = append(parts, &extractors.Part{
 			URL:  u,

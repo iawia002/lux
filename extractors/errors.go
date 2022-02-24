@@ -1,7 +1,7 @@
 package extractors
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 )
 
 var (

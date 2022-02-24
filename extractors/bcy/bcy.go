@@ -2,13 +2,13 @@ package bcy
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -36,25 +36,25 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	// parse json data
 	rep := strings.NewReplacer(`\"`, `"`, `\\`, `\`)
 	realURLs := utils.MatchOneOf(html, `JSON.parse\("(.+?)"\);`)
 	if realURLs == nil || len(realURLs) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	jsonString := rep.Replace(realURLs[1])
 
 	var data bcyData
 	if err = json.Unmarshal([]byte(jsonString), &data); err != nil {
-		return nil, fmt.Errorf("json unmarshal failed, err: %v", err)
+		return nil, errors.WithStack(err)
 	}
 
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	title := strings.Replace(parser.Title(doc), " - 半次元 banciyuan - ACG爱好者社区", "", -1)
 
@@ -63,12 +63,12 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	for _, img := range data.Detail.PostData.Multi {
 		size, err := request.Size(img.OriginalPath, url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		totalSize += size
 		_, ext, err := utils.GetNameAndExt(img.OriginalPath)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		parts = append(parts, &extractors.Part{
 			URL:  img.OriginalPath,

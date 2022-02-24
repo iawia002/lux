@@ -4,7 +4,6 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	cookiemonster "github.com/MercuryEngineering/CookieMonster"
 	"github.com/fatih/color"
@@ -62,7 +63,7 @@ func Request(method, url string, body io.Reader, headers map[string]string) (*ht
 
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	for k, v := range config.FakeHeaders {
 		req.Header.Set(k, v)
@@ -106,11 +107,11 @@ func Request(method, url string, body io.Reader, headers map[string]string) (*ht
 		} else if i+1 >= retryTimes {
 			var err error
 			if requestError != nil {
-				err = fmt.Errorf("request error: %v", requestError)
+				err = errors.Errorf("request error: %v", requestError)
 			} else {
-				err = fmt.Errorf("%s request error: HTTP %d", url, res.StatusCode)
+				err = errors.Errorf("%s request error: HTTP %d", url, res.StatusCode)
 			}
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		time.Sleep(1 * time.Second)
 	}
@@ -149,7 +150,7 @@ func GetByte(url, refer string, headers map[string]string) ([]byte, error) {
 	}
 	res, err := Request(http.MethodGet, url, nil, headers)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer res.Body.Close() // nolint
 
@@ -166,7 +167,7 @@ func GetByte(url, refer string, headers map[string]string) ([]byte, error) {
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil && err != io.EOF {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return body, nil
 }
@@ -178,7 +179,7 @@ func Headers(url, refer string) (http.Header, error) {
 	}
 	res, err := Request(http.MethodGet, url, nil, headers)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer res.Body.Close() // nolint
 	return res.Header, nil

@@ -9,6 +9,7 @@ import (
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -34,18 +35,18 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	usernames := utils.MatchOneOf(html, `property="og:title"\s+content="(.+)"`)
 	if usernames == nil || len(usernames) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	username := usernames[1]
 
 	tweetIDs := utils.MatchOneOf(url, `(status|statuses)/(\d+)`)
 	if tweetIDs == nil || len(tweetIDs) < 3 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	tweetID := tweetIDs[2]
 
@@ -57,18 +58,18 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 	jsonString, err := request.Get(api, url, headers)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	var twitterData twitter
 	if err := json.Unmarshal([]byte(jsonString), &twitterData); err != nil {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	twitterData.TweetID = tweetID
 	twitterData.Username = username
 	extractedData, err := download(twitterData, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return extractedData, nil
 }
@@ -84,19 +85,19 @@ func download(data twitter, uri string) ([]*extractors.Data, error) {
 	case strings.Contains(data.Track.URL, ".m3u8"):
 		m3u8urls, err := utils.M3u8URLs(data.Track.URL)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		for index, m3u8 := range m3u8urls {
 			var totalSize int64
 			ts, err := utils.M3u8URLs(m3u8)
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			urls := make([]*extractors.Part, 0, len(ts))
 			for _, i := range ts {
 				size, err := request.Size(i, uri)
 				if err != nil {
-					return nil, err
+					return nil, errors.WithStack(err)
 				}
 				temp := &extractors.Part{
 					URL:  i,
@@ -119,7 +120,7 @@ func download(data twitter, uri string) ([]*extractors.Data, error) {
 	case strings.Contains(data.Track.URL, ".mp4"):
 		size, err = request.Size(data.Track.URL, uri)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		urlData := &extractors.Part{
 			URL:  data.Track.URL,

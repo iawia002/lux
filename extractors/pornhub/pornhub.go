@@ -4,7 +4,6 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/robertkrimen/otto"
 
 	"github.com/iawia002/lux/extractors"
@@ -41,7 +41,7 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	res, err := request.Request(http.MethodGet, url, nil, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	defer res.Body.Close() // nolint
@@ -59,7 +59,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	b, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	html := string(b)
@@ -81,7 +81,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	reg, err := regexp.Compile(`<script\b[^>]*>([\s\S]*?)<\/script>`)
 	if err != nil {
-		return nil, extractors.ErrInvalidRegularExpression
+		return nil, errors.WithStack(extractors.ErrInvalidRegularExpression)
 	}
 
 	matchers := reg.FindAllStringSubmatch(html, -1)
@@ -102,12 +102,12 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	vm := otto.New()
 	_, err = vm.Run(`var playerObjList = {};` + encryptedScript + fmt.Sprintf(`;var __VM__OUTPUT = JSON.stringify(%s.mediaDefinitions)`, flashId))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	value, err := vm.Get("__VM__OUTPUT")
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	type MediaDefinition struct {
@@ -118,10 +118,10 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	mediaDefinitions := make([]MediaDefinition, 0)
 
 	if str, err := value.ToString(); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	} else {
 		if err := json.Unmarshal([]byte(str), &mediaDefinitions); err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 	}
 
@@ -141,13 +141,13 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		"Cookie": strings.Join(cookiesArr, "; "),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	pornhubs := make([]pornhubData, 0)
 
 	if err := json.Unmarshal([]byte(resApi), &pornhubs); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	streams := make(map[string]*extractors.Stream, len(pornhubs))
@@ -155,7 +155,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	for _, data := range pornhubs {
 		size, err := request.Size(data.VideoURL, data.VideoURL)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		urlData := &extractors.Part{

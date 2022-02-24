@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb/v3"
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -113,7 +114,7 @@ func (downloader *Downloader) writeFile(url string, file *os.File, headers map[s
 	// So don't worry about memory.
 	written, copyErr := io.Copy(barWriter, res.Body)
 	if copyErr != nil && copyErr != io.EOF {
-		return written, fmt.Errorf("file copy error: %s", copyErr)
+		return written, errors.Errorf("file copy error: %s", copyErr)
 	}
 	return written, nil
 }
@@ -415,12 +416,12 @@ func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, er
 	dirPath := filepath.Dir(filePath)
 	dir, err := os.Open(dirPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer dir.Close() // nolint
 	fns, err := dir.Readdir(0)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var metas []*FilePartMeta
 	reg := regexp.MustCompile(fmt.Sprintf("%s.%s.part.+", regexp.QuoteMeta(filename), extname))
@@ -428,7 +429,7 @@ func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, er
 		if reg.MatchString(fn.Name()) {
 			meta, err := parseFilePartMeta(path.Join(dirPath, fn.Name()), fn.Size())
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			metas = append(metas, meta)
 		}
@@ -444,20 +445,20 @@ func parseFilePartMeta(filepath string, fileSize int64) (*FilePartMeta, error) {
 	size := binary.Size(*meta)
 	file, err := os.OpenFile(filepath, os.O_RDWR, 0666)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer file.Close() // nolint
 	var buf [512]byte
 	readSize, err := file.ReadAt(buf[0:size], 0)
 	if err != nil && err != io.EOF {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if readSize < size {
-		return nil, fmt.Errorf("the file has been broked, please delete all part files and re-download")
+		return nil, errors.Errorf("the file has been broked, please delete all part files and re-download")
 	}
 	err = binary.Read(bytes.NewBuffer(buf[:size]), binary.LittleEndian, meta)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	savedSize := fileSize - int64(binary.Size(meta))
 	meta.Cur = meta.Start + savedSize
@@ -545,7 +546,7 @@ func (downloader *Downloader) aria2(title string, stream *extractors.Stream) err
 // Download download urls
 func (downloader *Downloader) Download(data *extractors.Data) error {
 	if len(data.Streams) == 0 {
-		return fmt.Errorf("no streams in title %s", data.Title)
+		return errors.Errorf("no streams in title %s", data.Title)
 	}
 
 	sortedStreams := genSortedStreams(data.Streams)
@@ -566,7 +567,7 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 	}
 	stream, ok := data.Streams[streamName]
 	if !ok {
-		return fmt.Errorf("no stream named %s", streamName)
+		return errors.Errorf("no stream named %s", streamName)
 	}
 
 	if !downloader.option.Silent {

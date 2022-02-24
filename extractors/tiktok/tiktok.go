@@ -6,6 +6,7 @@ import (
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -26,7 +27,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	urlMatcherRegExp := regexp.MustCompile(`"downloadAddr":\s*"([^"]+)"`)
@@ -34,7 +35,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	downloadURLMatcher := urlMatcherRegExp.FindStringSubmatch(html)
 
 	if len(downloadURLMatcher) == 0 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	videoURL := strings.ReplaceAll(downloadURLMatcher[1], `\u002F`, "/")
@@ -44,7 +45,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	titleMatcher := titleMatcherRegExp.FindStringSubmatch(html)
 
 	if len(titleMatcher) == 0 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	title := titleMatcher[1]
@@ -57,7 +58,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	size, err := request.Size(videoURL, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	urlData := &extractors.Part{
 		URL:  videoURL,
