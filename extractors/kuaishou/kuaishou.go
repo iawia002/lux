@@ -74,7 +74,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		"sd": regexp.MustCompile(`"photoUrl":\s*"([^"]+)"`),
 	}
 
-	streams := make(map[string]*extractors.Stream, 2)
+	streams := make(map[string]*extractors.Stream, 1)
 	for quality, qualityReg := range qualityRegMap {
 		matcher := qualityReg.FindStringSubmatch(html)
 
