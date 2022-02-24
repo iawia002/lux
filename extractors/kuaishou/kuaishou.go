@@ -66,9 +66,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.New("can not found title")
 	}
 
-	title := strings.TrimSpace(titles[1])
-
-	title = regexp.MustCompile(`\n+`).ReplaceAllString(title, " ")
+	title := regexp.MustCompile(`\n+`).ReplaceAllString(strings.TrimSpace(titles[1]), " ")
 
 	qualityRegMap := map[string]*regexp.Regexp{
 		"sd": regexp.MustCompile(`"photoUrl":\s*"([^"]+)"`),
