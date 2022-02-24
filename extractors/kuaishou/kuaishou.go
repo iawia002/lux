@@ -101,7 +101,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	return []*extractors.Data{
 		{
-			Site:    "KuaiShou www.kuaishou.com",
+			Site:    "快手 kuaishou.com",
 			Title:   title,
 			Type:    extractors.DataTypeVideo,
 			Streams: streams,
