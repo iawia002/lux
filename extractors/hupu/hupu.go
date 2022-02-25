@@ -1,6 +1,8 @@
 package hupu
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
@@ -20,7 +22,7 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	var title string
@@ -36,12 +38,12 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	if len(urlDesc) > 1 {
 		videoUrl = urlDesc[1]
 	} else {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	size, err := request.Size(videoUrl, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	urlData := &extractors.Part{
 		URL:  videoUrl,

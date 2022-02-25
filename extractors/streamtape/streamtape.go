@@ -3,6 +3,7 @@ package streamtape
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
 	"github.com/robertkrimen/otto"
 
 	"github.com/iawia002/lux/extractors"
@@ -27,26 +28,26 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	scripts := utils.MatchOneOf(html, `document.getElementById\('norobotlink'\).innerHTML = (.+?);`)
 	if len(scripts) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	vm := otto.New()
 	_, err = vm.Run(fmt.Sprintf("var __VM__OUTPUT = %s", scripts[1]))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	value, err := vm.Get("__VM__OUTPUT")
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	u, err := value.ToString() // //streamtape.com/get_video?id=xx&expires=xx&ip=xx&token=xx
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	u = fmt.Sprintf("https:%s&stream=1", u)
 
@@ -60,7 +61,7 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 
 	size, err := request.Size(u, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	urlData := &extractors.Part{

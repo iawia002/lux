@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
@@ -99,11 +101,11 @@ func getVPS(tvid, vid, refer string) (*iqiyi, error) {
 	apiURL := fmt.Sprintf("%s%s&vf=%s", host, params, vf)
 	info, err := request.Get(apiURL, refer, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	data := new(iqiyi)
 	if err := json.Unmarshal([]byte(info), data); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return data, nil
 }
@@ -131,7 +133,7 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 	}
 	html, err := request.Get(url, refer, headers)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	tvid := utils.MatchOneOf(
 		url,
@@ -148,7 +150,7 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 		)
 	}
 	if tvid == nil || len(tvid) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	vid := utils.MatchOneOf(
@@ -165,12 +167,12 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 		)
 	}
 	if vid == nil || len(vid) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var title string
 	if e.siteType == SiteTypeIqiyi {
@@ -195,10 +197,10 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 	}
 	videoDatas, err := getVPS(tvid[1], vid[1], refer)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if videoDatas.Code != "A00000" {
-		return nil, fmt.Errorf("can't play this video: %s", videoDatas.Msg)
+		return nil, errors.Errorf("can't play this video: %s", videoDatas.Msg)
 	}
 
 	streams := make(map[string]*extractors.Stream)
@@ -208,15 +210,15 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 		for index, v := range video.Fs {
 			realURLData, err := request.Get(urlPrefix+v.L, refer, nil)
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			var realURL iqiyiURL
 			if err = json.Unmarshal([]byte(realURLData), &realURL); err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			_, ext, err := utils.GetNameAndExt(realURL.L)
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			urls[index] = &extractors.Part{
 				URL:  realURL.L,

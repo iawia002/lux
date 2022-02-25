@@ -1,6 +1,8 @@
 package universal
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
@@ -21,11 +23,11 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	filename, ext, err := utils.GetNameAndExt(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	size, err := request.Size(url, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	streams := map[string]*extractors.Stream{
 		"default": {
@@ -41,7 +43,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 	contentType, err := request.ContentType(url, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return []*extractors.Data{

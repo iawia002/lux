@@ -6,6 +6,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
@@ -40,7 +42,7 @@ func New() extractors.Extractor {
 func extractImageFromPage(html, url string) (map[string]*extractors.Stream, error) {
 	_, realURLs, err := parser.GetImages(html, "EmbeddedMediaImage", nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	urls := make([]*extractors.Part, 0, len(realURLs))
@@ -48,7 +50,7 @@ func extractImageFromPage(html, url string) (map[string]*extractors.Stream, erro
 	for _, realURL := range realURLs {
 		size, err := request.Size(realURL, url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		urlData := &extractors.Part{
 			URL:  realURL,
@@ -70,7 +72,7 @@ func extractImageFromPage(html, url string) (map[string]*extractors.Stream, erro
 func extractFromData(dataString, url string) (map[string]*extractors.Stream, error) {
 	var data instagram
 	if err := json.Unmarshal([]byte(dataString), &data); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	urls := make([]*extractors.Part, 0, len(data.ShortcodeMedia.EdgeSidecar.Edges))
@@ -87,7 +89,7 @@ func extractFromData(dataString, url string) (map[string]*extractors.Stream, err
 
 		size, err := request.Size(realURL, url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		urlData := &extractors.Part{
 			URL:  realURL,
@@ -111,18 +113,18 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	// Instagram is forcing a login to access the page, so we use the embed page to bypass that.
 	u, err := netURL.Parse(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	id := u.Path[strings.LastIndex(u.Path, "/")+1:]
 	u.Path = path.Join(u.Path, "embed")
 
 	html, err := request.Get(u.String(), url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	dataStrings := utils.MatchOneOf(html, `window\.__additionalDataLoaded\('graphql',(.*)\);`)
 	if dataStrings == nil || len(dataStrings) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	dataString := dataStrings[1]
 
@@ -133,7 +135,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		streams, err = extractFromData(dataString, url)
 	}
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return []*extractors.Data{

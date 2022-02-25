@@ -2,8 +2,9 @@ package yinyuetai
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -48,12 +49,12 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	var err error
 	html, err := request.Get(apiURL, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	// parse yinyuetai data
 	data := yinyuetaiMvData{}
 	if err = json.Unmarshal([]byte(html), &data); err != nil {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	// handle api error
 	if data.Error {

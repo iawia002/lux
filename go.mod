@@ -12,7 +12,8 @@ require (
 	github.com/json-iterator/go v1.1.11
 	github.com/kkdai/youtube/v2 v2.7.2
 	github.com/kr/pretty v0.1.0
-	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
+	github.com/pkg/errors v0.9.1
+	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f
 	github.com/tidwall/gjson v1.9.3
 	github.com/urfave/cli/v2 v2.3.0
 )

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
@@ -109,7 +111,7 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	vid := utils.MatchOneOf(
 		url,
@@ -120,7 +122,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		vid = utils.MatchOneOf(html, `vid: (\d+),`)
 	}
 	if vid == nil || len(vid) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	// API extract from https://js.mgtv.com/imgotv-miniv6/global/page/play-tv.js
@@ -142,11 +144,11 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		headers,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var pm2 mgtvPm2Data
 	if err = json.Unmarshal([]byte(pm2DataString), &pm2); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	dataString, err := request.Get(
@@ -158,11 +160,11 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		headers,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var mgtvData mgtv
 	if err = json.Unmarshal([]byte(dataString), &mgtvData); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	title := strings.TrimSpace(
@@ -179,15 +181,15 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		addr = mgtvVideoAddr{}
 		addrInfo, err := request.GetByte(mgtvData.Data.StreamDomain[0]+stream.URL, url, headers)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		if err = json.Unmarshal(addrInfo, &addr); err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		m3u8URLs, totalSize, err := mgtvM3u8(addr.Info)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		urls := make([]*extractors.Part, len(m3u8URLs))
 		for index, u := range m3u8URLs {

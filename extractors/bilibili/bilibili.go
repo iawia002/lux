@@ -2,11 +2,12 @@ package bilibili
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/parser"
@@ -49,7 +50,7 @@ func genAPI(aid, cid, quality int, bvid string, bangumi bool, cookie string) (st
 			return "", err
 		}
 		if t.Code != 0 {
-			return "", fmt.Errorf("cookie error: %s", t.Message)
+			return "", errors.Errorf("cookie error: %s", t.Message)
 		}
 		utoken = t.Data.Token
 	}
@@ -94,7 +95,7 @@ func extractBangumi(url, html string, extractOption extractors.Options) ([]*extr
 	var data bangumiData
 	err := json.Unmarshal([]byte(dataString), &data)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if !extractOption.Playlist {
 		aid := data.EpInfo.Aid
@@ -158,7 +159,7 @@ func getMultiPageData(html string) (*multiPage, error) {
 	}
 	err := json.Unmarshal([]byte(multiPageDataString[1]), &data)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return &data, nil
 }
@@ -166,7 +167,7 @@ func getMultiPageData(html string) (*multiPage, error) {
 func extractNormalVideo(url, html string, extractOption extractors.Options) ([]*extractors.Data, error) {
 	pageData, err := getMultiPageData(html)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if !extractOption.Playlist {
 		// handle URL that has a playlist, mainly for unified titles
@@ -183,7 +184,7 @@ func extractNormalVideo(url, html string, extractOption extractors.Options) ([]*
 		}
 
 		if len(pageData.VideoData.Pages) < p || p < 1 {
-			return nil, extractors.ErrURLParseFailed
+			return nil, errors.WithStack(extractors.ErrURLParseFailed)
 		}
 
 		page := pageData.VideoData.Pages[p-1]
@@ -246,7 +247,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	var err error
 	html, err := request.Get(url, referer, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	// set thread number to 1 manually to avoid http 412 error
@@ -421,7 +422,7 @@ func subtitleTransform(body []byte) ([]byte, error) {
 	captionData := bilibiliSubtitleFormat{}
 	err := json.Unmarshal(body, &captionData)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	for i := 0; i < len(captionData.Body); i++ {

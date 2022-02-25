@@ -5,13 +5,14 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/pkg/errors"
 )
 
 // GetDoc return Document object of the HTML string
 func GetDoc(html string) (*goquery.Document, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return doc, nil
 }
@@ -20,7 +21,7 @@ func GetDoc(html string) (*goquery.Document, error) {
 func GetImages(html, imgClass string, urlHandler func(string) string) (string, []string, error) {
 	doc, err := GetDoc(html)
 	if err != nil {
-		return "", nil, err
+		return "", nil, errors.WithStack(err)
 	}
 	title := Title(doc)
 	urls := make([]string, 0)

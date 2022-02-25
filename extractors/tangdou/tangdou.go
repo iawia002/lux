@@ -1,6 +1,8 @@
 package tangdou
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
@@ -27,7 +29,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	html, err := request.Get(url, referer, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	videoIDs := utils.MatchAll(html, `<a target="tdplayer" href="(.+?)" class="title">`)
@@ -61,7 +63,7 @@ func tangdouDownload(uri string) *extractors.Data {
 		html, `<div class="title">(.+?)</div>`, `<meta name="description" content="(.+?)"`, `<title>(.+?)</title>`,
 	)
 	if titles == nil || len(titles) < 2 {
-		return extractors.EmptyData(uri, extractors.ErrURLParseFailed)
+		return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
 	}
 	title := titles[1]
 
@@ -74,7 +76,7 @@ func tangdouDownload(uri string) *extractors.Data {
 			html, `<div class="video">\s*<script src="(.+?)"`,
 		)
 		if shareURLs == nil || len(shareURLs) < 2 {
-			return extractors.EmptyData(uri, extractors.ErrURLParseFailed)
+			return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
 		}
 		shareURL := shareURLs[1]
 
@@ -87,12 +89,12 @@ func tangdouDownload(uri string) *extractors.Data {
 			signedVideo, `src=\\"(.+?)\\"`,
 		)
 		if realURLs == nil || len(realURLs) < 2 {
-			return extractors.EmptyData(uri, extractors.ErrURLParseFailed)
+			return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
 		}
 		realURL = realURLs[1]
 	} else {
 		if len(videoURLs) < 2 {
-			return extractors.EmptyData(uri, extractors.ErrURLParseFailed)
+			return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
 		}
 		realURL = videoURLs[1]
 	}

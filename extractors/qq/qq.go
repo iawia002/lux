@@ -2,10 +2,11 @@ package qq
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -64,7 +65,7 @@ func getVinfo(vid, defn, refer string) (qqVideoInfo, error) {
 	}
 	jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
 	if jsonStrings == nil || len(jsonStrings) < 2 {
-		return qqVideoInfo{}, extractors.ErrURLParseFailed
+		return qqVideoInfo{}, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	jsonString := jsonStrings[1]
 	var data qqVideoInfo
@@ -99,7 +100,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*extractors.Strea
 		} else {
 			tmpData, err := getVinfo(vid, fi.Name, cdn)
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			fns = strings.Split(tmpData.Vl.Vi[0].Fn, ".")
 			if len(fns) >= 3 && utils.MatchOneOf(fns[1], `^p(\d{3})$`) != nil {
@@ -133,17 +134,17 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*extractors.Strea
 				), "", nil,
 			)
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
 			if jsonStrings == nil || len(jsonStrings) < 2 {
-				return nil, extractors.ErrURLParseFailed
+				return nil, errors.WithStack(extractors.ErrURLParseFailed)
 			}
 			jsonString := jsonStrings[1]
 
 			var keyData qqKeyInfo
 			if err = json.Unmarshal([]byte(jsonString), &keyData); err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 
 			vkey = keyData.Key
@@ -153,7 +154,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*extractors.Strea
 			realURL := fmt.Sprintf("%s%s?vkey=%s", cdn, filename, vkey)
 			size, err := request.Size(realURL, cdn)
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			urlData := &extractors.Part{
 				URL:  realURL,
@@ -183,28 +184,28 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	vids := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)
 	if vids == nil || len(vids) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	vid := vids[1]
 
 	if len(vid) != 11 {
 		u, err := request.Get(url, url, nil)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		vids = utils.MatchOneOf(
 			u, `vid=(\w+)`, `vid:\s*["'](\w+)`, `vid\s*=\s*["']\s*(\w+)`,
 		)
 		if vids == nil || len(vids) < 2 {
-			return nil, extractors.ErrURLParseFailed
+			return nil, errors.WithStack(extractors.ErrURLParseFailed)
 		}
 		vid = vids[1]
 	}
 
 	data, err := getVinfo(vid, "shd", url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	// API request error
@@ -214,7 +215,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	cdn := data.Vl.Vi[0].Ul.UI[0].URL
 	streams, err := genStreams(vid, cdn, data)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return []*extractors.Data{

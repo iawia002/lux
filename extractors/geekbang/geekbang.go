@@ -2,10 +2,11 @@ package geekbang
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -63,7 +64,7 @@ func geekM3u8(url string) ([]geekURLInfo, error) {
 	)
 	urls, err := utils.M3u8URLs(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	for _, u := range urls {
 		temp = geekURLInfo{
@@ -87,7 +88,7 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 	var err error
 	matches := utils.MatchOneOf(url, `https?://time.geekbang.org/course/detail/(\d+)-(\d+)`)
 	if matches == nil || len(matches) < 3 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	// Get video information
@@ -95,13 +96,13 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 	params := strings.NewReader(fmt.Sprintf(`{"id": %q}`, matches[2]))
 	res, err := request.Request(http.MethodPost, "https://time.geekbang.org/serv/v1/article", params, heanders)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer res.Body.Close() // nolint
 
 	var data geekData
 	if err = json.NewDecoder(res.Body).Decode(&data); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	if data.Code < 0 {
@@ -116,13 +117,13 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 	params = strings.NewReader("{\"source_type\":1,\"aid\":" + string(matches[2]) + ",\"video_id\":\"" + string(data.Data.VideoID) + "\"}")
 	res, err = request.Request(http.MethodPost, "https://time.geekbang.org/serv/v3/source_auth/video_play_auth", params, heanders)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer res.Body.Close() // nolint
 
 	var playAuth videoPlayAuth
 	if err = json.NewDecoder(res.Body).Decode(&playAuth); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	if playAuth.Code < 0 {
@@ -133,13 +134,13 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 	heanders = map[string]string{"Accept-Encoding": ""}
 	res, err = request.Request(http.MethodGet, "http://ali.mantv.top/play/info?playAuth="+playAuth.Data.PlayAuth, nil, heanders)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer res.Body.Close() // nolint
 
 	var playInfo playInfo
 	if err = json.NewDecoder(res.Body).Decode(&playInfo); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	title := data.Data.Title
@@ -150,7 +151,7 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 		m3u8URLs, err := geekM3u8(media.URL)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		urls := make([]*extractors.Part, len(m3u8URLs))

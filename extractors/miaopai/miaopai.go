@@ -2,11 +2,12 @@ package miaopai
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -53,7 +54,7 @@ func New() extractors.Extractor {
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	ids := utils.MatchOneOf(url, `/media/([^\./]+)`, `/show(?:/channel)?/([^\./]+)`)
 	if ids == nil || len(ids) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	id := ids[1]
 
@@ -65,7 +66,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		url, nil,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	match := utils.MatchOneOf(jsonString, randomString+`\((.*)\);$`)
@@ -75,13 +76,13 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	err = json.Unmarshal([]byte(match[1]), &data)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	realURL := data.Data.MetaData[0].URLs.M
 	size, err := request.Size(realURL, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	urlData := &extractors.Part{
 		URL:  realURL,

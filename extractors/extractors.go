@@ -5,6 +5,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/utils"
 )
 
@@ -35,7 +37,7 @@ func Extract(u string, option Options) ([]*Data, error) {
 	} else {
 		u, err := url.ParseRequestURI(u)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		if u.Host == "haokan.baidu.com" {
 			domain = "haokan"
@@ -49,7 +51,7 @@ func Extract(u string, option Options) ([]*Data, error) {
 	}
 	videos, err := extractor.Extract(u, option)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	for _, v := range videos {
 		v.FillUpStreamsData()

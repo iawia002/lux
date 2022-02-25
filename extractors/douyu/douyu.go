@@ -2,7 +2,8 @@ package douyu
 
 import (
 	"encoding/json"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -68,32 +69,32 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	titles := utils.MatchOneOf(html, `<title>(.*?)</title>`)
 	if titles == nil || len(titles) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	title := titles[1]
 
 	vids := utils.MatchOneOf(url, `https?://v.douyu.com/show/(\S+)`)
 	if vids == nil || len(vids) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	vid := vids[1]
 
 	dataString, err := request.Get("http://vmobile.douyu.com/video/getInfo?vid="+vid, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	dataDict := new(douyuData)
 	if err := json.Unmarshal([]byte(dataString), dataDict); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	m3u8URLs, totalSize, err := douyuM3u8(dataDict.Data.VideoURL)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	urls := make([]*extractors.Part, len(m3u8URLs))
 	for index, u := range m3u8URLs {

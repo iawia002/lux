@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
@@ -55,24 +57,24 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	if strings.Contains(url, "player.vimeo.com") {
 		html, err = request.Get(url, url, nil)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 	} else {
 		vid = utils.MatchOneOf(url, `vimeo\.com/(\d+)`)[1]
 		html, err = request.Get("https://player.vimeo.com/video/"+vid, url, nil)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 	}
 	jsonStrings := utils.MatchOneOf(html, `var \w+\s?=\s?({.+?});`)
 	if jsonStrings == nil || len(jsonStrings) < 2 {
-		return nil, extractors.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	jsonString := jsonStrings[1]
 
 	var vimeoData vimeo
 	if err = json.Unmarshal([]byte(jsonString), &vimeoData); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	streams := make(map[string]*extractors.Stream, len(vimeoData.Request.Files.Progressive))
@@ -80,7 +82,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	for _, video := range vimeoData.Request.Files.Progressive {
 		size, err = request.Size(video.URL, url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		urlData := &extractors.Part{
 			URL:  video.URL,
