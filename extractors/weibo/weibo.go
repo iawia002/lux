@@ -10,11 +10,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
-
-	"github.com/pkg/errors"
 )
 
 func init() {

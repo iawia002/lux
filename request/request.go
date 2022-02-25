@@ -12,11 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-
 	cookiemonster "github.com/MercuryEngineering/CookieMonster"
 	"github.com/fatih/color"
 	"github.com/kr/pretty"
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/config"
 )

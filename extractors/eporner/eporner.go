@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"

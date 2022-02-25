@@ -15,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-
 	"github.com/tidwall/gjson"
 
 	"github.com/iawia002/lux/request"

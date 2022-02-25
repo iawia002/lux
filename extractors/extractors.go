@@ -5,9 +5,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/iawia002/lux/utils"
-
 	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/utils"
 )
 
 var lock sync.RWMutex

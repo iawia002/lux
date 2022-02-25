@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/kkdai/youtube/v2"
-
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
