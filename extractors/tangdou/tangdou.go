@@ -1,6 +1,8 @@
 package tangdou
 
 import (
+	"strings"
+
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
@@ -21,40 +23,22 @@ func New() extractors.Extractor {
 	return &extractor{}
 }
 
+var defaultHeader = map[string]string{
+	"Sec-Fetch-Dest": "document",
+	"Sec-Fetch-Mode": "navigate",
+	"Sec-Fetch-Site": "cross-site",
+	"Sec-GPC":        "1",
+	"User-Agent":     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+}
+
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
-	if !option.Playlist {
-		return []*extractors.Data{tangdouDownload(url)}, nil
-	}
-
-	html, err := request.Get(url, referer, nil)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	videoIDs := utils.MatchAll(html, `<a target="tdplayer" href="(.+?)" class="title">`)
-	needDownloadItems := utils.NeedDownloadList(option.Items, option.ItemStart, option.ItemEnd, len(videoIDs))
-	extractedData := make([]*extractors.Data, len(needDownloadItems))
-	wgp := utils.NewWaitGroupPool(option.ThreadNumber)
-	dataIndex := 0
-	for index, videoID := range videoIDs {
-		if !utils.ItemInSlice(index+1, needDownloadItems) || len(videoID) < 2 {
-			continue
-		}
-		wgp.Add()
-		go func(index int, videURI string, extractedData []*extractors.Data) {
-			defer wgp.Done()
-			extractedData[index] = tangdouDownload(videURI)
-		}(dataIndex, videoID[1], extractedData)
-		dataIndex++
-	}
-	wgp.Wait()
-	return extractedData, nil
+	return []*extractors.Data{tangdouDownload(url)}, nil
 }
 
 // tangdouDownload download function for single url
 func tangdouDownload(uri string) *extractors.Data {
-	html, err := request.Get(uri, referer, nil)
+	html, err := request.Get(uri, uri, defaultHeader)
 	if err != nil {
 		return extractors.EmptyData(uri, err)
 	}
@@ -69,34 +53,15 @@ func tangdouDownload(uri string) *extractors.Data {
 
 	var realURL string
 	videoURLs := utils.MatchOneOf(
-		html, `video:'(.+?)'`, `video:"(.+?)"`, `<video.*src="(.+?)"`,
+		html, `video:'(.+?)'`, `video:"(.+?)"`, `<video[^>]*src="(.+?)"`, `play_url:\s*"(.+?)",`,
 	)
 	if videoURLs == nil {
-		shareURLs := utils.MatchOneOf(
-			html, `<div class="video">\s*<script src="(.+?)"`,
-		)
-		if shareURLs == nil || len(shareURLs) < 2 {
-			return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
-		}
-		shareURL := shareURLs[1]
-
-		signedVideo, err := request.Get(shareURL, uri, nil)
-		if err != nil {
-			return extractors.EmptyData(uri, err)
-		}
-
-		realURLs := utils.MatchOneOf(
-			signedVideo, `src=\\"(.+?)\\"`,
-		)
-		if realURLs == nil || len(realURLs) < 2 {
-			return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
-		}
-		realURL = realURLs[1]
+		return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
 	} else {
 		if len(videoURLs) < 2 {
 			return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
 		}
-		realURL = videoURLs[1]
+		realURL = strings.ReplaceAll(videoURLs[1], `\u002F`, "/")
 	}
 
 	size, err := request.Size(realURL, uri)
