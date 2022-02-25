@@ -49,18 +49,19 @@ func tangdouDownload(uri string) *extractors.Data {
 	}
 	title := titles[1]
 
-	var realURL string
 	videoURLs := utils.MatchOneOf(
 		html, `video:'(.+?)'`, `video:"(.+?)"`, `<video[^>]*src="(.+?)"`, `play_url:\s*"(.+?)",`,
 	)
+
 	if videoURLs == nil {
 		return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
-	} else {
-		if len(videoURLs) < 2 {
-			return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
-		}
-		realURL = strings.ReplaceAll(videoURLs[1], `\u002F`, "/")
 	}
+
+	if len(videoURLs) < 2 {
+		return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
+	}
+
+	realURL := strings.ReplaceAll(videoURLs[1], `\u002F`, "/")
 
 	size, err := request.Size(realURL, uri)
 	if err != nil {
