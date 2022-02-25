@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+
 	"github.com/robertkrimen/otto"
 
 	"github.com/iawia002/lux/extractors"

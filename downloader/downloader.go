@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb/v3"
+
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"

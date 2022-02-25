@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	jsoniter "github.com/json-iterator/go"
+
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
