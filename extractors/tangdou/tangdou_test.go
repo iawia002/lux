@@ -16,19 +16,10 @@ func TestTangDou(t *testing.T) {
 		{
 			name: "need call share url first and get the signed video URL test and can get title from head's title tag",
 			args: test.Args{
-				URL:   "https://m.tangdou.com/v94/dAOMMYNjwT1T2Q2.html",
-				Title: "吉美广场舞《再唱山歌给党听》民族形体舞 附教学视频在线观看",
-				Size:  50710318,
+				URL:   "https://m.tangdou.com/play/1500676338077",
+				Title: "暴瘦减肚子，不用跑不用跳，8天瘦了16斤 正面演示 背面演示 分解教学__广场舞_糖豆广场舞-糖豆视频",
+				Size:  62258444,
 			},
-		},
-		{
-			name: "playlist test",
-			args: test.Args{
-				URL:   "https://www.tangdou.com/playlist/view/2816/page/4",
-				Title: "茉莉广场舞 我向草原问个好 原创藏族风民族舞附教学",
-				Size:  66284484,
-			},
-			playlist: true,
 		},
 	}
 	for _, tt := range tests {
