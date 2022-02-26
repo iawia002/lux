@@ -53,10 +53,6 @@ func tangdouDownload(uri string) *extractors.Data {
 		html, `video:'(.+?)'`, `video:"(.+?)"`, `<video[^>]*src="(.+?)"`, `play_url:\s*"(.+?)",`,
 	)
 
-	if videoURLs == nil {
-		return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
-	}
-
 	if len(videoURLs) < 2 {
 		return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
 	}
