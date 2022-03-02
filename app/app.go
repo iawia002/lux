@@ -294,11 +294,13 @@ func download(c *cli.Context, videoURL string) error {
 	}
 
 	if c.Bool("json") {
-		jsonData, err := json.MarshalIndent(data, "", "\t")
-		if err != nil {
+		e := json.NewEncoder(os.Stdout)
+		e.SetIndent("", "\t")
+		e.SetEscapeHTML(false)
+		if err := e.Encode(data); err != nil {
 			return err
 		}
-		fmt.Printf("%s\n", jsonData)
+
 		return nil
 	}
 
