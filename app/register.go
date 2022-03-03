@@ -35,4 +35,5 @@ import (
 	_ "github.com/iawia002/lux/extractors/yinyuetai"
 	_ "github.com/iawia002/lux/extractors/youku"
 	_ "github.com/iawia002/lux/extractors/youtube"
+	_ "github.com/iawia002/lux/extractors/ixigua"
 )
