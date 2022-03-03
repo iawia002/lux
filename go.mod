@@ -13,6 +13,5 @@ require (
 	github.com/kr/pretty v0.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f
-	github.com/tidwall/gjson v1.14.0
 	github.com/urfave/cli/v2 v2.3.0
 )
