@@ -29,7 +29,7 @@ type Video struct {
 	Quality string `json:"quality"`
 }
 
-// New returns a extractor.
+// New returns a ixigua extractor.
 func New() extractors.Extractor {
 	return &extractor{}
 }
