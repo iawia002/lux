@@ -40,18 +40,18 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		"Content-Type": "application/json",
 	}
 
-	// ixigua有两种格式的URL
+	// ixigua有三种格式的URL
 	// https://www.ixigua.com/7053389963487871502
 	// https://v.ixigua.com/RedcbWM/
-	// 后者打开的时候会跳转到前者
+  // https://m.toutiao.com/is/dtj1pND/
+	// 后面两种打开的时候会跳转到前者
 	// 所以这里先把URL转换为前者
-
 	var finalURL string
 	if strings.HasPrefix(url, "https://www.ixigua.com/") {
 		finalURL = url
 	}
 
-	if strings.HasPrefix(url, "https://v.ixigua.com/") {
+	if strings.HasPrefix(url, "https://v.ixigua.com/") || strings.HasPrefix(url, "https://m.toutiao.com/") {
 		resp, err := http.Get(url)
 		if err != nil {
 			return nil, errors.WithStack(err)
