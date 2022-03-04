@@ -17,6 +17,7 @@ import (
 
 func init() {
 	extractors.Register("ixigua", New())
+	extractors.Register("toutiao", New())
 }
 
 type extractor struct{}
@@ -127,6 +128,8 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 		stream := extractors.Stream{
 			Quality: video.Quality,
+			Size:    video.Size,
+			Ext:     video.Ext,
 			Parts: []*extractors.Part{
 				&extractors.Part{
 					URL:  video.URL,
@@ -134,7 +137,6 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 					Ext:  video.Ext,
 				},
 			},
-			NeedMux: false,
 		}
 		streams[video.Quality] = &stream
 	}
