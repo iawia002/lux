@@ -8,7 +8,7 @@ require (
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/fatih/color v1.13.0
 	github.com/go-rod/rod v0.102.1
-	github.com/itchyny/gojq v0.12.7 // indirect
+	github.com/itchyny/gojq v0.12.7
 	github.com/json-iterator/go v1.1.12
 	github.com/kkdai/youtube/v2 v2.7.10
 	github.com/kr/pretty v0.3.0
