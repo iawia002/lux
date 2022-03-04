@@ -14,6 +14,7 @@ import (
 	_ "github.com/iawia002/lux/extractors/huya"
 	_ "github.com/iawia002/lux/extractors/instagram"
 	_ "github.com/iawia002/lux/extractors/iqiyi"
+	_ "github.com/iawia002/lux/extractors/ixigua"
 	_ "github.com/iawia002/lux/extractors/kuaishou"
 	_ "github.com/iawia002/lux/extractors/mgtv"
 	_ "github.com/iawia002/lux/extractors/miaopai"
@@ -35,5 +36,4 @@ import (
 	_ "github.com/iawia002/lux/extractors/yinyuetai"
 	_ "github.com/iawia002/lux/extractors/youku"
 	_ "github.com/iawia002/lux/extractors/youtube"
-	_ "github.com/iawia002/lux/extractors/ixigua"
 )
