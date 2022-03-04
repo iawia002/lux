@@ -1,7 +1,6 @@
 package ixigua
 
 import (
-	"log"
 	"testing"
 
 	"github.com/iawia002/lux/extractors"

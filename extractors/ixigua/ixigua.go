@@ -126,19 +126,18 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		}
 		video.URL = base64Decode(video.URL)
 
-		stream := extractors.Stream{
+		streams[video.Quality] = &extractors.Stream{
 			Quality: video.Quality,
 			Size:    video.Size,
 			Ext:     video.Ext,
 			Parts: []*extractors.Part{
-				&extractors.Part{
+				{
 					URL:  video.URL,
 					Size: video.Size,
 					Ext:  video.Ext,
 				},
 			},
 		}
-		streams[video.Quality] = &stream
 	}
 
 	return []*extractors.Data{
