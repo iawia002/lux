@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/itchyny/gojq"
 	"github.com/pkg/errors"
@@ -97,7 +98,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 				{
 					URL:  quality.URL,
 					Size: quality.Size,
-					Ext:  quality.Ext,
+					Ext:  strings.Split(quality.Ext, "/")[1],
 				},
 			},
 		}
