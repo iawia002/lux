@@ -41,7 +41,7 @@ func Check(t *testing.T, args Args, data *extractors.Data) {
 	if len(sortedStreams) == 0 {
 		t.Fatalf("stream should not empty")
 	}
-	sort.Slice(sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size })
+	sort.SliceStable(sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size })
 	defaultData := sortedStreams[0]
 
 	temp := Args{

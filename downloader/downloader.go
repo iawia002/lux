@@ -434,7 +434,7 @@ func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, er
 			metas = append(metas, meta)
 		}
 	}
-	sort.Slice(metas, func(i, j int) bool {
+	sort.SliceStable(metas, func(i, j int) bool {
 		return metas[i].Index < metas[j].Index
 	})
 	return metas, nil

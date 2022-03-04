@@ -20,7 +20,7 @@ func genSortedStreams(streams map[string]*extractors.Stream) []*extractors.Strea
 		sortedStreams = append(sortedStreams, data)
 	}
 	if len(sortedStreams) > 1 {
-		sort.Slice(
+		sort.SliceStable(
 			sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size },
 		)
 	}
