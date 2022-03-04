@@ -40,7 +40,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		"Content-Type": "application/json",
 	}
 
-	// ixigua有三种格式的URL
+	// ixigua 有三种格式的 URL
 	// 格式一 https://www.ixigua.com/7053389963487871502
 	// 格式二 https://v.ixigua.com/RedcbWM/
 	// 格式三 https://m.toutiao.com/is/dtj1pND/
