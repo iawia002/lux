@@ -41,11 +41,12 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 
 	// ixigua有三种格式的URL
-	// https://www.ixigua.com/7053389963487871502
-	// https://v.ixigua.com/RedcbWM/
-  // https://m.toutiao.com/is/dtj1pND/
-	// 后面两种打开的时候会跳转到前者
-	// 所以这里先把URL转换为前者
+	// 格式一 https://www.ixigua.com/7053389963487871502
+	// 格式二 https://v.ixigua.com/RedcbWM/
+	// 格式三 https://m.toutiao.com/is/dtj1pND/
+	// 格式二会跳转到格式一
+	// 格式三会跳转到https://www.toutiao.com/a7053389963487871502
+
 	var finalURL string
 	if strings.HasPrefix(url, "https://www.ixigua.com/") {
 		finalURL = url
@@ -55,12 +56,13 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		resp, err := http.Get(url)
 		if err != nil {
 			return nil, errors.WithStack(err)
-
 		}
 
 		// follow redirects, https://stackoverflow.com/a/16785343
 		finalURL = resp.Request.URL.String()
 	}
+
+	finalURL = strings.ReplaceAll(finalURL, "https://www.toutiao.com/a", "https://www.ixigua.com/")
 
 	streams := make(map[string]*extractors.Stream)
 
