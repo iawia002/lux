@@ -4,7 +4,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/itchyny/gojq"
 	"github.com/pkg/errors"
@@ -38,10 +40,32 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		"Content-Type": "application/json",
 	}
 
+	// ixigua有两种格式的URL
+	// https://www.ixigua.com/7053389963487871502
+	// https://v.ixigua.com/RedcbWM/
+	// 后者打开的时候会跳转到前者
+	// 所以这里先把URL转换为前者
+
+	var finalURL string
+	if strings.HasPrefix(url, "https://www.ixigua.com/") {
+		finalURL = url
+	}
+
+	if strings.HasPrefix(url, "https://v.ixigua.com/") {
+		resp, err := http.Get(url)
+		if err != nil {
+			return nil, errors.WithStack(err)
+
+		}
+
+		// follow redirects, https://stackoverflow.com/a/16785343
+		finalURL = resp.Request.URL.String()
+	}
+
 	streams := make(map[string]*extractors.Stream)
 
 	r := regexp.MustCompile(`(ixigua.com/)(\w+)?`)
-	id := r.FindSubmatch([]byte(url))[2]
+	id := r.FindSubmatch([]byte(finalURL))[2]
 	url2 := fmt.Sprintf("https://www.ixigua.com/api/public/videov2/brief/details?group_id=%s", string(id))
 
 	body, err := request.Get(url2, url, headers)
