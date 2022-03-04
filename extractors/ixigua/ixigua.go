@@ -45,7 +45,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	// 格式二 https://v.ixigua.com/RedcbWM/
 	// 格式三 https://m.toutiao.com/is/dtj1pND/
 	// 格式二会跳转到格式一
-	// 格式三会跳转到https://www.toutiao.com/a7053389963487871502
+	// 格式三会跳转到 https://www.toutiao.com/a7053389963487871502
 
 	var finalURL string
 	if strings.HasPrefix(url, "https://www.ixigua.com/") {
