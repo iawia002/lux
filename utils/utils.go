@@ -15,15 +15,10 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/tidwall/gjson"
 
 	"github.com/iawia002/lux/request"
 )
 
-// GetStringFromJSON get the string value from json path
-func GetStringFromJSON(json, path string) string {
-	return gjson.Get(json, path).String()
-}
 
 // MatchOneOf match one of the patterns
 func MatchOneOf(text string, patterns ...string) []string {
