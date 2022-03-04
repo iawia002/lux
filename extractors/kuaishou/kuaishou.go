@@ -18,7 +18,7 @@ func init() {
 
 type extractor struct{}
 
-// New returns a extractor.
+// New returns a kuaishou extractor.
 func New() extractors.Extractor {
 	return &extractor{}
 }
