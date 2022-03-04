@@ -4,13 +4,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"regexp"
+
+	"github.com/itchyny/gojq"
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
-	"github.com/itchyny/gojq"
-	"github.com/pkg/errors"
 )
 
 func init() {
@@ -18,6 +18,13 @@ func init() {
 }
 
 type extractor struct{}
+
+type Video struct {
+	URL     string `json:"url"`
+	Size    int64  `json:"size"`
+	Ext     string `json:"ext"`
+	Quality string `json:"quality"`
+}
 
 // New returns a extractor.
 func New() extractors.Extractor {
@@ -32,7 +39,6 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 
 	streams := make(map[string]*extractors.Stream)
-	// parts := []*extractors.Part{}
 
 	r := regexp.MustCompile(`(ixigua.com/)(\w+)?`)
 	id := r.FindSubmatch([]byte(url))[2]
@@ -43,16 +49,16 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.WithStack(err)
 	}
 
-	var title string
 	var m interface{}
 	err = json.Unmarshal([]byte(body), &m)
 	if err != nil {
-		panic(err)
+		return nil, errors.WithStack(err)
 	}
 
+	var title string
 	query1, err := gojq.Parse(".data.title")
 	if err != nil {
-		log.Fatalln(err)
+		return nil, errors.WithStack(err)
 	}
 	iter := query1.Run(m)
 	for {
@@ -61,14 +67,15 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			break
 		}
 		if err, ok := v.(error); ok {
-			log.Fatalln(err)
+			return nil, errors.WithStack(err)
 		}
 		title, _ = v.(string)
 	}
 
 	query2, err := gojq.Parse(".data.videoResource.normal.video_list | .[] | {url: .main_url, size: .size, ext: .vtype, quality: .definition}")
 	if err != nil {
-		log.Fatalln(err)
+		return nil, errors.WithStack(err)
+
 	}
 	iter2 := query2.Run(m)
 	for {
@@ -77,18 +84,18 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			break
 		}
 		if err, ok := v.(error); ok {
-			log.Fatalln(err)
+			return nil, errors.WithStack(err)
 		}
 
 		video := Video{}
 
 		jsonbody, err := json.Marshal(v)
 		if err != nil {
-			log.Fatalln(err)
+			return nil, errors.WithStack(err)
 		}
 
 		if err := json.Unmarshal(jsonbody, &video); err != nil {
-			log.Fatalln(err)
+			return nil, errors.WithStack(err)
 		}
 		video.URL = base64Decode(video.URL)
 
@@ -121,11 +128,4 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 func base64Decode(t string) string {
 	d, _ := base64.StdEncoding.DecodeString(t)
 	return string(d)
-}
-
-type Video struct {
-	URL     string `json:"url"`
-	Size    int64  `json:"size"`
-	Ext     string `json:"ext"`
-	Quality string `json:"quality"`
 }
