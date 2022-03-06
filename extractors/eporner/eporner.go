@@ -6,11 +6,17 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/parser"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/parser"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("eporner", New())
+}
 
 const (
 	downloadclass = ".dloaddivcol"
@@ -93,15 +99,15 @@ func getSrc(html string) []*src {
 type extractor struct{}
 
 // New returns a eporner extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(u string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(u string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(u, u, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var title string
 	desc := utils.MatchOneOf(html, `<title>(.+?)</title>`)
@@ -112,33 +118,33 @@ func (e *extractor) Extract(u string, option types.Options) ([]*types.Data, erro
 	}
 	uu, err := url.Parse(u)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	srcs := getSrc(html)
-	streams := make(map[string]*types.Stream, len(srcs))
+	streams := make(map[string]*extractors.Stream, len(srcs))
 	for _, src := range srcs {
 		srcurl := uu.Scheme + "://" + uu.Host + src.url
 		// skipping an extra HEAD request to the URL.
 		// size, err := request.Size(srcurl, u)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
-		urlData := &types.Part{
+		urlData := &extractors.Part{
 			URL:  srcurl,
 			Size: src.size,
 			Ext:  "mp4",
 		}
-		streams[src.quality] = &types.Stream{
-			Parts:   []*types.Part{urlData},
+		streams[src.quality] = &extractors.Stream{
+			Parts:   []*extractors.Part{urlData},
 			Size:    src.size,
 			Quality: src.quality,
 		}
 	}
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "EPORNER eporner.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     u,
 		},

@@ -5,13 +5,14 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/pkg/errors"
 )
 
 // GetDoc return Document object of the HTML string
 func GetDoc(html string) (*goquery.Document, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return doc, nil
 }
@@ -20,7 +21,7 @@ func GetDoc(html string) (*goquery.Document, error) {
 func GetImages(html, imgClass string, urlHandler func(string) string) (string, []string, error) {
 	doc, err := GetDoc(html)
 	if err != nil {
-		return "", nil, err
+		return "", nil, errors.WithStack(err)
 	}
 	title := Title(doc)
 	urls := make([]string, 0)
@@ -40,9 +41,12 @@ func GetImages(html, imgClass string, urlHandler func(string) string) (string, [
 // Title get title
 func Title(doc *goquery.Document) string {
 	var title string
-	title = strings.Replace(
-		strings.TrimSpace(doc.Find("h1").First().Text()), "\n", "", -1,
-	)
+	h1Elem := doc.Find("h1").First()
+	h1Title, found := h1Elem.Attr("title")
+	if !found {
+		h1Title = h1Elem.Text()
+	}
+	title = strings.Replace(strings.TrimSpace(h1Title), "\n", "", -1)
 	if title == "" {
 		// Bilibili: Some movie page got no h1 tag
 		title, _ = doc.Find("meta[property=\"og:title\"]").Attr("content")

@@ -16,10 +16,11 @@ import (
 	"time"
 
 	"github.com/cheggaaa/pb/v3"
+	"github.com/pkg/errors"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
 
 // Options defines options used in downloading.
@@ -67,8 +68,7 @@ func New(option Options) *Downloader {
 }
 
 // caption downloads danmaku, subtitles, etc
-func (downloader *Downloader) caption(url, fileName, ext string) error {
-	fmt.Println("\nDownloading captions...")
+func (downloader *Downloader) caption(url, fileName, ext string, transform func([]byte) ([]byte, error)) error {
 
 	refer := downloader.option.Refer
 	if refer == "" {
@@ -78,6 +78,14 @@ func (downloader *Downloader) caption(url, fileName, ext string) error {
 	if err != nil {
 		return err
 	}
+
+	if transform != nil {
+		body, err = transform(body)
+		if err != nil {
+			return err
+		}
+	}
+
 	filePath, err := utils.FilePath(fileName, ext, downloader.option.FileNameLength, downloader.option.OutputPath, true)
 	if err != nil {
 		return err
@@ -106,12 +114,12 @@ func (downloader *Downloader) writeFile(url string, file *os.File, headers map[s
 	// So don't worry about memory.
 	written, copyErr := io.Copy(barWriter, res.Body)
 	if copyErr != nil && copyErr != io.EOF {
-		return written, fmt.Errorf("file copy error: %s", copyErr)
+		return written, errors.Errorf("file copy error: %s", copyErr)
 	}
 	return written, nil
 }
 
-func (downloader *Downloader) save(part *types.Part, refer, fileName string) error {
+func (downloader *Downloader) save(part *extractors.Part, refer, fileName string) error {
 	filePath, err := utils.FilePath(fileName, part.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, false)
 	if err != nil {
 		return err
@@ -209,7 +217,7 @@ func (downloader *Downloader) save(part *types.Part, refer, fileName string) err
 	return nil
 }
 
-func (downloader *Downloader) multiThreadSave(dataPart *types.Part, refer, fileName string) error {
+func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, fileName string) error {
 	filePath, err := utils.FilePath(fileName, dataPart.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, false)
 	if err != nil {
 		return err
@@ -325,12 +333,15 @@ func (downloader *Downloader) multiThreadSave(dataPart *types.Part, refer, fileN
 
 	wgp := utils.NewWaitGroupPool(downloader.option.ThreadNumber)
 	var errs []error
+	var mu sync.Mutex
 	for _, part := range unfinishedPart {
 		wgp.Add()
 		go func(part *FilePartMeta) {
 			file, err := os.OpenFile(filePartPath(filePath, part), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 			if err != nil {
+				mu.Lock()
 				errs = append(errs, err)
+				mu.Unlock()
 				return
 			}
 			defer func() {
@@ -353,7 +364,9 @@ func (downloader *Downloader) multiThreadSave(dataPart *types.Part, refer, fileN
 				// Only write part to new file.
 				err = writeFilePartMeta(file, part)
 				if err != nil {
+					mu.Lock()
 					errs = append(errs, err)
+					mu.Unlock()
 					return
 				}
 			}
@@ -367,7 +380,9 @@ func (downloader *Downloader) multiThreadSave(dataPart *types.Part, refer, fileN
 						remainingSize -= chunkSize
 						break
 					} else if i+1 >= downloader.option.RetryTimes {
+						mu.Lock()
 						errs = append(errs, err)
+						mu.Unlock()
 						return
 					}
 					temp += written
@@ -401,12 +416,12 @@ func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, er
 	dirPath := filepath.Dir(filePath)
 	dir, err := os.Open(dirPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer dir.Close() // nolint
 	fns, err := dir.Readdir(0)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var metas []*FilePartMeta
 	reg := regexp.MustCompile(fmt.Sprintf("%s.%s.part.+", regexp.QuoteMeta(filename), extname))
@@ -414,12 +429,12 @@ func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, er
 		if reg.MatchString(fn.Name()) {
 			meta, err := parseFilePartMeta(path.Join(dirPath, fn.Name()), fn.Size())
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			metas = append(metas, meta)
 		}
 	}
-	sort.Slice(metas, func(i, j int) bool {
+	sort.SliceStable(metas, func(i, j int) bool {
 		return metas[i].Index < metas[j].Index
 	})
 	return metas, nil
@@ -430,20 +445,20 @@ func parseFilePartMeta(filepath string, fileSize int64) (*FilePartMeta, error) {
 	size := binary.Size(*meta)
 	file, err := os.OpenFile(filepath, os.O_RDWR, 0666)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer file.Close() // nolint
 	var buf [512]byte
 	readSize, err := file.ReadAt(buf[0:size], 0)
 	if err != nil && err != io.EOF {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if readSize < size {
-		return nil, fmt.Errorf("the file has been broked, please delete all part files and re-download")
+		return nil, errors.Errorf("the file has been broked, please delete all part files and re-download")
 	}
 	err = binary.Read(bytes.NewBuffer(buf[:size]), binary.LittleEndian, meta)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	savedSize := fileSize - int64(binary.Size(meta))
 	meta.Cur = meta.Start + savedSize
@@ -487,10 +502,10 @@ func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
 	return err
 }
 
-func (downloader *Downloader) aria2(title string, stream *types.Stream) error {
+func (downloader *Downloader) aria2(title string, stream *extractors.Stream) error {
 	rpcData := Aria2RPCData{
 		JSONRPC: "2.0",
-		ID:      "annie", // can be modified
+		ID:      "lux", // can be modified
 		Method:  "aria2.addUri",
 	}
 	rpcData.Params[0] = "token:" + downloader.option.Aria2Token
@@ -529,7 +544,11 @@ func (downloader *Downloader) aria2(title string, stream *types.Stream) error {
 }
 
 // Download download urls
-func (downloader *Downloader) Download(data *types.Data) error {
+func (downloader *Downloader) Download(data *extractors.Data) error {
+	if len(data.Streams) == 0 {
+		return errors.Errorf("no streams in title %s", data.Title)
+	}
+
 	sortedStreams := genSortedStreams(data.Streams)
 	if downloader.option.InfoOnly {
 		printInfo(data, sortedStreams)
@@ -548,7 +567,7 @@ func (downloader *Downloader) Download(data *types.Data) error {
 	}
 	stream, ok := data.Streams[streamName]
 	if !ok {
-		return fmt.Errorf("no stream named %s", streamName)
+		return errors.Errorf("no stream named %s", streamName)
 	}
 
 	if !downloader.option.Silent {
@@ -556,8 +575,14 @@ func (downloader *Downloader) Download(data *types.Data) error {
 	}
 
 	// download caption
-	if downloader.option.Caption && data.Caption != nil {
-		downloader.caption(data.Caption.URL, title, data.Caption.Ext) // nolint
+	if downloader.option.Caption && data.Captions != nil {
+		fmt.Println("\nDownloading captions...")
+		for k, v := range data.Captions {
+			if v != nil {
+				fmt.Printf("Downloading %s ...\n", k)
+				downloader.caption(v.URL, title, v.Ext, v.Transform) // nolint
+			}
+		}
 	}
 
 	// Use aria2 rpc to download
@@ -618,7 +643,7 @@ func (downloader *Downloader) Download(data *types.Data) error {
 		parts[index] = partFilePath
 
 		wgp.Add()
-		go func(part *types.Part, fileName string) {
+		go func(part *extractors.Part, fileName string) {
 			defer wgp.Done()
 			err := downloader.save(part, data.URL, fileName)
 			if err != nil {
@@ -634,7 +659,7 @@ func (downloader *Downloader) Download(data *types.Data) error {
 	}
 	downloader.bar.Finish()
 
-	if data.Type != types.DataTypeVideo {
+	if data.Type != extractors.DataTypeVideo {
 		return nil
 	}
 

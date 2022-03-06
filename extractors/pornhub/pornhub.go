@@ -1,32 +1,74 @@
 package pornhub
 
 import (
-	"bytes"
+	"compress/flate"
+	"compress/gzip"
 	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"regexp"
 	"strings"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+	"github.com/robertkrimen/otto"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
 
+func init() {
+	extractors.Register("pornhub", New())
+}
+
 type pornhubData struct {
-	Quality  json.RawMessage `json:"text"`
-	VideoURL string          `json:"url"`
+	DefaultQuality bool   `json:"defaultQuality"`
+	Format         string `json:"format"`
+	VideoURL       string `json:"videoUrl"`
+	Quality        string `json:"quality"`
 }
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a pornhub extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
-	html, err := request.Get(url, url, nil)
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
+	res, err := request.Request(http.MethodGet, url, nil, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
+	}
+
+	defer res.Body.Close() // nolint
+
+	var reader io.ReadCloser
+	switch res.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, _ = gzip.NewReader(res.Body)
+	case "deflate":
+		reader = flate.NewReader(res.Body)
+	default:
+		reader = res.Body
+	}
+	defer reader.Close() // nolint
+
+	b, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	html := string(b)
+
+	cookiesArr := make([]string, 0)
+	cookies := res.Cookies()
+
+	for _, c := range cookies {
+		cookiesArr = append(cookiesArr, c.Name+"="+c.Value)
 	}
 
 	var title string
@@ -37,54 +79,103 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		title = "pornhub video"
 	}
 
-	realURLs := utils.MatchOneOf(html, `qualityItems_\d+\s=\s([^;]+)`)
-	if realURLs == nil || len(realURLs) < 2 {
-		return nil, types.ErrURLParseFailed
+	reg, err := regexp.Compile(`<script\b[^>]*>([\s\S]*?)<\/script>`)
+	if err != nil {
+		return nil, errors.WithStack(extractors.ErrInvalidRegularExpression)
 	}
 
-	var pornhubs []pornhubData
-	if err = json.Unmarshal([]byte(realURLs[1]), &pornhubs); err != nil {
-		return nil, err
+	matchers := reg.FindAllStringSubmatch(html, -1)
+	var encryptedScript string
+
+	for _, scripts := range matchers {
+		script := scripts[1]
+		if !strings.Contains(script, "flashvars_") {
+			continue
+		} else {
+			encryptedScript = script
+			break
+		}
 	}
 
-	streams := make(map[string]*types.Stream, len(pornhubs))
+	flashId := regexp.MustCompile(`flashvars_\d+`).FindString(encryptedScript)
+
+	vm := otto.New()
+	_, err = vm.Run(`var playerObjList = {};` + encryptedScript + fmt.Sprintf(`;var __VM__OUTPUT = JSON.stringify(%s.mediaDefinitions)`, flashId))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	value, err := vm.Get("__VM__OUTPUT")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	type MediaDefinition struct {
+		Format   string `json:"format"`
+		VideoURL string `json:"videoUrl"`
+	}
+
+	mediaDefinitions := make([]MediaDefinition, 0)
+
+	if str, err := value.ToString(); err != nil {
+		return nil, errors.WithStack(err)
+	} else {
+		if err := json.Unmarshal([]byte(str), &mediaDefinitions); err != nil {
+			return nil, errors.WithStack(err)
+		}
+	}
+
+	var mp4MediaDefinition *MediaDefinition
+
+	for _, mediaDefinition := range mediaDefinitions {
+		if mediaDefinition.Format == "mp4" {
+			mp4MediaDefinition = &mediaDefinition
+		}
+	}
+
+	if mp4MediaDefinition == nil {
+		return nil, errors.New("can not found media")
+	}
+
+	resApi, err := request.Get(mp4MediaDefinition.VideoURL, mp4MediaDefinition.VideoURL, map[string]string{
+		"Cookie": strings.Join(cookiesArr, "; "),
+	})
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	pornhubs := make([]pornhubData, 0)
+
+	if err := json.Unmarshal([]byte(resApi), &pornhubs); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	streams := make(map[string]*extractors.Stream, len(pornhubs))
+
 	for _, data := range pornhubs {
-		if !strings.Contains(data.VideoURL, "mp4") {
-			continue
-		}
-
-		if bytes.ContainsRune(data.Quality, '[') {
-			// skip the case where the quality value is an array
-			// "quality": [
-			//   720,
-			//   480,
-			//   240
-			// ]
-			continue
-		}
-		quality := strings.ReplaceAll(string(data.Quality), "\"", "")
-
 		size, err := request.Size(data.VideoURL, data.VideoURL)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
-		urlData := &types.Part{
+
+		urlData := &extractors.Part{
 			URL:  data.VideoURL,
 			Size: size,
-			Ext:  "mp4",
+			Ext:  data.Format,
 		}
-		streams[quality] = &types.Stream{
-			Parts:   []*types.Part{urlData},
+
+		streams[data.Quality] = &extractors.Stream{
+			Parts:   []*extractors.Part{urlData},
 			Size:    size,
-			Quality: quality,
+			Quality: data.Quality,
 		}
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "Pornhub pornhub.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

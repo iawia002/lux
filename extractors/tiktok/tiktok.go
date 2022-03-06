@@ -1,65 +1,81 @@
 package tiktok
 
 import (
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"regexp"
+	"strings"
+
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
 )
+
+func init() {
+	extractors.Register("tiktok", New())
+}
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a tiktok extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
-	html, err := request.Get(url, url, nil)
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
+	html, err := request.Get(url, url, map[string]string{
+		// tiktok require a user agent
+		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+	})
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
-	// There are a few json objects loaded into the html that are useful. We're able to parse the video url from the
-	// videoObject json.
+	urlMatcherRegExp := regexp.MustCompile(`"downloadAddr":\s*"([^"]+)"`)
 
-	videoScriptTag := utils.MatchOneOf(html, `<script type="application\/ld\+json" id="videoObject">(.*?)<\/script>`)
-	if videoScriptTag == nil || len(videoScriptTag) < 2 {
-		return nil, types.ErrURLParseFailed
+	downloadURLMatcher := urlMatcherRegExp.FindStringSubmatch(html)
+
+	if len(downloadURLMatcher) == 0 {
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
-	videoJSON := videoScriptTag[1]
-	videoURL := utils.GetStringFromJSON(videoJSON, "contentUrl")
 
-	// We can receive the title directly from this __NEXT_DATA__ object.
+	videoURL := strings.ReplaceAll(downloadURLMatcher[1], `\u002F`, "/")
 
-	nextScriptTag := utils.MatchOneOf(html, `<script id="__NEXT_DATA__" type="application\/json" crossorigin="anonymous">(.*?)<\/script>`)
-	if nextScriptTag == nil || len(nextScriptTag) < 2 {
-		return nil, types.ErrURLParseFailed
+	titleMatcherRegExp := regexp.MustCompile(`<title[^>]*>([^<]+)</title>`)
+
+	titleMatcher := titleMatcherRegExp.FindStringSubmatch(html)
+
+	if len(titleMatcher) == 0 {
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
-	nextJSON := nextScriptTag[1]
-	title := utils.GetStringFromJSON(nextJSON, "props.pageProps.videoData.itemInfos.text")
 
-	streams := make(map[string]*types.Stream)
+	title := titleMatcher[1]
+
+	titleArr := strings.Split(title, "|")
+
+	title = strings.TrimSpace(strings.Join(titleArr[:len(titleArr)-1], "|"))
+
+	streams := make(map[string]*extractors.Stream)
 
 	size, err := request.Size(videoURL, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	urlData := &types.Part{
+	urlData := &extractors.Part{
 		URL:  videoURL,
 		Size: size,
 		Ext:  "mp4",
 	}
-	streams["default"] = &types.Stream{
-		Parts: []*types.Part{urlData},
+	streams["default"] = &extractors.Stream{
+		Parts: []*extractors.Part{urlData},
 		Size:  size,
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "TikTok tiktok.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

@@ -4,10 +4,16 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("xvideos", New())
+}
 
 const (
 	lowFlag      = "html5player.setVideoUrlLow('"
@@ -77,16 +83,16 @@ func getSrc(html string) []*src {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a xvideos extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var title string
 	desc := utils.MatchOneOf(html, `<title>(.+?)</title>`)
@@ -96,28 +102,28 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		title = "xvideos"
 	}
 
-	streams := make(map[string]*types.Stream, len(getSrc(html)))
+	streams := make(map[string]*extractors.Stream, len(getSrc(html)))
 	for _, src := range getSrc(html) {
 		size, err := request.Size(src.url, url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
-		urlData := &types.Part{
+		urlData := &extractors.Part{
 			URL:  src.url,
 			Size: size,
 			Ext:  "mp4",
 		}
-		streams[src.quality] = &types.Stream{
-			Parts:   []*types.Part{urlData},
+		streams[src.quality] = &extractors.Stream{
+			Parts:   []*extractors.Part{urlData},
 			Size:    size,
 			Quality: src.quality,
 		}
 	}
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "XVIDEOS xvideos.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

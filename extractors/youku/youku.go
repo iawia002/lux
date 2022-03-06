@@ -7,17 +7,22 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/rand"
 	netURL "net/url"
 	"strings"
 	"time"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("youku", New())
+}
 
 type errorData struct {
 	Note string `json:"note"`
@@ -77,7 +82,7 @@ func getAudioLang(lang string) string {
 
 // var ccodes = []string{"0510", "0502", "0507", "0508", "0512", "0513", "0514", "0503", "0590"}
 
-func youkuUps(vid string, option types.Options) (*youkuData, error) {
+func youkuUps(vid string, option extractors.Options) (*youkuData, error) {
 	var (
 		url   string
 		utid  string
@@ -90,13 +95,13 @@ func youkuUps(vid string, option types.Options) (*youkuData, error) {
 	} else {
 		headers, err := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		setCookie := headers.Get("Set-Cookie")
 		utids = utils.MatchOneOf(setCookie, `cna=(.+?);`)
 	}
 	if utids == nil || len(utids) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	utid = utids[1]
 
@@ -115,12 +120,12 @@ func youkuUps(vid string, option types.Options) (*youkuData, error) {
 		}
 		html, err := request.GetByte(url, youkuReferer, nil)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		// data must be emptied before reassignment, otherwise it will contain the previous value(the 'error' data)
 		data = youkuData{}
 		if err = json.Unmarshal(html, &data); err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		if data.Data.Error == (errorData{}) {
 			return &data, nil
@@ -163,12 +168,12 @@ func generateUtdid() string {
 	return base64.StdEncoding.EncodeToString(buffer.Bytes())
 }
 
-func genData(youkuData data) map[string]*types.Stream {
+func genData(youkuData data) map[string]*extractors.Stream {
 	var (
 		streamString string
 		quality      string
 	)
-	streams := make(map[string]*types.Stream, len(youkuData.Stream))
+	streams := make(map[string]*extractors.Stream, len(youkuData.Stream))
 	for _, stream := range youkuData.Stream {
 		if stream.AudioLang == "default" {
 			streamString = stream.Type
@@ -187,15 +192,15 @@ func genData(youkuData data) map[string]*types.Stream {
 			strings.Split(stream.Segs[0].URL, "?")[0],
 			".",
 		)
-		urls := make([]*types.Part, len(stream.Segs))
+		urls := make([]*extractors.Part, len(stream.Segs))
 		for index, data := range stream.Segs {
-			urls[index] = &types.Part{
+			urls[index] = &extractors.Part{
 				URL:  data.URL,
 				Size: data.Size,
 				Ext:  ext[len(ext)-1],
 			}
 		}
-		streams[streamString] = &types.Stream{
+		streams[streamString] = &extractors.Stream{
 			Parts:   urls,
 			Size:    stream.Size,
 			Quality: quality,
@@ -206,24 +211,24 @@ func genData(youkuData data) map[string]*types.Stream {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a youku extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	vids := utils.MatchOneOf(
 		url, `id_(.+?)\.html`, `id_(.+)`,
 	)
 	if vids == nil || len(vids) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	vid := vids[1]
 
 	youkuData, err := youkuUps(vid, option)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if youkuData.Data.Error.Code != 0 {
 		return nil, errors.New(youkuData.Data.Error.Note)
@@ -238,11 +243,11 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		title = fmt.Sprintf("%s %s", youkuData.Data.Show.Title, youkuData.Data.Video.Title)
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "优酷 youku.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

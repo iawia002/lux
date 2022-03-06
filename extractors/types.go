@@ -1,10 +1,15 @@
-package types
+package extractors
 
 // Part is the data structure for a single part of the video stream information.
 type Part struct {
 	URL  string `json:"url"`
 	Size int64  `json:"size"`
 	Ext  string `json:"ext"`
+}
+
+type CaptionPart struct {
+	Part
+	Transform func([]byte) ([]byte, error) `json:"-"`
 }
 
 // Stream is the data structure for each video stream, eg: 720P, 1080P.
@@ -33,6 +38,8 @@ const (
 	DataTypeVideo DataType = "video"
 	// DataTypeImage indicates the type of extracted data is the image.
 	DataTypeImage DataType = "image"
+	// DataTypeAudio indicates the type of extracted data is the audio.
+	DataTypeAudio DataType = "audio"
 )
 
 // Data is the main data structure for the whole video data.
@@ -45,7 +52,7 @@ type Data struct {
 	// each stream has it's own Parts and Quality
 	Streams map[string]*Stream `json:"streams"`
 	// danmaku, subtitles, etc
-	Caption *Part `json:"caption"`
+	Captions map[string]*CaptionPart `json:"caption"`
 	// Err is used to record whether an error occurred when extracting the list data
 	Err error `json:"err"`
 }

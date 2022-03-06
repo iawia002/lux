@@ -6,7 +6,7 @@ import (
 
 	"github.com/fatih/color"
 
-	"github.com/iawia002/annie/extractors/types"
+	"github.com/iawia002/lux/extractors"
 )
 
 var (
@@ -14,20 +14,20 @@ var (
 	cyan = color.New(color.FgCyan)
 )
 
-func genSortedStreams(streams map[string]*types.Stream) []*types.Stream {
-	sortedStreams := make([]*types.Stream, 0, len(streams))
+func genSortedStreams(streams map[string]*extractors.Stream) []*extractors.Stream {
+	sortedStreams := make([]*extractors.Stream, 0, len(streams))
 	for _, data := range streams {
 		sortedStreams = append(sortedStreams, data)
 	}
 	if len(sortedStreams) > 1 {
-		sort.Slice(
+		sort.SliceStable(
 			sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size },
 		)
 	}
 	return sortedStreams
 }
 
-func printHeader(data *types.Data) {
+func printHeader(data *extractors.Data) {
 	fmt.Println()
 	cyan.Printf(" Site:      ") // nolint
 	fmt.Println(data.Site)
@@ -37,7 +37,7 @@ func printHeader(data *types.Data) {
 	fmt.Println(data.Type)
 }
 
-func printStream(stream *types.Stream) {
+func printStream(stream *extractors.Stream) {
 	blue.Println(fmt.Sprintf("     [%s]  -------------------", stream.ID)) // nolint
 	if stream.Quality != "" {
 		cyan.Printf("     Quality:         ") // nolint
@@ -46,10 +46,10 @@ func printStream(stream *types.Stream) {
 	cyan.Printf("     Size:            ") // nolint
 	fmt.Printf("%.2f MiB (%d Bytes)\n", float64(stream.Size)/(1024*1024), stream.Size)
 	cyan.Printf("     # download with: ") // nolint
-	fmt.Printf("annie -f %s ...\n\n", stream.ID)
+	fmt.Printf("lux -f %s ...\n\n", stream.ID)
 }
 
-func printInfo(data *types.Data, sortedStreams []*types.Stream) {
+func printInfo(data *extractors.Data, sortedStreams []*extractors.Stream) {
 	printHeader(data)
 
 	cyan.Printf(" Streams:   ") // nolint
@@ -59,7 +59,7 @@ func printInfo(data *types.Data, sortedStreams []*types.Stream) {
 	}
 }
 
-func printStreamInfo(data *types.Data, stream *types.Stream) {
+func printStreamInfo(data *extractors.Data, stream *extractors.Stream) {
 	printHeader(data)
 
 	cyan.Printf(" Stream:   ") // nolint

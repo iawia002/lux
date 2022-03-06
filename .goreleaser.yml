@@ -1,4 +1,4 @@
-project_name: annie
+project_name: lux
 env:
   - GO111MODULE=on
 before:
@@ -7,7 +7,7 @@ before:
 builds:
 - env:
     - CGO_ENABLED=0
-  binary: annie
+  binary: lux
   # Disable ldflags: https://github.com/goreleaser/goreleaser/issues/1255
   ldflags:
     - "-X 'main.aa=aa'"

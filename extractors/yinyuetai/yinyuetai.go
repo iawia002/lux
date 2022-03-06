@@ -2,13 +2,18 @@ package yinyuetai
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("yinyuetai", New())
+}
 
 const yinyuetaiAPI = "https://ext.yinyuetai.com/main/"
 
@@ -22,13 +27,13 @@ func genAPI(action string, param string) string {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a yinyuetai extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	vid := utils.MatchOneOf(
 		url,
 		`https?://v.yinyuetai.com/video/(\d+)(?:\?vid=\d+)?`,
@@ -44,12 +49,12 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	var err error
 	html, err := request.Get(apiURL, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	// parse yinyuetai data
 	data := yinyuetaiMvData{}
 	if err = json.Unmarshal([]byte(html), &data); err != nil {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	// handle api error
 	if data.Error {
@@ -59,25 +64,25 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		return nil, errors.New(data.VideoInfo.CoreVideoInfo.ErrorMsg)
 	}
 	title := data.VideoInfo.CoreVideoInfo.VideoName
-	streams := make(map[string]*types.Stream, len(data.VideoInfo.CoreVideoInfo.VideoURLModels))
+	streams := make(map[string]*extractors.Stream, len(data.VideoInfo.CoreVideoInfo.VideoURLModels))
 	// set streams
 	for _, model := range data.VideoInfo.CoreVideoInfo.VideoURLModels {
-		urlData := &types.Part{
+		urlData := &extractors.Part{
 			URL:  model.VideoURL,
 			Size: model.FileSize,
 			Ext:  "mp4",
 		}
-		streams[model.QualityLevel] = &types.Stream{
-			Parts:   []*types.Part{urlData},
+		streams[model.QualityLevel] = &extractors.Stream{
+			Parts:   []*extractors.Part{urlData},
 			Size:    model.FileSize,
 			Quality: model.QualityLevelName,
 		}
 	}
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "音悦台 yinyuetai.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

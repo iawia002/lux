@@ -3,8 +3,8 @@ package facebook
 import (
 	"testing"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/test"
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/test"
 )
 
 func TestDownload(t *testing.T) {
@@ -15,16 +15,16 @@ func TestDownload(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:     "https://www.facebook.com/groups/314070194112/permalink/10155168902769113/",
-				Title:   "Ukrainian Scientists Worldwide Public Group | Facebook",
-				Size:    336975453,
-				Quality: "hd",
+				URL:     "https://www.facebook.com/100058251872436/videos/424557726111987",
+				Title:   "Роман Грищук - Підтримка з Японії 🇯🇵 Гурт Yokohama Sisters 👏",
+				Size:    1441128,
+				Quality: "sd",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := New().Extract(tt.args.URL, types.Options{})
+			data, err := New().Extract(tt.args.URL, extractors.Options{})
 			test.CheckError(t, err)
 			test.Check(t, tt.args, data[0])
 		})

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -15,15 +14,11 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/tidwall/gjson"
+	"github.com/pkg/errors"
 
-	"github.com/iawia002/annie/request"
+	"github.com/iawia002/lux/request"
 )
 
-// GetStringFromJSON get the string value from json path
-func GetStringFromJSON(json, path string) string {
-	return gjson.Get(json, path).String()
-}
 
 // MatchOneOf match one of the patterns
 func MatchOneOf(text string, patterns ...string) []string {
@@ -158,7 +153,7 @@ func ParseInputFile(r io.Reader, items string, itemStart, itemEnd int) []string 
 
 	itemList := make([]string, 0, len(wantedItems))
 	for i, item := range temp {
-		if ItemInSlice(i, wantedItems) {
+		if ItemInSlice(i+1, wantedItems) {
 			itemList = append(itemList, item)
 		}
 	}
@@ -227,7 +222,7 @@ func M3u8URLs(uri string) ([]string, error) {
 
 	html, err := request.Get(uri, "", nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	lines := strings.Split(html, "\n")
 	var urls []string

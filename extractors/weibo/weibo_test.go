@@ -3,8 +3,8 @@ package weibo
 import (
 	"testing"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/test"
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/test"
 )
 
 func TestToken(t *testing.T) {
@@ -27,20 +27,11 @@ func TestDownload(t *testing.T) {
 			},
 		},
 		{
-			name: "weibo.com test",
-			args: test.Args{
-				URL:   "https://weibo.com/1642500775/GjbO5ByzE",
-				Title: "让人怦然心动的小姐姐们 via@大懒糖",
-				Size:  2002420,
-			},
-		},
-		{
 			name: "weibo.com/tv test",
 			args: test.Args{
-				URL:     "https://weibo.com/tv/show/1034:4298353237002268?from=old_pc_videoshow",
-				Title:   "毒液插图Blender+Photoshop2.5小时工作流",
-				Quality: "720p",
-				Size:    7520929,
+				URL:   "https://weibo.com/tv/show/1034:4298353237002268?from=old_pc_videoshow",
+				Title: "毒液插图Blender+Photoshop2.5小时工作流",
+				Size:  7520929,
 			},
 		},
 		{
@@ -55,7 +46,7 @@ func TestDownload(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := New().Extract(tt.args.URL, types.Options{})
+			data, err := New().Extract(tt.args.URL, extractors.Options{})
 			test.CheckError(t, err)
 			test.Check(t, tt.args, data[0])
 		})

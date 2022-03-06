@@ -1,31 +1,37 @@
 package universal
 
 import (
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("", New())
+}
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a universal extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	filename, ext, err := utils.GetNameAndExt(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	size, err := request.Size(url, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		"default": {
-			Parts: []*types.Part{
+			Parts: []*extractors.Part{
 				{
 					URL:  url,
 					Size: size,
@@ -37,14 +43,14 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 	contentType, err := request.ContentType(url, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "Universal",
 			Title:   filename,
-			Type:    types.DataType(contentType),
+			Type:    extractors.DataType(contentType),
 			Streams: streams,
 			URL:     url,
 		},

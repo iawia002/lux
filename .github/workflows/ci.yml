@@ -1,5 +1,10 @@
 name: ci
-on: [pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    # run ci weekly
+    - cron: "0 0 * * 0"
 jobs:
   ci:
     runs-on: ${{ matrix.os }}
@@ -10,27 +15,22 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
     name: Go ${{ matrix.go }} in ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
-      with:
-        go-version: ${{ matrix.go }}
-    - name: Environment
-      run: |
-        go version
-        go env
-    - name: Install tools
-      env:
-        GO111MODULE: on
-      run: |
-        go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.0
-        golangci-lint --version
-    - name: Lint
-      run: |
-        go mod tidy
-        golangci-lint run ./... -v
-    - name: Test
-      env:
-        GOFLAGS: -mod=mod
-      run: go test -race -coverpkg=./... -coverprofile=coverage.txt ./...
-    - name: Send coverage
-      run: bash <(curl -s https://codecov.io/bash)
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Environment
+        run: |
+          go version
+          go env
+      - name: Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.44
+          only-new-issues: true
+      - name: Test
+        env:
+          GOFLAGS: -mod=mod
+        run: go test -race -coverpkg=./... -coverprofile=coverage.txt ./...
+      - name: Send coverage
+        run: bash <(curl -s https://codecov.io/bash)

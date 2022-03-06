@@ -1,106 +1,72 @@
 package tangdou
 
 import (
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"strings"
+
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
 
-const referer = "http://www.tangdou.com/html/playlist/view/4173"
+func init() {
+	extractors.Register("tangdou", New())
+}
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a tangdou extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
+var defaultHeader = map[string]string{
+	"Sec-Fetch-Dest": "document",
+	"Sec-Fetch-Mode": "navigate",
+	"Sec-Fetch-Site": "cross-site",
+	"Sec-GPC":        "1",
+	"User-Agent":     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+}
+
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
-	if !option.Playlist {
-		return []*types.Data{tangdouDownload(url)}, nil
-	}
-
-	html, err := request.Get(url, referer, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	videoIDs := utils.MatchAll(html, `<a target="tdplayer" href="(.+?)" class="title">`)
-	needDownloadItems := utils.NeedDownloadList(option.Items, option.ItemStart, option.ItemEnd, len(videoIDs))
-	extractedData := make([]*types.Data, len(needDownloadItems))
-	wgp := utils.NewWaitGroupPool(option.ThreadNumber)
-	dataIndex := 0
-	for index, videoID := range videoIDs {
-		if !utils.ItemInSlice(index+1, needDownloadItems) || len(videoID) < 2 {
-			continue
-		}
-		wgp.Add()
-		go func(index int, videURI string, extractedData []*types.Data) {
-			defer wgp.Done()
-			extractedData[index] = tangdouDownload(videURI)
-		}(dataIndex, videoID[1], extractedData)
-		dataIndex++
-	}
-	wgp.Wait()
-	return extractedData, nil
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
+	return []*extractors.Data{tangdouDownload(url)}, nil
 }
 
 // tangdouDownload download function for single url
-func tangdouDownload(uri string) *types.Data {
-	html, err := request.Get(uri, referer, nil)
+func tangdouDownload(uri string) *extractors.Data {
+	html, err := request.Get(uri, uri, defaultHeader)
 	if err != nil {
-		return types.EmptyData(uri, err)
+		return extractors.EmptyData(uri, err)
 	}
 
 	titles := utils.MatchOneOf(
 		html, `<div class="title">(.+?)</div>`, `<meta name="description" content="(.+?)"`, `<title>(.+?)</title>`,
 	)
 	if titles == nil || len(titles) < 2 {
-		return types.EmptyData(uri, types.ErrURLParseFailed)
+		return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
 	}
 	title := titles[1]
 
-	var realURL string
 	videoURLs := utils.MatchOneOf(
-		html, `video:'(.+?)'`, `video:"(.+?)"`, `<video.*src="(.+?)"`,
+		html, `video:'(.+?)'`, `video:"(.+?)"`, `<video[^>]*src="(.+?)"`, `play_url:\s*"(.+?)",`,
 	)
-	if videoURLs == nil {
-		shareURLs := utils.MatchOneOf(
-			html, `<div class="video">\s*<script src="(.+?)"`,
-		)
-		if shareURLs == nil || len(shareURLs) < 2 {
-			return types.EmptyData(uri, types.ErrURLParseFailed)
-		}
-		shareURL := shareURLs[1]
 
-		signedVideo, err := request.Get(shareURL, uri, nil)
-		if err != nil {
-			return types.EmptyData(uri, err)
-		}
-
-		realURLs := utils.MatchOneOf(
-			signedVideo, `src=\\"(.+?)\\"`,
-		)
-		if realURLs == nil || len(realURLs) < 2 {
-			return types.EmptyData(uri, types.ErrURLParseFailed)
-		}
-		realURL = realURLs[1]
-	} else {
-		if len(videoURLs) < 2 {
-			return types.EmptyData(uri, types.ErrURLParseFailed)
-		}
-		realURL = videoURLs[1]
+	if len(videoURLs) < 2 {
+		return extractors.EmptyData(uri, errors.WithStack(extractors.ErrURLParseFailed))
 	}
+
+	realURL := strings.ReplaceAll(videoURLs[1], `\u002F`, "/")
 
 	size, err := request.Size(realURL, uri)
 	if err != nil {
-		return types.EmptyData(uri, err)
+		return extractors.EmptyData(uri, err)
 	}
 
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		"default": {
-			Parts: []*types.Part{
+			Parts: []*extractors.Part{
 				{
 					URL:  realURL,
 					Size: size,
@@ -111,10 +77,10 @@ func tangdouDownload(uri string) *types.Data {
 		},
 	}
 
-	return &types.Data{
+	return &extractors.Data{
 		Site:    "糖豆广场舞 tangdou.com",
 		Title:   title,
-		Type:    types.DataTypeVideo,
+		Type:    extractors.DataTypeVideo,
 		Streams: streams,
 		URL:     uri,
 	}

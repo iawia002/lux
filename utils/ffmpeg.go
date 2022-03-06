@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/pkg/errors"
 )
 
 func runMergeCmd(cmd *exec.Cmd, paths []string, mergeFilePath string) error {
@@ -12,7 +14,7 @@ func runMergeCmd(cmd *exec.Cmd, paths []string, mergeFilePath string) error {
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("%s\n%s", err, stderr.String())
+		return errors.Errorf("%s\n%s", err, stderr.String())
 	}
 
 	if mergeFilePath != "" {

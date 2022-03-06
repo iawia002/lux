@@ -1,10 +1,11 @@
 package test
 
 import (
+	"fmt"
 	"sort"
 	"testing"
 
-	"github.com/iawia002/annie/extractors/types"
+	"github.com/iawia002/lux/extractors"
 )
 
 // Args Arguments for extractor tests
@@ -31,13 +32,16 @@ func CheckData(args, data Args) bool {
 }
 
 // Check check the result
-func Check(t *testing.T, args Args, data *types.Data) {
+func Check(t *testing.T, args Args, data *extractors.Data) {
 	// get the default stream
-	sortedStreams := make([]*types.Stream, 0, len(data.Streams))
+	sortedStreams := make([]*extractors.Stream, 0, len(data.Streams))
 	for _, s := range data.Streams {
 		sortedStreams = append(sortedStreams, s)
 	}
-	sort.Slice(sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size })
+	if len(sortedStreams) == 0 {
+		t.Fatalf("stream should not empty")
+	}
+	sort.SliceStable(sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size })
 	defaultData := sortedStreams[0]
 
 	temp := Args{
@@ -53,6 +57,6 @@ func Check(t *testing.T, args Args, data *types.Data) {
 // CheckError check the error
 func CheckError(t *testing.T, err error) {
 	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
+		t.Fatalf("Unexpected error:\n%s", fmt.Sprintf("%+v\n", err))
 	}
 }

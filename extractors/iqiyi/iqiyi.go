@@ -8,11 +8,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/parser"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/parser"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("iqiyi", New(SiteTypeIqiyi))
+	extractors.Register("iq", New(SiteTypeIQ))
+}
 
 type iqiyi struct {
 	Code string `json:"code"`
@@ -94,11 +101,11 @@ func getVPS(tvid, vid, refer string) (*iqiyi, error) {
 	apiURL := fmt.Sprintf("%s%s&vf=%s", host, params, vf)
 	info, err := request.Get(apiURL, refer, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	data := new(iqiyi)
 	if err := json.Unmarshal([]byte(info), data); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return data, nil
 }
@@ -107,15 +114,15 @@ type extractor struct {
 	siteType SiteType
 }
 
-// New returns a youtube extractor.
-func New(siteType SiteType) types.Extractor {
+// New returns a iqiyi extractor.
+func New(siteType SiteType) extractors.Extractor {
 	return &extractor{
 		siteType: siteType,
 	}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Data, error) {
 	refer := iqiyiReferer
 	headers := make(map[string]string)
 	if e.siteType == SiteTypeIQ {
@@ -126,7 +133,7 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 	}
 	html, err := request.Get(url, refer, headers)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	tvid := utils.MatchOneOf(
 		url,
@@ -143,7 +150,7 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 		)
 	}
 	if tvid == nil || len(tvid) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	vid := utils.MatchOneOf(
@@ -160,12 +167,12 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 		)
 	}
 	if vid == nil || len(vid) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var title string
 	if e.siteType == SiteTypeIqiyi {
@@ -190,36 +197,36 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 	}
 	videoDatas, err := getVPS(tvid[1], vid[1], refer)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	if videoDatas.Code != "A00000" {
-		return nil, fmt.Errorf("can't play this video: %s", videoDatas.Msg)
+		return nil, errors.Errorf("can't play this video: %s", videoDatas.Msg)
 	}
 
-	streams := make(map[string]*types.Stream)
+	streams := make(map[string]*extractors.Stream)
 	urlPrefix := videoDatas.Data.VP.Du
 	for _, video := range videoDatas.Data.VP.Tkl[0].Vs {
-		urls := make([]*types.Part, len(video.Fs))
+		urls := make([]*extractors.Part, len(video.Fs))
 		for index, v := range video.Fs {
 			realURLData, err := request.Get(urlPrefix+v.L, refer, nil)
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			var realURL iqiyiURL
 			if err = json.Unmarshal([]byte(realURLData), &realURL); err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
 			_, ext, err := utils.GetNameAndExt(realURL.L)
 			if err != nil {
-				return nil, err
+				return nil, errors.WithStack(err)
 			}
-			urls[index] = &types.Part{
+			urls[index] = &extractors.Part{
 				URL:  realURL.L,
 				Size: v.B,
 				Ext:  ext,
 			}
 		}
-		streams[strconv.Itoa(video.Bid)] = &types.Stream{
+		streams[strconv.Itoa(video.Bid)] = &extractors.Stream{
 			Parts:   urls,
 			Size:    video.Vsize,
 			Quality: video.Scrsz,
@@ -230,11 +237,11 @@ func (e *extractor) Extract(url string, _ types.Options) ([]*types.Data, error) 
 	if e.siteType == SiteTypeIQ {
 		siteName = "爱奇艺 iq.com"
 	}
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    siteName,
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

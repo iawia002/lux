@@ -1,64 +1,80 @@
 package facebook
 
 import (
-	"fmt"
+	"regexp"
+	"strings"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("facebook", New())
+}
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a facebook extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	var err error
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	titles := utils.MatchOneOf(html, `<title id="pageTitle">(.+)</title>`)
+	titles := utils.MatchOneOf(html, `<title>([^<]+)</title>`)
 	if titles == nil || len(titles) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
-	title := titles[1]
 
-	streams := make(map[string]*types.Stream, 2)
-	for _, quality := range []string{"sd", "hd"} {
-		srcElement := utils.MatchOneOf(
-			html, fmt.Sprintf(`%s_src_no_ratelimit:"(.+?)"`, quality),
-		)
-		if srcElement == nil || len(srcElement) < 2 {
+	title := strings.TrimSpace(titles[1])
+
+	title = regexp.MustCompile(`\n+`).ReplaceAllString(title, " ")
+
+	qualityRegMap := map[string]*regexp.Regexp{
+		"sd": regexp.MustCompile(`"playable_url":\s*"([^"]+)"`),
+		// "hd": regexp.MustCompile(`"playable_url_quality_hd":\s*"([^"]+)"`),
+	}
+
+	streams := make(map[string]*extractors.Stream, 2)
+	for quality, qualityReg := range qualityRegMap {
+		matcher := qualityReg.FindStringSubmatch(html)
+
+		if len(matcher) == 0 {
 			continue
 		}
 
-		u := srcElement[1]
+		u := strings.ReplaceAll(matcher[1], "\\", "")
+
 		size, err := request.Size(u, url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
-		urlData := &types.Part{
+
+		urlData := &extractors.Part{
 			URL:  u,
 			Size: size,
 			Ext:  "mp4",
 		}
-		streams[quality] = &types.Stream{
-			Parts:   []*types.Part{urlData},
+		streams[quality] = &extractors.Stream{
+			Parts:   []*extractors.Part{urlData},
 			Size:    size,
 			Quality: quality,
 		}
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "Facebook facebook.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

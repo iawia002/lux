@@ -2,12 +2,17 @@ package douyu
 
 import (
 	"encoding/json"
-	"errors"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("douyu", New())
+}
 
 type douyuData struct {
 	Error int `json:"error"`
@@ -49,13 +54,13 @@ func douyuM3u8(url string) ([]douyuURLInfo, int64, error) {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a douyu extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	var err error
 	liveVid := utils.MatchOneOf(url, `https?://www.douyu.com/(\S+)`)
 	if liveVid != nil {
@@ -64,53 +69,53 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	titles := utils.MatchOneOf(html, `<title>(.*?)</title>`)
 	if titles == nil || len(titles) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	title := titles[1]
 
 	vids := utils.MatchOneOf(url, `https?://v.douyu.com/show/(\S+)`)
 	if vids == nil || len(vids) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	vid := vids[1]
 
 	dataString, err := request.Get("http://vmobile.douyu.com/video/getInfo?vid="+vid, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	dataDict := new(douyuData)
 	if err := json.Unmarshal([]byte(dataString), dataDict); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	m3u8URLs, totalSize, err := douyuM3u8(dataDict.Data.VideoURL)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	urls := make([]*types.Part, len(m3u8URLs))
+	urls := make([]*extractors.Part, len(m3u8URLs))
 	for index, u := range m3u8URLs {
-		urls[index] = &types.Part{
+		urls[index] = &extractors.Part{
 			URL:  u.URL,
 			Size: u.Size,
 			Ext:  "ts",
 		}
 	}
 
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		"default": {
 			Parts: urls,
 			Size:  totalSize,
 		},
 	}
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "斗鱼 douyu.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

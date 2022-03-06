@@ -1,13 +1,18 @@
 package udn
 
 import (
-	"errors"
 	"strings"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("udn", New())
+}
 
 const (
 	startFlag = `',
@@ -37,21 +42,21 @@ func prepareEmbedURL(url string) string {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a udn extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	url = prepareEmbedURL(url)
 	if len(url) == 0 {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	html, err := request.Get(url, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	var title string
 	desc := utils.MatchOneOf(html, `title: '(.+?)',
@@ -67,30 +72,30 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 	}
 	srcURL, err := request.Get("http://"+cdnURL, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	size, err := request.Size(srcURL, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	urlData := &types.Part{
+	urlData := &extractors.Part{
 		URL:  srcURL,
 		Size: size,
 		Ext:  "mp4",
 	}
 	quality := "normal"
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		quality: {
-			Parts:   []*types.Part{urlData},
+			Parts:   []*extractors.Part{urlData},
 			Size:    size,
 			Quality: quality,
 		},
 	}
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "udn udn.com",
 			Title:   title,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

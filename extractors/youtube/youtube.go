@@ -5,11 +5,18 @@ import (
 	"strconv"
 
 	"github.com/kkdai/youtube/v2"
+	"github.com/pkg/errors"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	e := New()
+	extractors.Register("youtube", e)
+	extractors.Register("youtu", e) // youtu.be
+}
 
 const referer = "https://www.youtube.com"
 
@@ -18,29 +25,29 @@ type extractor struct {
 }
 
 // New returns a youtube extractor.
-func New() types.Extractor {
+func New() extractors.Extractor {
 	return &extractor{
 		client: &youtube.Client{},
 	}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	if !option.Playlist {
 		video, err := e.client.GetVideo(url)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
-		return []*types.Data{e.youtubeDownload(url, video)}, nil
+		return []*extractors.Data{e.youtubeDownload(url, video)}, nil
 	}
 
 	playlist, err := e.client.GetPlaylist(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	needDownloadItems := utils.NeedDownloadList(option.Items, option.ItemStart, option.ItemEnd, len(playlist.Videos))
-	extractedData := make([]*types.Data, len(needDownloadItems))
+	extractedData := make([]*extractors.Data, len(needDownloadItems))
 	wgp := utils.NewWaitGroupPool(option.ThreadNumber)
 	dataIndex := 0
 	for index, videoEntry := range playlist.Videos {
@@ -49,14 +56,14 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		}
 
 		wgp.Add()
-		go func(index int, extractedData []*types.Data) {
+		go func(index int, entry *youtube.PlaylistEntry, extractedData []*extractors.Data) {
 			defer wgp.Done()
-			video, err := e.client.VideoFromPlaylistEntry(videoEntry)
+			video, err := e.client.VideoFromPlaylistEntry(entry)
 			if err != nil {
 				return
 			}
 			extractedData[index] = e.youtubeDownload(url, video)
-		}(dataIndex, extractedData)
+		}(dataIndex, videoEntry, extractedData)
 		dataIndex++
 	}
 	wgp.Wait()
@@ -64,9 +71,9 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 }
 
 // youtubeDownload download function for single url
-func (e *extractor) youtubeDownload(url string, video *youtube.Video) *types.Data {
-	streams := make(map[string]*types.Stream, len(video.Formats))
-	audioCache := make(map[string]*types.Part)
+func (e *extractor) youtubeDownload(url string, video *youtube.Video) *extractors.Data {
+	streams := make(map[string]*extractors.Stream, len(video.Formats))
+	audioCache := make(map[string]*extractors.Part)
 
 	for i := range video.Formats {
 		f := &video.Formats[i]
@@ -78,11 +85,11 @@ func (e *extractor) youtubeDownload(url string, video *youtube.Video) *types.Dat
 
 		part, err := e.genPartByFormat(video, f)
 		if err != nil {
-			return types.EmptyData(url, err)
+			return extractors.EmptyData(url, err)
 		}
-		stream := &types.Stream{
+		stream := &extractors.Stream{
 			ID:      itag,
-			Parts:   []*types.Part{part},
+			Parts:   []*extractors.Part{part},
 			Quality: quality,
 			Ext:     part.Ext,
 			NeedMux: true,
@@ -99,11 +106,11 @@ func (e *extractor) youtubeDownload(url string, video *youtube.Video) *types.Dat
 			if !ok {
 				audio, err := getVideoAudio(video, part.Ext)
 				if err != nil {
-					return types.EmptyData(url, err)
+					return extractors.EmptyData(url, err)
 				}
 				audioPart, err = e.genPartByFormat(video, audio)
 				if err != nil {
-					return types.EmptyData(url, err)
+					return extractors.EmptyData(url, err)
 				}
 				audioCache[part.Ext] = audioPart
 			}
@@ -112,7 +119,7 @@ func (e *extractor) youtubeDownload(url string, video *youtube.Video) *types.Dat
 		streams[itag] = stream
 	}
 
-	return &types.Data{
+	return &extractors.Data{
 		Site:    "YouTube youtube.com",
 		Title:   video.Title,
 		Type:    "video",
@@ -121,17 +128,17 @@ func (e *extractor) youtubeDownload(url string, video *youtube.Video) *types.Dat
 	}
 }
 
-func (e *extractor) genPartByFormat(video *youtube.Video, f *youtube.Format) (*types.Part, error) {
+func (e *extractor) genPartByFormat(video *youtube.Video, f *youtube.Format) (*extractors.Part, error) {
 	ext := getStreamExt(f.MimeType)
 	url, err := e.client.GetStreamURL(video, f)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	size := f.ContentLength
 	if size == 0 {
 		size, _ = request.Size(url, referer)
 	}
-	return &types.Part{
+	return &extractors.Part{
 		URL:  url,
 		Size: size,
 		Ext:  ext,
@@ -141,7 +148,7 @@ func (e *extractor) genPartByFormat(video *youtube.Video, f *youtube.Format) (*t
 func getVideoAudio(v *youtube.Video, mimeType string) (*youtube.Format, error) {
 	audioFormats := v.Formats.Type(mimeType).Type("audio")
 	if len(audioFormats) == 0 {
-		return nil, fmt.Errorf("no audio format found after filtering")
+		return nil, errors.New("no audio format found after filtering")
 	}
 	audioFormats.Sort()
 	return &audioFormats[0], nil

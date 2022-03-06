@@ -2,16 +2,21 @@ package miaopai
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
 	"time"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/request"
-	"github.com/iawia002/annie/utils"
+	"github.com/pkg/errors"
+
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
+
+func init() {
+	extractors.Register("miaopai", New())
+}
 
 type miaopaiData struct {
 	Data struct {
@@ -40,16 +45,16 @@ func getRandomString(l int) string {
 
 type extractor struct{}
 
-// New returns a youtube extractor.
-func New() types.Extractor {
+// New returns a miaopai extractor.
+func New() extractors.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, error) {
+func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	ids := utils.MatchOneOf(url, `/media/([^\./]+)`, `/show(?:/channel)?/([^\./]+)`)
 	if ids == nil || len(ids) < 2 {
-		return nil, types.ErrURLParseFailed
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	id := ids[1]
 
@@ -61,7 +66,7 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 		url, nil,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	match := utils.MatchOneOf(jsonString, randomString+`\((.*)\);$`)
@@ -71,31 +76,31 @@ func (e *extractor) Extract(url string, option types.Options) ([]*types.Data, er
 
 	err = json.Unmarshal([]byte(match[1]), &data)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	realURL := data.Data.MetaData[0].URLs.M
 	size, err := request.Size(realURL, url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
-	urlData := &types.Part{
+	urlData := &extractors.Part{
 		URL:  realURL,
 		Size: size,
 		Ext:  "mp4",
 	}
-	streams := map[string]*types.Stream{
+	streams := map[string]*extractors.Stream{
 		"default": {
-			Parts: []*types.Part{urlData},
+			Parts: []*extractors.Part{urlData},
 			Size:  size,
 		},
 	}
 
-	return []*types.Data{
+	return []*extractors.Data{
 		{
 			Site:    "秒拍 miaopai.com",
 			Title:   data.Data.Description,
-			Type:    types.DataTypeVideo,
+			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,
 		},

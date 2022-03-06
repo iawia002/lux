@@ -3,8 +3,8 @@ package iqiyi
 import (
 	"testing"
 
-	"github.com/iawia002/annie/extractors/types"
-	"github.com/iawia002/annie/test"
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/test"
 )
 
 func TestDownload(t *testing.T) {
@@ -16,7 +16,7 @@ func TestDownload(t *testing.T) {
 			name: "normal test",
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/v_19rrbdmaj0.html",
-				Title:   "新一轮降水将至 冷空气影响中东部地区-资讯-搜索最新资讯-爱奇艺",
+				Title:   "新一轮降水将至 冷空气影响中东部地区",
 				Size:    2952228,
 				Quality: "896x504",
 			},
@@ -25,7 +25,7 @@ func TestDownload(t *testing.T) {
 			name: "title test 1",
 			args: test.Args{
 				URL:     "http://www.iqiyi.com/v_19rqy2z83w.html",
-				Title:   "收了创意视频2018：58天环球飞行记",
+				Title:   "收了创意视频2018 :58天环球飞行记",
 				Size:    76186786,
 				Quality: "1920x1080",
 			},
@@ -42,7 +42,7 @@ func TestDownload(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := New(SiteTypeIqiyi).Extract(tt.args.URL, types.Options{})
+			data, err := New(SiteTypeIqiyi).Extract(tt.args.URL, extractors.Options{})
 			test.CheckError(t, err)
 			test.Check(t, tt.args, data[0])
 		})
