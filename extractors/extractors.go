@@ -47,7 +47,7 @@ func Extract(u string, option Options) ([]*Data, error) {
 	}
 	extractor := extractorMap[domain]
 	if extractor == nil {
-		extractor = extractorMap[""]
+		return nil, errors.Errorf("%s is not yet supported", u)
 	}
 	videos, err := extractor.Extract(u, option)
 	if err != nil {
