@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        go: ["1.16"]
+        go: ["1.17"]
         os: [ubuntu-latest, macOS-latest]
     name: Go ${{ matrix.go }} in ${{ matrix.os }}
     steps:

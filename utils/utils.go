@@ -19,7 +19,6 @@ import (
 	"github.com/iawia002/lux/request"
 )
 
-
 // MatchOneOf match one of the patterns
 func MatchOneOf(text string, patterns ...string) []string {
 	var (
