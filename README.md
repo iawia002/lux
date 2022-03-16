@@ -28,6 +28,7 @@
   - [Void Linux](#void-linux)
   - [Scoop on Windows](#scoop-on-windows)
   - [Chocolatey on Windows](#chocolatey-on-windows)
+  - [Cask on Windows/macOS/Linux](#cask-on-windowsmacoslinux)
 - [Getting Started](#getting-started)
   - [Download a video](#download-a-video)
   - [Download anything else](#download-anything-else)
@@ -108,6 +109,12 @@ $ scoop install lux
 
 ```
 $ choco install lux
+```
+
+### [Cask](https://github.com/axetroy/cask.rs) on Windows/macOS/Linux
+
+```sh
+$ cask install github.com/iawia002/lux
 ```
 
 ## Getting Started
