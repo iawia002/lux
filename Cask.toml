@@ -1,0 +1,20 @@
+[package]
+name = "github.com/iawia002/lux"
+bin = "lux"
+authors = ["Xinzhao Xu <z2d@jifangcheng.com>"]
+keywords = ["go", "golang", "crawler", "scraper", "downloader", "youtube", "video", "download", "tumblr", "bilibili", "qq", "hacktoberfest", "youku", "iqiyi"]
+repository = "https://github.com/iawia002/lux"
+description = """
+👾 Fast and simple video download library and CLI tool written in Go
+"""
+
+[darwin]
+x86_64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_macOS_64-bit.tar.gz" }
+aarch64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_macOS_ARM64.tar.gz" }
+
+[windows]
+x86_64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Windows_64-bit.zip" }
+
+[linux]
+x86_64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Linux_64-bit.tar.gz" }
+aarch64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Linux_ARM64.tar.gz" }
