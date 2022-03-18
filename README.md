@@ -338,9 +338,6 @@ As a text file:
 $ lux -c cookies.txt "https://www.bilibili.com/video/av20203945"
 ```
 
-If the `-c` is not set, `lux` will try to get the cookies from the current user's Chrome or Edge automatically.
-To use this feature, you need to shutdown your Chrome or Edge for only one time and let `lux` launch the browser for you.
-
 ### Proxy
 
 You can set the HTTP/SOCKS5 proxy using environment variables:

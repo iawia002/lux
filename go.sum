@@ -140,8 +140,6 @@ github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
-github.com/go-rod/rod v0.102.1 h1:JCg1J6rFJ9cwm6qf/q/+8a3TMAhUXIXSHbArWOVOZpQ=
-github.com/go-rod/rod v0.102.1/go.mod h1:RXSLAlPodTFOmZnwaAQJIcOJ1i835r0uuTGPLO09t/M=
 github.com/go-sourcemap/sourcemap v2.1.3+incompatible h1:W1iEw64niKVGogNgBN3ePyLFfuisuzeidWPMPWmECqU=
 github.com/go-sourcemap/sourcemap v2.1.3+incompatible/go.mod h1:F8jJfvm2KbVjc5NqelyYJmf/v5J0dwNLS2mL4sNA1Jg=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
@@ -385,16 +383,6 @@ github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqri
 github.com/urfave/cli/v2 v2.3.0 h1:qph92Y649prgesehzOrQjdWyxFOp/QVM+6imKHad91M=
 github.com/urfave/cli/v2 v2.3.0/go.mod h1:LJmUH05zAU44vOAcrfzZQKsZbVcdbOG8rtL3/XcUArI=
 github.com/vbauerster/mpb/v5 v5.4.0/go.mod h1:fi4wVo7BVQ22QcvFObm+VwliQXlV1eBT8JDaKXR4JGI=
-github.com/ysmood/goob v0.3.1 h1:qMp5364BGS1DLJVrAqUxTF6KOFt0YDot8GC70u/0jbI=
-github.com/ysmood/goob v0.3.1/go.mod h1:S3lq113Y91y1UBf1wj1pFOxeahvfKkCk6mTWTWbDdWs=
-github.com/ysmood/got v0.15.1 h1:X5jAbMyBf5yeezuFMp9HaMGXZWMSqIQcUlAHI+kJmUs=
-github.com/ysmood/got v0.15.1/go.mod h1:pE1l4LOwOBhQg6A/8IAatkGp7uZjnalzrZolnlhhMgY=
-github.com/ysmood/gotrace v0.2.2 h1:006KHGRThSRf8lwh4EyhNmuuq/l+Ygs+JqojkhEG1/E=
-github.com/ysmood/gotrace v0.2.2/go.mod h1:TzhIG7nHDry5//eYZDYcTzuJLYQIkykJzCRIo4/dzQM=
-github.com/ysmood/gson v0.6.4 h1:Yb6tosv6bk59HqjZu2/7o4BFherpYEMkDkXmlhgryZ4=
-github.com/ysmood/gson v0.6.4/go.mod h1:3Kzs5zDl21g5F/BlLTNcuAGAYLKt2lV5G8D1zF3RNmg=
-github.com/ysmood/leakless v0.7.0 h1:XCGdaPExyoreoQd+H5qgxM3ReNbSPFsEXpSKwbXbwQw=
-github.com/ysmood/leakless v0.7.0/go.mod h1:R8iAXPRaG97QJwqxs74RdwzcRHT1SWCGTNqY8q0JvMQ=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
