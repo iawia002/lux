@@ -10,10 +10,8 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/go-rod/rod"
 	"github.com/urfave/cli/v2"
 
-	"github.com/iawia002/lux/cookier"
 	"github.com/iawia002/lux/downloader"
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -234,11 +232,6 @@ func New() *cli.App {
 					}
 					cookie = strings.TrimSpace(string(data))
 				}
-			} else {
-				// Try to use current user's cookie if possible, if failed empty cookie will be used
-				_ = rod.Try(func() {
-					cookie = cookier.Get(args...)
-				})
 			}
 
 			request.SetOptions(request.Options{
