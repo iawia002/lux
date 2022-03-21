@@ -282,51 +282,28 @@ func TestFilePath(t *testing.T) {
 }
 
 func TestItemInSlice(t *testing.T) {
-	type args struct {
-		i    interface{}
-		list interface{}
-	}
 	tests := []struct {
 		name string
-		args args
+		item int
+		list []int
 		want bool
 	}{
 		{
 			name: "int in slice test 1",
-			args: args{
-				i:    1,
-				list: []int{1, 2},
-			},
+			item: 1,
+			list: []int{1, 2},
 			want: true,
 		},
 		{
 			name: "int in slice test 2",
-			args: args{
-				i:    1,
-				list: []int{2, 3},
-			},
-			want: false,
-		},
-		{
-			name: "string test 1",
-			args: args{
-				i:    "hello",
-				list: []string{"2", "hello"},
-			},
-			want: true,
-		},
-		{
-			name: "mix test 1",
-			args: args{
-				i:    3,
-				list: []string{"2", "3"},
-			},
+			item: 1,
+			list: []int{2, 3},
 			want: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ItemInSlice(tt.args.i, tt.args.list); got != tt.want {
+			if got := ItemInSlice(tt.item, tt.list); got != tt.want {
 				t.Errorf("ItemInSlice() = %v, want %v", got, tt.want)
 			}
 		})
