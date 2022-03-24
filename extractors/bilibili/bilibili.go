@@ -206,7 +206,45 @@ func extractNormalVideo(url, html string, extractOption extractors.Options) ([]*
 	}
 
 	// handle normal video playlist
-	// https://www.bilibili.com/video/av20827366/?p=1
+	if len(pageData.Sections) == 0 {
+		// https://www.bilibili.com/video/av20827366/?p=1 each video in playlist has different p=?
+		extractedData, err := multiPageDownload(url, html, extractOption, pageData)
+		return extractedData, err
+	} else {
+		// https://www.bilibili.com/video/av*** each video in playlist has different av/bv id
+		extractedData, err := multiEpisodeDownload(url, html, extractOption, pageData)
+		return extractedData, err
+	}
+}
+
+// handle multi episode download
+func multiEpisodeDownload(url, html string,extractOption extractors.Options, pageData *multiPage) ([]*extractors.Data, error) {
+	extractedData := make([]*extractors.Data, len(pageData.Sections[0].Episodes))
+	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
+	dataIndex := 0
+	for _, u := range pageData.Sections[0].Episodes {
+		wgp.Add()
+		options := bilibiliOptions{
+			url:      url,
+			html:     html,
+			aid:      u.Aid,
+			bvid:     u.BVid,
+			cid:      u.Cid,
+			subtitle: u.Title,
+			page:     0,
+		}
+		go func(index int, options bilibiliOptions, extractedData []*extractors.Data) {
+			defer wgp.Done()
+			extractedData[index] = bilibiliDownload(options, extractOption)
+		}(dataIndex, options, extractedData)
+		dataIndex++
+	}
+	wgp.Wait()
+	return extractedData, nil
+}
+
+// handle multi page download
+func multiPageDownload(url, html string,extractOption extractors.Options, pageData *multiPage) ([]*extractors.Data, error) {
 	needDownloadItems := utils.NeedDownloadList(extractOption.Items, extractOption.ItemStart, extractOption.ItemEnd, len(pageData.VideoData.Pages))
 	extractedData := make([]*extractors.Data, len(needDownloadItems))
 	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
