@@ -206,7 +206,46 @@ func extractNormalVideo(url, html string, extractOption extractors.Options) ([]*
 	}
 
 	// handle normal video playlist
-	// https://www.bilibili.com/video/av20827366/?p=1
+	if len(pageData.Sections) == 0 {
+		// https://www.bilibili.com/video/av20827366/?p=* each video in playlist has different p=?
+		return multiPageDownload(url, html, extractOption, pageData)
+	}
+	// handle another kind of playlist
+	// https://www.bilibili.com/video/av*** each video in playlist has different av/bv id
+	return multiEpisodeDownload(url, html, extractOption, pageData)
+}
+
+// handle multi episode download
+func multiEpisodeDownload(url, html string, extractOption extractors.Options, pageData *multiPage) ([]*extractors.Data, error) {
+	needDownloadItems := utils.NeedDownloadList(extractOption.Items, extractOption.ItemStart, extractOption.ItemEnd, len(pageData.Sections[0].Episodes))
+	extractedData := make([]*extractors.Data, len(needDownloadItems))
+	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
+	dataIndex := 0
+	for index, u := range pageData.Sections[0].Episodes {
+		if !utils.ItemInSlice(index+1, needDownloadItems) {
+			continue
+		}
+		wgp.Add()
+		options := bilibiliOptions{
+			url:      url,
+			html:     html,
+			aid:      u.Aid,
+			bvid:     u.BVid,
+			cid:      u.Cid,
+			subtitle: u.Title,
+		}
+		go func(index int, options bilibiliOptions, extractedData []*extractors.Data) {
+			defer wgp.Done()
+			extractedData[index] = bilibiliDownload(options, extractOption)
+		}(dataIndex, options, extractedData)
+		dataIndex++
+	}
+	wgp.Wait()
+	return extractedData, nil
+}
+
+// handle multi page download
+func multiPageDownload(url, html string, extractOption extractors.Options, pageData *multiPage) ([]*extractors.Data, error) {
 	needDownloadItems := utils.NeedDownloadList(extractOption.Items, extractOption.ItemStart, extractOption.ItemEnd, len(pageData.VideoData.Pages))
 	extractedData := make([]*extractors.Data, len(needDownloadItems))
 	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
