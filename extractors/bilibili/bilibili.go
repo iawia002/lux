@@ -210,6 +210,7 @@ func extractNormalVideo(url, html string, extractOption extractors.Options) ([]*
 		// https://www.bilibili.com/video/av20827366/?p=* each video in playlist has different p=?
 		return multiPageDownload(url, html, extractOption, pageData)
 	}
+	// handle another kind of playlist
 	// https://www.bilibili.com/video/av*** each video in playlist has different av/bv id
 	return multiEpisodeDownload(url, html, extractOption, pageData)
 }
@@ -232,7 +233,6 @@ func multiEpisodeDownload(url, html string, extractOption extractors.Options, pa
 			bvid:     u.BVid,
 			cid:      u.Cid,
 			subtitle: u.Title,
-			page:     0,
 		}
 		go func(index int, options bilibiliOptions, extractedData []*extractors.Data) {
 			defer wgp.Done()
