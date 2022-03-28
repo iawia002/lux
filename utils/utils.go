@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"runtime"
 	"strings"
@@ -18,7 +17,6 @@ import (
 
 	"github.com/iawia002/lux/request"
 )
-
 
 // MatchOneOf match one of the patterns
 func MatchOneOf(text string, patterns ...string) []string {
@@ -161,24 +159,11 @@ func ParseInputFile(r io.Reader, items string, itemStart, itemEnd int) []string 
 	return itemList
 }
 
-// ItemInSlice if a item is in the list
-func ItemInSlice(item, list interface{}) bool {
-	v1 := reflect.ValueOf(item)
-	v2 := reflect.ValueOf(list)
-	for i := 0; i < v2.Len(); i++ {
-		indexType := v2.Index(i).Type().String()
-		if v1.Type().String() != indexType {
-			continue
-		}
-		switch indexType {
-		case "int":
-			if v1.Int() == v2.Index(i).Int() {
-				return true
-			}
-		case "string":
-			if v1.String() == v2.Index(i).String() {
-				return true
-			}
+// ItemInSlice returns true if an item is in the list.
+func ItemInSlice[Item comparable](item Item, list []Item) bool {
+	for _, v := range list {
+		if item == v {
+			return true
 		}
 	}
 	return false

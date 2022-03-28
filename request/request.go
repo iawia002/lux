@@ -74,16 +74,16 @@ func Request(method, url string, body io.Reader, headers map[string]string) (*ht
 		req.Header.Set("Referer", url)
 	}
 	if rawCookie != "" {
-		var cookie string
-		cookies, err := cookiemonster.ParseString(rawCookie)
-		if err != nil || len(cookies) == 0 {
-			cookie = rawCookie
-		}
-		if cookie != "" {
-			req.Header.Set("Cookie", cookie)
-		}
-		for _, c := range cookies {
-			req.AddCookie(c)
+		// parse cookies in Netscape HTTP cookie format
+		cookies, _ := cookiemonster.ParseString(rawCookie)
+		if len(cookies) > 0 {
+			for _, c := range cookies {
+				req.AddCookie(c)
+			}
+		} else {
+			// cookie is not Netscape HTTP format, set it directly
+			// a=b; c=d
+			req.Header.Set("Cookie", rawCookie)
 		}
 	}
 
