@@ -399,7 +399,7 @@ func bilibiliDownload(options bilibiliOptions, extractOption extractors.Options)
 		switch dashData.DURLFormat {
 		case "flv", "flv480":
 			ext = "flv"
-		case "mp4", "hdmp4":
+		case "mp4", "hdmp4": // nolint
 			ext = "mp4"
 		}
 
@@ -410,8 +410,7 @@ func bilibiliDownload(options bilibiliOptions, extractOption extractors.Options)
 			Ext:  ext,
 		})
 
-		id := strconv.Itoa(dashData.CurQuality)
-		streams[id] = &extractors.Stream{
+		streams[strconv.Itoa(dashData.CurQuality)] = &extractors.Stream{
 			Parts:   parts,
 			Size:    durl.Size,
 			Quality: qualityString[dashData.CurQuality],
