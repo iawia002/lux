@@ -74,6 +74,13 @@ type dashInfo struct {
 	Description []string    `json:"accept_description"`
 	Quality     []int       `json:"accept_quality"`
 	Streams     dashStreams `json:"dash"`
+	DURLFormat  string      `json:"format"`
+	DURLs       []dURL      `json:"durl"`
+}
+
+type dURL struct {
+	URL  string `json:"url"`
+	Size int64  `json:"size"`
 }
 
 type dash struct {

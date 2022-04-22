@@ -394,6 +394,29 @@ func bilibiliDownload(options bilibiliOptions, extractOption extractors.Options)
 		}
 	}
 
+	for _, durl := range dashData.DURLs {
+		var ext string
+		switch dashData.DURLFormat {
+		case "flv", "flv480":
+			ext = "flv"
+		case "mp4", "hdmp4": // nolint
+			ext = "mp4"
+		}
+
+		parts := make([]*extractors.Part, 0, 1)
+		parts = append(parts, &extractors.Part{
+			URL:  durl.URL,
+			Size: durl.Size,
+			Ext:  ext,
+		})
+
+		streams[strconv.Itoa(dashData.CurQuality)] = &extractors.Stream{
+			Parts:   parts,
+			Size:    durl.Size,
+			Quality: qualityString[dashData.CurQuality],
+		}
+	}
+
 	// get the title
 	doc, err := parser.GetDoc(html)
 	if err != nil {
