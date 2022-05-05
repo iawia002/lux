@@ -21,7 +21,7 @@ import (
 const (
 	// Name is the name of this app.
 	Name    = "lux"
-	version = "v0.14.0"
+	version = "v0.15.0"
 )
 
 func init() {
