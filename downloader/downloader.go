@@ -388,8 +388,8 @@ func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, 
 					temp += written
 					headers["Range"] = fmt.Sprintf("bytes=%d-%d", temp, end)
 				}
+				part.Cur = end + 1
 			}
-			part.Cur = end + 1
 		}(part)
 	}
 	wgp.Wait()
