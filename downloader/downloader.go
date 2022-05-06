@@ -258,6 +258,12 @@ func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, 
 	var unfinishedPart []*FilePartMeta
 	savedSize := int64(0)
 	if len(parts) > 0 {
+
+		// The number of temporary files does not match, which will cause the file to be damaged after the file is merged
+		if len(parts) != downloader.option.ThreadNumber {
+			return errors.Errorf("the file has been broked, please delete all part files and re-download")
+		}
+
 		lastEnd := int64(-1)
 		for i, part := range parts {
 			// If some parts are lost, re-insert one part.
@@ -434,6 +440,7 @@ func readDirAllFilePart(filePath, filename, extname string) ([]*FilePartMeta, er
 			metas = append(metas, meta)
 		}
 	}
+
 	sort.SliceStable(metas, func(i, j int) bool {
 		return metas[i].Index < metas[j].Index
 	})
@@ -462,6 +469,15 @@ func parseFilePartMeta(filepath string, fileSize int64) (*FilePartMeta, error) {
 	}
 	savedSize := fileSize - int64(binary.Size(meta))
 	meta.Cur = meta.Start + savedSize
+
+	// The temporary file is exactly 28 bytes, which will lead to repeated writing of 28 bytes. Finally, the temporary file is merged and the merged file is damaged.
+	if fileSize == int64(binary.Size(meta)) {
+		err := os.Remove(filepath)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+	}
+
 	return meta, nil
 }
 
