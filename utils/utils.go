@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/iawia002/pandora/array"
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/request"
@@ -151,22 +152,12 @@ func ParseInputFile(r io.Reader, items string, itemStart, itemEnd int) []string 
 
 	itemList := make([]string, 0, len(wantedItems))
 	for i, item := range temp {
-		if ItemInSlice(i+1, wantedItems) {
+		if array.ItemInArray(i+1, wantedItems) {
 			itemList = append(itemList, item)
 		}
 	}
 
 	return itemList
-}
-
-// ItemInSlice returns true if an item is in the list.
-func ItemInSlice[Item comparable](item Item, list []Item) bool {
-	for _, v := range list {
-		if item == v {
-			return true
-		}
-	}
-	return false
 }
 
 // GetNameAndExt return the name and ext of the URL

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/iawia002/pandora/array"
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
@@ -84,7 +85,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*extractors.Strea
 	for _, fi := range data.Fl.Fi {
 		var fmtIDPrefix string
 		var fns []string
-		if utils.ItemInSlice(fi.Name, []string{"shd", "fhd"}) {
+		if array.ItemInArray(fi.Name, []string{"shd", "fhd"}) {
 			fmtIDPrefix = "p"
 			fmtIDName := fmt.Sprintf("%s%d", fmtIDPrefix, fi.ID%10000)
 			fns = []string{strings.Split(data.Vl.Vi[0].Fn, ".")[0], fmtIDName, "mp4"}
