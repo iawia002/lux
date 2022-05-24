@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/iawia002/pandora/array"
 	"github.com/kkdai/youtube/v2"
 	"github.com/pkg/errors"
 
@@ -51,7 +52,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	wgp := utils.NewWaitGroupPool(option.ThreadNumber)
 	dataIndex := 0
 	for index, videoEntry := range playlist.Videos {
-		if !utils.ItemInSlice(index+1, needDownloadItems) {
+		if !array.ItemInArray(index+1, needDownloadItems) {
 			continue
 		}
 

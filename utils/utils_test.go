@@ -281,35 +281,6 @@ func TestFilePath(t *testing.T) {
 	}
 }
 
-func TestItemInSlice(t *testing.T) {
-	tests := []struct {
-		name string
-		item int
-		list []int
-		want bool
-	}{
-		{
-			name: "int in slice test 1",
-			item: 1,
-			list: []int{1, 2},
-			want: true,
-		},
-		{
-			name: "int in slice test 2",
-			item: 1,
-			list: []int{2, 3},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := ItemInSlice(tt.item, tt.list); got != tt.want {
-				t.Errorf("ItemInSlice() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestGetNameAndExt(t *testing.T) {
 	type args struct {
 		uri string

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/iawia002/pandora/array"
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
@@ -123,7 +124,7 @@ func extractBangumi(url, html string, extractOption extractors.Options) ([]*extr
 	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
 	dataIndex := 0
 	for index, u := range data.EpList {
-		if !utils.ItemInSlice(index+1, needDownloadItems) {
+		if !array.ItemInArray(index+1, needDownloadItems) {
 			continue
 		}
 		wgp.Add()
@@ -222,7 +223,7 @@ func multiEpisodeDownload(url, html string, extractOption extractors.Options, pa
 	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
 	dataIndex := 0
 	for index, u := range pageData.Sections[0].Episodes {
-		if !utils.ItemInSlice(index+1, needDownloadItems) {
+		if !array.ItemInArray(index+1, needDownloadItems) {
 			continue
 		}
 		wgp.Add()
@@ -251,7 +252,7 @@ func multiPageDownload(url, html string, extractOption extractors.Options, pageD
 	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
 	dataIndex := 0
 	for index, u := range pageData.VideoData.Pages {
-		if !utils.ItemInSlice(index+1, needDownloadItems) {
+		if !array.ItemInArray(index+1, needDownloadItems) {
 			continue
 		}
 		wgp.Add()
