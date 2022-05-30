@@ -89,15 +89,15 @@ func extractContent(url, html string, extractOption extractors.Options) []*extra
 		}
 
 		videoURL := fmt.Sprintf("%s%s%s", redditMP4API, url, res720)
-		// audioURL := fmt.Sprintf("%s%s%s", redditMP4API, url, audioURLPart)
+		audioURL := fmt.Sprintf("%s%s%s", redditMP4API, url, audioURLPart)
 		videoSize, err := request.Size(videoURL, "reddit.com")
 		if err != nil {
 			log.Fatal("can't get video size")
 		}
-		// audioSize, err := request.Size(audioURL, "reddit.com")
-		// if err != nil {
-		// 	log.Fatal("can't get video size")
-		// }
+		audioSize, err := request.Size(audioURL, "reddit.com")
+		if err != nil {
+			log.Fatal("can't get video size")
+		}
 
 		contentData := make([]*extractors.Part, 0)
 		contentData = append(contentData, &extractors.Part{
@@ -105,17 +105,19 @@ func extractContent(url, html string, extractOption extractors.Options) []*extra
 			Size: videoSize,
 			Ext:  "mp4",
 		})
-		// contentData = append(contentData, &extractors.Part{
-		// 	URL:  audioURL,
-		// 	Size: audioSize,
-		// 	Ext:  "mp4",
-		// })
+
+		contentData = append(contentData,
+			&extractors.Part{
+				URL:  audioURL,
+				Size: audioSize,
+				Ext:  "mp3",
+			})
 
 		streams := map[string]*extractors.Stream{
 			"default": {
-				Parts: contentData,
-				Size:  videoSize,
-				// Size:  videoSize + audioSize,
+				Parts:   contentData,
+				Size:    videoSize + audioSize,
+				NeedMux: true,
 			},
 		}
 
@@ -124,6 +126,13 @@ func extractContent(url, html string, extractOption extractors.Options) []*extra
 				Site:    "reddit",
 				Title:   videoName,
 				Type:    extractors.DataTypeVideo,
+				Streams: streams,
+				URL:     "www.reddit.com",
+			},
+			{
+				Site:    "reddit",
+				Title:   videoName,
+				Type:    extractors.DataTypeAudio,
 				Streams: streams,
 				URL:     "www.reddit.com",
 			},
