@@ -13,6 +13,7 @@ import (
 
 var (
 	redditMP4API = "https://v.redd.it/"
+	redditIMGAPI = "https://i.redd.it/"
 	audioURLPart = "/DASH_audio.mp4"
 	resURLParts  = []string{"/DASH_720.mp4", "/DASH_480.mp4", "/DASH_360.mp4", "/DASH_240.mp4", "/DASH_220.mp4"}
 	res          = []string{"720p", "480p", "360p", "240p", "220p"}
@@ -40,9 +41,11 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	option.ThreadNumber = 1
 
 	var fileType = ""
-	videoName := utils.MatchOneOf(html, `<title>(.+?)<\/title>`)[1]
+	contentName := utils.MatchOneOf(html, `<title>(.+?)<\/title>`)[1]
 	if utils.MatchOneOf(html, `meta property="og:video" content=.*HLSPlaylist`) != nil {
 		fileType = "mp4"
+	} else if utils.MatchOneOf(html, `<meta property="og:type" content="image"/>`) != nil {
+		fileType = "img"
 	} else if utils.MatchOneOf(html, `https:\/\/preview\.redd\.it\/.*gif`) != nil {
 		fileType = "gif"
 	}
@@ -96,7 +99,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return []*extractors.Data{
 			{
 				Site:    "Reddit reddit.com",
-				Title:   videoName,
+				Title:   contentName,
 				Type:    extractors.DataTypeVideo,
 				Streams: streams,
 				URL:     url,
@@ -109,6 +112,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		}
 
 		gifURL = strings.ReplaceAll(gifURL, "&amp;", "&")
+		gifURL = strings.ReplaceAll(gifURL, "\"", "")
 
 		videoSize, err := request.Size(gifURL, "reddit.com")
 		if err != nil {
@@ -131,10 +135,51 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return []*extractors.Data{
 			{
 				Site:    "Reddit reddit.com",
-				Title:   videoName,
+				Title:   contentName,
 				Type:    extractors.DataTypeVideo,
 				Streams: streams,
 				URL:     url,
+			},
+		}, nil
+	} else if fileType == "img" {
+		var imgURL string
+		var is int64
+		if utils.MatchOneOf(html, `content":"https:\/\/i.redd.it\/(.+?)","type":"image"`) != nil {
+			imgURL = redditIMGAPI + utils.MatchOneOf(html, `content":"https:\/\/i.redd.it\/(.+?)","type":"image"`)[1]
+			is, err = request.Size(imgURL, referer)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			// https://external-preview.redd.it/q3R30Ph7Bfh2kDgpX7jyvCru4NxRKvGcK3hYr2Ng3eM.jpg?auto=webp\u0026s=13131922131e99dff74b4f42179c11df3e091787
+			// https://external-preview.redd.it/q3R30Ph7Bfh2kDgpX7jyvCru4NxRKvGcK3hYr2Ng3eM.jpg?auto=webp&s=13131922131e99dff74b4f42179c11df3e091787
+			imgURL = utils.MatchOneOf(html, `content":"(.+?)","type":"image"`)[1]
+			imgURL = strings.ReplaceAll(imgURL, "auto=webp\\u0026s", "auto=webp&s")
+			is, err = request.Size(imgURL, referer)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		imgParts := make([]*extractors.Part, 0)
+		imgParts = append(imgParts, &extractors.Part{
+			URL:  imgURL,
+			Size: is,
+			Ext:  "jpg",
+		})
+
+		return []*extractors.Data{
+			{
+				Site:  "Reddit reddit.com",
+				Title: contentName,
+				Type:  extractors.DataTypeVideo,
+				Streams: map[string]*extractors.Stream{
+					"image": {
+						Parts: imgParts,
+						Size:  is,
+					},
+				},
+				URL: url,
 			},
 		}, nil
 	}
