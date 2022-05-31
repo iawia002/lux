@@ -628,6 +628,7 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 | 虎牙视频   | <https://v.huya.com>         | ✓         |           |          |             |                   | [![huya](https://github.com/iawia002/lux/actions/workflows/stream_huya.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_huya.yml)                   |
 | 喜马拉雅   | <https://www.ximalaya.com>   |           |           | ✓        |             |                   | [![ximalaya](https://github.com/iawia002/lux/actions/workflows/stream_ximalaya.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_ximalaya.yml)       |
 | 快手       | <https://www.kuaishou.com>   | ✓         |           |          |             |                   | [![kuaishou](https://github.com/iawia002/lux/actions/workflows/stream_kuaishou.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_kuaishou.yml)       |
+| Reddit     | <https://www.reddit.com>     | ✓         | ✓         |          |             |                   | [![reddit](https://github.com/iawia002/lux/actions/workflows/stream_reddit.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_reddit.yml)       |
 
 ## Known issues
 
