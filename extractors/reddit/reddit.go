@@ -2,6 +2,7 @@ package reddit
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/iawia002/lux/extractors"
@@ -13,10 +14,8 @@ import (
 var (
 	redditMP4API = "https://v.redd.it/"
 	audioURLPart = "/DASH_audio.mp4"
-	res720       = "/DASH_720.mp4"
-	res480       = "/DASH_480.mp4"
-	res360       = "/DASH_360.mp4"
-	res280       = "/DASH_280.mp4"
+	resURLParts  = []string{"/DASH_720.mp4", "/DASH_480.mp4", "/DASH_360.mp4", "/DASH_240.mp4", "/DASH_220.mp4"}
+	res          = []string{"720p", "480p", "360p", "240p", "220p"}
 )
 
 type extractor struct{}
@@ -54,37 +53,44 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			return nil, errors.New("can't match mp4 content downloadable url")
 		}
 
-		videoURL := fmt.Sprintf("%s%s%s", redditMP4API, mp4URL, res720)
-		audioURL := fmt.Sprintf("%s%s%s", redditMP4API, mp4URL, audioURLPart)
-		videoSize, err := request.Size(videoURL, "reddit.com")
-		if err != nil {
-			return nil, err
-		}
-		audioSize, err := request.Size(audioURL, "reddit.com")
-		if err != nil {
-			return nil, err
-		}
-
-		contentData := make([]*extractors.Part, 0)
-		contentData = append(contentData, &extractors.Part{
-			URL:  videoURL,
-			Size: videoSize,
-			Ext:  "mp4",
-		})
-
-		contentData = append(contentData,
-			&extractors.Part{
+		streams := make(map[string]*extractors.Stream, len(resURLParts))
+		for id := 0; id < len(resURLParts); id++ {
+			index := strconv.Itoa(id)
+			id, err := strconv.Atoi(index)
+			if err != nil {
+				return nil, err
+			}
+			resURL := fmt.Sprintf("%s%s%s", redditMP4API, mp4URL, resURLParts[id])
+			audioURL := fmt.Sprintf("%s%s%s", redditMP4API, mp4URL, audioURLPart)
+			vs, err := request.Size(resURL, referer)
+			if err != nil {
+				return nil, err
+			}
+			as, err := request.Size(audioURL, referer)
+			if err != nil {
+				return nil, err
+			}
+			parts := make([]*extractors.Part, 0, 2)
+			parts = append(parts, &extractors.Part{
+				URL:  resURL,
+				Size: vs,
+				Ext:  "mp4",
+			})
+			parts = append(parts, &extractors.Part{
 				URL:  audioURL,
-				Size: audioSize,
+				Size: as,
 				Ext:  "mp3",
 			})
-
-		streams := map[string]*extractors.Stream{
-			"default": {
-				Parts:   contentData,
-				Size:    videoSize + audioSize,
+			var size int64
+			for _, part := range parts {
+				size += part.Size
+			}
+			streams[index] = &extractors.Stream{
+				Parts:   parts,
+				Size:    size,
+				Quality: res[id],
 				NeedMux: true,
-			},
+			}
 		}
 
 		return []*extractors.Data{
