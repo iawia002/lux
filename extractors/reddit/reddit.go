@@ -2,21 +2,26 @@ package reddit
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
-	"github.com/pkg/errors"
 )
 
 var (
 	redditMP4API = "https://v.redd.it/"
 	redditIMGAPI = "https://i.redd.it/"
 	audioURLPart = "/DASH_audio.mp4"
-	resURLParts  = []string{"/DASH_720.mp4", "/DASH_480.mp4", "/DASH_360.mp4", "/DASH_240.mp4", "/DASH_220.mp4"}
-	res          = []string{"720p", "480p", "360p", "240p", "220p"}
+	resMap       = map[string]string{
+		"720p": "/DASH_720.mp4",
+		"480p": "/DASH_480.mp4",
+		"360p": "/DASH_360.mp4",
+		"240p": "/DASH_240.mp4",
+		"220p": "/DASH_220.mp4",
+	}
 )
 
 type extractor struct{}
@@ -56,42 +61,39 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			return nil, errors.New("can't match mp4 content downloadable url")
 		}
 
-		streams := make(map[string]*extractors.Stream, len(resURLParts))
-		for id := 0; id < len(resURLParts); id++ {
-			index := strconv.Itoa(id)
-			id, err := strconv.Atoi(index)
-			if err != nil {
-				return nil, err
-			}
-			resURL := fmt.Sprintf("%s%s%s", redditMP4API, mp4URL, resURLParts[id])
-			audioURL := fmt.Sprintf("%s%s%s", redditMP4API, mp4URL, audioURLPart)
-			vs, err := request.Size(resURL, referer)
-			if err != nil {
-				return nil, err
-			}
-			as, err := request.Size(audioURL, referer)
+		audioURL := fmt.Sprintf("%s%s%s", redditMP4API, mp4URL, audioURLPart)
+		size, err := request.Size(audioURL, referer)
+		if err != nil {
+			return nil, err
+		}
+		audioPart := &extractors.Part{
+			URL:  audioURL,
+			Size: size,
+			Ext:  "mp3",
+		}
+
+		streams := make(map[string]*extractors.Stream, len(resMap))
+		for res, urlparts := range resMap {
+			resURL := fmt.Sprintf("%s%s%s", redditMP4API, mp4URL, urlparts)
+			size, err := request.Size(resURL, referer)
 			if err != nil {
 				return nil, err
 			}
 			parts := make([]*extractors.Part, 0, 2)
 			parts = append(parts, &extractors.Part{
 				URL:  resURL,
-				Size: vs,
+				Size: size,
 				Ext:  "mp4",
 			})
-			parts = append(parts, &extractors.Part{
-				URL:  audioURL,
-				Size: as,
-				Ext:  "mp3",
-			})
-			var size int64
+			parts = append(parts, audioPart)
+			var totalSize int64
 			for _, part := range parts {
-				size += part.Size
+				totalSize += part.Size
 			}
-			streams[index] = &extractors.Stream{
+			streams[res] = &extractors.Stream{
 				Parts:   parts,
-				Size:    size,
-				Quality: res[id],
+				Size:    totalSize,
+				Quality: res,
 				NeedMux: true,
 			}
 		}
@@ -114,24 +116,23 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		gifURL = strings.ReplaceAll(gifURL, "&amp;", "&")
 		gifURL = strings.ReplaceAll(gifURL, "\"", "")
 
-		videoSize, err := request.Size(gifURL, "reddit.com")
+		size, err := request.Size(gifURL, "reddit.com")
 		if err != nil {
 			return nil, errors.New("can't get video size")
 		}
-		contentData := make([]*extractors.Part, 0)
-		contentData = append(contentData, &extractors.Part{
-			URL:  gifURL,
-			Size: videoSize,
-			Ext:  "mp4",
-		})
 
 		streams := map[string]*extractors.Stream{
-			"video": {
-				Parts: contentData,
-				Size:  videoSize,
+			"default": {
+				Parts: []*extractors.Part{
+					{
+						URL:  gifURL,
+						Size: size,
+						Ext:  "mp4",
+					},
+				},
+				Size: size,
 			},
 		}
-
 		return []*extractors.Data{
 			{
 				Site:    "Reddit reddit.com",
@@ -143,40 +144,37 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		}, nil
 	} else if fileType == "img" {
 		var imgURL string
-		var is int64
+		var size int64
 		if utils.MatchOneOf(html, `content":"https:\/\/i.redd.it\/(.+?)","type":"image"`) != nil {
 			imgURL = redditIMGAPI + utils.MatchOneOf(html, `content":"https:\/\/i.redd.it\/(.+?)","type":"image"`)[1]
-			is, err = request.Size(imgURL, referer)
+			size, err = request.Size(imgURL, referer)
 			if err != nil {
 				return nil, err
 			}
 		} else {
-			// https://external-preview.redd.it/q3R30Ph7Bfh2kDgpX7jyvCru4NxRKvGcK3hYr2Ng3eM.jpg?auto=webp\u0026s=13131922131e99dff74b4f42179c11df3e091787
-			// https://external-preview.redd.it/q3R30Ph7Bfh2kDgpX7jyvCru4NxRKvGcK3hYr2Ng3eM.jpg?auto=webp&s=13131922131e99dff74b4f42179c11df3e091787
 			imgURL = utils.MatchOneOf(html, `content":"(.+?)","type":"image"`)[1]
 			imgURL = strings.ReplaceAll(imgURL, "auto=webp\\u0026s", "auto=webp&s")
-			is, err = request.Size(imgURL, referer)
+			size, err = request.Size(imgURL, referer)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		imgParts := make([]*extractors.Part, 0)
-		imgParts = append(imgParts, &extractors.Part{
-			URL:  imgURL,
-			Size: is,
-			Ext:  "jpg",
-		})
-
 		return []*extractors.Data{
 			{
 				Site:  "Reddit reddit.com",
 				Title: contentName,
-				Type:  extractors.DataTypeVideo,
+				Type:  extractors.DataTypeImage,
 				Streams: map[string]*extractors.Stream{
-					"image": {
-						Parts: imgParts,
-						Size:  is,
+					"default": {
+						Parts: []*extractors.Part{
+							{
+								URL:  imgURL,
+								Size: size,
+								Ext:  "jpg",
+							},
+						},
+						Size: size,
 					},
 				},
 				URL: url,
