@@ -22,6 +22,7 @@ import (
 	_ "github.com/iawia002/lux/extractors/pixivision"
 	_ "github.com/iawia002/lux/extractors/pornhub"
 	_ "github.com/iawia002/lux/extractors/qq"
+	_ "github.com/iawia002/lux/extractors/reddit"
 	_ "github.com/iawia002/lux/extractors/streamtape"
 	_ "github.com/iawia002/lux/extractors/tangdou"
 	_ "github.com/iawia002/lux/extractors/tiktok"
