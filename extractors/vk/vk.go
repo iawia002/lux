@@ -11,8 +11,6 @@ import (
 	"github.com/iawia002/lux/utils"
 )
 
-// https://vk.com/video-29715608_456253889
-
 func init() {
 	extractors.Register("vk", New())
 }
