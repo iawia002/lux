@@ -94,7 +94,6 @@ func (e extractor) Extract(url string, option extractors.Options) ([]*extractors
 		streams[qualityNames[i]] = &extractors.Stream{
 			Parts:   []*extractors.Part{urlData},
 			Size:    size,
-			NeedMux: true,
 			Quality: qualityNames[i],
 		}
 	}
