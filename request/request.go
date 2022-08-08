@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -164,7 +163,7 @@ func GetByte(url, refer string, headers map[string]string) ([]byte, error) {
 	}
 	defer reader.Close() // nolint
 
-	body, err := ioutil.ReadAll(reader)
+	body, err := io.ReadAll(reader)
 	if err != nil && err != io.EOF {
 		return nil, errors.WithStack(err)
 	}

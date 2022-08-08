@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
@@ -226,7 +225,7 @@ func New() *cli.App {
 				// If cookie is a file path, convert it to a string to ensure cookie is always string
 				if _, fileErr := os.Stat(cookie); fileErr == nil {
 					// Cookie is a file
-					data, err := ioutil.ReadFile(cookie)
+					data, err := os.ReadFile(cookie)
 					if err != nil {
 						return err
 					}
