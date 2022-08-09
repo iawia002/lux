@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
@@ -57,7 +56,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 	defer reader.Close() // nolint
 
-	b, err := ioutil.ReadAll(reader)
+	b, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
