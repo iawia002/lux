@@ -177,7 +177,7 @@ func New() *cli.App {
 			&cli.StringFlag{
 				Name:    "youku-ccode",
 				Aliases: []string{"ccode"},
-				Value:   "0532",
+				Value:   "0502",
 				Usage:   "Youku ccode",
 			},
 			&cli.StringFlag{
