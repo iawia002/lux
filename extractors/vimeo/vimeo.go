@@ -2,7 +2,6 @@ package vimeo
 
 import (
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -17,9 +16,9 @@ func init() {
 }
 
 type vimeoProgressive struct {
-	Profile int    `json:"profile"`
 	Width   int    `json:"width"`
 	Height  int    `json:"height"`
+	Profile string `json:"profile"`
 	Quality string `json:"quality"`
 	URL     string `json:"url"`
 }
@@ -89,7 +88,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			Size: size,
 			Ext:  "mp4",
 		}
-		streams[strconv.Itoa(video.Profile)] = &extractors.Stream{
+		streams[video.Profile] = &extractors.Stream{
 			Parts:   []*extractors.Part{urlData},
 			Size:    size,
 			Quality: video.Quality,
