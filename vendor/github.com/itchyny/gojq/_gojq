@@ -1,0 +1,32 @@
+#compdef gojq
+
+_gojq()
+{
+  _arguments -C \
+    '(-c --compact-output)'{-c,--compact-output}'[compact output]' \
+    '(-r --raw-output)'{-r,--raw-output}'[output raw strings]' \
+    '(-j --join-output)'{-j,--join-output}'[stop printing a newline after each output]' \
+    '(-0 --nul-output)'{-0,--nul-output}'[print NUL after each output]' \
+    '(-C --color-output)'{-C,--color-output}'[colorize output even if piped]' \
+    '(-M --monochrome-output)'{-M,--monochrome-output}'[stop colorizing output]' \
+    '(--yaml-output)'--yaml-output'[output by YAML]' \
+    '(--indent)'--indent'[number of spaces for indentation]:indentation count' \
+    '(--tab)'--tab'[use tabs for indentation]' \
+    '(-n --null-input)'{-n,--null-input}'[use null as input value]' \
+    '(-R --raw-input)'{-R,--raw-input}'[read input as raw strings]' \
+    '(-s --slurp)'{-s,--slurp}'[read all inputs into an array]' \
+    '(--stream)'--stream'[parse input in stream fashion]' \
+    '(--yaml-input)'--yaml-input'[read input as YAML]' \
+    '(-f --from-file)'{-f,--from-file}'[load query from file]:filename of jq query:_files' \
+    '(-L)'-L'[directory to search modules from]:module directory:_directories' \
+    '(--arg)'--arg'[set variable to string value]:variable name:' \
+    '(--argjson)'--argjson'[set variable to JSON value]:variable name:' \
+    '(--slurpfile)'--slurpfile'[set variable to the JSON contents of the file]:variable name:' \
+    '(--rawfile)'--rawfile'[set variable to the contents of the file]:variable name:' \
+    '(--args)'--args'[consume remaining arguments as positional string values]' \
+    '(--jsonargs)'--jsonargs'[consume remaining arguments as positional JSON values]' \
+    '(-e --exit-status)'{-e,--exit-status}'[exit 1 when the last value is false or null]' \
+    '(-v --version)'{-v,--version}'[print version]' \
+    '(-h --help)'{-h,--help}'[print help]' \
+    && ret=0
+}

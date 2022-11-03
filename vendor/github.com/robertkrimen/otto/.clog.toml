@@ -1,0 +1,13 @@
+[clog]
+repository = "https://github.com/robertkrimen/otto"
+subtitle = "Release Notes"
+
+[sections]
+"Refactors" = ["refactor"]
+"Chores" = ["chore"]
+"Continuous Integration" = ["ci"]
+"Improvements" = ["imp", "improvement"]
+"Features" = ["feat", "feature"]
+"Legacy" = ["legacy"]
+"QA" = ["qa", "test", "tests"]
+"Documentation" = ["doc", "docs"]

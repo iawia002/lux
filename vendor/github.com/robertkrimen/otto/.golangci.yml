@@ -1,0 +1,79 @@
+run:
+  concurrency: 4
+  deadline: 5m
+  skip-dirs:
+    - terst
+  skip-files:
+    - dbg/dbg.go
+
+linters-settings:
+  govet:
+    check-shadowing: false
+  gocyclo:
+    min-complexity: 20
+  maligned:
+    suggest-new: true
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 4
+  cyclop:
+    max-complexity: 15
+
+linters:
+  enable-all: true
+  disable:
+    - dupl
+    - gas
+    - errcheck
+    - gofmt
+    - gosimple
+    - interfacer
+    - megacheck
+    - maligned
+    - structcheck
+    - staticcheck
+    - unconvert
+    - unparam
+    - varcheck
+    - lll
+    - prealloc
+    - gochecknoglobals
+    - gochecknoinits
+    - scopelint
+    - funlen
+    - godox
+    - exhaustivestruct
+    - goerr113
+    - wsl
+    - nlreturn
+    - tagliatelle
+    - gomnd
+    - paralleltest
+    - wrapcheck
+    - testpackage
+    - golint
+    - gofumpt
+    - forbidigo
+    - gocognit
+    - gocritic
+    - godot
+    - nakedret
+    - nestif
+    - revive
+    - whitespace
+    - errorlint
+    - exhaustive
+    - forcetypeassert
+    - ifshort
+    - stylecheck
+    - gocyclo
+    - misspell
+    - cyclop
+
+issues:
+  exclude:
+    - .*Id.* should be .*ID.*
+  exclude-use-default: false
+  max-same-issues: 0

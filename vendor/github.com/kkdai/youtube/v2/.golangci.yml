@@ -1,0 +1,8 @@
+issues:
+  exclude:
+  - Subprocess launched with function call
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: cmd/
+      text: InsecureSkipVerify

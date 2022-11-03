@@ -1,0 +1,38 @@
+project_name: youtubedr
+
+env:
+  # Build without CGO to don't depend on specific glibc versions
+  - CGO_ENABLED=0
+
+builds:
+  - main: ./cmd/youtubedr
+    binary: youtubedr
+    goos:
+      - windows
+      - darwin
+      - linux
+      - freebsd
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    flags:
+      - -trimpath
+
+snapcrafts:
+  - name_template: '{{ .ProjectName }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    summary:  Youtube video downloader
+    description: Youtube video downloader written in Golang
+    publish: true
+    grade: stable
+    confinement: strict
+    license: MIT
+    base: core18
+    apps:
+      youtubedr:
+        plugs: ["home", "network", "dot-youtubedr-yaml"]
+    plugs:
+      dot-youtubedr-yaml:
+        interface: personal-files
+        read:
+        - $HOME/.youtubedr.yaml
