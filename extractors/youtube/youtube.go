@@ -2,6 +2,7 @@ package youtube
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/iawia002/pandora/array"
@@ -28,7 +29,13 @@ type extractor struct {
 // New returns a youtube extractor.
 func New() extractors.Extractor {
 	return &extractor{
-		client: &youtube.Client{},
+		client: &youtube.Client{
+			HTTPClient: &http.Client{
+				Transport: &http.Transport{
+					Proxy: http.ProxyFromEnvironment,
+				},
+			},
+		},
 	}
 }
 
