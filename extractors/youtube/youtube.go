@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/iawia002/pandora/array"
+	"github.com/iawia002/lia/array"
 	"github.com/kkdai/youtube/v2"
 	"github.com/pkg/errors"
 

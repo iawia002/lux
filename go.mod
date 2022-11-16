@@ -7,7 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/fatih/color v1.13.0
-	github.com/iawia002/pandora v0.0.0-20220524074332-aa58f6f818cd
+	github.com/iawia002/lia v0.0.0-20221116085912-1f653221be4b
 	github.com/itchyny/gojq v0.12.7
 	github.com/json-iterator/go v1.1.12
 	github.com/kkdai/youtube/v2 v2.7.16
@@ -36,7 +36,7 @@ require (
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf // indirect
-	golang.org/x/net v0.0.0-20220708220712-1185a9018129 // indirect
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/text v0.4.0 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
