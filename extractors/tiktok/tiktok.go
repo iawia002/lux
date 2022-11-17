@@ -53,7 +53,11 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	titleArr := strings.Split(title, "|")
 
-	title = strings.TrimSpace(strings.Join(titleArr[:len(titleArr)-1], "|"))
+	if len(titleArr) == 1 {
+		title = titleArr[0]
+	} else {
+		title = strings.TrimSpace(strings.Join(titleArr[:len(titleArr)-1], "|"))
+	}
 
 	streams := make(map[string]*extractors.Stream)
 

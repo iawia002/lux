@@ -15,17 +15,17 @@ func TestDownload(t *testing.T) {
 		{
 			name: "normal test 1",
 			args: test.Args{
-				URL:   "https://www.tiktok.com/@therock/video/6768158408110624005",
-				Title: "#bestfriend check.",
-				Size:  2594827,
+				URL:   "https://www.tiktok.com/@ginjiro_koyama/video/7164293510617763073?is_copy_url=1&is_from_webapp=v1",
+				Title: "イケすぎたXOXO#xoxo #repezenfoxx #背中男 #kfam #yoshikiさんを泣かせたチーム @K fam @【Repezen Foxx】🦊",
+				Size:  4356253,
 			},
 		},
 		{
 			name: "normal test 2",
 			args: test.Args{
-				URL:   "https://www.tiktok.com/@yun_bao/video/7050411198512155905",
-				Title: "🤔",
-				Size:  2224436,
+				URL:   "https://www.tiktok.com/@enhypen/video/7165445991238356225?is_copy_url=1&is_from_webapp=v1",
+				Title: "깜짝 퇴장 👋 #ENHYPEN #SUNGHOON #NI_KI #Make_the_change",
+				Size:  3848307,
 			},
 		},
 	}
