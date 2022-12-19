@@ -354,6 +354,12 @@ $ HTTP_PROXY="socks5://127.0.0.1:1080/" lux -i "https://www.youtube.com/watch?v=
 
 ### Multi-Thread
 
+Use `-m` option to enable multi-thread download for single video.
+
+Use `-sf` option to enable multi-thread download for every fragment. Requires `-m` is set.
+
+> For example, in BiliBili download, use `-m -sf` can significantly increase speed.
+
 Use `-n` option to set the number of download threads(default is 10, only works for multiple-parts video).
 
 > **Special Tips:** Use too many threads in **mgtv** download will cause HTTP 403 error, we recommend setting the number of threads to **1**.

@@ -135,6 +135,11 @@ func New() *cli.App {
 				Aliases: []string{"m"},
 				Usage:   "Multiple threads to download single video",
 			},
+			&cli.BoolFlag{
+				Name:    "split-fragment",
+				Aliases: []string{"sf"},
+				Usage:   "Multiple threads to download every fragment. Require --multi-thread is set",
+			},
 			&cli.UintFlag{
 				Name:  "retry",
 				Value: 10,
@@ -306,6 +311,7 @@ func download(c *cli.Context, videoURL string) error {
 		FileNameLength: int(c.Uint("file-name-length")),
 		Caption:        c.Bool("caption"),
 		MultiThread:    c.Bool("multi-thread"),
+		SplitFragment:  c.Bool("split-fragment"),
 		ThreadNumber:   int(c.Uint("thread")),
 		RetryTimes:     int(c.Uint("retry")),
 		ChunkSizeMB:    int(c.Uint("chunk-size")),

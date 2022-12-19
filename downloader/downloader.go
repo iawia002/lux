@@ -34,10 +34,11 @@ type Options struct {
 	FileNameLength int
 	Caption        bool
 
-	MultiThread  bool
-	ThreadNumber int
-	RetryTimes   int
-	ChunkSizeMB  int
+	MultiThread   bool
+	SplitFragment bool
+	ThreadNumber  int
+	RetryTimes    int
+	ChunkSizeMB   int
 	// Aria2
 	UseAria2RPC bool
 	Aria2Token  string
@@ -645,7 +646,12 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 		wgp.Add()
 		go func(part *extractors.Part, fileName string) {
 			defer wgp.Done()
-			err := downloader.save(part, data.URL, fileName)
+			var err error
+			if downloader.option.SplitFragment {
+				err = downloader.multiThreadSave(part, data.URL, fileName)
+			} else {
+				err = downloader.save(part, data.URL, fileName)
+			}
 			if err != nil {
 				lock.Lock()
 				errs = append(errs, err)
