@@ -52,7 +52,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	itemId := itemIds[len(itemIds)-1]
-	jsonData, err := request.Get("https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids="+itemId, url, nil)
+	jsonData, err := request.Get("https://www.iesdouyin.com/aweme/v1/web/aweme/detail/?aweme_id="+itemId+"&aid=1128&version_name=23.5.0&device_platform=android&os_version=2333", url, nil)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -64,10 +64,10 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	urlData := make([]*extractors.Part, 0)
 	var douyinType extractors.DataType
 	var totalSize int64
-	// AwemeType: 2:image 4:video
-	if douyin.ItemList[0].AwemeType == 2 {
+	// AwemeType: 0:video 68:image
+	if douyin.AwemeDetail.AwemeType == 68 {
 		douyinType = extractors.DataTypeImage
-		for _, img := range douyin.ItemList[0].Images {
+		for _, img := range douyin.AwemeDetail.Images {
 			realURL := img.URLList[len(img.URLList)-1]
 			size, err := request.Size(realURL, url)
 			if err != nil {
@@ -86,7 +86,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		}
 	} else {
 		douyinType = extractors.DataTypeVideo
-		realURL := "https://aweme.snssdk.com/aweme/v1/play/?video_id=" + douyin.ItemList[0].Video.PlayAddr.URI + "&ratio=720p&line=0"
+		realURL := douyin.AwemeDetail.Video.PlayAddr.URLList[0]
 		totalSize, err = request.Size(realURL, url)
 		if err != nil {
 			return nil, errors.WithStack(err)
@@ -107,7 +107,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	return []*extractors.Data{
 		{
 			Site:    "抖音 douyin.com",
-			Title:   douyin.ItemList[0].Desc,
+			Title:   douyin.AwemeDetail.Desc,
 			Type:    douyinType,
 			Streams: streams,
 			URL:     url,
