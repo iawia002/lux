@@ -7,7 +7,7 @@
     <img src="https://img.shields.io/codecov/c/github/iawia002/lux.svg?style=flat-square" alt="Codecov">
   </a>
   <a href="https://github.com/iawia002/lux/actions">
-    <img src="https://img.shields.io/github/workflow/status/iawia002/lux/ci?style=flat-square" alt="GitHub Workflow Status">
+    <img src="https://img.shields.io/github/actions/workflow/status/iawia002/lux/ci.yml?style=flat-square" alt="GitHub Workflow Status">
   </a>
   <a href="https://goreportcard.com/report/github.com/iawia002/lux">
     <img src="https://goreportcard.com/badge/github.com/iawia002/lux?style=flat-square" alt="Go Report Card">
