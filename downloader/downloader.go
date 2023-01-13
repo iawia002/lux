@@ -645,7 +645,12 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 		wgp.Add()
 		go func(part *extractors.Part, fileName string) {
 			defer wgp.Done()
-			err := downloader.save(part, data.URL, fileName)
+			var err error
+			if downloader.option.MultiThread {
+				err = downloader.multiThreadSave(part, data.URL, fileName)
+			} else {
+				err = downloader.save(part, data.URL, fileName)
+			}
 			if err != nil {
 				lock.Lock()
 				errs = append(errs, err)
