@@ -61,7 +61,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-
+		defer resp.Body.Close() // nolint
 		// follow redirects, https://stackoverflow.com/a/16785343
 		finalURL = resp.Request.URL.String()
 	}
@@ -86,7 +86,6 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	query, err := gojq.Parse("{title: .data.title} + {qualities: [.data.videoResource.normal.video_list | .[] | {url: .main_url, size: .size, ext: .vtype, quality: .definition}]}")
 	if err != nil {
 		return nil, errors.WithStack(err)
-
 	}
 
 	video := Video{}
@@ -135,7 +134,6 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			URL:     url,
 		},
 	}, nil
-
 }
 
 func base64Decode(t string) string {

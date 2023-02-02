@@ -114,7 +114,7 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 	}
 
 	// Get video license token information
-	params = strings.NewReader("{\"source_type\":1,\"aid\":" + string(matches[2]) + ",\"video_id\":\"" + string(data.Data.VideoID) + "\"}")
+	params = strings.NewReader("{\"source_type\":1,\"aid\":" + matches[2] + ",\"video_id\":\"" + data.Data.VideoID + "\"}")
 	res, err = request.Request(http.MethodPost, "https://time.geekbang.org/serv/v3/source_auth/video_play_auth", params, heanders)
 	if err != nil {
 		return nil, errors.WithStack(err)

@@ -10,10 +10,22 @@ linter-settings:
 
 linters:
   enable:
+    - bodyclose
+    - errcheck
     - goconst
+    - gofmt
     - goimports
+    - gosimple
+    - govet
+    - ineffassign
     - misspell
+    - nilerr
+    - staticcheck
+    - typecheck
+    - unconvert
     - unparam
+    - unused
+    - whitespace
 
 issues:
   exclude-use-default: false
