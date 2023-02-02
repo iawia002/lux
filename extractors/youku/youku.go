@@ -91,7 +91,6 @@ func youkuUps(vid string, option extractors.Options) (*youkuData, error) {
 	)
 	if strings.Contains(option.Cookie, "cna") {
 		utids = utils.MatchOneOf(option.Cookie, `cna=(.+?);`, `cna\s+(.+?)\s`, `cna\s+(.+?)$`)
-
 	} else {
 		headers, err := request.Headers("http://log.mmstat.com/eg.js", youkuReferer)
 		if err != nil {

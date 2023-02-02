@@ -41,6 +41,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
+		defer resp.Body.Close() // nolint
 		url = resp.Header.Get("location")
 	}
 

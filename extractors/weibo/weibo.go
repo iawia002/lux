@@ -44,7 +44,6 @@ func getXSRFToken() (string, error) {
 	}
 	url := "https://weibo.com/ajax/getversion"
 	req, err := http.NewRequest(http.MethodHead, url, nil)
-
 	if err != nil {
 		return "", err
 	}
@@ -54,6 +53,8 @@ func getXSRFToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer res.Body.Close() // nolint
+
 	token := utils.MatchOneOf(res.Header.Get("Set-Cookie"), `XSRF-TOKEN=(.+?);`)[1]
 	return token, nil
 }

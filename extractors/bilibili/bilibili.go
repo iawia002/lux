@@ -477,7 +477,6 @@ func getSubTitleCaptionPart(aid int, cid int) *extractors.CaptionPart {
 		},
 		Transform: subtitleTransform,
 	}
-
 }
 
 func subtitleTransform(body []byte) ([]byte, error) {
