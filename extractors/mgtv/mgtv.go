@@ -91,7 +91,7 @@ func mgtvM3u8(url string) ([]mgtvURLInfo, int64, error) {
 func encodeTk2(str string) string {
 	encodeString := base64.StdEncoding.EncodeToString([]byte(str))
 	r1 := regexp.MustCompile(`/\+/g`)
-	r2 := regexp.MustCompile(`/\//g`)
+	r2 := regexp.MustCompile(`///g`)
 	r3 := regexp.MustCompile(`/=/g`)
 	r1.ReplaceAllString(encodeString, "_")
 	r2.ReplaceAllString(encodeString, "~")
