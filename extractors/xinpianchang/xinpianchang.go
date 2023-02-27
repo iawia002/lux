@@ -45,8 +45,8 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.WithStack(err)
 	}
 
-	r1 := regexp.MustCompile(`vid = \"(.+?)\";`)
-	r2 := regexp.MustCompile(`modeServerAppKey = \"(.+?)\";`)
+	r1 := regexp.MustCompile(`vid = "(.+?)";`)
+	r2 := regexp.MustCompile(`modeServerAppKey = "(.+?)";`)
 
 	vid := r1.FindSubmatch([]byte(html))[1]
 	appKey := r2.FindSubmatch([]byte(html))[1]

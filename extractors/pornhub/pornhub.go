@@ -78,7 +78,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		title = "pornhub video"
 	}
 
-	reg, err := regexp.Compile(`<script\b[^>]*>([\s\S]*?)<\/script>`)
+	reg, err := regexp.Compile(`<script\b[^>]*>([\s\S]*?)</script>`)
 	if err != nil {
 		return nil, errors.WithStack(extractors.ErrInvalidRegularExpression)
 	}
