@@ -1,11 +1,13 @@
 package douyin
 
 import (
+	"crypto/rand"
 	_ "embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	netURL "net/url"
+	"regexp"
 	"strings"
 
 	"github.com/dop251/goja"
@@ -61,6 +63,12 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 	itemId := itemIds[len(itemIds)-1]
 
+	// dynamic generate cookie
+	cookie, err := createCookie()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	api := "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=" + itemId
 	// parse api query params string
 	query, err := netURL.Parse(api)
@@ -69,15 +77,16 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 	// define request headers and sign agent
 	headers := map[string]string{}
-	headers["Cookie"] = "s_v_web_id=verify_leytkxgn_kvO5kOmO_SdMs_4t1o_B5ml_BUqtWM1mP6BF;"
-	agent := "Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36 Edg/87.0.664.66"
+	headers["Cookie"] = cookie
+	headers["Referer"] = "https://www.douyin.com/"
+	headers["User-Agent"] = "Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36 Edg/87.0.664.66"
 
 	// init JavaScripts runtime
 	vm := goja.New()
 	// load sign scripts
 	_, _ = vm.RunString(script)
 	// sign
-	sign, err := vm.RunString(fmt.Sprintf("sign('%s', '%s')", query.RawQuery, agent))
+	sign, err := vm.RunString(fmt.Sprintf("sign('%s', '%s')", query.RawQuery, headers["User-Agent"]))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -144,4 +153,60 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			URL:     url,
 		},
 	}, nil
+}
+
+func createCookie() (string, error) {
+	v1, err := msToken(107)
+	if err != nil {
+		return "", err
+	}
+	v2, err := ttwid()
+	if err != nil {
+		return "", err
+	}
+	v3 := "324fb4ea4a89c0c05827e18a1ed9cf9bf8a17f7705fcc793fec935b637867e2a5a9b8168c885554d029919117a18ba69"
+	v4 := "eyJiZC10aWNrZXQtZ3VhcmQtdmVyc2lvbiI6MiwiYmQtdGlja2V0LWd1YXJkLWNsaWVudC1jc3IiOiItLS0tLUJFR0lOIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLVxyXG5NSUlCRFRDQnRRSUJBREFuTVFzd0NRWURWUVFHRXdKRFRqRVlNQllHQTFVRUF3d1BZbVJmZEdsamEyVjBYMmQxXHJcbllYSmtNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVKUDZzbjNLRlFBNUROSEcyK2F4bXAwNG5cclxud1hBSTZDU1IyZW1sVUE5QTZ4aGQzbVlPUlI4NVRLZ2tXd1FJSmp3Nyszdnc0Z2NNRG5iOTRoS3MvSjFJc3FBc1xyXG5NQ29HQ1NxR1NJYjNEUUVKRGpFZE1Cc3dHUVlEVlIwUkJCSXdFSUlPZDNkM0xtUnZkWGxwYmk1amIyMHdDZ1lJXHJcbktvWkl6ajBFQXdJRFJ3QXdSQUlnVmJkWTI0c0RYS0c0S2h3WlBmOHpxVDRBU0ROamNUb2FFRi9MQnd2QS8xSUNcclxuSURiVmZCUk1PQVB5cWJkcytld1QwSDZqdDg1czZZTVNVZEo5Z2dmOWlmeTBcclxuLS0tLS1FTkQgQ0VSVElGSUNBVEUgUkVRVUVTVC0tLS0tXHJcbiJ9"
+	cookie := fmt.Sprintf("msToken=%s;ttwid=%s;odin_tt=%s;bd_ticket_guard_client_data=%s;", v1, v2, v3, v4)
+	return cookie, nil
+}
+
+func msToken(length int) (string, error) {
+	const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+	randomBytes := make([]byte, length)
+	if _, err := rand.Read(randomBytes); err != nil {
+		return "", err
+	}
+	token := make([]byte, length)
+	for i, b := range randomBytes {
+		token[i] = characters[int(b)%len(characters)]
+	}
+	return string(token), nil
+}
+
+func ttwid() (string, error) {
+	body := map[string]interface{}{
+		"aid":           1768,
+		"union":         true,
+		"needFid":       false,
+		"region":        "cn",
+		"cbUrlProtocol": "https",
+		"service":       "www.ixigua.com",
+		"migrate_info":  map[string]string{"ticket": "", "source": "node"},
+	}
+	bytes, err := json.Marshal(body)
+	if err != nil {
+		return "", err
+	}
+	payload := strings.NewReader(string(bytes))
+	resp, err := request.Request(http.MethodPost, "https://ttwid.bytedance.com/ttwid/union/register/", payload, nil)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close() // nolint
+	cookie := resp.Header.Get("Set-Cookie")
+	re := regexp.MustCompile(`ttwid=([^;]+)`)
+	if match := re.FindStringSubmatch(cookie); match != nil {
+		return match[1], nil
+	}
+	return "", errors.New("douyin ttwid request failed")
 }
