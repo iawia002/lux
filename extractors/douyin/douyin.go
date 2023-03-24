@@ -2,7 +2,11 @@ package douyin
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/dop251/goja"
 	"net/http"
+	netURL "net/url"
+	"os"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -53,7 +57,31 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 	itemId := itemIds[len(itemIds)-1]
-	jsonData, err := request.Get("https://www.iesdouyin.com/aweme/v1/web/aweme/detail/?aweme_id="+itemId+"&aid=1128&version_name=23.5.0&device_platform=android&os_version=2333", url, nil)
+
+	// init JavaScripts runtime
+	vm := goja.New()
+	// read sign file
+	script, err := os.ReadFile("./script/douyin-sign.js")
+	if err != nil {
+		return nil, errors.WithStack(extractors.ErrSignScriptsRead)
+	}
+	api := "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=" + itemId
+	// parse api query params string
+	query, err := netURL.Parse(api)
+	if err != nil {
+		return nil, errors.WithStack(extractors.ErrURLQueryParamsParseFailed)
+	}
+	// define request headers and sign agent
+	headers := map[string]string{}
+	headers["Cookie"] = "s_v_web_id=verify_leytkxgn_kvO5kOmO_SdMs_4t1o_B5ml_BUqtWM1mP6BF;"
+	agent := "Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36 Edg/87.0.664.66"
+	// load sign scripts
+	_, _ = vm.RunString(string(script))
+	// sign
+	sign, err := vm.RunString(fmt.Sprintf("sign('%s', '%s')", query.RawQuery, agent))
+	api = fmt.Sprintf("%s&X-Bogus=%s", api, sign)
+
+	jsonData, err := request.Get(api, url, headers)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
