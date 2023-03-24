@@ -1,14 +1,14 @@
 package douyin
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
-	"github.com/dop251/goja"
 	"net/http"
 	netURL "net/url"
-	"os"
 	"strings"
 
+	"github.com/dop251/goja"
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
@@ -21,6 +21,9 @@ func init() {
 	extractors.Register("douyin", e)
 	extractors.Register("iesdouyin", e)
 }
+
+//go:embed sign.js
+var script string
 
 type extractor struct{}
 
@@ -58,13 +61,6 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 	itemId := itemIds[len(itemIds)-1]
 
-	// init JavaScripts runtime
-	vm := goja.New()
-	// read sign file
-	script, err := os.ReadFile("./script/douyin-sign.js")
-	if err != nil {
-		return nil, errors.WithStack(extractors.ErrSignScriptsRead)
-	}
 	api := "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=" + itemId
 	// parse api query params string
 	query, err := netURL.Parse(api)
@@ -75,10 +71,16 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	headers := map[string]string{}
 	headers["Cookie"] = "s_v_web_id=verify_leytkxgn_kvO5kOmO_SdMs_4t1o_B5ml_BUqtWM1mP6BF;"
 	agent := "Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36 Edg/87.0.664.66"
+
+	// init JavaScripts runtime
+	vm := goja.New()
 	// load sign scripts
-	_, _ = vm.RunString(string(script))
+	_, _ = vm.RunString(script)
 	// sign
 	sign, err := vm.RunString(fmt.Sprintf("sign('%s', '%s')", query.RawQuery, agent))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
 	api = fmt.Sprintf("%s&X-Bogus=%s", api, sign)
 
 	jsonData, err := request.Get(api, url, headers)
