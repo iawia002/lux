@@ -6,6 +6,7 @@ require (
 	github.com/MercuryEngineering/CookieMonster v0.0.0-20180304172713-1584578b3403
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/cheggaaa/pb/v3 v3.0.8
+	github.com/dop251/goja v0.0.0-20230304130813-e2f543bf4b4c
 	github.com/fatih/color v1.13.0
 	github.com/iawia002/lia v0.0.0-20221116085912-1f653221be4b
 	github.com/itchyny/gojq v0.12.7
@@ -23,8 +24,8 @@ require (
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
-	github.com/dop251/goja v0.0.0-20221115122301-6c0d9883792e // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
+	github.com/google/pprof v0.0.0-20230207041349-798e818bf904 // indirect
 	github.com/itchyny/timefmt-go v0.1.3 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
