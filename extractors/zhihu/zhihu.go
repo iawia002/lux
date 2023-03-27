@@ -3,11 +3,13 @@ package zhihu
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
+	"github.com/pkg/errors"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
-	"github.com/pkg/errors"
-	"strings"
 )
 
 const (
@@ -30,7 +32,6 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
-	var err error
 	html, err := request.Get(url, url, nil)
 	if err != nil {
 		return nil, errors.WithStack(err)

@@ -1,9 +1,10 @@
 package zhihu
 
 import (
+	"testing"
+
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/test"
-	"testing"
 )
 
 func TestDownload(t *testing.T) {
