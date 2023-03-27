@@ -8,9 +8,6 @@ builds:
 - env:
     - CGO_ENABLED=0
   binary: lux
-  # Disable ldflags: https://github.com/goreleaser/goreleaser/issues/1255
-  ldflags:
-    - "-X 'main.aa=aa'"
   goos:
     - windows
     - darwin
@@ -19,7 +16,7 @@ builds:
     - openbsd
     - netbsd
   goarch:
-    - 386
+    - "386"
     - amd64
     - arm
     - arm64
@@ -36,6 +33,7 @@ env_files:
   github_token: ./github_token
 changelog:
   sort: asc
+  use: github
   filters:
     exclude:
       - '^docs'
@@ -43,7 +41,14 @@ changelog:
       - Merge pull request
       - Merge branch
 archives:
-- name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}_v{{ .Arm }}{{ end }}'
+- name_template: >-
+    {{ .ProjectName }}_
+    {{- .Version }}_
+    {{- title .Os }}_
+    {{- if eq .Arch "amd64" }}x86_64
+    {{- else if eq .Arch "386" }}i386
+    {{- else }}{{ .Arch }}{{ end }}
+    {{- if .Arm }}v{{ .Arm }}{{ end }}
   format: tar.gz
   format_overrides:
     - goos: windows
@@ -51,16 +56,7 @@ archives:
   files:
     - none*
   wrap_in_directory: false
-  replacements:
-    amd64: 64-bit
-    386: 32-bit
-    arm: ARM
-    arm64: ARM64
-    darwin: macOS
-    linux: Linux
-    windows: Windows
-    openbsd: OpenBSD
-    netbsd: NetBSD
-    freebsd: FreeBSD
 release:
   draft: true
+  footer: |
+    **Full Changelog**: https://github.com/iawia002/lux/compare/{{ .PreviousTag }}...{{ .Tag }}
