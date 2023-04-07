@@ -8,7 +8,7 @@ require (
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/dop251/goja v0.0.0-20230304130813-e2f543bf4b4c
 	github.com/fatih/color v1.13.0
-	github.com/iawia002/lia v0.0.0-20221116085912-1f653221be4b
+	github.com/iawia002/lia v0.1.0
 	github.com/itchyny/gojq v0.12.7
 	github.com/json-iterator/go v1.1.12
 	github.com/kkdai/youtube/v2 v2.7.18
