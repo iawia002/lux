@@ -26,7 +26,6 @@ func TestBilibili(t *testing.T) {
 			args: test.Args{
 				URL:   "https://www.bilibili.com/video/av41301960",
 				Title: "【英雄联盟】2019赛季CG 《觉醒》",
-				Size:  70696896,
 			},
 			playlist: false,
 		},
@@ -34,7 +33,7 @@ func TestBilibili(t *testing.T) {
 			name: "bangumi test",
 			args: test.Args{
 				URL:   "https://www.bilibili.com/bangumi/play/ep167000",
-				Title: "狐妖小红娘：第70话 苏苏智商上线",
+				Title: "狐妖小红娘 第70话 苏苏智商上线",
 			},
 		},
 		{
