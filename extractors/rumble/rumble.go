@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
+	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -128,8 +130,13 @@ func getVideoID(embedURL string) (string, error) {
 	return path.Base(u.Path), nil
 }
 
+// Rumble response contains the streams in `rumbleStreams`
+type rumbleResponse struct {
+	Streams *json.RawMessage `json:"ua"`
+}
+
 // Common video meta data
-type rumbleStreamMeta struct {
+type streamInfo struct {
 	URL  string `json:"url"`
 	Meta struct {
 		Bitrate uint16 `json:"bitrate"`
@@ -139,40 +146,33 @@ type rumbleStreamMeta struct {
 	} `json:"meta"`
 }
 
-// Rumble response contains the streams in `rumbleStreams`
-type rumbleResponse struct {
-	Streams *json.RawMessage `json:"ua"`
+// common video qualities for `mp4`, `webm`
+type videoQualities struct {
+	Q240  struct{ streamInfo } `json:"240"`
+	Q360  struct{ streamInfo } `json:"360"`
+	Q480  struct{ streamInfo } `json:"480"`
+	Q720  struct{ streamInfo } `json:"720"`
+	Q1080 struct{ streamInfo } `json:"1080"`
+	Q1440 struct{ streamInfo } `json:"1440"`
+	Q2160 struct{ streamInfo } `json:"2160"`
+	Q2161 struct{ streamInfo } `json:"2161"`
 }
 
 // Video payload for adaptive stream and different qualities
 type rumbleStreams struct {
-	FormatMp4 struct {
-		Q240  struct{ rumbleStreamMeta } `json:"240"`
-		Q360  struct{ rumbleStreamMeta } `json:"360"`
-		Q480  struct{ rumbleStreamMeta } `json:"480"`
-		Q720  struct{ rumbleStreamMeta } `json:"720"`
-		Q1080 struct{ rumbleStreamMeta } `json:"1080"`
-		Q1440 struct{ rumbleStreamMeta } `json:"1440"`
-		Q2160 struct{ rumbleStreamMeta } `json:"2160"`
-		Q2161 struct{ rumbleStreamMeta } `json:"2161"`
+	FMp4 struct {
+		videoQualities
 	} `json:"mp4"`
-	FormatWebm struct {
-		Q240  struct{ rumbleStreamMeta } `json:"240"`
-		Q360  struct{ rumbleStreamMeta } `json:"360"`
-		Q480  struct{ rumbleStreamMeta } `json:"480"`
-		Q720  struct{ rumbleStreamMeta } `json:"720"`
-		Q1080 struct{ rumbleStreamMeta } `json:"1080"`
-		Q1440 struct{ rumbleStreamMeta } `json:"1440"`
-		Q2160 struct{ rumbleStreamMeta } `json:"2160"`
-		Q2161 struct{ rumbleStreamMeta } `json:"2161"`
+	FWebm struct {
+		videoQualities
 	} `json:"webm"`
-	FormatHLS struct {
-		QAuto struct{ rumbleStreamMeta } `json:"auto"`
+	FHLS struct {
+		QAuto struct{ streamInfo } `json:"auto"`
 	} `json:"hls"`
 }
 
 // Unmarshall the video response
-// Some properties like `mp4`, `webm` are either array or an object........
+// Some properties like `mp4`, `webm` are either array or an object
 func (r *rumbleStreams) UnmarshalJSON(b []byte) error {
 	var resp *rumbleResponse
 	if err := json.Unmarshal(b, &resp); err != nil {
@@ -186,13 +186,82 @@ func (r *rumbleStreams) UnmarshalJSON(b []byte) error {
 	}
 
 	if v, ok := obj["mp4"]; ok {
-		_ = json.Unmarshal(*v, &r.FormatMp4)
+		_ = json.Unmarshal(*v, &r.FMp4)
 	}
 	if v, ok := obj["webm"]; ok {
-		_ = json.Unmarshal(*v, &r.FormatMp4)
+		_ = json.Unmarshal(*v, &r.FWebm)
 	}
 	if v, ok := obj["hls"]; ok {
-		_ = json.Unmarshal(*v, &r.FormatMp4)
+		_ = json.Unmarshal(*v, &r.FHLS)
+	}
+
+	return nil
+}
+
+// Use this to create all the streams for `mp4`, `webm`
+func (rs *rumbleStreams) makeAllVODStreams(m map[string]*extractors.Stream) {
+	m["webm"] = makeStreamMeta("480", "webm", &rs.FWebm.Q480.streamInfo)
+	m["240"] = makeStreamMeta("240", "mp4", &rs.FMp4.Q240.streamInfo)
+	m["360"] = makeStreamMeta("360", "mp4", &rs.FMp4.Q360.streamInfo)
+	m["480"] = makeStreamMeta("480", "mp4", &rs.FMp4.Q480.streamInfo)
+	m["720"] = makeStreamMeta("720", "mp4", &rs.FMp4.Q720.streamInfo)
+	m["1080"] = makeStreamMeta("1080", "mp4", &rs.FMp4.Q1080.streamInfo)
+	m["1440"] = makeStreamMeta("1440", "mp4", &rs.FMp4.Q1440.streamInfo)
+	m["2160"] = makeStreamMeta("2160", "mp4", &rs.FMp4.Q2160.streamInfo)
+	m["2161"] = makeStreamMeta("2161", "mp4", &rs.FMp4.Q2161.streamInfo)
+}
+
+var reResolution = regexp.MustCompile(`_(\d{3,4})p\/`) // ex. _720p/
+
+// Use this to create all the streams for live videos
+func (rs *rumbleStreams) makeAllLiveStreams(m map[string]*extractors.Stream) error {
+	playlists, err := utils.M3u8URLs(rs.FHLS.QAuto.URL)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if len(playlists) == 0 {
+		return errors.WithStack(extractors.ErrURLParseFailed)
+	}
+
+	// Find the highest resolution
+	playlistURL := playlists[0]
+	maxRes := 0
+	for _, x := range playlists {
+		matched := reResolution.FindStringSubmatch(x)
+		if len(matched) == 0 {
+			continue
+		}
+		res, err := strconv.Atoi(matched[1])
+		if err != nil {
+			continue
+		}
+
+		if maxRes < res {
+			maxRes = res
+			playlistURL = x
+		}
+	}
+
+	tsURLs, err := utils.M3u8URLs(playlistURL)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	var parts []*extractors.Part
+	for _, x := range tsURLs {
+		part := &extractors.Part{
+			URL:  x,
+			Size: rs.FHLS.QAuto.streamInfo.Meta.Size,
+			Ext:  "ts",
+		}
+		parts = append(parts, part)
+	}
+
+	m["hls"] = &extractors.Stream{
+		Parts:   parts,
+		Size:    rs.FHLS.QAuto.streamInfo.Meta.Size,
+		Quality: strconv.Itoa(maxRes),
 	}
 
 	return nil
@@ -224,36 +293,28 @@ func fetchVideoQuality(videoID string) (map[string]*extractors.Stream, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	var rStreams rumbleStreams
-	if err := json.Unmarshal(b, &rStreams); err != nil {
+	var rs rumbleStreams
+	if err := json.Unmarshal(b, &rs); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
 	streams := make(map[string]*extractors.Stream, 9)
-	streams["hls"] = makeStreamMeta("auto", "ts", rStreams.FormatHLS.QAuto.URL, rStreams.FormatHLS.QAuto.Meta.Size)
-	streams["webm"] = makeStreamMeta("480", "webm", rStreams.FormatWebm.Q480.URL, rStreams.FormatWebm.Q480.Meta.Size)
-	streams["240"] = makeStreamMeta("240", "mp4", rStreams.FormatMp4.Q240.URL, rStreams.FormatMp4.Q240.Meta.Size)
-	streams["360"] = makeStreamMeta("360", "mp4", rStreams.FormatMp4.Q360.URL, rStreams.FormatMp4.Q360.Meta.Size)
-	streams["480"] = makeStreamMeta("480", "mp4", rStreams.FormatMp4.Q480.URL, rStreams.FormatMp4.Q480.Meta.Size)
-	streams["720"] = makeStreamMeta("720", "mp4", rStreams.FormatMp4.Q720.URL, rStreams.FormatMp4.Q720.Meta.Size)
-	streams["1080"] = makeStreamMeta("1080", "mp4", rStreams.FormatMp4.Q1080.URL, rStreams.FormatMp4.Q1080.Meta.Size)
-	streams["1440"] = makeStreamMeta("1440", "mp4", rStreams.FormatMp4.Q1440.URL, rStreams.FormatMp4.Q1440.Meta.Size)
-	streams["2160"] = makeStreamMeta("2160", "mp4", rStreams.FormatMp4.Q2160.URL, rStreams.FormatMp4.Q2160.Meta.Size)
-	streams["2161"] = makeStreamMeta("2161", "mp4", rStreams.FormatMp4.Q2161.URL, rStreams.FormatMp4.Q2160.Meta.Size)
+	rs.makeAllVODStreams(streams)
+	_ = rs.makeAllLiveStreams(streams)
 
 	return streams, nil
 }
 
-func makeStreamMeta(q, ext, url string, size int64) *extractors.Stream {
+func makeStreamMeta(q, ext string, info *streamInfo) *extractors.Stream {
 	urlMeta := &extractors.Part{
-		URL:  url,
-		Size: size,
+		URL:  info.URL,
+		Size: info.Meta.Size,
 		Ext:  ext,
 	}
 
 	return &extractors.Stream{
 		Parts:   []*extractors.Part{urlMeta},
-		Size:    size,
+		Size:    info.Meta.Size,
 		Quality: q,
 	}
 }
