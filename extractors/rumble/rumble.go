@@ -64,14 +64,6 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 
 	html := string(b)
-
-	cookiesArr := make([]string, 0)
-	cookies := res.Cookies()
-
-	for _, c := range cookies {
-		cookiesArr = append(cookiesArr, c.Name+"="+c.Value)
-	}
-
 	var title string
 	matchTitle := utils.MatchOneOf(html, `<title>(.+?)</title>`)
 	if len(matchTitle) > 1 {
@@ -238,7 +230,7 @@ func fetchVideoQuality(videoID string) (map[string]*extractors.Stream, error) {
 	}
 
 	streams := make(map[string]*extractors.Stream, 9)
-	streams["hls"] = makeStreamMeta("auto", "hls", rStreams.FormatHLS.QAuto.URL, rStreams.FormatHLS.QAuto.Meta.Size)
+	streams["hls"] = makeStreamMeta("auto", "ts", rStreams.FormatHLS.QAuto.URL, rStreams.FormatHLS.QAuto.Meta.Size)
 	streams["webm"] = makeStreamMeta("480", "webm", rStreams.FormatWebm.Q480.URL, rStreams.FormatWebm.Q480.Meta.Size)
 	streams["240"] = makeStreamMeta("240", "mp4", rStreams.FormatMp4.Q240.URL, rStreams.FormatMp4.Q240.Meta.Size)
 	streams["360"] = makeStreamMeta("360", "mp4", rStreams.FormatMp4.Q360.URL, rStreams.FormatMp4.Q360.Meta.Size)
