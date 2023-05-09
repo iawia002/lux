@@ -641,6 +641,7 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 | Reddit           | <https://www.reddit.com>                                                  | ✓        | ✓        |         |            |                  | [![reddit](https://github.com/iawia002/lux/actions/workflows/stream_reddit.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_reddit.yml)                   |
 | VKontakte        | <https://vk.com>                                                          | ✓        |          |         |            |                  | [![vk](https://github.com/iawia002/lux/actions/workflows/stream_vk.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_vk.yml/)                              |
 | 知乎             | <https://zhihu.com>                                                       | ✓        |          |         |            |                  | [![zhihu](https://github.com/iawia002/lux/actions/workflows/stream_zhihu.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_zhihu.yml/)                     |
+| Rumble             | <https://rumble.com>                                                       | ✓        |          |         |            |                  | [![rumble](https://github.com/iawia002/lux/actions/workflows/stream_rumble.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_rumble.yml/)                     |
 
 
 ## Known issues
