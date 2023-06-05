@@ -55,8 +55,15 @@ func getXSRFToken() (string, error) {
 	}
 	defer res.Body.Close() // nolint
 
-	token := utils.MatchOneOf(res.Header.Get("Set-Cookie"), `XSRF-TOKEN=(.+?);`)[1]
-	return token, nil
+	cookie := res.Header.Get("Set-Cookie")
+	if cookie == "" {
+		return "", nil
+	}
+	xsrfTokens := utils.MatchOneOf(cookie, `XSRF-TOKEN=(.+?);`)
+	if xsrfTokens == nil || len(xsrfTokens) != 2 {
+		return "", nil
+	}
+	return xsrfTokens[1], nil
 }
 
 func downloadWeiboVideo(url string) ([]*extractors.Data, error) {
@@ -144,10 +151,13 @@ func downloadWeiboTV(url string) ([]*extractors.Data, error) {
 		return nil, errors.WithStack(err)
 	}
 	headers := map[string]string{
-		"Cookie":       "SUB=_2AkMpogLYf8NxqwJRmP0XxG7kbo10ww_EieKf_vMDJRMxHRl-yj_nqm4NtRB6AiIsKFFGRY4-UuGD5B1-Kf9glz3sp7Ii; XSRF-TOKEN=" + token,
+		"Cookie":       "SUB=_2AkMpogLYf8NxqwJRmP0XxG7kbo10ww_EieKf_vMDJRMxHRl-yj_nqm4NtRB6AiIsKFFGRY4-UuGD5B1-Kf9glz3sp7Ii",
 		"Referer":      utils.MatchOneOf(url, `^([^?]+)`)[1],
 		"content-type": `application/x-www-form-urlencoded`,
-		"x-xsrf-token": token,
+	}
+	if token != "" {
+		headers["Cookie"] += "; XSRF-TOKEN=" + token
+		headers["x-xsrf-token"] = token
 	}
 	oid := utils.MatchOneOf(url, `tv/show/([^?]+)`)[1]
 	postData := "data=" + netURL.QueryEscape("{\"Component_Play_Playinfo\":{\"oid\":\""+oid+"\"}}")
@@ -241,28 +251,39 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 	title := titles[1]
 
-	realURLs := utils.MatchOneOf(
-		html, `"stream_url_hd": "(.+?)"`, `"stream_url": "(.+?)"`,
+	urlsJsonStrs := utils.MatchOneOf(
+		html, `"urls": (\{[^\}]+\})`,
 	)
-	if realURLs == nil || len(realURLs) < 2 {
+	if urlsJsonStrs == nil || len(urlsJsonStrs) < 2 {
 		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
-	realURL := realURLs[1]
-
-	size, err := request.Size(realURL, url)
+	urlsJson := urlsJsonStrs[1]
+	var qualityUrls map[string]string
+	err = json.Unmarshal([]byte(urlsJson), &qualityUrls)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
-	urlData := &extractors.Part{
-		URL:  realURL,
-		Size: size,
-		Ext:  "mp4",
-	}
-	streams := map[string]*extractors.Stream{
-		"default": {
+
+	streams := make(map[string]*extractors.Stream)
+	var size int64
+	for quality, realURL := range qualityUrls {
+		streamId := quality
+		size, err = request.Size(realURL, url)
+		if err != nil {
+			continue
+		}
+		urlData := &extractors.Part{
+			URL:  realURL,
+			Size: size,
+			Ext:  "mp4",
+		}
+		streams[streamId] = &extractors.Stream{
 			Parts: []*extractors.Part{urlData},
 			Size:  size,
-		},
+		}
+	}
+	if err != nil || len(streams) <= 0 {
+		return nil, errors.WithStack(err)
 	}
 
 	return []*extractors.Data{
