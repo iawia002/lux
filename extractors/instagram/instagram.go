@@ -3,15 +3,13 @@ package instagram
 import (
 	"encoding/json"
 	netURL "net/url"
-	"path"
 	"strings"
 
 	"github.com/pkg/errors"
+	"golang.org/x/net/html"
 
 	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/parser"
 	"github.com/iawia002/lux/request"
-	"github.com/iawia002/lux/utils"
 )
 
 func init() {
@@ -32,6 +30,32 @@ type instagram struct {
 	} `json:"shortcode_media"`
 }
 
+type instagramPayload struct {
+    ArticleBody string `json:"articleBody"`
+    Author struct {
+        Image string `json:"image"`
+        Name string `json:"name"`
+        AlternativeName string `json:"alternativeName"`
+        Url string `json:"url"`
+    }`json:"author"`
+    Videos []struct {
+        UploadData string `json:"string"`
+        Description string `json:"description"`
+        Name string `json:"name"`
+        Caption string `json:"caption"`
+        Height string `json:"height"`
+        Width string `json:"width"`
+        ContentURL string `json:"contentUrl"`
+        ThumbnailURL string `json:"thumbnailUrl"`
+    } `json:"video"`
+    Images []struct {
+        Caption string `json:"caption"`
+        Height string `json:"height"`
+        Width string `json:"width"`
+        Url string `json:"url"`
+    } `json:"image"`
+}
+
 type extractor struct{}
 
 // New returns a instagram extractor.
@@ -39,104 +63,67 @@ func New() extractors.Extractor {
 	return &extractor{}
 }
 
-func extractImageFromPage(html, url string) (map[string]*extractors.Stream, error) {
-	_, realURLs, err := parser.GetImages(html, "EmbeddedMediaImage", nil)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	urls := make([]*extractors.Part, 0, len(realURLs))
-	var totalSize int64
-	for _, realURL := range realURLs {
-		size, err := request.Size(realURL, url)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-		urlData := &extractors.Part{
-			URL:  realURL,
-			Size: size,
-			Ext:  "jpg",
-		}
-		urls = append(urls, urlData)
-		totalSize += size
-	}
-
-	return map[string]*extractors.Stream{
-		"default": {
-			Parts: urls,
-			Size:  totalSize,
-		},
-	}, nil
-}
-
-func extractFromData(dataString, url string) (map[string]*extractors.Stream, error) {
-	var data instagram
-	if err := json.Unmarshal([]byte(dataString), &data); err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	urls := make([]*extractors.Part, 0, len(data.ShortcodeMedia.EdgeSidecar.Edges))
-	var totalSize int64
-	for _, u := range data.ShortcodeMedia.EdgeSidecar.Edges {
-		// Image
-		realURL := u.Node.DisplayURL
-		ext := "jpg"
-		if u.Node.IsVideo {
-			// Video
-			realURL = u.Node.VideoURL
-			ext = "mp4"
-		}
-
-		size, err := request.Size(realURL, url)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-		urlData := &extractors.Part{
-			URL:  realURL,
-			Size: size,
-			Ext:  ext,
-		}
-		urls = append(urls, urlData)
-		totalSize += size
-	}
-
-	return map[string]*extractors.Stream{
-		"default": {
-			Parts: urls,
-			Size:  totalSize,
-		},
-	}, nil
-}
-
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
-	// Instagram is forcing a login to access the page, so we use the embed page to bypass that.
 	u, err := netURL.Parse(url)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	id := u.Path[strings.LastIndex(u.Path, "/")+1:]
-	u.Path = path.Join(u.Path, "embed")
 
-	html, err := request.Get(u.String(), url, nil)
+	htmlResp, err := request.Get(u.String(), url, nil)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	dataStrings := utils.MatchOneOf(html, `window\.__additionalDataLoaded\('graphql',(.*)\);`)
-	if dataStrings == nil || len(dataStrings) < 2 {
-		return nil, errors.WithStack(extractors.ErrURLParseFailed)
-	}
-	dataString := dataStrings[1]
 
-	var streams map[string]*extractors.Stream
-	if dataString == "" || dataString == "null" {
-		streams, err = extractImageFromPage(html, url)
-	} else {
-		streams, err = extractFromData(dataString, url)
-	}
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+    reader := strings.NewReader(htmlResp)
+    htmlRoot, err := html.Parse(reader)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    sNode, err := dfsFindScript(htmlRoot)
+    if err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    var payload instagramPayload
+    if err = json.Unmarshal([]byte(sNode.Data), &payload); err != nil {
+        return nil, errors.WithStack(err)
+    }
+
+    var parts []*extractors.Part
+    if len(payload.Videos) > 0 {
+        for _, it := range payload.Videos {
+            ext := ""
+            part := &extractors.Part{
+                URL:  it.ContentURL,
+                Size: 0,
+                Ext:  ext,
+            }
+            parts = append(parts, part)
+        }
+    } else if len(payload.Images) > 0 {
+        for _, it := range payload.Videos {
+            ext := ""
+            part := &extractors.Part{
+                URL:  it.ContentURL,
+                Size: 0,
+                Ext:  ext,
+            }
+            parts = append(parts, part)
+        }
+    } else {
+        return nil, errors.WithStack(extractors.ErrBodyParseFailed)
+    }
+            
+    streams :=  map[string]*extractors.Stream{
+        "default": {
+            Parts: parts,
+            Size:  0,
+        },
+    };
+    
+    id := u.Path[strings.LastIndex(u.Path, "/") + 1:]
 
 	return []*extractors.Data{
 		{
@@ -147,4 +134,22 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			URL:     url,
 		},
 	}, nil
+}
+
+func dfsFindScript(n *html.Node) (*html.Node, error) {
+    if n.Type == html.ElementNode && n.Data == "script" {
+        for _, attr := range n.Attr {
+            if attr.Key == "type" && attr.Val == "application/ld+json" {
+                return n.FirstChild, nil
+            }
+        }
+    }
+
+    for c := n.FirstChild; c != nil; c = c.NextSibling {
+        if ret, err := dfsFindScript(c); err == nil {
+            return ret, nil
+        }
+    }
+
+    return nil, errors.WithStack(extractors.ErrBodyParseFailed)
 }
