@@ -49,7 +49,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
-	title := strings.Split(titleMatcher[0], "<title>")[1]
+	title := strings.ReplaceAll(strings.ReplaceAll(titleMatcher[0], "<title>", ""), "</title>", "")
 
 	titleArr := strings.Split(title, "|")
 
