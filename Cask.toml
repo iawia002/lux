@@ -9,12 +9,12 @@ description = """
 """
 
 [darwin]
-x86_64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_macOS_64-bit.tar.gz" }
-aarch64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_macOS_ARM64.tar.gz" }
+x86_64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Darwin_x86_64.tar.gz" }
+aarch64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Darwin_arm64.tar.gz" }
 
 [windows]
-x86_64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Windows_64-bit.zip" }
+x86_64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Windows_x86_64.zip" }
 
 [linux]
-x86_64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Linux_64-bit.tar.gz" }
-aarch64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Linux_ARM64.tar.gz" }
+x86_64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Linux_x86_64.tar.gz" }
+aarch64 = { url = "https://github.com/iawia002/lux/releases/download/v{version}/lux_{version}_Linux_arm64.tar.gz" }
