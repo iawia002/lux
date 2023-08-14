@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 
@@ -30,8 +29,6 @@ type miaopaiData struct {
 }
 
 func getRandomString(l int) string {
-	rand.Seed(time.Now().UnixNano())
-
 	s := make([]string, 0)
 	chars := []string{
 		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "n", "m", "o", "p", "q", "r", "s", "t", "u", "v",

@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go: ["1.20"]
+        go: ["1.21"]
         os: [ubuntu-latest]
     name: ${{ matrix.os }}
     steps:

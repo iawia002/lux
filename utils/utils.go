@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 
-	"github.com/iawia002/lia/array"
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/request"
@@ -152,7 +152,7 @@ func ParseInputFile(r io.Reader, items string, itemStart, itemEnd int) []string 
 
 	itemList := make([]string, 0, len(wantedItems))
 	for i, item := range temp {
-		if array.ItemInArray(i+1, wantedItems) {
+		if slices.Contains(wantedItems, i+1) {
 			itemList = append(itemList, item)
 		}
 	}
