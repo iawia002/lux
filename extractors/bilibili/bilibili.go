@@ -3,12 +3,12 @@ package bilibili
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/iawia002/lia/array"
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
@@ -158,7 +158,7 @@ func extractBangumi(url, html string, extractOption extractors.Options) ([]*extr
 	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
 	dataIndex := 0
 	for index, u := range data.EpList {
-		if !array.ItemInArray(index+1, needDownloadItems) {
+		if !slices.Contains(needDownloadItems, index+1) {
 			continue
 		}
 		wgp.Add()
@@ -259,7 +259,7 @@ func multiEpisodeDownload(url, html string, extractOption extractors.Options, pa
 	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
 	dataIndex := 0
 	for index, u := range pageData.Sections[0].Episodes {
-		if !array.ItemInArray(index+1, needDownloadItems) {
+		if !slices.Contains(needDownloadItems, index+1) {
 			continue
 		}
 		wgp.Add()
@@ -288,7 +288,7 @@ func multiPageDownload(url, html string, extractOption extractors.Options, pageD
 	wgp := utils.NewWaitGroupPool(extractOption.ThreadNumber)
 	dataIndex := 0
 	for index, u := range pageData.VideoData.Pages {
-		if !array.ItemInArray(index+1, needDownloadItems) {
+		if !slices.Contains(needDownloadItems, index+1) {
 			continue
 		}
 		wgp.Add()

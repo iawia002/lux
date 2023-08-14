@@ -3,9 +3,9 @@ package youtube
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 
-	"github.com/iawia002/lia/array"
 	"github.com/kkdai/youtube/v2"
 	"github.com/pkg/errors"
 
@@ -59,7 +59,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	wgp := utils.NewWaitGroupPool(option.ThreadNumber)
 	dataIndex := 0
 	for index, videoEntry := range playlist.Videos {
-		if !array.ItemInArray(index+1, needDownloadItems) {
+		if !slices.Contains(needDownloadItems, index+1) {
 			continue
 		}
 

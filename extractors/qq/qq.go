@@ -3,10 +3,10 @@ package qq
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
-	"github.com/iawia002/lia/array"
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
@@ -85,7 +85,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*extractors.Strea
 	for _, fi := range data.Fl.Fi {
 		var fmtIDPrefix string
 		var fns []string
-		if array.ItemInArray(fi.Name, []string{"shd", "fhd"}) {
+		if slices.Contains([]string{"shd", "fhd"}, fi.Name) {
 			fmtIDPrefix = "p"
 			fmtIDName := fmt.Sprintf("%s%d", fmtIDPrefix, fi.ID%10000)
 			fns = []string{strings.Split(data.Vl.Vi[0].Fn, ".")[0], fmtIDName, "mp4"}

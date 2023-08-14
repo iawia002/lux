@@ -1,6 +1,6 @@
 module github.com/iawia002/lux
 
-go 1.20
+go 1.21
 
 require (
 	github.com/MercuryEngineering/CookieMonster v0.0.0-20180304172713-1584578b3403
@@ -8,7 +8,6 @@ require (
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/dop251/goja v0.0.0-20230304130813-e2f543bf4b4c
 	github.com/fatih/color v1.13.0
-	github.com/iawia002/lia v0.1.0
 	github.com/itchyny/gojq v0.12.7
 	github.com/json-iterator/go v1.1.12
 	github.com/kkdai/youtube/v2 v2.7.18
@@ -37,7 +36,6 @@ require (
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	golang.org/x/exp v0.0.0-20220518171630-0b5c67f07fdf // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
