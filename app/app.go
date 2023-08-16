@@ -156,7 +156,7 @@ func New() *cli.App {
 			&cli.BoolFlag{
 				Name:    "rename",
 				Aliases: []string{"re"},
-				Usage:   "Avoid duplicate names causing download failures; (name-timestamp)",
+				Usage:   "Rename the file with timestamp suffix",
 			},
 
 			// Aria2
