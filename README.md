@@ -305,7 +305,7 @@ You can use the `-start`, `-end` or `-items` option to specify the download rang
 -items
     	File lines to download. Separated by commas like: 1,5,6,8-10
 ```
-You can use the `-re` option to rename file with timestamp suffix
+You can use the `-re` option to rename the file with timestamp suffix:
 
 ```console
 $ lux -re "https://www.bilibili.com/video/BV1KF411Z7d9/"
