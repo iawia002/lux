@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
@@ -152,6 +153,11 @@ func New() *cli.App {
 				Value:   10,
 				Usage:   "The number of download thread (only works for multiple-parts video)",
 			},
+			&cli.BoolFlag{
+				Name:    "rename",
+				Aliases: []string{"re"},
+				Usage:   "Avoid duplicate names causing download failures; (name-timestamp)",
+			},
 
 			// Aria2
 			&cli.BoolFlag{
@@ -283,6 +289,12 @@ func download(c *cli.Context, videoURL string) error {
 		// if this error occurs, it means that an error occurred before actually starting to extract data
 		// (there is an error in the preparation step), and the data list is empty.
 		return err
+	}
+
+	if c.Bool("rename") {
+		for _, v := range data {
+			v.Title += fmt.Sprintf("-%v", time.Now().Unix())
+		}
 	}
 
 	if c.Bool("json") {

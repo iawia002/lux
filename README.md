@@ -305,6 +305,23 @@ You can use the `-start`, `-end` or `-items` option to specify the download rang
 -items
     	File lines to download. Separated by commas like: 1,5,6,8-10
 ```
+You can use the `-re` option to rename file with timestamp suffix
+
+```console
+$ lux -re "https://www.bilibili.com/video/BV1KF411Z7d9/"
+
+ Site:      哔哩哔哩 bilibili.com
+ Title:     每一种热爱都值得全力以赴！-1692149347
+ Type:      video
+ Stream:
+     [32-7]  -------------------
+     Quality:         清晰 480P avc1.64001F
+     Size:            17.88 MiB (18753237 Bytes)
+     # download with: lux -f 32-7 ...
+
+17.88 MiB / 17.88 MiB [==================================================================================================================================] 3.74 MiB p/s 100.00% 5.0s
+
+```
 
 ### Resume a download
 
