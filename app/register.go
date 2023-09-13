@@ -35,6 +35,7 @@ import (
 	_ "github.com/iawia002/lux/extractors/vimeo"
 	_ "github.com/iawia002/lux/extractors/vk"
 	_ "github.com/iawia002/lux/extractors/weibo"
+	_ "github.com/iawia002/lux/extractors/xiaohongshu"
 	_ "github.com/iawia002/lux/extractors/ximalaya"
 	_ "github.com/iawia002/lux/extractors/xinpianchang"
 	_ "github.com/iawia002/lux/extractors/xvideos"
