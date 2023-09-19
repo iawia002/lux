@@ -28,4 +28,4 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Test
-        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/geekbang
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/wujiu2020/lux/extractors/geekbang

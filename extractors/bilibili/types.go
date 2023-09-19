@@ -1,17 +1,5 @@
 package bilibili
 
-// {"code":0,"message":"0","ttl":1,"data":{"token":"aaa"}}
-// {"code":-101,"message":"账号未登录","ttl":1}
-type tokenData struct {
-	Token string `json:"token"`
-}
-
-type token struct {
-	Code    int       `json:"code"`
-	Message string    `json:"message"`
-	Data    tokenData `json:"data"`
-}
-
 type bangumiEpData struct {
 	Aid         int    `json:"aid"`
 	Cid         int    `json:"cid"`

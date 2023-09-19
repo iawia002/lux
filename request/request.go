@@ -16,7 +16,7 @@ import (
 	"github.com/kr/pretty"
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/config"
+	"github.com/wujiu2020/lux/config"
 )
 
 var (

@@ -16,7 +16,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/request"
+	"github.com/wujiu2020/lux/request"
 )
 
 // MatchOneOf match one of the patterns

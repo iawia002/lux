@@ -6,8 +6,7 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-
-	"github.com/iawia002/lux/utils"
+	"github.com/wujiu2020/lux/utils"
 )
 
 var lock sync.RWMutex
@@ -21,7 +20,7 @@ func Register(domain string, e Extractor) {
 }
 
 // Extract is the main function to extract the data.
-func Extract(u string, option Options) ([]*Data, error) {
+func Extract(u string) ([]*Data, error) {
 	u = strings.TrimSpace(u)
 	var domain string
 
@@ -49,7 +48,7 @@ func Extract(u string, option Options) ([]*Data, error) {
 	if extractor == nil {
 		extractor = extractorMap[""]
 	}
-	videos, err := extractor.Extract(u, option)
+	videos, err := extractor.Extract(u)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

@@ -21,7 +21,7 @@ type Stream struct {
 	// [Part: {URL, Size, Ext}, ...]
 	// Some video stream have multiple parts,
 	// and can also be used to download multiple image files at once
-	Parts []*Part `json:"parts"`
+	Segs []*Part `json:"segs"`
 	// total size of all urls
 	Size int64 `json:"size"`
 	// the file extension after video parts merged
@@ -68,7 +68,7 @@ func (d *Data) FillUpStreamsData() {
 
 		// generate the merged file extension
 		if d.Type == DataTypeVideo && stream.Ext == "" {
-			ext := stream.Parts[0].Ext
+			ext := stream.Segs[0].Ext
 			// The file extension in `Parts` is used as the merged file extension by default, except for the following formats
 			switch ext {
 			// ts and flv files should be merged into an mp4 file
@@ -83,7 +83,7 @@ func (d *Data) FillUpStreamsData() {
 			continue
 		}
 		var size int64
-		for _, part := range stream.Parts {
+		for _, part := range stream.Segs {
 			size += part.Size
 		}
 		stream.Size = size
@@ -98,31 +98,8 @@ func EmptyData(url string, err error) *Data {
 	}
 }
 
-// Options defines optional options that can be used in the extraction function.
-type Options struct {
-	// Playlist indicates if we need to extract the whole playlist rather than the single video.
-	Playlist bool
-	// Items defines wanted items from a playlist. Separated by commas like: 1,5,6,8-10.
-	Items string
-	// ItemStart defines the starting item of a playlist.
-	ItemStart int
-	// ItemEnd defines the ending item of a playlist.
-	ItemEnd int
-
-	// ThreadNumber defines how many threads will use in the extraction, only works when Playlist is true.
-	ThreadNumber int
-	Cookie       string
-
-	// EpisodeTitleOnly indicates file name of each bilibili episode doesn't include the playlist title
-	EpisodeTitleOnly bool
-
-	YoukuCcode    string
-	YoukuCkey     string
-	YoukuPassword string
-}
-
 // Extractor implements video data extraction related operations.
 type Extractor interface {
 	// Extract is the main function to extract the data.
-	Extract(url string, option Options) ([]*Data, error)
+	Extract(url string) ([]*Data, error)
 }

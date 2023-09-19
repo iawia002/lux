@@ -9,9 +9,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/request"
-	"github.com/iawia002/lux/utils"
+	"github.com/wujiu2020/lux/extractors"
+	"github.com/wujiu2020/lux/request"
+	"github.com/wujiu2020/lux/utils"
 )
 
 func init() {
@@ -166,7 +166,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*extractors.Strea
 			totalSize += size
 		}
 		streams[fi.Name] = &extractors.Stream{
-			Parts:   urls,
+			Segs:    urls,
 			Size:    totalSize,
 			Quality: fi.Cname,
 		}
@@ -182,7 +182,7 @@ func New() extractors.Extractor {
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
+func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
 	vids := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)
 	if vids == nil || len(vids) < 2 {
 		return nil, errors.WithStack(extractors.ErrURLParseFailed)

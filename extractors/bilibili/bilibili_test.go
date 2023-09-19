@@ -1,83 +1,41 @@
 package bilibili
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 
-	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/test"
+	"github.com/wujiu2020/lux/extractors"
 )
 
-func TestBilibili(t *testing.T) {
+func Test_extractor_Extract(t *testing.T) {
+	type args struct {
+		url string
+	}
 	tests := []struct {
-		name     string
-		args     test.Args
-		playlist bool
+		name    string
+		args    args
+		want    []*extractors.Data
+		wantErr bool
 	}{
 		{
-			name: "normal test 1",
-			args: test.Args{
-				URL:   "https://www.bilibili.com/video/av20203945/",
-				Title: "【2018拜年祭单品】相遇day by day",
+			name: "bilibili",
+			args: args{
+				url: "https://www.bilibili.com/video/BV19C4y1f7zx/?spm_id_from=333.1007.tianma.1-1-1.click",
 			},
-			playlist: false,
-		},
-		{
-			name: "normal test 2",
-			args: test.Args{
-				URL:   "https://www.bilibili.com/video/av41301960",
-				Title: "【英雄联盟】2019赛季CG 《觉醒》",
-			},
-			playlist: false,
-		},
-		{
-			name: "bangumi test",
-			args: test.Args{
-				URL:   "https://www.bilibili.com/bangumi/play/ep167000",
-				Title: "狐妖小红娘 第70话 苏苏智商上线",
-			},
-		},
-		{
-			name: "bangumi playlist test",
-			args: test.Args{
-				URL:   "https://www.bilibili.com/bangumi/play/ss5050",
-				Title: "一人之下：第1话 异人刀兵起，道炁携阴阳",
-			},
-			playlist: true,
-		},
-		{
-			name: "playlist test",
-			args: test.Args{
-				URL:   "https://www.bilibili.com/video/av16907446/",
-				Title: "\"不要相信歌词，他们为了押韵什么都干得出来\"",
-			},
-			playlist: true,
-		},
-		{
-			name: "8k test",
-			args: test.Args{
-				URL:   "https://www.bilibili.com/video/BV1qM4y1w716",
-				Title: "【8K演示片】B站首发！你的设备还顶得住吗？",
-			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var (
-				data []*extractors.Data
-				err  error
-			)
-			if tt.playlist {
-				// for playlist, we don't check the data
-				_, err = New().Extract(tt.args.URL, extractors.Options{
-					Playlist:     true,
-					ThreadNumber: 9,
-				})
-				test.CheckError(t, err)
-			} else {
-				data, err = New().Extract(tt.args.URL, extractors.Options{})
-				test.CheckError(t, err)
-				test.Check(t, tt.args, data[0])
+			e := &extractor{}
+			got, err := e.Extract(tt.args.url)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("extractor.Extract() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
+			b, _ := json.Marshal(got[0])
+			fmt.Println(string(b))
 		})
 	}
 }

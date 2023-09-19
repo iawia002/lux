@@ -20,4 +20,4 @@ $ go build
 ```
 
 ## Features Requested
-There are several [features](https://github.com/iawia002/lux/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-request) requested by the community. If you have any idea, feel free to fork the repo, follow the style guide above, push and merge it after passing the test. Besides, you are welcomed to propose new features through the issue.
+There are several [features](https://github.com/wujiu2020/lux/issues?q=is%3Aissue+is%3Aopen+label%3Afeature-request) requested by the community. If you have any idea, feel free to fork the repo, follow the style guide above, push and merge it after passing the test. Besides, you are welcomed to propose new features through the issue.

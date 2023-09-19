@@ -10,10 +10,10 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/parser"
-	"github.com/iawia002/lux/request"
-	"github.com/iawia002/lux/utils"
+	"github.com/wujiu2020/lux/extractors"
+	"github.com/wujiu2020/lux/parser"
+	"github.com/wujiu2020/lux/request"
+	"github.com/wujiu2020/lux/utils"
 )
 
 func init() {
@@ -122,7 +122,7 @@ func New(siteType SiteType) extractors.Extractor {
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Data, error) {
+func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
 	refer := iqiyiReferer
 	headers := make(map[string]string)
 	if e.siteType == SiteTypeIQ {
@@ -227,7 +227,7 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 			}
 		}
 		streams[strconv.Itoa(video.Bid)] = &extractors.Stream{
-			Parts:   urls,
+			Segs:    urls,
 			Size:    video.Vsize,
 			Quality: video.Scrsz,
 		}

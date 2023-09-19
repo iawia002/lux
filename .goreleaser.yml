@@ -59,4 +59,4 @@ archives:
 release:
   draft: true
   footer: |
-    **Full Changelog**: https://github.com/iawia002/lux/compare/{{ .PreviousTag }}...{{ .Tag }}
+    **Full Changelog**: https://github.com/wujiu2020/lux/compare/{{ .PreviousTag }}...{{ .Tag }}
