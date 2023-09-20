@@ -1,0 +1,24 @@
+{
+    "url": "https://www.douyin.com/video/6967223681286278436?previous_page=main_page\u0026tab_name=home",
+    "site": "抖音 douyin.com",
+    "title": "是爱情，让父子相认#陈翔六点半  #关于爱情",
+    "type": "video",
+    "streams": [
+        {
+            "id": "default",
+            "quality": "default",
+            "segs": [
+                {
+                    "url": "http://v6-default.365yg.com/0cecc6bef52c1dc0c6110d77e434d6e3/650a6bab/video/tos/cn/tos-cn-ve-15/6ec3bc40706342f487569187d7e6f579/?a=0\u0026ch=26\u0026cr=0\u0026dr=0\u0026lr=all\u0026cd=0%7C0%7C0%7C0\u0026cv=1\u0026br=1451\u0026bt=1451\u0026cs=0\u0026ds=6\u0026ft=_nEInvvBQSqU88ym8Z.wNnOYZlcvVLiK2bLndl6fuZmka\u0026mime_type=video_mp4\u0026qs=0\u0026rc=NGc1NTgzOWdpaWU1ZGVlPEBpM3Vramg1Ozc7NTMzNGkzM0AvNF4xNWI0NS0xYi5eLmI2YSMuMmZta3A0bWxgLS1kLWFzcw%3D%3D\u0026btag=e00028000\u0026dy_q=1695178024\u0026l=20230920104704EA37FCEB13FEC5481E71",
+                    "size": 21376347,
+                    "ext": "mp4"
+                }
+            ],
+            "size": 21376347,
+            "ext": "",
+            "NeedMux": false
+        }
+    ],
+    "caption": null,
+    "err": null
+}

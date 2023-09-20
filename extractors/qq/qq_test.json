@@ -1,0 +1,40 @@
+[
+    {
+        "url": "https://v.qq.com/x/cover/mzc002003rpvd4j/n0046ht5pn8.html",
+        "site": "腾讯视频 v.qq.com",
+        "title": "长相思_01",
+        "type": "video",
+        "streams": [
+            {
+                "id": "sd",
+                "quality": "流畅;(270P)",
+                "segs": [
+                    {
+                        "url": "http://116.140.44.200/vlive.qqvideo.tc.qq.com/A6CJpYSRATU8lPd1Q1vrljb2PXjinvUe68YQGzfSN8EA/B_JxNyiJmktHRgresXhfyMehlnfelFaJsL4nXivWb38I9e90S6cunPv_HWnxQB9EjM/svp_50112/gzc_1000102_0b53vmabmaaaymans2ovkzsmbk6dc2tqaesa.f100001.mp4?vkey=8F9E47AA959AA2AC6D36632409CDFD555E6DD3B9936B422F06373F0BF01A8734141A840183A96B7C39F1FF7B8E444076244EC134B9CBD041FB8B4B1A3BEF65F06DB2A744FC94BE17E1EE30C5B00C4B8F8A62F639AAE4C73D9345EAC5D87A201BE980C65FB394DECE6367FA7E66F2D49897C816B2AD119C64DBA7F898F49E2AC58180238CA2231E83",
+                        "size": 13066393,
+                        "ext": "mp4"
+                    }
+                ],
+                "size": 13066393,
+                "ext": "",
+                "NeedMux": false
+            },
+            {
+                "id": "hd",
+                "quality": "标清;(480P)",
+                "segs": [
+                    {
+                        "url": "http://116.140.44.200/vlive.qqvideo.tc.qq.com/A6CJpYSRATU8lPd1Q1vrljb2PXjinvUe68YQGzfSN8EA/B_JxNyiJmktHRgresXhfyMehlnfelFaJsL4nXivWb38I9e90S6cunPv_HWnxQB9EjM/svp_50112/gzc_1000102_0b53vmabmaaaymans2ovkzsmbk6dc2tqaesa.f2.mp4?vkey=EF228E78F88B46F0CE64F53DB8710719BD20BC53B7490DEB104863D55C0D5B17B0FA142CC0EABF2DB16E3FAA3493799EB0D9C4576C3380C34089A248F328EAC3229C6289AB4884B70016C1094C9C798903293B3909C7AAD74F2DC551D7DBCF5D2020E5E50274AB1D8A7492EB8DAC253713D71219B084C0099FCDAF3CF2478BE8DB76317172407131",
+                        "size": 30182648,
+                        "ext": "mp4"
+                    }
+                ],
+                "size": 30182648,
+                "ext": "",
+                "NeedMux": false
+            }
+        ],
+        "caption": null,
+        "err": null
+    }
+]

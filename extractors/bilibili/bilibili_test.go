@@ -36,6 +36,9 @@ func Test_extractor_Extract(t *testing.T) {
 			}
 			b, _ := json.Marshal(got[0])
 			fmt.Println(string(b))
+			// if !reflect.DeepEqual(got, tt.want) {
+			// 	t.Errorf("extractor.Extract() = %v, want %v", got, tt.want)
+			// }
 		})
 	}
 }

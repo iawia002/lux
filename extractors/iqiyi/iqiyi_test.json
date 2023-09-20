@@ -1,0 +1,40 @@
+[
+    {
+        "url": "https://www.iqiyi.com/v_19rro0jdls.html#curid=350289100_6e6601aae889d0b1004586a52027c321",
+        "site": "爱奇艺 iq.com",
+        "title": "",
+        "type": "video",
+        "streams": [
+            {
+                "id": "2",
+                "quality": "848x352",
+                "segs": [
+                    {
+                        "url": "http://113.0.165.7/videos/v0/20150227/32/d7/ff828f8b460a0383c112902da1504e3e.f4v?key=0297b875f8831d786de45848fcfbf3fab\u0026dis_k=2a0706bb090ad1d65256926952a9d3b96\u0026dis_t=1695177768\u0026dis_dz=CNC-LiaoNing_ShenYang\u0026dis_st=103\u0026src=iqiyi.com\u0026dis_hit=0\u0026dis_tag=01010000\u0026uuid=3c1100cb-650a5c28-28a\u0026qd_vipres=0\u0026qd_tm=1695177768545\u0026qd_aid=350289100\u0026qd_stert=0\u0026qd_vipdyn=0\u0026qd_p=3c1100cb\u0026qd_vip=0\u0026qd_tvid=350289100\u0026qd_index=1\u0026qd_src=01012001010000000000\u0026qd_sc=6a229988613cbef1f75a359b444e6013\u0026qd_uid=0\u0026qd_k=d677a3f70e5185e46e2ad2af3756e9b8\u0026qd_ip=3c1100cb\u0026cphc=arta",
+                        "size": 20446591,
+                        "ext": "f4v"
+                    }
+                ],
+                "size": 20446591,
+                "ext": "",
+                "NeedMux": false
+            },
+            {
+                "id": "1",
+                "quality": "592x240",
+                "segs": [
+                    {
+                        "url": "http://221.212.217.30/videos/v0/20150227/36/40/da5cf7ae3ae4bab0464511175d3679b8.f4v?key=09197cefc5b3636f0de45848fcfbf3fab\u0026dis_k=2863fbdf722a3da8e601f35765ef2abdc\u0026dis_t=1695177768\u0026dis_dz=CNC-LiaoNing_ShenYang\u0026dis_st=103\u0026src=iqiyi.com\u0026dis_hit=0\u0026dis_tag=01010000\u0026uuid=3c1100cb-650a5c28-293\u0026qd_vipres=0\u0026qd_tm=1695177768545\u0026qd_aid=350289100\u0026qd_stert=0\u0026qd_vipdyn=0\u0026qd_p=3c1100cb\u0026qd_vip=0\u0026qd_tvid=350289100\u0026qd_index=1\u0026qd_src=01012001010000000000\u0026qd_sc=6a229988613cbef1f75a359b444e6013\u0026qd_uid=0\u0026qd_k=d677a3f70e5185e46e2ad2af3756e9b8\u0026qd_ip=3c1100cb\u0026cphc=arta",
+                        "size": 11291706,
+                        "ext": "f4v"
+                    }
+                ],
+                "size": 11291706,
+                "ext": "",
+                "NeedMux": false
+            }
+        ],
+        "caption": null,
+        "err": null
+    }
+]

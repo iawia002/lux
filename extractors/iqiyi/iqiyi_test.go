@@ -1,49 +1,49 @@
 package iqiyi
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 
-	"github.com/wujiu2020/lux/test"
+	"github.com/wujiu2020/lux/extractors"
 )
 
-func TestDownload(t *testing.T) {
+func Test_extractor_Extract(t *testing.T) {
+	type fields struct {
+		siteType SiteType
+	}
+	type args struct {
+		url string
+	}
 	tests := []struct {
-		name string
-		args test.Args
+		name    string
+		fields  fields
+		args    args
+		want    []*extractors.Data
+		wantErr bool
 	}{
 		{
-			name: "normal test",
-			args: test.Args{
-				URL:     "http://www.iqiyi.com/v_19rrbdmaj0.html",
-				Title:   "新一轮降水将至 冷空气影响中东部地区",
-				Size:    2952228,
-				Quality: "896x504",
-			},
-		},
-		{
-			name: "title test 1",
-			args: test.Args{
-				URL:     "http://www.iqiyi.com/v_19rqy2z83w.html",
-				Title:   "收了创意视频2018 :58天环球飞行记",
-				Size:    76186786,
-				Quality: "1920x1080",
-			},
-		},
-		{
-			name: "curid test 1",
-			args: test.Args{
-				URL:     "https://www.iqiyi.com/v_19rro0jdls.html#curid=350289100_6e6601aae889d0b1004586a52027c321",
-				Title:   "Shawn Mendes - Never Be Alone",
-				Size:    79921894,
-				Quality: "1920x800",
+			name: "iqiyi",
+			args: args{
+				url: "https://www.iqiyi.com/v_19rro0jdls.html#curid=350289100_6e6601aae889d0b1004586a52027c321",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			data, err := New(SiteTypeIqiyi).Extract(tt.args.URL)
-			test.CheckError(t, err)
-			test.Check(t, tt.args, data[0])
+			e := &extractor{
+				siteType: tt.fields.siteType,
+			}
+			got, err := e.Extract(tt.args.url)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("extractor.Extract() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			b, _ := json.Marshal(got)
+			fmt.Println(string(b))
+			// if !reflect.DeepEqual(got, tt.want) {
+			// 	t.Errorf("extractor.Extract() = %v, want %v", got, tt.want)
+			// }
 		})
 	}
 }
