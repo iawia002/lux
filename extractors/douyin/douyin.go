@@ -137,10 +137,12 @@ func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
 			Ext:  "mp4",
 		})
 	}
-	streams := map[string]*extractors.Stream{
-		"default": {
-			Segs: urlData,
-			Size: totalSize,
+	streams := []*extractors.Stream{
+		{
+			ID:      "default",
+			Quality: "default",
+			Segs:    urlData,
+			Size:    totalSize,
 		},
 	}
 

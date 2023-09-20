@@ -203,7 +203,7 @@ func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
 		return nil, errors.Errorf("can't play this video: %s", videoDatas.Msg)
 	}
 
-	streams := make(map[string]*extractors.Stream)
+	streams := make([]*extractors.Stream, 0)
 	urlPrefix := videoDatas.Data.VP.Du
 	for _, video := range videoDatas.Data.VP.Tkl[0].Vs {
 		urls := make([]*extractors.Part, len(video.Fs))
@@ -226,11 +226,12 @@ func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
 				Ext:  ext,
 			}
 		}
-		streams[strconv.Itoa(video.Bid)] = &extractors.Stream{
+		streams = append(streams, &extractors.Stream{
+			ID:      strconv.Itoa(video.Bid),
 			Segs:    urls,
 			Size:    video.Vsize,
 			Quality: video.Scrsz,
-		}
+		})
 	}
 
 	siteName := "爱奇艺 iqiyi.com"

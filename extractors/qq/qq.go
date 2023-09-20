@@ -76,8 +76,8 @@ func getVinfo(vid, defn, refer string) (qqVideoInfo, error) {
 	return data, nil
 }
 
-func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*extractors.Stream, error) {
-	streams := make(map[string]*extractors.Stream)
+func genStreams(vid, cdn string, data qqVideoInfo) ([]*extractors.Stream, error) {
+	streams := make([]*extractors.Stream, 0)
 	var vkey string
 	// number of fragments
 	var clips int
@@ -165,11 +165,12 @@ func genStreams(vid, cdn string, data qqVideoInfo) (map[string]*extractors.Strea
 			urls = append(urls, urlData)
 			totalSize += size
 		}
-		streams[fi.Name] = &extractors.Stream{
+		streams = append(streams, &extractors.Stream{
+			ID:      fi.Name,
 			Segs:    urls,
 			Size:    totalSize,
 			Quality: fi.Cname,
-		}
+		})
 	}
 	return streams, nil
 }

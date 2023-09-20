@@ -50,7 +50,7 @@ type Data struct {
 	Title string   `json:"title"`
 	Type  DataType `json:"type"`
 	// each stream has it's own Parts and Quality
-	Streams map[string]*Stream `json:"streams"`
+	Streams []*Stream `json:"streams"`
 	// danmaku, subtitles, etc
 	Captions map[string]*CaptionPart `json:"caption"`
 	// Err is used to record whether an error occurred when extracting the list data
@@ -59,13 +59,10 @@ type Data struct {
 
 // FillUpStreamsData fills up some data automatically.
 func (d *Data) FillUpStreamsData() {
-	for id, stream := range d.Streams {
-		// fill up ID
-		stream.ID = id
+	for _, stream := range d.Streams {
 		if stream.Quality == "" {
-			stream.Quality = id
+			stream.Quality = stream.ID
 		}
-
 		// generate the merged file extension
 		if d.Type == DataTypeVideo && stream.Ext == "" {
 			ext := stream.Segs[0].Ext

@@ -1,0 +1,93 @@
+{
+    "url": "https://www.bilibili.com/video/BV19C4y1f7zx/?spm_id_from=333.1007.tianma.1-1-1.click",
+    "site": "哔哩哔哩 bilibili.com",
+    "title": "让车商头疼的不良车型，要抓紧处理，不然金九银十也救不活",
+    "type": "video",
+    "streams": [
+        {
+            "id": "32-12",
+            "quality": "清晰 480P hev1.1.6.L120.90",
+            "segs": [
+                {
+                    "url": "https://xy182x115x2x114xy.mcdn.bilivideo.cn:8082/v1/resource/1271408906-1-100110.m4s?agrr=0\u0026build=0\u0026buvid=\u0026bvc=vod\u0026bw=65389\u0026deadline=1695184590\u0026e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M%3D\u0026f=u_0_0\u0026gen=playurlv2\u0026logo=A0002000\u0026mcdnid=14002263\u0026mid=0\u0026nbs=1\u0026nettype=0\u0026oi=1007747275\u0026orderid=0%2C3\u0026os=mcdn\u0026platform=pc\u0026sign=3e238b\u0026traceid=trQQDTVSXeKkpR_0_e_N\u0026uipk=5\u0026uparams=e%2Cuipk%2Cnbs%2Cdeadline%2Cgen%2Cos%2Coi%2Ctrid%2Cmid%2Cplatform\u0026upsig=8e1250da8d8ccc9c38899f9e057105f5",
+                    "size": 29098304,
+                    "ext": "mp4"
+                },
+                {
+                    "url": "https: //xy153x34x58x217xy.mcdn.bilivideo.cn:8082/v1/resource/1271408906-1-30280.m4s?agrr=0\u0026build=0\u0026buvid=\u0026bvc=vod\u0026bw=10948\u0026deadline=1695184590\u0026e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M%3D\u0026f=u_0_0\u0026gen=playurlv2\u0026logo=A0002000\u0026mcdnid=14002263\u0026mid=0\u0026nbs=1\u0026nettype=0\u0026oi=1007747275\u0026orderid=0%2C3\u0026os=mcdn\u0026platform=pc\u0026sign=cf3402\u0026traceid=trUcGXGWwnYkmR_0_e_N\u0026uipk=5\u0026uparams=e%2Cuipk%2Cnbs%2Cdeadline%2Cgen%2Cos%2Coi%2Ctrid%2Cmid%2Cplatform\u0026upsig=ca3b48f1d335c6834411b92b20493073",
+                    "size": 4871889,
+                    "ext": "m4a"
+                }
+            ],
+            "size": 33970193,
+            "ext": "",
+            "NeedMux": true
+        },
+        {
+            "id": "32-7",
+            "quality": "清晰 480P avc1.64001F",
+            "segs": [
+                {
+                    "url": "https://xy182x54x114x203xy.mcdn.bilivideo.cn:8082/v1/resource/1271408906-1-100047.m4s?agrr=0\u0026build=0\u0026buvid=\u0026bvc=vod\u0026bw=98355\u0026deadline=1695184590\u0026e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M%3D\u0026f=u_0_0\u0026gen=playurlv2\u0026logo=A0002000\u0026mcdnid=14002263\u0026mid=0\u0026nbs=1\u0026nettype=0\u0026oi=1007747275\u0026orderid=0%2C3\u0026os=mcdn\u0026platform=pc\u0026sign=1bfdb4\u0026traceid=trFikOyRxsofGJ_0_e_N\u0026uipk=5\u0026uparams=e%2Cuipk%2Cnbs%2Cdeadline%2Cgen%2Cos%2Coi%2Ctrid%2Cmid%2Cplatform\u0026upsig=e80efe4da2e1885c7eff8a9149c3bb5f",
+                    "size": 43768406,
+                    "ext": "mp4"
+                },
+                {
+                    "url": "https: //xy153x34x58x217xy.mcdn.bilivideo.cn:8082/v1/resource/1271408906-1-30280.m4s?agrr=0\u0026build=0\u0026buvid=\u0026bvc=vod\u0026bw=10948\u0026deadline=1695184590\u0026e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M%3D\u0026f=u_0_0\u0026gen=playurlv2\u0026logo=A0002000\u0026mcdnid=14002263\u0026mid=0\u0026nbs=1\u0026nettype=0\u0026oi=1007747275\u0026orderid=0%2C3\u0026os=mcdn\u0026platform=pc\u0026sign=cf3402\u0026traceid=trUcGXGWwnYkmR_0_e_N\u0026uipk=5\u0026uparams=e%2Cuipk%2Cnbs%2Cdeadline%2Cgen%2Cos%2Coi%2Ctrid%2Cmid%2Cplatform\u0026upsig=ca3b48f1d335c6834411b92b20493073",
+                    "size": 4871889,
+                    "ext": "m4a"
+                }
+            ],
+            "size": 48640295,
+            "ext": "",
+            "NeedMux": true
+        },
+        {
+            "id": "16-12",
+            "quality": "流畅 360P hev1.1.6.L120.90",
+            "segs": [
+                {
+                    "url": "https: //xy27x45x179x200xy.mcdn.bilivideo.cn:8082/v1/resource/1271408906-1-100109.m4s?agrr=0\u0026build=0\u0026buvid=\u0026bvc=vod\u0026bw=38711\u0026deadline=1695184590\u0026e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M%3D\u0026f=u_0_0\u0026gen=playurlv2\u0026logo=A0002000\u0026mcdnid=14002263\u0026mid=0\u0026nbs=1\u0026nettype=0\u0026oi=1007747275\u0026orderid=0%2C3\u0026os=mcdn\u0026platform=pc\u0026sign=64e12e\u0026traceid=trnWvMhRdFZjjq_0_e_N\u0026uipk=5\u0026uparams=e%2Cuipk%2Cnbs%2Cdeadline%2Cgen%2Cos%2Coi%2Ctrid%2Cmid%2Cplatform\u0026upsig=8a816e589c908cb6b194593c06a38e4a",
+                    "size": 17226522,
+                    "ext": "mp4"
+                },
+                {
+                    "url": "https: //xy153x34x58x217xy.mcdn.bilivideo.cn:8082/v1/resource/1271408906-1-30280.m4s?agrr=0\u0026build=0\u0026buvid=\u0026bvc=vod\u0026bw=10948\u0026deadline=1695184590\u0026e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M%3D\u0026f=u_0_0\u0026gen=playurlv2\u0026logo=A0002000\u0026mcdnid=14002263\u0026mid=0\u0026nbs=1\u0026nettype=0\u0026oi=1007747275\u0026orderid=0%2C3\u0026os=mcdn\u0026platform=pc\u0026sign=cf3402\u0026traceid=trUcGXGWwnYkmR_0_e_N\u0026uipk=5\u0026uparams=e%2Cuipk%2Cnbs%2Cdeadline%2Cgen%2Cos%2Coi%2Ctrid%2Cmid%2Cplatform\u0026upsig=ca3b48f1d335c6834411b92b20493073",
+                    "size": 4871889,
+                    "ext": "m4a"
+                }
+            ],
+            "size": 22098411,
+            "ext": "",
+            "NeedMux": true
+        },
+        {
+            "id": "16-7",
+            "quality": "流畅 360P avc1.64001E",
+            "segs": [
+                {
+                    "url": "https://xy218x24x77x139xy.mcdn.bilivideo.cn:4483/upgcxcode/06/89/1271408906/1271408906-1-100046.m4s?e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M=\u0026uipk=5\u0026nbs=1\u0026deadline=1695184590\u0026gen=playurlv2\u0026os=mcdn\u0026oi=1007747275\u0026trid=00003dc9d70373d24bf592c537a2a08dc546u\u0026mid=0\u0026platform=pc\u0026upsig=6799310b1e45c310e977ad406cb8789a\u0026uparams=e,uipk,nbs,deadline,gen,os,oi,trid,mid,platform\u0026mcdnid=14002263\u0026bvc=vod\u0026nettype=0\u0026orderid=0,3\u0026buvid=\u0026build=0\u0026f=u_0_0\u0026agrr=0\u0026bw=44711\u0026logo=A0002000",
+                    "size": 19896467,
+                    "ext": "mp4"
+                },
+                {
+                    "url": "https://xy153x34x58x217xy.mcdn.bilivideo.cn:8082/v1/resource/1271408906-1-30280.m4s?agrr=0\u0026build=0\u0026buvid=\u0026bvc=vod\u0026bw=10948\u0026deadline=1695184590\u0026e=ig8euxZM2rNcNbdlhoNvNC8BqJIzNbfqXBvEqxTEto8BTrNvN0GvT90W5JZMkX_YN0MvXg8gNEV4NC8xNEV4N03eN0B5tZlqNxTEto8BTrNvNeZVuJ10Kj_g2UB02J0mN0B5tZlqNCNEto8BTrNvNC7MTX502C8f2jmMQJ6mqF2fka1mqx6gqj0eN0B599M%3D\u0026f=u_0_0\u0026gen=playurlv2\u0026logo=A0002000\u0026mcdnid=14002263\u0026mid=0\u0026nbs=1\u0026nettype=0\u0026oi=1007747275\u0026orderid=0%2C3\u0026os=mcdn\u0026platform=pc\u0026sign=cf3402\u0026traceid=trUcGXGWwnYkmR_0_e_N\u0026uipk=5\u0026uparams=e%2Cuipk%2Cnbs%2Cdeadline%2Cgen%2Cos%2Coi%2Ctrid%2Cmid%2Cplatform\u0026upsig=ca3b48f1d335c6834411b92b20493073",
+                    "size": 4871889,
+                    "ext": "m4a"
+                }
+            ],
+            "size": 24768356,
+            "ext": "",
+            "NeedMux": true
+        }
+    ],
+    "caption": {
+        "danmaku": {
+            "url": "https: //comment.bilibili.com/1271408906.xml",
+            "size": 0,
+            "ext": "xml"
+        },
+        "subtitle": null
+    },
+    "err": null
+}

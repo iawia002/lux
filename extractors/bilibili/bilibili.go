@@ -224,7 +224,7 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 		}
 	}
 
-	streams := make(map[string]*extractors.Stream, len(dashData.Quality))
+	streams := make([]*extractors.Stream, 0)
 	for _, stream := range dashData.Streams.Video {
 		s, err := request.Size(stream.BaseURL, referer)
 		if err != nil {
@@ -244,14 +244,17 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 			size += part.Size
 		}
 		id := fmt.Sprintf("%d-%d", stream.ID, stream.Codecid)
-		streams[id] = &extractors.Stream{
+		var needMux bool
+		if audioPart != nil {
+			needMux = true
+		}
+		streams = append(streams, &extractors.Stream{
+			ID:      id,
 			Segs:    segs,
 			Size:    size,
+			NeedMux: needMux,
 			Quality: fmt.Sprintf("%s %s", qualityString[stream.ID], stream.Codecs),
-		}
-		if audioPart != nil {
-			streams[id].NeedMux = true
-		}
+		})
 	}
 
 	for _, durl := range dashData.DURLs {
@@ -270,11 +273,12 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 			Ext:  ext,
 		})
 
-		streams[strconv.Itoa(dashData.CurQuality)] = &extractors.Stream{
+		streams = append(streams, &extractors.Stream{
+			ID:      strconv.Itoa(dashData.CurQuality),
 			Segs:    segs,
 			Size:    durl.Size,
 			Quality: qualityString[dashData.CurQuality],
-		}
+		})
 	}
 
 	// get the title
