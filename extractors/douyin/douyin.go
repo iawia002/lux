@@ -35,7 +35,7 @@ func New() extractors.Extractor {
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
+func (e *extractor) Extract(url string) (*extractors.Data, error) {
 	if strings.Contains(url, "v.douyin.com") {
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
@@ -146,14 +146,12 @@ func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
 		},
 	}
 
-	return []*extractors.Data{
-		{
-			Site:    "抖音 douyin.com",
-			Title:   douyin.AwemeDetail.Desc,
-			Type:    douyinType,
-			Streams: streams,
-			URL:     url,
-		},
+	return &extractors.Data{
+		Site:    "抖音 douyin.com",
+		Title:   douyin.AwemeDetail.Desc,
+		Type:    douyinType,
+		Streams: streams,
+		URL:     url,
 	}, nil
 }
 

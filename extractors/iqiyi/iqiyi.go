@@ -122,7 +122,7 @@ func New(siteType SiteType) extractors.Extractor {
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
+func (e *extractor) Extract(url string) (*extractors.Data, error) {
 	refer := iqiyiReferer
 	headers := make(map[string]string)
 	if e.siteType == SiteTypeIQ {
@@ -238,13 +238,11 @@ func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
 	if e.siteType == SiteTypeIQ {
 		siteName = "爱奇艺 iq.com"
 	}
-	return []*extractors.Data{
-		{
-			Site:    siteName,
-			Title:   title,
-			Type:    extractors.DataTypeVideo,
-			Streams: streams,
-			URL:     url,
-		},
+	return &extractors.Data{
+		Site:    siteName,
+		Title:   title,
+		Type:    extractors.DataTypeVideo,
+		Streams: streams,
+		URL:     url,
 	}, nil
 }

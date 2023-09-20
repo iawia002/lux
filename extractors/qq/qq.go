@@ -183,7 +183,7 @@ func New() extractors.Extractor {
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
+func (e *extractor) Extract(url string) (*extractors.Data, error) {
 	vids := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)
 	if vids == nil || len(vids) < 2 {
 		return nil, errors.WithStack(extractors.ErrURLParseFailed)
@@ -220,13 +220,11 @@ func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	return []*extractors.Data{
-		{
-			Site:    "腾讯视频 v.qq.com",
-			Title:   data.Vl.Vi[0].Ti,
-			Type:    extractors.DataTypeVideo,
-			Streams: streams,
-			URL:     url,
-		},
+	return &extractors.Data{
+		Site:    "腾讯视频 v.qq.com",
+		Title:   data.Vl.Vi[0].Ti,
+		Type:    extractors.DataTypeVideo,
+		Streams: streams,
+		URL:     url,
 	}, nil
 }

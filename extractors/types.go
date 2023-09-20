@@ -7,11 +7,6 @@ type Part struct {
 	Ext  string `json:"ext"`
 }
 
-type CaptionPart struct {
-	Part
-	Transform func([]byte) ([]byte, error) `json:"-"`
-}
-
 // Stream is the data structure for each video stream, eg: 720P, 1080P.
 type Stream struct {
 	// eg: "1080"
@@ -26,8 +21,6 @@ type Stream struct {
 	Size int64 `json:"size"`
 	// the file extension after video parts merged
 	Ext string `json:"ext"`
-	// if the parts need mux
-	NeedMux bool
 }
 
 // DataType indicates the type of extracted data, eg: video or image.
@@ -51,8 +44,6 @@ type Data struct {
 	Type  DataType `json:"type"`
 	// each stream has it's own Parts and Quality
 	Streams []*Stream `json:"streams"`
-	// danmaku, subtitles, etc
-	Captions map[string]*CaptionPart `json:"caption"`
 	// Err is used to record whether an error occurred when extracting the list data
 	Err error `json:"err"`
 }
@@ -98,5 +89,5 @@ func EmptyData(url string, err error) *Data {
 // Extractor implements video data extraction related operations.
 type Extractor interface {
 	// Extract is the main function to extract the data.
-	Extract(url string) ([]*Data, error)
+	Extract(url string) (*Data, error)
 }

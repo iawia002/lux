@@ -34,7 +34,7 @@ func Test_extractor_Extract(t *testing.T) {
 				t.Errorf("extractor.Extract() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			b, _ := json.Marshal(got[0])
+			b, _ := json.Marshal(got)
 			fmt.Println(string(b))
 			// if !reflect.DeepEqual(got, tt.want) {
 			// 	t.Errorf("extractor.Extract() = %v, want %v", got, tt.want)

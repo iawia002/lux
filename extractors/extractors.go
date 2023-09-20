@@ -20,7 +20,7 @@ func Register(domain string, e Extractor) {
 }
 
 // Extract is the main function to extract the data.
-func Extract(u string) ([]*Data, error) {
+func Extract(u string) (*Data, error) {
 	u = strings.TrimSpace(u)
 	var domain string
 
@@ -51,9 +51,6 @@ func Extract(u string) ([]*Data, error) {
 	videos, err := extractor.Extract(u)
 	if err != nil {
 		return nil, errors.WithStack(err)
-	}
-	for _, v := range videos {
-		v.FillUpStreamsData()
 	}
 	return videos, nil
 }

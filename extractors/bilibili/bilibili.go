@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 
@@ -47,7 +46,7 @@ func New() extractors.Extractor {
 type extractor struct{}
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
+func (e *extractor) Extract(url string) (*extractors.Data, error) {
 	var err error
 	html, err := request.Get(url, referer, nil)
 	if err != nil {
@@ -62,7 +61,7 @@ func (e *extractor) Extract(url string) ([]*extractors.Data, error) {
 	return extractNormalVideo(url, html)
 }
 
-func extractBangumi(url, html string) ([]*extractors.Data, error) {
+func extractBangumi(url, html string) (*extractors.Data, error) {
 	dataString := utils.MatchOneOf(html, `<script\s+id="__NEXT_DATA__"\s+type="application/json"\s*>(.*?)</script\s*>`)[1]
 	epMapString := utils.MatchOneOf(dataString, `"epMap"\s*:\s*(.+?)\s*,\s*"initEpList"`)[1]
 	fullVideoIdString := utils.MatchOneOf(dataString, `"videoId"\s*:\s*"(ep|ss)(\d+)"`)
@@ -118,10 +117,10 @@ func extractBangumi(url, html string) ([]*extractors.Data, error) {
 
 		subtitle: fmt.Sprintf("%s %s", titleFormat, longTitle),
 	}
-	return []*extractors.Data{bilibiliDownload(options)}, nil
+	return bilibiliDownload(options), nil
 }
 
-func extractNormalVideo(url, html string) ([]*extractors.Data, error) {
+func extractNormalVideo(url, html string) (*extractors.Data, error) {
 	pageData, err := getMultiPageData(html)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -158,7 +157,7 @@ func extractNormalVideo(url, html string) ([]*extractors.Data, error) {
 	} else {
 		options.subtitle = page.Part
 	}
-	return []*extractors.Data{bilibiliDownload(options)}, nil
+	return bilibiliDownload(options), nil
 }
 
 func bilibiliDownload(options bilibiliOptions) *extractors.Data {
@@ -244,15 +243,10 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 			size += part.Size
 		}
 		id := fmt.Sprintf("%d-%d", stream.ID, stream.Codecid)
-		var needMux bool
-		if audioPart != nil {
-			needMux = true
-		}
 		streams = append(streams, &extractors.Stream{
 			ID:      id,
 			Segs:    segs,
 			Size:    size,
-			NeedMux: needMux,
 			Quality: fmt.Sprintf("%s %s", qualityString[stream.ID], stream.Codecs),
 		})
 	}
@@ -300,57 +294,8 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 		Title:   title,
 		Type:    extractors.DataTypeVideo,
 		Streams: streams,
-		Captions: map[string]*extractors.CaptionPart{
-			"danmaku": {
-				Part: extractors.Part{
-					URL: fmt.Sprintf("https://comment.bilibili.com/%d.xml", options.cid),
-					Ext: "xml",
-				},
-			},
-			"subtitle": getSubTitleCaptionPart(options.aid, options.cid),
-		},
-		URL: options.url,
+		URL:     options.url,
 	}
-}
-
-func getSubTitleCaptionPart(aid int, cid int) *extractors.CaptionPart {
-	jsonString, err := request.Get(
-		fmt.Sprintf("http://api.bilibili.com/x/web-interface/view?aid=%d&cid=%d", aid, cid), referer, nil,
-	)
-	if err != nil {
-		return nil
-	}
-	stu := bilibiliWebInterface{}
-	err = json.Unmarshal([]byte(jsonString), &stu)
-	if err != nil || len(stu.Data.SubtitleInfo.SubtitleList) == 0 {
-		return nil
-	}
-	return &extractors.CaptionPart{
-		Part: extractors.Part{
-			URL: stu.Data.SubtitleInfo.SubtitleList[0].SubtitleUrl,
-			Ext: "srt",
-		},
-		Transform: subtitleTransform,
-	}
-}
-
-func subtitleTransform(body []byte) ([]byte, error) {
-	bytes := ""
-	captionData := bilibiliSubtitleFormat{}
-	err := json.Unmarshal(body, &captionData)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	for i := 0; i < len(captionData.Body); i++ {
-		bytes += fmt.Sprintf("%d\n%s --> %s\n%s\n\n",
-			i,
-			time.Unix(0, int64(captionData.Body[i].From*1000)*int64(time.Millisecond)).UTC().Format("15:04:05.000"),
-			time.Unix(0, int64(captionData.Body[i].To*1000)*int64(time.Millisecond)).UTC().Format("15:04:05.000"),
-			captionData.Body[i].Content,
-		)
-	}
-	return []byte(bytes), nil
 }
 
 func genAPI(aid, cid, quality int, bvid string, bangumi bool) (string, error) {
