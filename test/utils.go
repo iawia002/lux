@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/wujiu2020/lux/extractors"
+	"github.com/wujiu2020/lux/extractors/proto"
 )
 
 // Args Arguments for extractor tests
@@ -32,12 +32,10 @@ func CheckData(args, data Args) bool {
 }
 
 // Check check the result
-func Check(t *testing.T, args Args, data *extractors.Data) {
+func Check(t *testing.T, args Args, data *proto.Data) {
 	// get the default stream
-	sortedStreams := make([]*extractors.Stream, 0, len(data.Streams))
-	for _, s := range data.Streams {
-		sortedStreams = append(sortedStreams, s)
-	}
+	sortedStreams := make([]*proto.Stream, 0, len(data.Streams))
+	sortedStreams = append(sortedStreams, data.Streams...)
 	if len(sortedStreams) == 0 {
 		t.Fatalf("stream should not empty")
 	}

@@ -9,15 +9,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/wujiu2020/lux/extractors"
+	"github.com/wujiu2020/lux/extractors/proto"
 	"github.com/wujiu2020/lux/parser"
 	"github.com/wujiu2020/lux/request"
 	"github.com/wujiu2020/lux/utils"
 )
-
-func init() {
-	extractors.Register("bilibili", New())
-}
 
 const (
 	bilibiliAPI        = "https://api.bilibili.com/x/player/playurl?"
@@ -39,14 +35,14 @@ type bilibiliOptions struct {
 }
 
 // New returns a bilibili extractor.
-func New() extractors.Extractor {
+func New() proto.Extractor {
 	return &extractor{}
 }
 
 type extractor struct{}
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string) (*extractors.Data, error) {
+func (e *extractor) Extract(url string) (*proto.Data, error) {
 	var err error
 	html, err := request.Get(url, referer, nil)
 	if err != nil {
@@ -61,7 +57,7 @@ func (e *extractor) Extract(url string) (*extractors.Data, error) {
 	return extractNormalVideo(url, html)
 }
 
-func extractBangumi(url, html string) (*extractors.Data, error) {
+func extractBangumi(url, html string) (*proto.Data, error) {
 	dataString := utils.MatchOneOf(html, `<script\s+id="__NEXT_DATA__"\s+type="application/json"\s*>(.*?)</script\s*>`)[1]
 	epMapString := utils.MatchOneOf(dataString, `"epMap"\s*:\s*(.+?)\s*,\s*"initEpList"`)[1]
 	fullVideoIdString := utils.MatchOneOf(dataString, `"videoId"\s*:\s*"(ep|ss)(\d+)"`)
@@ -120,7 +116,7 @@ func extractBangumi(url, html string) (*extractors.Data, error) {
 	return bilibiliDownload(options), nil
 }
 
-func extractNormalVideo(url, html string) (*extractors.Data, error) {
+func extractNormalVideo(url, html string) (*proto.Data, error) {
 	pageData, err := getMultiPageData(html)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -139,7 +135,7 @@ func extractNormalVideo(url, html string) (*extractors.Data, error) {
 	}
 
 	if len(pageData.VideoData.Pages) < p || p < 1 {
-		return nil, errors.WithStack(extractors.ErrURLParseFailed)
+		return nil, errors.WithStack(proto.ErrURLParseFailed)
 	}
 
 	page := pageData.VideoData.Pages[p-1]
@@ -160,7 +156,7 @@ func extractNormalVideo(url, html string) (*extractors.Data, error) {
 	return bilibiliDownload(options), nil
 }
 
-func bilibiliDownload(options bilibiliOptions) *extractors.Data {
+func bilibiliDownload(options bilibiliOptions) *proto.Data {
 	var (
 		err  error
 		html string
@@ -171,7 +167,7 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 	} else {
 		html, err = request.Get(options.url, referer, nil)
 		if err != nil {
-			return extractors.EmptyData(options.url, err)
+			return proto.EmptyData(options.url, err)
 		}
 	}
 
@@ -180,17 +176,17 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 	// "accept_quality":[127，120,112,80,48,32,16],
 	api, err := genAPI(options.aid, options.cid, 127, options.bvid, options.bangumi)
 	if err != nil {
-		return extractors.EmptyData(options.url, err)
+		return proto.EmptyData(options.url, err)
 	}
 	jsonString, err := request.Get(api, referer, nil)
 	if err != nil {
-		return extractors.EmptyData(options.url, err)
+		return proto.EmptyData(options.url, err)
 	}
 
 	var data dash
 	err = json.Unmarshal([]byte(jsonString), &data)
 	if err != nil {
-		return extractors.EmptyData(options.url, err)
+		return proto.EmptyData(options.url, err)
 	}
 	var dashData dashInfo
 	if data.Data.Description == nil {
@@ -199,7 +195,7 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 		dashData = data.Data
 	}
 
-	var audioPart *extractors.Part
+	var audioPart *proto.Part
 	if dashData.Streams.Audio != nil {
 		// Get audio part
 		var audioID int
@@ -214,23 +210,23 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 		}
 		s, err := request.Size(audios[audioID], referer)
 		if err != nil {
-			return extractors.EmptyData(options.url, err)
+			return proto.EmptyData(options.url, err)
 		}
-		audioPart = &extractors.Part{
+		audioPart = &proto.Part{
 			URL:  audios[audioID],
 			Size: s,
 			Ext:  "m4a",
 		}
 	}
 
-	streams := make([]*extractors.Stream, 0)
+	streams := make([]*proto.Stream, 0)
 	for _, stream := range dashData.Streams.Video {
 		s, err := request.Size(stream.BaseURL, referer)
 		if err != nil {
-			return extractors.EmptyData(options.url, err)
+			return proto.EmptyData(options.url, err)
 		}
-		segs := make([]*extractors.Part, 0, 2)
-		segs = append(segs, &extractors.Part{
+		segs := make([]*proto.Part, 0, 2)
+		segs = append(segs, &proto.Part{
 			URL:  stream.BaseURL,
 			Size: s,
 			Ext:  getExtFromMimeType(stream.MimeType),
@@ -243,7 +239,7 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 			size += part.Size
 		}
 		id := fmt.Sprintf("%d-%d", stream.ID, stream.Codecid)
-		streams = append(streams, &extractors.Stream{
+		streams = append(streams, &proto.Stream{
 			ID:      id,
 			Segs:    segs,
 			Size:    size,
@@ -260,14 +256,14 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 			ext = "mp4"
 		}
 
-		segs := make([]*extractors.Part, 0, 1)
-		segs = append(segs, &extractors.Part{
+		segs := make([]*proto.Part, 0, 1)
+		segs = append(segs, &proto.Part{
 			URL:  durl.URL,
 			Size: durl.Size,
 			Ext:  ext,
 		})
 
-		streams = append(streams, &extractors.Stream{
+		streams = append(streams, &proto.Stream{
 			ID:      strconv.Itoa(dashData.CurQuality),
 			Segs:    segs,
 			Size:    durl.Size,
@@ -278,7 +274,7 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 	// get the title
 	doc, err := parser.GetDoc(html)
 	if err != nil {
-		return extractors.EmptyData(options.url, err)
+		return proto.EmptyData(options.url, err)
 	}
 	title := parser.Title(doc)
 	if options.subtitle != "" {
@@ -289,10 +285,10 @@ func bilibiliDownload(options bilibiliOptions) *extractors.Data {
 		title = fmt.Sprintf("%s %s%s", title, pageString, options.subtitle)
 	}
 
-	return &extractors.Data{
+	return &proto.Data{
 		Site:    "哔哩哔哩 bilibili.com",
 		Title:   title,
-		Type:    extractors.DataTypeVideo,
+		Type:    proto.DataTypeVideo,
 		Streams: streams,
 		URL:     options.url,
 	}

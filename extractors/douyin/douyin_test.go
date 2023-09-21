@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/wujiu2020/lux/extractors"
+	"github.com/wujiu2020/lux/extractors/proto"
 )
 
 func Test_extractor_Extract(t *testing.T) {
@@ -16,7 +16,7 @@ func Test_extractor_Extract(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    []*extractors.Data
+		want    []*proto.Data
 		wantErr bool
 	}{
 		{

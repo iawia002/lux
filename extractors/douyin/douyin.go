@@ -12,17 +12,10 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/pkg/errors"
-
-	"github.com/wujiu2020/lux/extractors"
+	"github.com/wujiu2020/lux/extractors/proto"
 	"github.com/wujiu2020/lux/request"
 	"github.com/wujiu2020/lux/utils"
 )
-
-func init() {
-	e := New()
-	extractors.Register("douyin", e)
-	extractors.Register("iesdouyin", e)
-}
 
 //go:embed sign.js
 var script string
@@ -30,12 +23,12 @@ var script string
 type extractor struct{}
 
 // New returns a douyin extractor.
-func New() extractors.Extractor {
+func New() proto.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string) (*extractors.Data, error) {
+func (e *extractor) Extract(url string) (*proto.Data, error) {
 	if strings.Contains(url, "v.douyin.com") {
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
@@ -59,7 +52,7 @@ func (e *extractor) Extract(url string) (*extractors.Data, error) {
 		return nil, errors.New("unable to get video ID")
 	}
 	if itemIds == nil || len(itemIds) < 2 {
-		return nil, errors.WithStack(extractors.ErrURLParseFailed)
+		return nil, errors.WithStack(proto.ErrURLParseFailed)
 	}
 	itemId := itemIds[len(itemIds)-1]
 
@@ -73,7 +66,7 @@ func (e *extractor) Extract(url string) (*extractors.Data, error) {
 	// parse api query params string
 	query, err := netURL.Parse(api)
 	if err != nil {
-		return nil, errors.WithStack(extractors.ErrURLQueryParamsParseFailed)
+		return nil, errors.WithStack(proto.ErrURLQueryParamsParseFailed)
 	}
 	// define request headers and sign agent
 	headers := map[string]string{}
@@ -101,12 +94,12 @@ func (e *extractor) Extract(url string) (*extractors.Data, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	urlData := make([]*extractors.Part, 0)
-	var douyinType extractors.DataType
+	urlData := make([]*proto.Part, 0)
+	var douyinType proto.DataType
 	var totalSize int64
 	// AwemeType: 0:video 68:image
 	if douyin.AwemeDetail.AwemeType == 68 {
-		douyinType = extractors.DataTypeImage
+		douyinType = proto.DataTypeImage
 		for _, img := range douyin.AwemeDetail.Images {
 			realURL := img.URLList[len(img.URLList)-1]
 			size, err := request.Size(realURL, url)
@@ -118,26 +111,26 @@ func (e *extractor) Extract(url string) (*extractors.Data, error) {
 			if err != nil {
 				return nil, errors.WithStack(err)
 			}
-			urlData = append(urlData, &extractors.Part{
+			urlData = append(urlData, &proto.Part{
 				URL:  realURL,
 				Size: size,
 				Ext:  ext,
 			})
 		}
 	} else {
-		douyinType = extractors.DataTypeVideo
+		douyinType = proto.DataTypeVideo
 		realURL := douyin.AwemeDetail.Video.PlayAddr.URLList[0]
 		totalSize, err = request.Size(realURL, url)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		urlData = append(urlData, &extractors.Part{
+		urlData = append(urlData, &proto.Part{
 			URL:  realURL,
 			Size: totalSize,
 			Ext:  "mp4",
 		})
 	}
-	streams := []*extractors.Stream{
+	streams := []*proto.Stream{
 		{
 			ID:      "default",
 			Quality: "default",
@@ -146,7 +139,7 @@ func (e *extractor) Extract(url string) (*extractors.Data, error) {
 		},
 	}
 
-	return &extractors.Data{
+	return &proto.Data{
 		Site:    "抖音 douyin.com",
 		Title:   douyin.AwemeDetail.Desc,
 		Type:    douyinType,
@@ -189,7 +182,7 @@ func ttwid() (string, error) {
 		"union":         true,
 		"needFid":       false,
 		"region":        "cn",
-		"cbUrlProtocol": "https",
+		"cbUrlprotocol": "https",
 		"service":       "www.ixigua.com",
 		"migrate_info":  map[string]string{"ticket": "", "source": "node"},
 	}

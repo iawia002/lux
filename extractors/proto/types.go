@@ -1,4 +1,4 @@
-package extractors
+package proto
 
 // Part is the data structure for a single part of the video stream information.
 type Part struct {

@@ -9,14 +9,10 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/wujiu2020/lux/extractors"
+	"github.com/wujiu2020/lux/extractors/proto"
 	"github.com/wujiu2020/lux/request"
 	"github.com/wujiu2020/lux/utils"
 )
-
-func init() {
-	extractors.Register("qq", New())
-}
 
 type qqVideoInfo struct {
 	Fl struct {
@@ -66,7 +62,7 @@ func getVinfo(vid, defn, refer string) (qqVideoInfo, error) {
 	}
 	jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
 	if jsonStrings == nil || len(jsonStrings) < 2 {
-		return qqVideoInfo{}, errors.WithStack(extractors.ErrURLParseFailed)
+		return qqVideoInfo{}, errors.WithStack(proto.ErrURLParseFailed)
 	}
 	jsonString := jsonStrings[1]
 	var data qqVideoInfo
@@ -76,8 +72,8 @@ func getVinfo(vid, defn, refer string) (qqVideoInfo, error) {
 	return data, nil
 }
 
-func genStreams(vid, cdn string, data qqVideoInfo) ([]*extractors.Stream, error) {
-	streams := make([]*extractors.Stream, 0)
+func genStreams(vid, cdn string, data qqVideoInfo) ([]*proto.Stream, error) {
+	streams := make([]*proto.Stream, 0)
 	var vkey string
 	// number of fragments
 	var clips int
@@ -113,7 +109,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) ([]*extractors.Stream, error)
 			}
 		}
 
-		var urls []*extractors.Part
+		var urls []*proto.Part
 		var totalSize int64
 		var filename string
 		for part := 1; part < clips+1; part++ {
@@ -139,7 +135,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) ([]*extractors.Stream, error)
 			}
 			jsonStrings := utils.MatchOneOf(html, `QZOutputJson=(.+);$`)
 			if jsonStrings == nil || len(jsonStrings) < 2 {
-				return nil, errors.WithStack(extractors.ErrURLParseFailed)
+				return nil, errors.WithStack(proto.ErrURLParseFailed)
 			}
 			jsonString := jsonStrings[1]
 
@@ -157,7 +153,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) ([]*extractors.Stream, error)
 			if err != nil {
 				return nil, errors.WithStack(err)
 			}
-			urlData := &extractors.Part{
+			urlData := &proto.Part{
 				URL:  realURL,
 				Size: size,
 				Ext:  "mp4",
@@ -165,7 +161,7 @@ func genStreams(vid, cdn string, data qqVideoInfo) ([]*extractors.Stream, error)
 			urls = append(urls, urlData)
 			totalSize += size
 		}
-		streams = append(streams, &extractors.Stream{
+		streams = append(streams, &proto.Stream{
 			ID:      fi.Name,
 			Segs:    urls,
 			Size:    totalSize,
@@ -178,15 +174,15 @@ func genStreams(vid, cdn string, data qqVideoInfo) ([]*extractors.Stream, error)
 type extractor struct{}
 
 // New returns a qq extractor.
-func New() extractors.Extractor {
+func New() proto.Extractor {
 	return &extractor{}
 }
 
 // Extract is the main function to extract the data.
-func (e *extractor) Extract(url string) (*extractors.Data, error) {
+func (e *extractor) Extract(url string) (*proto.Data, error) {
 	vids := utils.MatchOneOf(url, `vid=(\w+)`, `/(\w+)\.html`)
 	if vids == nil || len(vids) < 2 {
-		return nil, errors.WithStack(extractors.ErrURLParseFailed)
+		return nil, errors.WithStack(proto.ErrURLParseFailed)
 	}
 	vid := vids[1]
 
@@ -200,7 +196,7 @@ func (e *extractor) Extract(url string) (*extractors.Data, error) {
 			u, `vid=(\w+)`, `vid:\s*["'](\w+)`, `vid\s*=\s*["']\s*(\w+)`,
 		)
 		if vids == nil || len(vids) < 2 {
-			return nil, errors.WithStack(extractors.ErrURLParseFailed)
+			return nil, errors.WithStack(proto.ErrURLParseFailed)
 		}
 		vid = vids[1]
 	}
@@ -220,10 +216,10 @@ func (e *extractor) Extract(url string) (*extractors.Data, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	return &extractors.Data{
+	return &proto.Data{
 		Site:    "腾讯视频 v.qq.com",
 		Title:   data.Vl.Vi[0].Ti,
-		Type:    extractors.DataTypeVideo,
+		Type:    proto.DataTypeVideo,
 		Streams: streams,
 		URL:     url,
 	}, nil
