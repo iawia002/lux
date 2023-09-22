@@ -7,14 +7,12 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/dop251/goja v0.0.0-20230828202809-3dbe69dd2b8e
 	github.com/fatih/color v1.13.0
-	github.com/kkdai/youtube/v2 v2.9.0
 	github.com/kr/pretty v0.3.0
 	github.com/pkg/errors v0.9.1
 )
 
 require (
 	github.com/andybalholm/cascadia v1.3.1 // indirect
-	github.com/bitly/go-simplejson v0.5.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/google/pprof v0.0.0-20230907193218-d3ddc7976beb // indirect
