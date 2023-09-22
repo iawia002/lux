@@ -1,7 +1,7 @@
 {
-    "url": "https://v.qq.com/x/cover/mzc002003rpvd4j/n0046ht5pn8.html",
+    "url": "https://v.qq.com/x/cover/mzc00200fjo16c3/o00474v68ks.html",
     "site": "腾讯视频 v.qq.com",
-    "title": "长相思_01",
+    "title": "好事成双_02",
     "type": "video",
     "streams": [
         {
@@ -9,12 +9,13 @@
             "quality": "流畅;(270P)",
             "segs": [
                 {
-                    "url": "http://42.7.49.108/vlive.qqvideo.tc.qq.com/AgG9ncwCDlBRGLBGWNqi2YmH_IBoDUfCQW473Fho1lNg/B_JxNyiJmktHRgresXhfyMehlnfelFaJsL4nXivWb38I9e90S6cunPv_HWnxQB9EjM/svp_50112/gzc_1000102_0b53vmabmaaaymans2ovkzsmbk6dc2tqaesa.f100001.mp4?vkey=0F6F5672582AFAB29A0EB41A484847CF09566A3390450708EF978D759E91B90F7E765FF787A0655CBEE75EDBDE8F7AED76BD1DD2FFC813D8820990E917E52D95427A3E23C9F684A16E144F08450D9D4623B144697FDE2CCAC8EBDB73F595CB6FFDD16756A0FB98B3274B34AA5E419AEE61C2EB735DEA062FF71459098038B19921546FE67AB90DE4",
-                    "size": 13066393,
+                    "url": "http://116.140.44.97/vlive.qqvideo.tc.qq.com/ALKddZ0Fo3gKnNfngluHGKft42K-szBPxh95tHKCab_4/B_JxNyiJmktHRgresXhfyMelLyUNgJvfg-j7ZT9VwMfNOhASIQ9fZ0rOJbgLH09CY1/svp_50112/gzc_1000102_0b53kiackaaasyaenmyjqzs4auwdevpaaika.f100001.mp4?vkey=DD53193F60F5FA9526C40FB024E6418B730DF41E6B78A763B54ACC2CA40CA28269D0C84F01EAD0B62B96A8745CDA6D63C6F9539BAB1A7D50F6141FC289B43FDA54B0D2FA41F8CAB98EAA4527FD0E29DCD3720135B7C5197A9AAA492F0535D7E6E24FF5E32CB399A176298DB2A7DBB096EECB27BAEEDD016D56E8D032D3265C7C8212AE24694ACF57",
+                    "backupUrl": "",
+                    "size": 8800212,
                     "ext": "mp4"
                 }
             ],
-            "size": 13066393,
+            "size": 8800212,
             "ext": ""
         },
         {
@@ -22,12 +23,13 @@
             "quality": "标清;(480P)",
             "segs": [
                 {
-                    "url": "http://42.7.49.108/vlive.qqvideo.tc.qq.com/AgG9ncwCDlBRGLBGWNqi2YmH_IBoDUfCQW473Fho1lNg/B_JxNyiJmktHRgresXhfyMehlnfelFaJsL4nXivWb38I9e90S6cunPv_HWnxQB9EjM/svp_50112/gzc_1000102_0b53vmabmaaaymans2ovkzsmbk6dc2tqaesa.f2.mp4?vkey=AABF4CC13978A20828484A59A87EA652630903D996D95513E41AD7F8A3D47F7A73805147EDA927ACB4FF08C808DFF0F989666BD30132E8212C3EEC318B4E61E2AAB2567FDC013C384CA739D0453572CFFE24A9195135C5F10EDDDD4A81FF3B0B827FC1CA1CE617C4AE0FE6F4941EC5DFC8802C5D3BA56CB6CAAD6C2F1BC2D511BC78354E76133F75",
-                    "size": 30182648,
+                    "url": "http://116.140.44.97/vlive.qqvideo.tc.qq.com/ALKddZ0Fo3gKnNfngluHGKft42K-szBPxh95tHKCab_4/B_JxNyiJmktHRgresXhfyMelLyUNgJvfg-j7ZT9VwMfNOhASIQ9fZ0rOJbgLH09CY1/svp_50112/gzc_1000102_0b53kiackaaasyaenmyjqzs4auwdevpaaika.f2.mp4?vkey=DB70735285AC446FF5A18B993F3B196EB9176347DD5A07FDB26A0DDD697253EBCCC47418B92B3AF99E67B6CBA115B59E7E91394ED662343C3DD6515BFD712A6CB5E37E72405301EA607DED9346B3DF72046E23908FEA897CB82DD7828EC9CA0926C8F5091F408465ABEFAD7D29C3D821F02CD4878FBAFAEE312BCB85E26B42859B7F689F9637B0DE",
+                    "backupUrl": "",
+                    "size": 18018071,
                     "ext": "mp4"
                 }
             ],
-            "size": 30182648,
+            "size": 18018071,
             "ext": ""
         }
     ],

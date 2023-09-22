@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-
 	"github.com/wujiu2020/lux/extractors/proto"
 	"github.com/wujiu2020/lux/parser"
 	"github.com/wujiu2020/lux/request"

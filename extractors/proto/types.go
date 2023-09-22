@@ -2,9 +2,10 @@ package proto
 
 // Part is the data structure for a single part of the video stream information.
 type Part struct {
-	URL  string `json:"url"`
-	Size int64  `json:"size"`
-	Ext  string `json:"ext"`
+	URL       string `json:"url"`
+	BackupURL string `json:"backupUrl"`
+	Size      int64  `json:"size"`
+	Ext       string `json:"ext"`
 }
 
 // Stream is the data structure for each video stream, eg: 720P, 1080P.

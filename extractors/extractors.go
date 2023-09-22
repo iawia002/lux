@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-	"github.com/wujiu2020/lux/extractors/bilibili"
 	"github.com/wujiu2020/lux/extractors/cctv"
 	"github.com/wujiu2020/lux/extractors/douyin"
 	"github.com/wujiu2020/lux/extractors/iqiyi"
@@ -19,7 +18,6 @@ func init() {
 	douyin := douyin.New()
 	Register("douyin", douyin)
 	Register("iesdouyin", douyin)
-	Register("douyin", bilibili.New())
 	Register("iqiyi", iqiyi.New(iqiyi.SiteTypeIqiyi))
 	Register("iq", iqiyi.New(iqiyi.SiteTypeIQ))
 	Register("qq", qq.New())

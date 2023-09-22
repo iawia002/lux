@@ -1,0 +1,37 @@
+{
+    "url": "https://v.qq.com/x/cover/mzc002003rpvd4j/n0046ht5pn8.html",
+    "site": "腾讯视频 v.qq.com",
+    "title": "长相思_01",
+    "type": "video",
+    "streams": [
+        {
+            "id": "sd",
+            "quality": "流畅;(270P)",
+            "segs": [
+                {
+                    "url": "http://apd-vlive.apdcdn.tc.qq.com/vlive.qqvideo.tc.qq.com/A79375lY3hNLtuTUm-2GUXPlOR0VWs2b0MT6kHTRpqhI/B_JxNyiJmktHRgresXhfyMehlnfelFaJsL4nXivWb38I9e90S6cunPv_HWnxQB9EjM/svp_50112/gzc_1000102_0b53vmabmaaaymans2ovkzsmbk6dc2tqaesa.f100001.mp4?vkey=721F26307F3DF1B12D2AB42C23ACDE2EB099977699EE31FEC15A9C73534123F8A6443BB834121F683C4E8DCAD5C762B25DEFC506D59E6A6FB2159F912DDA05A8BFFC015DBF3920FB5FC82ABB707210D43F947D06C6E3BB701029B84443D99B383FB913480523B4D231229EF70773FE4E324204D7B9FB3F0E189CD74E65AAE3C3FB53A1DE1A5D1E38",
+                    "backupUrl": "",
+                    "size": 13066393,
+                    "ext": "mp4"
+                }
+            ],
+            "size": 13066393,
+            "ext": ""
+        },
+        {
+            "id": "hd",
+            "quality": "标清;(480P)",
+            "segs": [
+                {
+                    "url": "http://apd-vlive.apdcdn.tc.qq.com/vlive.qqvideo.tc.qq.com/A79375lY3hNLtuTUm-2GUXPlOR0VWs2b0MT6kHTRpqhI/B_JxNyiJmktHRgresXhfyMehlnfelFaJsL4nXivWb38I9e90S6cunPv_HWnxQB9EjM/svp_50112/gzc_1000102_0b53vmabmaaaymans2ovkzsmbk6dc2tqaesa.f2.mp4?vkey=18F703661FEF7C5EEC8192488781AAAA84F02D023DCE4B83647A403B9E963B741C0CD136FAB0204B0753A2350CB871D09C238907449FD06C7A8A5411C5029E00919410E0A10CD608D51A4158373907DD172333842DC9F77AA87044464FE4389B049FC1861353F744B0410058FDB89887ADEB7256A72CB920EA18129C7971376520F5460A5FE88166",
+                    "backupUrl": "",
+                    "size": 30182648,
+                    "ext": "mp4"
+                }
+            ],
+            "size": 30182648,
+            "ext": ""
+        }
+    ],
+    "err": null
+}

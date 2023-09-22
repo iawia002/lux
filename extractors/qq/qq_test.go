@@ -21,7 +21,7 @@ func Test_extractor_Extract(t *testing.T) {
 		{
 			name: "qq",
 			args: args{
-				url: "https://v.qq.com/x/cover/mzc002003rpvd4j/n0046ht5pn8.html",
+				url: "https://v.qq.com/x/cover/mzc00200fjo16c3/o00474v68ks.html",
 			},
 		},
 	}

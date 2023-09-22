@@ -21,7 +21,7 @@ func Test_extractor_Extract(t *testing.T) {
 		{
 			name: "bilibili",
 			args: args{
-				url: "https://www.bilibili.com/video/BV19C4y1f7zx/?spm_id_from=333.1007.tianma.1-1-1.click",
+				url: "https://www.bilibili.com/video/BV1zP4y1h7Lz/?spm_id_from=333.337.search-card.all.click",
 			},
 			wantErr: false,
 		},
