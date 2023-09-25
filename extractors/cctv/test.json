@@ -1,0 +1,82 @@
+{
+    "ack": "yes",
+    "status": "001",
+    "tag": "日本，老龄化",
+    "title": "全球最高！日本65岁以上老人占比达29.1%",
+    "play_channel": "小央视频",
+    "produce": "",
+    "editer_name": "wangzuoya",
+    "produce_id": "jksz",
+    "column": "原创高清视频",
+    "f_pgmtime": "2023-09-20 20:36:36",
+    "cdn_info": {
+        "cdn_vip": "vod.cntv.myhwcdn.cn",
+        "cdn_code": "VOD-MP4-CDN-HW",
+        "cdn_name": "华为云"
+    },
+    "video": {
+        "totalLength": "14.00",
+        "chapters": [
+            {
+                "duration": "14",
+                "image": "https://p3.img.cctvpic.com/fmspic/2023/09/20/d6923ad9fc44449f8d11a4f44c473627-180.jpg",
+                "url": "https://vod.cntv.myhwcdn.cn/flash/mp4video63/TMS/2023/09/20/d6923ad9fc44449f8d11a4f44c473627_450_h264_418_aac_32.mp4"
+            }
+        ],
+        "chapters2": [
+            {
+                "duration": "14",
+                "image": "https://p3.img.cctvpic.com/fmspic/2023/09/20/d6923ad9fc44449f8d11a4f44c473627-180.jpg",
+                "url": "https://vod.cntv.myhwcdn.cn/flash/mp4video63/TMS/2023/09/20/d6923ad9fc44449f8d11a4f44c473627_850_h264_818_aac_32.mp4"
+            }
+        ],
+        "chapters3": [
+            {
+                "duration": "14",
+                "image": "https://p3.img.cctvpic.com/fmspic/2023/09/20/d6923ad9fc44449f8d11a4f44c473627-180.jpg",
+                "url": "https: //vod.cntv.myhwcdn.cn/flash/mp4video63/TMS/2023/09/20/d6923ad9fc44449f8d11a4f44c473627_1200_h264_1072_aac_128.mp4"
+            }
+        ],
+        "chapters4": [
+            {
+                "duration": "14",
+                "image": "https://p3.img.cctvpic.com/fmspic/2023/09/20/d6923ad9fc44449f8d11a4f44c473627-180.jpg",
+                "url": "https://vod.cntv.myhwcdn.cn/flash/mp4video63/TMS/2023/09/20/d6923ad9fc44449f8d11a4f44c473627_2000_h264_1872_aac_128.mp4"
+            }
+        ],
+        "validChapterNum": 4,
+        "url": ""
+    },
+    "hls_cdn_info": {
+        "cdn_vip": "hls.cntv.kcdnvip.com",
+        "cdn_code": "VOD-HLS-CDN-JSHNEW",
+        "cdn_name": "3rd金山云-新"
+    },
+    "hls_url": "https://hls.cntv.kcdnvip.com/asp/hls/main/0303000a/3/default/d6923ad9fc44449f8d11a4f44c473627/main.m3u8?maxbr=2048",
+    "asp_error_code": "0",
+    "manifest": {
+        "audio_mp3": "https://dhls.cntv.myalicdn.com/asp/audio/d/6/9/2/d6923ad9fc44449f8d11a4f44c473627/mp3/main.m3u8",
+        "hls_audio_url": "https://dhls.cntv.myalicdn.com/asp/hlsaudio/hls/main/0303000a/3/default/d6923ad9fc44449f8d11a4f44c473627/main.m3u8",
+        "hls_enc_url": "https://dhls.cntv.myalicdn.com/asp/enc/hls/main/0303000a/3/default/d6923ad9fc44449f8d11a4f44c473627/main.m3u8?maxbr=2048\u0026contentid=18120319242338",
+        "hls_h5e_url": "https: //dh5.cntv.myalicdn.com/asp/h5e/hls/main/0303000a/3/default/d6923ad9fc44449f8d11a4f44c473627/main.m3u8?maxbr=2048\u0026contentid=15120519184043",
+        "hls_enc2_url": "https://dhls2.cntv.kcdnvip.com/asp/enc2/hls/main/0303000a/3/default/d6923ad9fc44449f8d11a4f44c473627/main.m3u8?maxbr=2048\u0026contentid=16121029231855"
+    },
+    "client_sid": "3haRuFSbzh6lWZN3/Vtq0loyds3ZsqBm7/j0AJKINF4=",
+    "public": "1",
+    "is_invalid_copyright": "0",
+    "is_protected": "0",
+    "is_fn_hot": "true",
+    "is_p2p_use": true,
+    "default_stream": "chapters3",
+    "lc": {
+        "isp_code": "2",
+        "city_code": "SY",
+        "provice_code": "LN",
+        "country_code": "CN",
+        "ip": "60.17.0.203"
+    },
+    "is_ipad_support": "true",
+    "version": "0.2",
+    "embed": "",
+    "is_fn_multi_stream": false
+}
