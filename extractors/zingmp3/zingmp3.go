@@ -23,6 +23,7 @@ import (
 
 func init() {
 	extractors.Register("zingmp3", New())
+	extractors.Register("mp3.zing.vn", New())
 }
 
 type extractor struct{}
@@ -42,7 +43,7 @@ var ApiSlugs = map[string]string{
 	"song-streaming": "/api/v2/song/get/streaming",
 }
 
-var Domain = "https://zingmp3.vn"
+const Domain = "https://zingmp3.vn"
 
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
@@ -147,15 +148,22 @@ func callApi(urlType string, p params) []byte {
 }
 
 func updatingCookies() {
-	api := generateApi("bai-hat", params{"id": ""})
-	res, _ := request.Request(http.MethodGet, api, nil, nil)
-	cookies := ""
-	for _, value := range res.Cookies() {
-		cookies += value.String()
+	// For the first time. We need to call the temp API to get cookies and set cookies to for next request
+	// But sometime zingmp3 doesn't return cookies. We need to retry get and set cookies again (only allow 5 time)
+	for i := 0; i < 5; i++ {
+		api := generateApi("bai-hat", params{"id": ""})
+		res, _ := request.Request(http.MethodGet, api, nil, nil)
+		cookies := ""
+		for _, value := range res.Cookies() {
+			cookies += value.String()
+		}
+		if cookies != "" {
+			request.SetOptions(request.Options{
+				Cookie: cookies,
+			})
+			return
+		}
 	}
-	request.SetOptions(request.Options{
-		Cookie: cookies,
-	})
 }
 
 func generateApi(urlType string, p params) string {
