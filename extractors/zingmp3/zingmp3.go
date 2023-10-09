@@ -13,7 +13,6 @@ import (
 	"sort"
 
 	"github.com/buger/jsonparser"
-
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
@@ -22,8 +21,9 @@ import (
 )
 
 func init() {
-	extractors.Register("zingmp3", New())
-	extractors.Register("mp3.zing.vn", New())
+	zingmp3Extractor := New()
+	extractors.Register("zingmp3", zingmp3Extractor)
+	extractors.Register("zing", zingmp3Extractor)
 }
 
 type extractor struct{}
@@ -54,7 +54,9 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 	urlType := urlMatcher[1]
 	id := urlMatcher[2]
-	updatingCookies()
+	if err := updatingCookies(); err != nil {
+		return nil, errors.WithStack(err)
+	}
 	data := callApi(urlType, params{"id": id})
 	title, _ := jsonparser.GetString(data, "title")
 	var contentType extractors.DataType
@@ -71,7 +73,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		source = callApi("song-streaming", params{"id": id})
 	}
 	streams := make(map[string]*extractors.Stream)
-	jsonparser.ObjectEach(source, func(k []byte, v []byte, dataType jsonparser.ValueType, offset int) error {
+	if err := jsonparser.ObjectEach(source, func(k []byte, v []byte, dataType jsonparser.ValueType, offset int) error {
 		key := string(k)
 		value := string(v)
 		if value == "" || value == "VIP" {
@@ -93,7 +95,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		}
 
 		// Handle for video
-		jsonparser.ObjectEach(v, func(kSource []byte, vSource []byte, _ jsonparser.ValueType, _ int) error {
+		return jsonparser.ObjectEach(v, func(kSource []byte, vSource []byte, _ jsonparser.ValueType, _ int) error {
 			resolution := string(kSource)
 			videoUrl := string(vSource)
 			if resolution == "" {
@@ -117,7 +119,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			}
 			size, _ := request.Size(videoUrl, url)
 			streams[fmt.Sprintf("mp4-%s", resolution)] = &extractors.Stream{
-				Parts: []*extractors.Part{&extractors.Part{
+				Parts: []*extractors.Part{{
 					URL:  videoUrl,
 					Ext:  "mp4",
 					Size: size,
@@ -125,13 +127,13 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			}
 			return nil
 		})
-
-		return nil
-	})
+	}); err != nil {
+		return nil, errors.WithStack(err)
+	}
 
 	return []*extractors.Data{
 		{
-			Site:    "Zingmp3 zingmp3.vn",
+			Site:    "Zing MP3 zingmp3.vn",
 			Title:   title,
 			Type:    contentType,
 			Streams: streams,
@@ -147,23 +149,28 @@ func callApi(urlType string, p params) []byte {
 	return data
 }
 
-func updatingCookies() {
+func updatingCookies() error {
 	// For the first time. We need to call the temp API to get cookies and set cookies to for next request
 	// But sometime zingmp3 doesn't return cookies. We need to retry get and set cookies again (only allow 5 time)
 	for i := 0; i < 5; i++ {
 		api := generateApi("bai-hat", params{"id": ""})
-		res, _ := request.Request(http.MethodGet, api, nil, nil)
+		res, err := request.Request(http.MethodGet, api, nil, nil)
+		if err != nil {
+			return err
+		}
 		cookies := ""
 		for _, value := range res.Cookies() {
 			cookies += value.String()
 		}
+		res.Body.Close() // nolint
 		if cookies != "" {
 			request.SetOptions(request.Options{
 				Cookie: cookies,
 			})
-			return
+			return nil
 		}
 	}
+	return nil
 }
 
 func generateApi(urlType string, p params) string {

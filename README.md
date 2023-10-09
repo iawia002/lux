@@ -644,6 +644,7 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 | 知乎             | <https://zhihu.com>                                                       | ✓        |          |         |            |                  | [![zhihu](https://github.com/iawia002/lux/actions/workflows/stream_zhihu.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_zhihu.yml/)                     |
 | Rumble           | <https://rumble.com>                                                      | ✓        |          |         |            |                  | [![rumble](https://github.com/iawia002/lux/actions/workflows/stream_rumble.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_rumble.yml/)                  |
 | 小红书           | <https://xiaohongshu.com>                                                 | ✓        |          |         |            |                  | [![xiaohongshu](https://github.com/iawia002/lux/actions/workflows/stream_xiaohongshu.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_xiaohongshu.yml/)   |
+| Zing MP3         | <https://zingmp3.vn>                                                      | ✓        |          | ✓       |            |                  | [![zingmp3](https://github.com/iawia002/lux/actions/workflows/stream_zingmp3.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_zingmp3.yml/)               |
 
 
 ## Known issues
