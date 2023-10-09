@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/MercuryEngineering/CookieMonster v0.0.0-20180304172713-1584578b3403
 	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/buger/jsonparser v1.1.1
 	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/dop251/goja v0.0.0-20230304130813-e2f543bf4b4c
 	github.com/fatih/color v1.13.0
