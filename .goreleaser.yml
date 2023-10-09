@@ -1,13 +1,13 @@
 project_name: lux
 env:
   - GO111MODULE=on
+  - CGO_ENABLED=0
 before:
   hooks:
     - go mod download
 builds:
-- env:
-    - CGO_ENABLED=0
-  binary: lux
+- binary: lux
+  ldflags: -s -w -X github.com/iawia002/lux/app.version={{ .RawVersion }}
   goos:
     - windows
     - darwin
@@ -29,17 +29,6 @@ builds:
     - goos: openbsd
       goarch: arm
       goarm: 6
-env_files:
-  github_token: ./github_token
-changelog:
-  sort: asc
-  use: github
-  filters:
-    exclude:
-      - '^docs'
-      - '^tests'
-      - Merge pull request
-      - Merge branch
 archives:
 - name_template: >-
     {{ .ProjectName }}_
@@ -56,7 +45,3 @@ archives:
   files:
     - none*
   wrap_in_directory: false
-release:
-  draft: true
-  footer: |
-    **Full Changelog**: https://github.com/iawia002/lux/compare/{{ .PreviousTag }}...{{ .Tag }}

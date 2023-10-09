@@ -17,11 +17,11 @@ import (
 	"github.com/iawia002/lux/utils"
 )
 
-const (
-	// Name is the name of this app.
-	Name    = "lux"
-	version = "v0.20.0"
-)
+// Name is the name of this app.
+const Name = "lux"
+
+// This value will be injected into the corresponding git tag value at build time using `-ldflags`.
+var version = "v0.0.0"
 
 func init() {
 	cli.VersionPrinter = func(c *cli.Context) {
