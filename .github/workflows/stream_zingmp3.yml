@@ -1,0 +1,31 @@
+name: zingmp3
+
+on:
+  push:
+    paths:
+      - "extractors/zingmp3/*.go"
+      - ".github/workflows/stream_zingmp3.yml"
+  pull_request:
+    paths:
+      - "extractors/zingmp3/*.go"
+      - ".github/workflows/stream_zingmp3.yml"
+  schedule:
+    # run ci weekly
+    - cron: "0 0 * * 0"
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go: ["1.21"]
+        os: [ubuntu-latest]
+    name: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Test
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/zingmp3
