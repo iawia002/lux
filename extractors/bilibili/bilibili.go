@@ -500,7 +500,7 @@ func getExtFromMimeType(mimeType string) string {
 
 func getSubTitleCaptionPart(aid int, cid int) *extractors.CaptionPart {
 	jsonString, err := request.Get(
-		fmt.Sprintf("http://api.bilibili.com/x/web-interface/view?aid=%d&cid=%d", aid, cid), referer, nil,
+		fmt.Sprintf("http://api.bilibili.com/x/player/wbi/v2?aid=%d&cid=%d", aid, cid), referer, nil,
 	)
 	if err != nil {
 		return nil
@@ -512,7 +512,7 @@ func getSubTitleCaptionPart(aid int, cid int) *extractors.CaptionPart {
 	}
 	return &extractors.CaptionPart{
 		Part: extractors.Part{
-			URL: stu.Data.SubtitleInfo.SubtitleList[0].SubtitleUrl,
+			URL: fmt.Sprintf("https:%s", stu.Data.SubtitleInfo.SubtitleList[0].SubtitleUrl),
 			Ext: "srt",
 		},
 		Transform: subtitleTransform,

@@ -131,7 +131,7 @@ type subtitleProperty struct {
 
 type subtitleInfo struct {
 	AllowSubmit  bool               `json:"allow_submit"`
-	SubtitleList []subtitleProperty `json:"list"`
+	SubtitleList []subtitleProperty `json:"subtitles"`
 }
 
 type bilibiliWebInterfaceData struct {
