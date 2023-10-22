@@ -19,6 +19,7 @@ import (
 
 func init() {
 	extractors.Register("bilibili", New())
+	extractors.Register("b23", New())
 }
 
 const (
