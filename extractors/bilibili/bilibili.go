@@ -18,7 +18,9 @@ import (
 )
 
 func init() {
-	extractors.Register("bilibili", New())
+	bilibiliExtractor := New()
+	extractors.Register("bilibili", bilibiliExtractor)
+	extractors.Register("b23", bilibiliExtractor)
 }
 
 const (

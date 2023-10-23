@@ -59,6 +59,13 @@ func TestBilibili(t *testing.T) {
 				Title: "【8K演示片】B站首发！你的设备还顶得住吗？",
 			},
 		},
+		{
+			name: "b23 test",
+			args: test.Args{
+				URL:   "https://b23.tv/Fc9i7QF",
+				Title: "【十年榜】2000-2009年最强华语金曲TOP100 P1 100爱转角-罗志祥",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
