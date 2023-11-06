@@ -96,29 +96,28 @@ type bilibiliOptions struct {
 
 func extractBangumi(url, html string, extractOption extractors.Options) ([]*extractors.Data, error) {
 	dataString := utils.MatchOneOf(html, `<script\s+id="__NEXT_DATA__"\s+type="application/json"\s*>(.*?)</script\s*>`)[1]
-	epMapString := utils.MatchOneOf(dataString, `"epMap"\s*:\s*(.+?)\s*,\s*"initEpList"`)[1]
+	epArrayString := utils.MatchOneOf(dataString, `"episodes"\s*:\s*(.+?)\s*,\s*"user_status"`)[1]
 	fullVideoIdString := utils.MatchOneOf(dataString, `"videoId"\s*:\s*"(ep|ss)(\d+)"`)
 	epSsString := fullVideoIdString[1] // "ep" or "ss"
 	videoIdString := fullVideoIdString[2]
 
-	var epMap map[string]json.RawMessage
-	err := json.Unmarshal([]byte(epMapString), &epMap)
+	var epArray []json.RawMessage
+	err := json.Unmarshal([]byte(epArrayString), &epArray)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	var data bangumiData
-	for idString, jsonByte := range epMap {
+	for _, jsonByte := range epArray {
 		var epInfo bangumiEpData
 		err := json.Unmarshal(jsonByte, &epInfo)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		epID, err := strconv.ParseInt(idString, 10, 0)
+		videoId, err := strconv.ParseInt(videoIdString, 10, 0)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		epInfo.EpID = int(epID)
-		if idString == videoIdString || (epSsString == "ss" && epInfo.TitleFormat == "第1话") {
+		if epInfo.ID == int(videoId) || (epSsString == "ss" && epInfo.TitleFormat == "第1话") {
 			data.EpInfo = epInfo
 		}
 		data.EpList = append(data.EpList, epInfo)
