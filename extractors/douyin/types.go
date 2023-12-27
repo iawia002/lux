@@ -395,7 +395,7 @@ type douyinData struct {
 				ImgXSize int     `json:"img_x_size"`
 				ImgYLen  int     `json:"img_y_len"`
 				ImgYSize int     `json:"img_y_size"`
-				Interval int     `json:"interval"`
+				Interval float64 `json:"interval"`
 				URI      string  `json:"uri"`
 			} `json:"big_thumbs"`
 			BitRate []struct {
