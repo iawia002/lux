@@ -669,6 +669,7 @@ Code with ❤️ by [iawia002](https://github.com/iawia002) and lovely [contribu
 
 ## Similar projects
 
+- [youtube](https://github.com/kkdai/youtube)
 - [youtube-dl](https://github.com/rg3/youtube-dl)
 - [you-get](https://github.com/soimort/you-get)
 - [ytdl](https://github.com/rylio/ytdl)
