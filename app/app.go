@@ -89,6 +89,11 @@ func New() *cli.App {
 				Aliases: []string{"f"},
 				Usage:   "Select specific stream to download",
 			},
+			&cli.BoolFlag{
+				Name:    "audio-only",
+				Aliases: []string{"ao"},
+				Usage:   "Download audio only at best quality",
+			},
 			&cli.StringFlag{
 				Name:    "file",
 				Aliases: []string{"F"},
@@ -300,6 +305,7 @@ func download(c *cli.Context, videoURL string) error {
 		Silent:         c.Bool("silent"),
 		InfoOnly:       c.Bool("info"),
 		Stream:         c.String("stream-format"),
+		AudioOnly:      c.Bool("audio-only"),
 		Refer:          c.String("refer"),
 		OutputPath:     c.String("output-path"),
 		OutputName:     c.String("output-name"),
