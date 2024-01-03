@@ -570,16 +570,21 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 	}
 
 	if downloader.option.AudioOnly {
+		var isFound bool
 		for _, s := range sortedStreams {
 			// Looking for the best quality
-			matches, ok := regexp.MatchString("audio", s.Quality)
-			if ok != nil {
-				return errors.Errorf("No audio stream found")
+			matches, err := regexp.MatchString("audio", s.Quality)
+			if err != nil {
+				return err
 			}
 			if matches {
+				isFound = true
 				stream, _ = data.Streams[s.ID]
 				break
 			}
+		}
+		if !isFound {
+			return errors.Errorf("No audio stream found")
 		}
 	}
 
