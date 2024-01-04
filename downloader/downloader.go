@@ -571,15 +571,16 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 
 	if downloader.option.AudioOnly {
 		var isFound bool
+		reg, err := regexp.Compile("audio+")
+		if err != nil {
+			return err
+		}
+
 		for _, s := range sortedStreams {
 			// Looking for the best quality
-			matches, err := regexp.MatchString("audio", s.Quality)
-			if err != nil {
-				return err
-			}
-			if matches {
+			if reg.MatchString(s.Quality) {
 				isFound = true
-				stream, _ = data.Streams[s.ID]
+				stream = data.Streams[s.ID]
 				break
 			}
 		}
