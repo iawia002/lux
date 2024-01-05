@@ -28,6 +28,7 @@ type Options struct {
 	InfoOnly       bool
 	Silent         bool
 	Stream         string
+	AudioOnly      bool
 	Refer          string
 	OutputPath     string
 	OutputName     string
@@ -566,6 +567,26 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 	stream, ok := data.Streams[streamName]
 	if !ok {
 		return errors.Errorf("no stream named %s", streamName)
+	}
+
+	if downloader.option.AudioOnly {
+		var isFound bool
+		reg, err := regexp.Compile("audio+")
+		if err != nil {
+			return err
+		}
+
+		for _, s := range sortedStreams {
+			// Looking for the best quality
+			if reg.MatchString(s.Quality) {
+				isFound = true
+				stream = data.Streams[s.ID]
+				break
+			}
+		}
+		if !isFound {
+			return errors.Errorf("No audio stream found")
+		}
 	}
 
 	if !downloader.option.Silent {
