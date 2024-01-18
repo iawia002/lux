@@ -28,6 +28,8 @@ type Stream struct {
 	Ext string `json:"ext"`
 	// if the parts need mux
 	NeedMux bool
+	// 如果有m3u8地址
+	M3u8Url string `json:"m3u8_url"`
 }
 
 // DataType indicates the type of extracted data, eg: video or image.
