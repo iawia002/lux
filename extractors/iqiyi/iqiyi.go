@@ -35,6 +35,7 @@ type iqiyi struct {
 						L string `json:"l"`
 						B int64  `json:"b"`
 					} `json:"fs"`
+					M3u8Url string `json:"m3u8Url"`
 				} `json:"vs"`
 			} `json:"tkl"`
 		} `json:"vp"`
@@ -230,6 +231,7 @@ func (e *extractor) Extract(url string, _ extractors.Options) ([]*extractors.Dat
 			Parts:   urls,
 			Size:    video.Vsize,
 			Quality: video.Scrsz,
+			M3u8Url: video.M3u8Url,
 		}
 	}
 

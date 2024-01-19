@@ -57,6 +57,8 @@ type Data struct {
 	Captions map[string]*CaptionPart `json:"caption"`
 	// Err is used to record whether an error occurred when extracting the list data
 	Err error `json:"err"`
+
+	Raw string `json:"raw"`
 }
 
 // FillUpStreamsData fills up some data automatically.

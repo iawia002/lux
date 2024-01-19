@@ -488,6 +488,7 @@ func bilibiliDownload(options bilibiliOptions, extractOption extractors.Options)
 			"subtitle": getSubTitleCaptionPart(options.aid, options.cid),
 		},
 		URL: options.url,
+		Raw: jsonString,
 	}
 }
 
