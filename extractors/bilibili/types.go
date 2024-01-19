@@ -81,7 +81,7 @@ type dashStream struct {
 
 type dashStreams struct {
 	Duration      int64        `json:"duration"`
-	MinBufferTime string       `json:"minBufferTime"`
+	MinBufferTime float32      `json:"minBufferTime"`
 	Video         []dashStream `json:"video"`
 	Audio         []dashStream `json:"audio"`
 }
