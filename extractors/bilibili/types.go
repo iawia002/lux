@@ -57,24 +57,40 @@ type multiPage struct {
 	VideoData multiPageVideoData `json:"videoData"`
 }
 
+type segmentBase struct {
+	Initialization string `json:"Initialization"`
+	indexRange     string `json:"indexRange"`
+}
+
 type dashStream struct {
-	ID        int    `json:"id"`
-	BaseURL   string `json:"baseUrl"`
-	Bandwidth int    `json:"bandwidth"`
-	MimeType  string `json:"mimeType"`
-	Codecid   int    `json:"codecid"`
-	Codecs    string `json:"codecs"`
+	ID           int         `json:"id"`
+	BaseURL      string      `json:"baseUrl"`
+	Bandwidth    int         `json:"bandwidth"`
+	MimeType     string      `json:"mimeType"`
+	Codecid      int         `json:"codecid"`
+	Codecs       string      `json:"codecs"`
+	StartWithSAP int         `json:"startWithSAP"`
+	Sar          string      `json:"sar"`
+	FrameRate    string      `json:"frameRate"`
+	Width        int         `json:"width"`
+	Height       int         `json:"height"`
+	BackupUrl    []string    `json:"backupUrl"`
+	SegmentBase  segmentBase `json:"SegmentBase"`
+	Size         int64       `json:"size"`
 }
 
 type dashStreams struct {
-	Video []dashStream `json:"video"`
-	Audio []dashStream `json:"audio"`
+	Duration      int64        `json:"duration"`
+	MinBufferTime string       `json:"minBufferTime"`
+	Video         []dashStream `json:"video"`
+	Audio         []dashStream `json:"audio"`
 }
 
 type dashInfo struct {
 	CurQuality  int         `json:"quality"`
 	Description []string    `json:"accept_description"`
 	Quality     []int       `json:"accept_quality"`
+	TimeLength  int         `json:"timelength"`
 	Streams     dashStreams `json:"dash"`
 	DURLFormat  string      `json:"format"`
 	DURLs       []dURL      `json:"durl"`
