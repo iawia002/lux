@@ -56,6 +56,7 @@ func progressBar(size int64) *pb.ProgressBar {
 	tmpl := `{{counters .}} {{bar . "[" "=" ">" "-" "]"}} {{speed .}} {{percent . | green}} {{rtime .}}`
 	return pb.New64(size).
 		Set(pb.Bytes, true).
+		Set(pb.ReturnSymbol, "\n").
 		SetMaxWidth(1000).
 		SetTemplate(pb.ProgressBarTemplate(tmpl))
 }
