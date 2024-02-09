@@ -52,6 +52,10 @@ type Downloader struct {
 	option Options
 }
 
+const (
+	DOWNLOAD_FILE_EXT = ".download"
+)
+
 func progressBar(size int64) *pb.ProgressBar {
 	tmpl := `{{counters .}} {{bar . "[" "=" ">" "-" "]"}} {{speed .}} {{percent . | green}} {{rtime .}}`
 	return pb.New64(size).
@@ -135,7 +139,7 @@ func (downloader *Downloader) save(part *extractors.Part, refer, fileName string
 		return nil
 	}
 
-	tempFilePath := filePath + ".download"
+	tempFilePath := filePath + DOWNLOAD_FILE_EXT
 	tempFileSize, _, err := utils.FileSize(tempFilePath)
 	if err != nil {
 		return err
@@ -233,7 +237,7 @@ func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, 
 		downloader.bar.Add64(fileSize)
 		return nil
 	}
-	tmpFilePath := filePath + ".download"
+	tmpFilePath := filePath + DOWNLOAD_FILE_EXT
 	tmpFileSize, tmpExists, err := utils.FileSize(tmpFilePath)
 	if err != nil {
 		return err
@@ -469,7 +473,7 @@ func writeFilePartMeta(file *os.File, meta *FilePartMeta) error {
 }
 
 func mergeMultiPart(filepath string, parts []*FilePartMeta) error {
-	tempFilePath := filepath + ".download"
+	tempFilePath := filepath + DOWNLOAD_FILE_EXT
 	tempFile, err := os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return err
