@@ -143,3 +143,30 @@ type bilibiliWebInterface struct {
 	Code int                      `json:"code"`
 	Data bilibiliWebInterfaceData `json:"data"`
 }
+
+type festival struct {
+	VideoSections []struct {
+		Id    int64  `json:"id"`
+		Title string `json:"title"`
+		Type  int    `json:"type"`
+	} `json:"videoSections"`
+	Episodes  []episode `json:"episodes"`
+	VideoInfo struct {
+		Aid   int    `json:"aid"`
+		BVid  string `json:"bvid"`
+		Cid   int    `json:"cid"`
+		Title string `json:"title"`
+		Desc  string `json:"desc"`
+		Pages []struct {
+			Cid       int    `json:"cid"`
+			Duration  int    `json:"duration"`
+			Page      int    `json:"page"`
+			Part      string `json:"part"`
+			Dimension struct {
+				Width  int `json:"width"`
+				Height int `json:"height"`
+				Rotate int `json:"rotate"`
+			} `json:"dimension"`
+		} `json:"pages"`
+	} `json:"videoInfo"`
+}
