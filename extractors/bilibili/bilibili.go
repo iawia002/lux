@@ -297,7 +297,7 @@ func multiEpisodeDownload(url, html string, extractOption extractors.Options, pa
 			aid:      u.Aid,
 			bvid:     u.BVid,
 			cid:      u.Cid,
-			subtitle: u.Title,
+			subtitle: fmt.Sprintf("%s P%d", u.Title, dataIndex+1),
 		}
 		go func(index int, options bilibiliOptions, extractedData []*extractors.Data) {
 			defer wgp.Done()
