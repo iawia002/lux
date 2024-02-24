@@ -70,9 +70,13 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	r := regexp.MustCompile(`(ixigua.com/)(\w+)?`)
 	id := r.FindSubmatch([]byte(finalURL))[2]
-	url2 := fmt.Sprintf("https://www.ixigua.com/api/public/videov2/brief/details?group_id=%s", string(id))
 
-	body, err := request.Get(url2, url, headers)
+	// update video info api
+	//url2 := fmt.Sprintf("https://www.ixigua.com/api/public/videov2/brief/details?group_id=%s", string(id))
+	url2 := fmt.Sprintf("https://www.ixigua.com/api/mixVideo/information?mixId=%s", string(id))
+	referUrl := fmt.Sprintf("https://www.ixigua.com/iframe/%s", string(id))
+
+	body, err := request.Get(url2, referUrl, headers)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -83,7 +87,8 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.WithStack(err)
 	}
 
-	query, err := gojq.Parse("{title: .data.title} + {qualities: [.data.videoResource.normal.video_list | .[] | {url: .main_url, size: .size, ext: .vtype, quality: .definition}]}")
+	//query, err := gojq.Parse("{title: .data.title} + {qualities: [.data.videoResource.normal.video_list | .[] | {url: .main_url, size: .size, ext: .vtype, quality: .definition}]}")
+	query, err := gojq.Parse("{title: .data.gidInformation.packerData.video.title} + {qualities: [.data.gidInformation.packerData.video.videoResource.normal.video_list | .[] | {url: .main_url, size: .size, ext: .vtype, quality: .definition}]}")
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
