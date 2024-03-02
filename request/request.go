@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"strconv"
 	"strings"
 	"time"
@@ -54,9 +55,14 @@ func Request(method, url string, body io.Reader, headers map[string]string) (*ht
 		TLSHandshakeTimeout: 10 * time.Second,
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 	}
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
 	client := &http.Client{
 		Transport: transport,
 		Timeout:   15 * time.Minute,
+		Jar:       jar,
 	}
 
 	req, err := http.NewRequest(method, url, body)
