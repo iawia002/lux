@@ -9,6 +9,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+func IsFfmpegInstalled() error {
+	_, err := exec.LookPath("ffmpeg")
+	if err != nil {
+		return errors.Errorf("%s", err)
+	}
+	return nil
+}
+
 func runMergeCmd(cmd *exec.Cmd, paths []string, mergeFilePath string) error {
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
