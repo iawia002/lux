@@ -5,9 +5,27 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 
 	"github.com/pkg/errors"
 )
+
+func findFFmpegExecutable() string {
+	ffmpegFileName := "ffmpeg"
+	if runtime.GOOS == "windows" {
+		ffmpegFileName = "ffmpeg.exe" // 在Windows上添加.exe擴展名
+	}
+	// 嘗試在當前目錄中查找ffmpeg
+	matches, err := filepath.Glob("./" + ffmpegFileName)
+	if err == nil && len(matches) > 0 {
+		// 如果在當前目錄找到了ffmpeg，直接返回這個路徑
+		return "./" + ffmpegFileName
+	}
+
+	// 返回從PATH中找到的ffmpeg路徑
+	return ffmpegFileName
+}
 
 func runMergeCmd(cmd *exec.Cmd, paths []string, mergeFilePath string) error {
 	var stderr bytes.Buffer
@@ -37,7 +55,8 @@ func MergeFilesWithSameExtension(paths []string, mergedFilePath string) error {
 		cmds = append(cmds, "-i", path)
 	}
 	cmds = append(cmds, "-c:v", "copy", "-c:a", "copy", mergedFilePath)
-	return runMergeCmd(exec.Command("ffmpeg", cmds...), paths, "")
+
+	return runMergeCmd(exec.Command(findFFmpegExecutable(), cmds...), paths, "")
 }
 
 // MergeToMP4 merges video parts to an MP4 file.
@@ -52,7 +71,7 @@ func MergeToMP4(paths []string, mergedFilePath string, filename string) error {
 	mergeFile.Close() // nolint
 
 	cmd := exec.Command(
-		"ffmpeg", "-y", "-f", "concat", "-safe", "0",
+		findFFmpegExecutable(), "-y", "-f", "concat", "-safe", "0",
 		"-i", mergeFilePath, "-c", "copy", "-bsf:a", "aac_adtstoasc", mergedFilePath,
 	)
 	return runMergeCmd(cmd, paths, mergeFilePath)
