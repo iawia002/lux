@@ -2,45 +2,137 @@ package instagram
 
 import (
 	"encoding/json"
+	"fmt"
+	"net"
+	"net/http"
 	netURL "net/url"
+	"regexp"
 	"strings"
+	"time"
 
+	browser "github.com/EDDYCJY/fake-useragent"
+	"github.com/gocolly/colly/v2"
 	"github.com/pkg/errors"
-	"golang.org/x/net/html"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
 	"github.com/iawia002/lux/utils"
 )
 
+var client *http.Client
+
 func init() {
 	extractors.Register("instagram", New())
+	client = &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			Dial: (&net.Dialer{
+				Timeout: 5 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout: 5 * time.Second,
+		},
+	}
+}
+
+// sliderItemNode contains information about the Instagram post
+type sliderItemNode struct {
+	DisplayURL string `json:"display_url"` // URL of the Media (resolution is dynamic)
+
+	IsVideo  bool   `json:"is_video"`  // Is type of the Media equals to video
+	VideoURL string `json:"video_url"` // Direct URL to the Video
+}
+
+func (s sliderItemNode) extractMediaURL() string {
+	if s.IsVideo {
+		return s.VideoURL
+	}
+
+	return s.DisplayURL
 }
 
 type instagramPayload struct {
-	ArticleBody string `json:"articleBody"`
-	Author      struct {
-		Image           string `json:"image"`
-		Name            string `json:"name"`
-		AlternativeName string `json:"alternativeName"`
-		Url             string `json:"url"`
-	} `json:"author"`
-	Videos []struct {
-		UploadData   string `json:"string"`
-		Description  string `json:"description"`
-		Name         string `json:"name"`
-		Caption      string `json:"caption"`
-		Height       string `json:"height"`
-		Width        string `json:"width"`
-		ContentURL   string `json:"contentUrl"`
-		ThumbnailURL string `json:"thumbnailUrl"`
-	} `json:"video"`
-	Images []struct {
-		Caption string `json:"caption"`
-		Height  string `json:"height"`
-		Width   string `json:"width"`
-		URL     string `json:"url"`
-	} `json:"image"`
+	Media struct {
+		ID          string `json:"id"` // Unique ID of the Media
+		SliderItems struct {
+			Edges []struct {
+				Node sliderItemNode `json:"node"`
+			} `json:"edges"`
+		} `json:"edge_sidecar_to_children"` // Children of the Media
+	} `json:"shortcode_media"` // Media
+}
+
+func (s instagramPayload) isEmpty() bool {
+	return s.Media.ID == ""
+}
+
+func getPostWithCode(code string) ([]string, error) {
+	URL := fmt.Sprintf("https://www.instagram.com/p/%v/embed/captioned/", code)
+
+	var embeddedMediaImage string
+	var embedResponse = instagramPayload{}
+	collector := colly.NewCollector()
+	collector.SetClient(client)
+	var collectorErr error
+
+	collector.OnHTML("img.EmbeddedMediaImage", func(e *colly.HTMLElement) {
+		embeddedMediaImage = e.Attr("src")
+	})
+
+	collector.OnHTML("script", func(e *colly.HTMLElement) {
+		r := regexp.MustCompile(`\\\"gql_data\\\":([\s\S]*)\}\"\}\]\]\,\[\"NavigationMetrics`)
+		match := r.FindStringSubmatch(e.Text)
+
+		if len(match) < 2 {
+			return
+		}
+
+		s := strings.ReplaceAll(match[1], `\"`, `"`)
+		s = strings.ReplaceAll(s, `\\/`, `/`)
+		s = strings.ReplaceAll(s, `\\`, `\`)
+
+		err := json.Unmarshal([]byte(s), &embedResponse)
+		if err != nil {
+			collectorErr = err
+		}
+	})
+
+	collector.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("User-Agent", browser.Chrome())
+	})
+
+	if err := collector.Visit(URL); err != nil {
+		return nil, fmt.Errorf("failed to send HTTP request to the Instagram: %v", err)
+	}
+
+	if collectorErr != nil {
+		return nil, fmt.Errorf("failed to parse the Instagram response: %v", collectorErr)
+	}
+
+	// If the method one which is JSON parsing didn't fail
+	if !embedResponse.isEmpty() {
+		result := make([]string, 0, len(embedResponse.Media.SliderItems.Edges))
+		for _, item := range embedResponse.Media.SliderItems.Edges {
+			result = append(result, item.Node.extractMediaURL())
+		}
+
+		return result, nil
+	}
+
+	if embeddedMediaImage != "" {
+		return []string{embeddedMediaImage}, nil
+	}
+
+	// If every two methods have failed, then return an error
+	return nil, errors.New("failed to fetch the post, the page might be \"private\", or the link is completely wrong")
+}
+
+func extractShortCodeFromLink(link string) (string, error) {
+	values := regexp.MustCompile(`(p|tv|reel|reels\/videos)\/([A-Za-z0-9-_]+)`).FindStringSubmatch(link)
+	if len(values) != 3 {
+		return "", errors.New("couldn't extract the media short code from the link")
+	}
+
+	return values[2], nil
 }
 
 type extractor struct{}
@@ -57,44 +149,35 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.WithStack(err)
 	}
 
-	htmlResp, err := request.Get(u.String(), url, nil)
+	shortCode, err := extractShortCodeFromLink(u.String())
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	reader := strings.NewReader(htmlResp)
-	htmlRoot, err := html.Parse(reader)
+	urls, err := getPostWithCode(shortCode)
 	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	sNode, err := dfsFindScript(htmlRoot)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	var payload instagramPayload
-	if err = json.Unmarshal([]byte(sNode.Data), &payload); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
 	var totalSize int64
 	var parts []*extractors.Part
-	if len(payload.Videos) > 0 {
-		videoParts, err := createPartVideos(&payload, url)
+
+	for _, u := range urls {
+		_, ext, err := utils.GetNameAndExt(u)
 		if err != nil {
-			return nil, errors.WithStack(extractors.ErrBodyParseFailed)
+			return nil, errors.WithStack(err)
+		}
+		fileSize, err := request.Size(u, url)
+		if err != nil {
+			return nil, errors.WithStack(err)
 		}
 
-		parts = append(parts, videoParts...)
-	}
-	if len(payload.Images) > 0 {
-		imageParts, err := createPartImages(&payload, url)
-		if err != nil {
-			return nil, errors.WithStack(extractors.ErrBodyParseFailed)
+		part := &extractors.Part{
+			URL:  u,
+			Size: fileSize,
+			Ext:  ext,
 		}
-
-		parts = append(parts, imageParts...)
+		parts = append(parts, part)
 	}
 
 	for _, part := range parts {
@@ -108,77 +191,13 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		},
 	}
 
-	id := u.Path[strings.LastIndex(u.Path, "/")+1:]
-
 	return []*extractors.Data{
 		{
 			Site:    "Instagram instagram.com",
-			Title:   "Instagram " + id,
+			Title:   "Instagram " + shortCode,
 			Type:    extractors.DataTypeImage,
 			Streams: streams,
 			URL:     url,
 		},
 	}, nil
-}
-
-func dfsFindScript(n *html.Node) (*html.Node, error) {
-	if n.Type == html.ElementNode && n.Data == "script" {
-		for _, attr := range n.Attr {
-			if attr.Key == "type" && attr.Val == "application/ld+json" {
-				return n.FirstChild, nil
-			}
-		}
-	}
-
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		if ret, err := dfsFindScript(c); err == nil {
-			return ret, nil
-		}
-	}
-
-	return nil, errors.WithStack(extractors.ErrBodyParseFailed)
-}
-
-func createPartVideos(payload *instagramPayload, ref string) (parts []*extractors.Part, err error) {
-	for _, it := range payload.Videos {
-		_, ext, err := utils.GetNameAndExt(it.ContentURL)
-		if err != nil {
-			return parts, errors.WithStack(err)
-		}
-		filesize, err := request.Size(it.ContentURL, ref)
-		if err != nil {
-			return parts, errors.WithStack(err)
-		}
-
-		part := &extractors.Part{
-			URL:  it.ContentURL,
-			Size: filesize,
-			Ext:  ext,
-		}
-		parts = append(parts, part)
-	}
-
-	return parts, err
-}
-
-func createPartImages(payload *instagramPayload, ref string) (parts []*extractors.Part, err error) {
-	for _, it := range payload.Images {
-		_, ext, err := utils.GetNameAndExt(it.URL)
-		if err != nil {
-			return parts, errors.WithStack(err)
-		}
-		filesize, err := request.Size(it.URL, ref)
-		if err != nil {
-			return parts, errors.WithStack(err)
-		}
-
-		part := &extractors.Part{
-			URL:  it.URL,
-			Size: filesize,
-			Ext:  ext,
-		}
-		parts = append(parts, part)
-	}
-
-	return parts, err
 }
