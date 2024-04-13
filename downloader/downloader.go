@@ -457,7 +457,7 @@ func parseFilePartMeta(filepath string, fileSize int64) (*FilePartMeta, error) {
 		return nil, errors.WithStack(err)
 	}
 	if readSize < size {
-		return nil, errors.Errorf("the file has been broked, please delete all part files and re-download")
+		return nil, errors.Errorf("the file has been broken, please delete all part files and re-download")
 	}
 	err = binary.Read(bytes.NewBuffer(buf[:size]), binary.LittleEndian, meta)
 	if err != nil {
