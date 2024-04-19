@@ -655,6 +655,13 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 
 最好是每次下载都附带登录过的 Cookie 以避免部分 `ccode` 的问题
 
+### 西瓜/头条视频
+西瓜/头条视频必须带 Cookie 才能下载成功，西瓜和头条可共用西瓜视频的 Cookie，Cookie 的有效期可能较短，下载失败就更新 Cookie 尝试：
+
+```
+$ lux -c "msToken=yoEh0-qLUq4obZ8Sfxsem_CxCo9R3NM6ViTrWaRcM1...; ttwid=1%7C..." "https://m.toutiao.com/is/iYbTfJ79/"
+```
+
 ## Contributing
 
 Lux is an open source project and built on the top of open-source projects. Check out the [Contributing Guide](./CONTRIBUTING.md) to get started.
