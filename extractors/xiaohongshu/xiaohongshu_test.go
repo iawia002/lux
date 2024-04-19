@@ -15,7 +15,7 @@ func TestDownload(t *testing.T) {
 		{
 			name: "normal test",
 			args: test.Args{
-				URL:   "https://www.xiaohongshu.com/explore/64e9f1e50000000003023b3f?m_source=pinpai",
+				URL:   "https://www.xiaohongshu.com/explore/64e9f1e50000000003023b3f",
 				Title: "七星级大厨都不会告诉你的，五花肉的8种做法",
 				Size:  59410194,
 			},

@@ -340,6 +340,11 @@ As a text file:
 $ lux -c cookies.txt "https://www.bilibili.com/video/av20203945"
 ```
 
+Another example
+```
+$ lux -c "msToken=yoEh0-qLUq4obZ8Sfxsem_CxCo9R3NM6ViTrWaRcM1...; ttwid=1%7C..." "https://m.toutiao.com/is/iYbTfJ79/"
+```
+
 ### Proxy
 
 You can set the HTTP/SOCKS5 proxy using environment variables:
@@ -654,6 +659,9 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 优酷的 `ccode` 经常变化导致 lux 不可用，如果你知道有新的可用的 `ccode`，可以直接使用 `lux -ccode ...` 而不用等待 lux 更新（当然，也欢迎你给我们提一个 Pull request 来更新默认的 `ccode`）
 
 最好是每次下载都附带登录过的 Cookie 以避免部分 `ccode` 的问题
+
+### 西瓜&头条
+西瓜&头条视频必须带Cookie才能下载成功，西瓜和头条可共用西瓜视频的Cookie，Cookie的有效期可能较短，下载失败就更新Cookie尝试（2024-04-19）
 
 ## Contributing
 
