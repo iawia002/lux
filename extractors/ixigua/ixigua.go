@@ -4,16 +4,16 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	browser "github.com/EDDYCJY/fake-useragent"
-	"github.com/iawia002/lux/utils"
 	"net/http"
 	"regexp"
 	"strings"
 
+	browser "github.com/EDDYCJY/fake-useragent"
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
 
 func init() {
@@ -71,7 +71,6 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	r := regexp.MustCompile(`(ixigua.com/)(\w+)?`)
 	id := r.FindSubmatch([]byte(finalURL))[2]
-	//url2 := fmt.Sprintf("https://www.ixigua.com/api/public/videov2/brief/details?group_id=%s", string(id))
 	url2 := fmt.Sprintf("https://www.ixigua.com/%s", string(id))
 
 	body, err := request.Get(url2, url, headers)
@@ -87,15 +86,13 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	videoUrl := videoListJson[1]
 	videoUrl = strings.Replace(videoUrl, ":undefined", ":\"undefined\"", -1)
 
-	// 解析JSON字符串
-	var xiguanData xiguanData
-	err = json.Unmarshal([]byte(videoUrl), &xiguanData)
-	if err != nil {
+	var data xiguanData
+	if err = json.Unmarshal([]byte(videoUrl), &data); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	title := xiguanData.AnyVideo.GidInformation.PackerData.Video.Title
-	videoList := xiguanData.AnyVideo.GidInformation.PackerData.Video.VideoResource.Normal.VideoList
+	title := data.AnyVideo.GidInformation.PackerData.Video.Title
+	videoList := data.AnyVideo.GidInformation.PackerData.Video.VideoResource.Normal.VideoList
 
 	streams := make(map[string]*extractors.Stream)
 	for _, v := range videoList {
