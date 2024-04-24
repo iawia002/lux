@@ -66,6 +66,13 @@ func TestBilibili(t *testing.T) {
 				Title: "【十年榜】2000-2009年最强华语金曲TOP100 P1 100爱转角-罗志祥",
 			},
 		},
+		{
+			name: "festival test",
+			args: test.Args{
+				URL:   "https://www.bilibili.com/festival/lty10th?bvid=BV1dZ4y1Y7bt",
+				Title: "洛天依十周年官方演唱会",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

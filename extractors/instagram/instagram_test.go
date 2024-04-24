@@ -17,7 +17,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/BlIka1ZFCNr",
 				Title: "Instagram BlIka1ZFCNr",
-				Size:  577298,
+				Size:  992330,
 			},
 		},
 		{
@@ -25,7 +25,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/Bl5oVUyl9Yx",
 				Title: "Instagram Bl5oVUyl9Yx",
-				Size:  101611,
+				Size:  250596,
 			},
 		},
 		{
@@ -33,7 +33,7 @@ func TestDownload(t *testing.T) {
 			args: test.Args{
 				URL:   "https://www.instagram.com/p/Bjyr-gxF4Rb",
 				Title: "Instagram Bjyr-gxF4Rb",
-				Size:  241466,
+				Size:  656476,
 			},
 		},
 	}

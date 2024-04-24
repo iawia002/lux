@@ -202,6 +202,33 @@ func getMultiPageData(html string) (*multiPage, error) {
 	return &data, nil
 }
 
+func extractFestival(url, html string, extractOption extractors.Options) ([]*extractors.Data, error) {
+	matches := utils.MatchAll(html, "<\\s*script[^>]*>\\s*window\\.__INITIAL_STATE__=([\\s\\S]*?);\\s?\\(function[\\s\\S]*?<\\/\\s*script\\s*>")
+	if len(matches) < 1 {
+		return nil, errors.WithStack(extractors.ErrURLParseFailed)
+	}
+	if len(matches[0]) < 2 {
+		return nil, errors.New("could not find video in page")
+	}
+
+	var festivalData festival
+	err := json.Unmarshal([]byte(matches[0][1]), &festivalData)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	options := bilibiliOptions{
+		url:  url,
+		html: html,
+		aid:  festivalData.VideoInfo.Aid,
+		bvid: festivalData.VideoInfo.BVid,
+		cid:  festivalData.VideoInfo.Cid,
+		page: 0,
+	}
+
+	return []*extractors.Data{bilibiliDownload(options, extractOption)}, nil
+}
+
 func extractNormalVideo(url, html string, extractOption extractors.Options) ([]*extractors.Data, error) {
 	pageData, err := getMultiPageData(html)
 	if err != nil {
@@ -270,7 +297,7 @@ func multiEpisodeDownload(url, html string, extractOption extractors.Options, pa
 			aid:      u.Aid,
 			bvid:     u.BVid,
 			cid:      u.Cid,
-			subtitle: u.Title,
+			subtitle: fmt.Sprintf("%s P%d", u.Title, index+1),
 		}
 		go func(index int, options bilibiliOptions, extractedData []*extractors.Data) {
 			defer wgp.Done()
@@ -333,9 +360,12 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	if strings.Contains(url, "bangumi") {
 		// handle bangumi
 		return extractBangumi(url, html, option)
+	} else if strings.Contains(url, "festival") {
+		return extractFestival(url, html, option)
+	} else {
+		// handle normal video
+		return extractNormalVideo(url, html, option)
 	}
-	// handle normal video
-	return extractNormalVideo(url, html, option)
 }
 
 // bilibiliDownload is the download function for a single URL

@@ -2,6 +2,7 @@ package xiaohongshu
 
 import (
 	"encoding/json"
+	neturl "net/url"
 	"strconv"
 	"strings"
 
@@ -34,7 +35,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	}
 
 	// title
-	titles := utils.MatchOneOf(html, `,"title":"(.+?)",`)
+	titles := utils.MatchOneOf(html, `<title>(.*?)</title>`)
 	if titles == nil || len(titles) != 2 {
 		return nil, errors.WithStack(extractors.ErrBodyParseFailed)
 	}
@@ -51,6 +52,11 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return nil, errors.WithStack(extractors.ErrBodyParseFailed)
 	}
 
+	pUrl, err := neturl.ParseRequestURI(url)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	// streams
 	streams := make(map[string]*extractors.Stream)
 	var size int64
@@ -61,6 +67,10 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		size, err = request.Size(u, u)
 		if err != nil {
 			continue
+		}
+
+		if pUrl.Host == "xhslink.com" && strings.Contains(u, "sns-video-qc") {
+			size += 1 // Make sure the link is downloadable and sort the link first with the same size
 		}
 		streams[strconv.Itoa(i)] = &extractors.Stream{
 			Parts: []*extractors.Part{

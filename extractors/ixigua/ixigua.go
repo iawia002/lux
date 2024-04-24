@@ -8,11 +8,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/itchyny/gojq"
+	browser "github.com/EDDYCJY/fake-useragent"
 	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
+	"github.com/iawia002/lux/utils"
 )
 
 func init() {
@@ -40,8 +41,8 @@ func New() extractors.Extractor {
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	headers := map[string]string{
-		"User-Agent":   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
-		"Content-Type": "application/json",
+		"User-Agent": browser.Chrome(),
+		"Cookie":     option.Cookie,
 	}
 
 	// ixigua 有三种格式的 URL
@@ -66,60 +67,42 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		finalURL = resp.Request.URL.String()
 	}
 
-	finalURL = strings.ReplaceAll(finalURL, "https://www.toutiao.com/a", "https://www.ixigua.com/")
+	finalURL = strings.ReplaceAll(finalURL, "https://www.toutiao.com/video/", "https://www.ixigua.com/")
 
 	r := regexp.MustCompile(`(ixigua.com/)(\w+)?`)
 	id := r.FindSubmatch([]byte(finalURL))[2]
-	url2 := fmt.Sprintf("https://www.ixigua.com/api/public/videov2/brief/details?group_id=%s", string(id))
+	url2 := fmt.Sprintf("https://www.ixigua.com/%s", string(id))
 
 	body, err := request.Get(url2, url, headers)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	var m interface{}
-	err = json.Unmarshal([]byte(body), &m)
-	if err != nil {
+	videoListJson := utils.MatchOneOf(body, `window._SSR_HYDRATED_DATA=(\{.*?\})\<\/script\>`)
+	if videoListJson == nil || len(videoListJson) != 2 {
+		return nil, errors.WithStack(extractors.ErrBodyParseFailed)
+	}
+
+	videoUrl := videoListJson[1]
+	videoUrl = strings.Replace(videoUrl, ":undefined", ":\"undefined\"", -1)
+
+	var data xiguanData
+	if err = json.Unmarshal([]byte(videoUrl), &data); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	query, err := gojq.Parse("{title: .data.title} + {qualities: [.data.videoResource.normal.video_list | .[] | {url: .main_url, size: .size, ext: .vtype, quality: .definition}]}")
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	video := Video{}
-
-	iter := query.Run(m)
-	for {
-		v, ok := iter.Next()
-		if !ok {
-			break
-		}
-		if err, ok := v.(error); ok {
-			return nil, errors.WithStack(err)
-		}
-
-		jsonbody, err := json.Marshal(v)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		if err := json.Unmarshal(jsonbody, &video); err != nil {
-			return nil, errors.WithStack(err)
-		}
-	}
+	title := data.AnyVideo.GidInformation.PackerData.Video.Title
+	videoList := data.AnyVideo.GidInformation.PackerData.Video.VideoResource.Normal.VideoList
 
 	streams := make(map[string]*extractors.Stream)
-	for _, quality := range video.Qualities {
-		streams[quality.Quality] = &extractors.Stream{
-			Size:    quality.Size,
-			Quality: quality.Quality,
+	for _, v := range videoList {
+		streams[v.Definition] = &extractors.Stream{
+			Quality: v.Definition,
 			Parts: []*extractors.Part{
 				{
-					URL:  base64Decode(quality.URL),
-					Size: quality.Size,
-					Ext:  quality.Ext,
+					URL:  base64Decode(v.MainUrl),
+					Size: v.Size,
+					Ext:  v.Vtype,
 				},
 			},
 		}
@@ -128,7 +111,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	return []*extractors.Data{
 		{
 			Site:    "西瓜视频 ixigua.com",
-			Title:   video.Title,
+			Title:   title,
 			Type:    extractors.DataTypeVideo,
 			Streams: streams,
 			URL:     url,

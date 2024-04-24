@@ -6,7 +6,7 @@ type Aria2RPCData struct {
 	// https://aria2.github.io/manual/en/html/aria2c.html#rpc-interface
 	JSONRPC string `json:"jsonrpc"`
 	ID      string `json:"id"`
-	// For a simple download, only inplemented `addUri`
+	// For a simple download, only implemented `addUri`
 	Method string `json:"method"`
 	// secret, uris, options
 	Params [3]interface{} `json:"params"`
