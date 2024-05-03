@@ -21,7 +21,7 @@ import (
 const Name = "lux"
 
 // This value will be injected into the corresponding git tag value at build time using `-ldflags`.
-var version = "v0.0.0"
+var version = "v0.24.0"
 
 func init() {
 	cli.VersionPrinter = func(c *cli.Context) {
