@@ -11,12 +11,12 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        go: ["1.21"]
+        go: ["1.22"]
         os: [ubuntu-latest, macOS-latest]
     name: Go ${{ matrix.go }} in ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
       - name: Environment
@@ -26,7 +26,7 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.54.1
+          version: v1.58.0
           only-new-issues: true
       - name: Test
         env:

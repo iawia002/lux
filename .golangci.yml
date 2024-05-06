@@ -1,7 +1,7 @@
 run:
   concurrency: 2
   timeout: 5m
-  go: 1.21
+  go: 1.22
 
 linter-settings:
   goconst:
