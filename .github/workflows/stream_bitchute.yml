@@ -1,0 +1,31 @@
+name: bitchute
+
+on:
+  push:
+    paths:
+      - "extractors/bitchute/*.go"
+      - ".github/workflows/stream_bitchute.yml"
+  pull_request:
+    paths:
+      - "extractors/bitchute/*.go"
+      - ".github/workflows/stream_bitchute.yml"
+  schedule:
+    # run ci weekly
+    - cron: "0 0 * * 0"
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go: ["1.22"]
+        os: [ubuntu-latest]
+    name: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Test
+        run: go test -timeout 5m -race -coverpkg=./... -coverprofile=coverage.txt github.com/iawia002/lux/extractors/bitchute

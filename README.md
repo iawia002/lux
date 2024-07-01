@@ -58,6 +58,7 @@
 - [Supported Sites](#supported-sites)
 - [Known issues](#known-issues)
   - [优酷](#优酷)
+  - [西瓜/头条视频](#西瓜头条视频)
 - [Contributing](#contributing)
 - [Authors](#authors)
 - [Similar projects](#similar-projects)
@@ -645,6 +646,7 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 | Rumble           | <https://rumble.com>                                                      | ✓        |          |         |            |                  | [![rumble](https://github.com/iawia002/lux/actions/workflows/stream_rumble.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_rumble.yml/)                  |
 | 小红书           | <https://xiaohongshu.com>                                                 | ✓        |          |         |            |                  | [![xiaohongshu](https://github.com/iawia002/lux/actions/workflows/stream_xiaohongshu.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_xiaohongshu.yml/)   |
 | Zing MP3         | <https://zingmp3.vn>                                                      | ✓        |          | ✓       |            |                  | [![zingmp3](https://github.com/iawia002/lux/actions/workflows/stream_zingmp3.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_zingmp3.yml/)               |
+| Bitchute         | <https://www.bitchute.com>                                                | ✓        |          | ✓       |            |                  | [![bitchute](https://github.com/iawia002/lux/actions/workflows/stream_bitchute.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_bitchute.yml/)            |
 
 
 ## Known issues
