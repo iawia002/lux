@@ -43,13 +43,27 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 
 	titleMatcherRegExp := regexp.MustCompile(`<title[^>]*>([^<]+)</title>`)
 
+	titleMatcherRegExpOpt := regexp.MustCompile(`"desc":"([^"]*)"`)
+
 	titleMatcher := titleMatcherRegExp.FindStringSubmatch(html)
+
+	titleMatcherOpt := titleMatcherRegExpOpt.FindStringSubmatch(html)
 
 	if len(titleMatcher) == 0 {
 		return nil, errors.WithStack(extractors.ErrURLParseFailed)
 	}
 
 	title := titleMatcher[1]
+
+	if title == "TikTok - Make Your Day" {
+		if len(titleMatcherOpt[1]) > 64 {
+			cutoff := titleMatcherOpt[1][:64]
+			lastSpace := strings.LastIndex(cutoff, " ")
+			title = titleMatcherOpt[1][:lastSpace]
+		} else {
+			title = titleMatcherOpt[1]
+		}
+	}
 
 	titleArr := strings.Split(title, "|")
 
