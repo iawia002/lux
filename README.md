@@ -668,10 +668,6 @@ $ lux -c "msToken=yoEh0-qLUq4obZ8Sfxsem_CxCo9R3NM6ViTrWaRcM1...; ttwid=1%7C..." 
 
 Lux is an open source project and built on the top of open-source projects. Check out the [Contributing Guide](./CONTRIBUTING.md) to get started.
 
-Thanks for [JetBrains](https://www.jetbrains.com/?from=lux) for the wonderful IDE.
-
-<a href="https://www.jetbrains.com/?from=lux"><img src="static/jetbrains-variant-3.svg" /></a>
-
 ## Authors
 
 Code with ❤️ by [iawia002](https://github.com/iawia002) and lovely [contributors](https://github.com/iawia002/lux/graphs/contributors)
