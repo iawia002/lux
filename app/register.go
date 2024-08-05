@@ -28,6 +28,7 @@ import (
 	_ "github.com/iawia002/lux/extractors/rumble"
 	_ "github.com/iawia002/lux/extractors/streamtape"
 	_ "github.com/iawia002/lux/extractors/tangdou"
+	_ "github.com/iawia002/lux/extractors/threads"
 	_ "github.com/iawia002/lux/extractors/tiktok"
 	_ "github.com/iawia002/lux/extractors/tumblr"
 	_ "github.com/iawia002/lux/extractors/twitter"
