@@ -27,6 +27,7 @@ const (
 	bilibiliAPI        = "https://api.bilibili.com/x/player/playurl?"
 	bilibiliBangumiAPI = "https://api.bilibili.com/pgc/player/web/playurl?"
 	bilibiliTokenAPI   = "https://api.bilibili.com/x/player/playurl/token?"
+	sleepSeconds       = 6
 )
 
 const referer = "https://www.bilibili.com"
@@ -348,10 +349,18 @@ func New() extractors.Extractor {
 
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
+	requireHtml := true
+	if strings.Contains(url, "/favlist/") {
+		requireHtml = false
+	}
+
 	var err error
-	html, err := request.Get(url, referer, nil)
-	if err != nil {
-		return nil, errors.WithStack(err)
+	var html string
+	if requireHtml {
+		html, err = request.Get(url, referer, nil)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
 	}
 
 	// set thread number to 1 manually to avoid http 412 error
@@ -362,10 +371,116 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return extractBangumi(url, html, option)
 	} else if strings.Contains(url, "festival") {
 		return extractFestival(url, html, option)
+	} else if strings.Contains(url, "favlist") {
+		return extractFavLists(option)
 	} else {
 		// handle normal video
 		return extractNormalVideo(url, html, option)
 	}
+}
+
+func extractFavLists(opts extractors.Options) ([]*extractors.Data, error) {
+	idx := strings.Index(opts.Cookie, "DedeUserID=")
+	if idx < 0 {
+		return nil, fmt.Errorf("bad cookies, can not found `DedeUserID`")
+	}
+
+	tmp := opts.Cookie[idx:]
+	idx = strings.Index(tmp, ";")
+	if idx < 0 {
+		return nil, fmt.Errorf("bad cookies, can not found `DedeUserID`")
+	}
+	uid, err := strconv.ParseUint(tmp[11:idx], 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("bad cookies, can not found `DedeUserID`")
+	}
+
+	txt, err := request.GetByte(
+		fmt.Sprintf("https://api.bilibili.com/x/v3/fav/folder/created/list-all?up_mid=%d", uid),
+		fmt.Sprintf("https://space.bilibili.com/%d/favlist?spm_id_from=333.999.0.0", uid),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("fetch all favlist failed, %s", err)
+	}
+
+	var jsonobj map[string]any = map[string]any{}
+
+	err = json.Unmarshal(txt, &jsonobj)
+	if err != nil {
+		return nil, fmt.Errorf("fetch all favlist failed, %s", err)
+	}
+	code := int64(jsonobj["code"].(float64))
+	if code != 0 {
+		msg := jsonobj["message"].(string)
+		return nil, fmt.Errorf("fetch all favlist failed, %s", msg)
+	}
+
+	data, ok := jsonobj["data"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("fetch all favlist failed, data struct changed")
+	}
+	list, ok := data["list"].([]any)
+	if !ok {
+		return nil, fmt.Errorf("fetch all favlist failed, data struct changed")
+	}
+
+	var eds []*extractors.Data
+
+	for _, ele := range list {
+		favl, ok := ele.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("fetch all favlist failed, data struct changed")
+		}
+		oeds, err := extractOneFavList(uid, favl)
+		if err != nil {
+			return nil, err
+		}
+		eds = append(eds, oeds...)
+
+		fmt.Printf("Sleep(%d seconds), press `CTRL+C` to stop.\r\n", sleepSeconds)
+		time.Sleep(time.Second * sleepSeconds)
+	}
+	return eds, nil
+}
+
+func extractOneFavList(uid uint64, info map[string]any) ([]*extractors.Data, error) {
+	colid := int64(info["id"].(float64))
+
+	jsonbytes, err := request.GetByte(
+		fmt.Sprintf("https://api.bilibili.com/x/v3/fav/resource/list?media_id=%d&pn=1&ps=20&keyword=&order=mtime&type=0&tid=0&platform=web", colid),
+		fmt.Sprintf("https://space.bilibili.com/%d/favlist?spm_id_from=333.999.0.0", uid),
+		nil)
+	if err != nil {
+		return nil, fmt.Errorf("read favlist failed, %s", err)
+	}
+
+	var jsonobj map[string]any = map[string]any{}
+	err = json.Unmarshal(jsonbytes, &jsonobj)
+	if err != nil {
+		return nil, fmt.Errorf("read favlist failed, %s", err)
+	}
+
+	code := int64(jsonobj["code"].(float64))
+	if code != 0 {
+		msg := jsonobj["message"].(string)
+		return nil, fmt.Errorf("fetch favlist failed, %s", msg)
+	}
+
+	data, ok := jsonobj["data"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("fetch favlist failed, data struct changed")
+	}
+	medias, ok := data["medias"].([]any)
+	if !ok {
+		return nil, fmt.Errorf("fetch favlist failed, data struct changed")
+	}
+
+	for _, media := range medias {
+		fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+		fmt.Println(media)
+	}
+	return nil, nil
 }
 
 // bilibiliDownload is the download function for a single URL

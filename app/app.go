@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
@@ -225,19 +224,10 @@ func New() *cli.App {
 				return errors.New("too few arguments")
 			}
 
-			cookie := c.String("cookie")
-			if cookie != "" {
-				// If cookie is a file path, convert it to a string to ensure cookie is always string
-				if _, fileErr := os.Stat(cookie); fileErr == nil {
-					// Cookie is a file
-					data, err := os.ReadFile(cookie)
-					if err != nil {
-						return err
-					}
-					cookie = strings.TrimSpace(string(data))
-				}
+			cookie, err := utils.ReadCookie(c.String("cookie"))
+			if err != nil {
+				return err
 			}
-
 			request.SetOptions(request.Options{
 				RetryTimes: int(c.Uint("retry")),
 				Cookie:     cookie,
@@ -272,6 +262,11 @@ func New() *cli.App {
 }
 
 func download(c *cli.Context, videoURL string) error {
+	cookie, err := utils.ReadCookie(c.String("cookie"))
+	if err != nil {
+		return nil
+	}
+
 	data, err := extractors.Extract(videoURL, extractors.Options{
 		Playlist:         c.Bool("playlist"),
 		Items:            c.String("items"),
@@ -279,7 +274,7 @@ func download(c *cli.Context, videoURL string) error {
 		ItemEnd:          int(c.Uint("end")),
 		ThreadNumber:     int(c.Uint("thread")),
 		EpisodeTitleOnly: c.Bool("episode-title-only"),
-		Cookie:           c.String("cookie"),
+		Cookie:           cookie,
 		YoukuCcode:       c.String("youku-ccode"),
 		YoukuCkey:        c.String("youku-ckey"),
 		YoukuPassword:    c.String("youku-password"),

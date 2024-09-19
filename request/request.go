@@ -104,6 +104,32 @@ func Request(method, url string, body io.Reader, headers map[string]string) (*ht
 		res          *http.Response
 		requestError error
 	)
+
+	debugprint := func() {
+		if !debug {
+			return
+		}
+
+		blue := color.New(color.FgBlue)
+		fmt.Println()
+		blue.Printf("URL:         ") // nolint
+		fmt.Printf("%s\n", url)
+		blue.Printf("Method:      ") // nolint
+		fmt.Printf("%s\n", method)
+		blue.Printf("Headers:     ")        // nolint
+		pretty.Printf("%# v\n", req.Header) // nolint
+
+		if res == nil {
+			return
+		}
+		blue.Printf("Status Code: ") // nolint
+		if res.StatusCode >= 400 {
+			color.Red("%d", res.StatusCode)
+		} else {
+			color.Green("%d", res.StatusCode)
+		}
+	}
+
 	for i := 0; ; i++ {
 		res, requestError = client.Do(req)
 		if requestError == nil && res.StatusCode < 400 {
@@ -115,26 +141,12 @@ func Request(method, url string, body io.Reader, headers map[string]string) (*ht
 			} else {
 				err = errors.Errorf("%s request error: HTTP %d", url, res.StatusCode)
 			}
+			debugprint()
 			return nil, errors.WithStack(err)
 		}
 		time.Sleep(1 * time.Second)
 	}
-	if debug {
-		blue := color.New(color.FgBlue)
-		fmt.Println()
-		blue.Printf("URL:         ") // nolint
-		fmt.Printf("%s\n", url)
-		blue.Printf("Method:      ") // nolint
-		fmt.Printf("%s\n", method)
-		blue.Printf("Headers:     ")        // nolint
-		pretty.Printf("%# v\n", req.Header) // nolint
-		blue.Printf("Status Code: ")        // nolint
-		if res.StatusCode >= 400 {
-			color.Red("%d", res.StatusCode)
-		} else {
-			color.Green("%d", res.StatusCode)
-		}
-	}
+	debugprint()
 	return res, nil
 }
 

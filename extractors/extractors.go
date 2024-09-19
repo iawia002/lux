@@ -26,14 +26,21 @@ func Extract(u string, option Options) ([]*Data, error) {
 	var domain string
 
 	bilibiliShortLink := utils.MatchOneOf(u, `^(av|BV|ep)\w+`)
-	if len(bilibiliShortLink) > 1 {
+	isBilibiliFavlist := strings.ToLower(u) == "favlist"
+	if len(bilibiliShortLink) > 1 || isBilibiliFavlist {
 		bilibiliURL := map[string]string{
 			"av": "https://www.bilibili.com/video/",
 			"BV": "https://www.bilibili.com/video/",
 			"ep": "https://www.bilibili.com/bangumi/play/",
 		}
 		domain = "bilibili"
-		u = bilibiliURL[bilibiliShortLink[1]] + u
+
+		if isBilibiliFavlist {
+			u = "https://www.bilibili.com/favlist/"
+		} else {
+			u = bilibiliURL[bilibiliShortLink[1]] + u
+		}
+
 	} else {
 		u, err := url.ParseRequestURI(u)
 		if err != nil {
