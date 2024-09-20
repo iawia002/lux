@@ -98,6 +98,3 @@ func TestBilibili(t *testing.T) {
 	}
 }
 
-func TestPath(t *testing.T) {
-	fmt.Println(filepath.Base(`vids\自制捕蚊子陷阱.mp4`))
-}
