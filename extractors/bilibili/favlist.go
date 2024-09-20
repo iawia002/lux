@@ -55,7 +55,7 @@ func favListExtractedDataFilter(uid uint64, favlTitle string, ds []*extractors.D
 	var nds []*extractors.Data
 	for _, edata := range ds {
 		if slices.Contains(titles, edata.Title) {
-			fmt.Println(">>> skip downloaded vid:", edata.Title)
+			fmt.Println(">>> skip downloaded video:", edata.Title)
 			continue
 		}
 		edata.OnDownloadDone = favListOnDownloadDown
@@ -68,7 +68,6 @@ func makeFavListOnDownloadDown(favdir string) func(fp string) error {
 	return func(fp string) error {
 		name := filepath.Base(fp)
 		dest := filepath.Join(favdir, name)
-		fmt.Println(">>>>>>>>>>>>>>>>>>>", dest)
 		return os.Rename(fp, dest)
 	}
 }

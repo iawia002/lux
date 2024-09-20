@@ -394,11 +394,9 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 }
 
 func extractFavLists(names string, opts extractors.Options) ([]*extractors.Data, error) {
-	var requirednames []string
+	var requiredName string
 	if names != "*" {
-		for _, part := range strings.Split(names, "##") {
-			requirednames = append(requirednames, strings.TrimSpace(part))
-		}
+		requiredName = names
 	}
 
 	idx := strings.Index(opts.Cookie, "DedeUserID=")
@@ -454,13 +452,13 @@ func extractFavLists(names string, opts extractors.Options) ([]*extractors.Data,
 			return nil, fmt.Errorf("fetch all favlist failed, data struct changed")
 		}
 		title := favl["title"].(string)
-		if len(requirednames) > 0 && !slices.Contains(requirednames, title) {
+		if len(requiredName) > 0 && title != requiredName {
 			continue
 		}
 
 		oeds, err := extractOneFavList(uid, favl, opts)
 		if err != nil {
-			if opts.ErrorContinue {
+			if opts.ContinueOnError {
 				continue
 			} else {
 				return nil, err
@@ -508,7 +506,7 @@ func extractOneFavListOnePage(uid uint64, info map[string]any, page int32, opts 
 	for _, obj := range medias {
 		media, ok := obj.(map[string]any)
 		if !ok {
-			if opts.ErrorContinue {
+			if opts.ContinueOnError {
 				continue
 			} else {
 				return nil, fmt.Errorf("fetch favlist failed, data struct changed")
@@ -516,7 +514,7 @@ func extractOneFavListOnePage(uid uint64, info map[string]any, page int32, opts 
 		}
 		bvid, ok := media["bv_id"].(string)
 		if !ok {
-			if opts.ErrorContinue {
+			if opts.ContinueOnError {
 				continue
 			} else {
 				return nil, fmt.Errorf("fetch favlist failed, data struct changed")
@@ -525,7 +523,7 @@ func extractOneFavListOnePage(uid uint64, info map[string]any, page int32, opts 
 		url := fmt.Sprintf("https://www.bilibili.com/video/%s/", bvid)
 		html, err := request.Get(url, referer, nil)
 		if err != nil {
-			if opts.ErrorContinue {
+			if opts.ContinueOnError {
 				continue
 			} else {
 				return nil, errors.WithStack(err)
@@ -533,7 +531,7 @@ func extractOneFavListOnePage(uid uint64, info map[string]any, page int32, opts 
 		}
 		ds, err := extractNormalVideo(url, html, opts)
 		if err != nil {
-			if opts.ErrorContinue {
+			if opts.ContinueOnError {
 				continue
 			} else {
 				return nil, err

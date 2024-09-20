@@ -122,8 +122,8 @@ type Options struct {
 	YoukuCkey     string
 	YoukuPassword string
 
-	ErrorContinue bool
-	OutputPath    string
+	ContinueOnError bool
+	OutputPath      string
 }
 
 // Extractor implements video data extraction related operations.

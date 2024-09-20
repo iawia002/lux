@@ -701,7 +701,7 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 		err = utils.MergeToMP4(parts, mergedFilePath, title)
 	}
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if data.OnDownloadDone != nil {

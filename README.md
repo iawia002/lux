@@ -402,14 +402,11 @@ You also can use `favlist/${favlist name}` to sync your favlist video:
 `lux` will create a new folder in your `output-path`, and skip downloaded videos.
 
 ```console
-#sync all favlist
+#sync all favlists
 $ lux favlist/*
 
 #sync one favlist by name
 $ lux favlist/hello
-
-#sync multi favlist by name, use `##` as sep.
-$ lux favlist/fav1##fav2##fav3
 ```
 
 ### Use specified Referrer
