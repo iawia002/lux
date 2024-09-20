@@ -55,6 +55,8 @@ type Data struct {
 	Captions map[string]*CaptionPart `json:"caption"`
 	// Err is used to record whether an error occurred when extracting the list data
 	Err error `json:"err"`
+
+	OnDownloadDone func(fn string) error `json:"-"`
 }
 
 // FillUpStreamsData fills up some data automatically.
@@ -119,6 +121,9 @@ type Options struct {
 	YoukuCcode    string
 	YoukuCkey     string
 	YoukuPassword string
+
+	ErrorContinue bool
+	OutputPath    string
 }
 
 // Extractor implements video data extraction related operations.

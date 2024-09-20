@@ -694,8 +694,18 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 	if !downloader.option.Silent {
 		fmt.Printf("Merging video parts into %s\n", mergedFilePath)
 	}
+
 	if stream.Ext != "mp4" || stream.NeedMux {
-		return utils.MergeFilesWithSameExtension(parts, mergedFilePath)
+		err = utils.MergeFilesWithSameExtension(parts, mergedFilePath)
+	} else {
+		err = utils.MergeToMP4(parts, mergedFilePath, title)
 	}
-	return utils.MergeToMP4(parts, mergedFilePath, title)
+	if err != nil {
+		return nil
+	}
+
+	if data.OnDownloadDone != nil {
+		return data.OnDownloadDone(mergedFilePath)
+	}
+	return nil
 }

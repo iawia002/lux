@@ -156,6 +156,12 @@ func New() *cli.App {
 				Value:   10,
 				Usage:   "The number of download thread (only works for multiple-parts video)",
 			},
+			&cli.BoolFlag{
+				Name:    "errorcontinue",
+				Aliases: []string{"ec", "errcontinue"},
+				Value:   false,
+				Usage:   "When an error occurs, only output without interruption.(currently only support `bilibili`)",
+			},
 
 			// Aria2
 			&cli.BoolFlag{
@@ -262,6 +268,8 @@ func New() *cli.App {
 }
 
 func download(c *cli.Context, videoURL string) error {
+	errcontinue := c.Bool("errorcontinue")
+
 	cookie, err := utils.ReadCookie(c.String("cookie"))
 	if err != nil {
 		return nil
@@ -278,6 +286,8 @@ func download(c *cli.Context, videoURL string) error {
 		YoukuCcode:       c.String("youku-ccode"),
 		YoukuCkey:        c.String("youku-ckey"),
 		YoukuPassword:    c.String("youku-password"),
+		ErrorContinue:    errcontinue,
+		OutputPath:       c.String("output-path"),
 	})
 	if err != nil {
 		// if this error occurs, it means that an error occurred before actually starting to extract data

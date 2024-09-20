@@ -27,7 +27,6 @@ const (
 	bilibiliAPI        = "https://api.bilibili.com/x/player/playurl?"
 	bilibiliBangumiAPI = "https://api.bilibili.com/pgc/player/web/playurl?"
 	bilibiliTokenAPI   = "https://api.bilibili.com/x/player/playurl/token?"
-	sleepSeconds       = 6
 )
 
 const referer = "https://www.bilibili.com"
@@ -190,8 +189,23 @@ func extractBangumi(url, html string, extractOption extractors.Options) ([]*extr
 
 func getMultiPageData(html string) (*multiPage, error) {
 	var data multiPage
+
+	const errBeginFlag = `div class="error-text"`
+	const errEndFlag = `</div>`
+
+	idx := strings.Index(html, errBeginFlag)
+	if idx > -1 {
+		tmp := html[idx+len(errBeginFlag):]
+		idx := strings.Index(tmp, errEndFlag)
+		if idx < 0 {
+			return &data, errors.New("this page has no playlist")
+		}
+		return &data, fmt.Errorf("this page has no playlist: %s", tmp[:idx])
+	}
+
 	multiPageDataString := utils.MatchOneOf(
-		html, `window.__INITIAL_STATE__=(.+?);\(function`,
+		html,
+		`window.__INITIAL_STATE__=(.+?);\(function`,
 	)
 	if multiPageDataString == nil {
 		return &data, errors.New("this page has no playlist")
@@ -350,7 +364,7 @@ func New() extractors.Extractor {
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
 	requireHtml := true
-	if strings.Contains(url, "/favlist/") {
+	if strings.HasPrefix(url, "favlist/") {
 		requireHtml = false
 	}
 
@@ -371,15 +385,22 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return extractBangumi(url, html, option)
 	} else if strings.Contains(url, "festival") {
 		return extractFestival(url, html, option)
-	} else if strings.Contains(url, "favlist") {
-		return extractFavLists(option)
+	} else if strings.HasPrefix(url, "favlist/") {
+		return extractFavLists(url[8:], option)
 	} else {
 		// handle normal video
 		return extractNormalVideo(url, html, option)
 	}
 }
 
-func extractFavLists(opts extractors.Options) ([]*extractors.Data, error) {
+func extractFavLists(names string, opts extractors.Options) ([]*extractors.Data, error) {
+	var requirednames []string
+	if names != "*" {
+		for _, part := range strings.Split(names, "##") {
+			requirednames = append(requirednames, strings.TrimSpace(part))
+		}
+	}
+
 	idx := strings.Index(opts.Cookie, "DedeUserID=")
 	if idx < 0 {
 		return nil, fmt.Errorf("bad cookies, can not found `DedeUserID`")
@@ -432,23 +453,29 @@ func extractFavLists(opts extractors.Options) ([]*extractors.Data, error) {
 		if !ok {
 			return nil, fmt.Errorf("fetch all favlist failed, data struct changed")
 		}
-		oeds, err := extractOneFavList(uid, favl)
-		if err != nil {
-			return nil, err
+		title := favl["title"].(string)
+		if len(requirednames) > 0 && !slices.Contains(requirednames, title) {
+			continue
 		}
-		eds = append(eds, oeds...)
 
-		fmt.Printf("Sleep(%d seconds), press `CTRL+C` to stop.\r\n", sleepSeconds)
-		time.Sleep(time.Second * sleepSeconds)
+		oeds, err := extractOneFavList(uid, favl, opts)
+		if err != nil {
+			if opts.ErrorContinue {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+		eds = append(eds, favListExtractedDataFilter(uid, title, oeds, opts)...)
 	}
 	return eds, nil
 }
 
-func extractOneFavList(uid uint64, info map[string]any) ([]*extractors.Data, error) {
+func extractOneFavListOnePage(uid uint64, info map[string]any, page int32, opts extractors.Options) ([]*extractors.Data, error) {
 	colid := int64(info["id"].(float64))
 
 	jsonbytes, err := request.GetByte(
-		fmt.Sprintf("https://api.bilibili.com/x/v3/fav/resource/list?media_id=%d&pn=1&ps=20&keyword=&order=mtime&type=0&tid=0&platform=web", colid),
+		fmt.Sprintf("https://api.bilibili.com/x/v3/fav/resource/list?media_id=%d&pn=%d&ps=20&keyword=&order=mtime&type=0&tid=0&platform=web", colid, page),
 		fmt.Sprintf("https://space.bilibili.com/%d/favlist?spm_id_from=333.999.0.0", uid),
 		nil)
 	if err != nil {
@@ -476,11 +503,59 @@ func extractOneFavList(uid uint64, info map[string]any) ([]*extractors.Data, err
 		return nil, fmt.Errorf("fetch favlist failed, data struct changed")
 	}
 
-	for _, media := range medias {
-		fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-		fmt.Println(media)
+	var ads []*extractors.Data
+
+	for _, obj := range medias {
+		media, ok := obj.(map[string]any)
+		if !ok {
+			if opts.ErrorContinue {
+				continue
+			} else {
+				return nil, fmt.Errorf("fetch favlist failed, data struct changed")
+			}
+		}
+		bvid, ok := media["bv_id"].(string)
+		if !ok {
+			if opts.ErrorContinue {
+				continue
+			} else {
+				return nil, fmt.Errorf("fetch favlist failed, data struct changed")
+			}
+		}
+		url := fmt.Sprintf("https://www.bilibili.com/video/%s/", bvid)
+		html, err := request.Get(url, referer, nil)
+		if err != nil {
+			if opts.ErrorContinue {
+				continue
+			} else {
+				return nil, errors.WithStack(err)
+			}
+		}
+		ds, err := extractNormalVideo(url, html, opts)
+		if err != nil {
+			if opts.ErrorContinue {
+				continue
+			} else {
+				return nil, err
+			}
+		}
+		ads = append(ads, ds...)
 	}
-	return nil, nil
+	return ads, nil
+}
+
+func extractOneFavList(uid uint64, info map[string]any, opts extractors.Options) ([]*extractors.Data, error) {
+	page := 1
+	var ads []*extractors.Data
+	for {
+		ds, err := extractOneFavListOnePage(uid, info, int32(page), opts)
+		if err != nil || len(ds) < 1 {
+			break
+		}
+		ads = append(ads, ds...)
+		page++
+	}
+	return ads, nil
 }
 
 // bilibiliDownload is the download function for a single URL

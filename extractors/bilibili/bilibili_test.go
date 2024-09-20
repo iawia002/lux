@@ -1,6 +1,8 @@
 package bilibili
 
 import (
+	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/iawia002/lux/extractors"
@@ -94,4 +96,8 @@ func TestBilibili(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPath(t *testing.T) {
+	fmt.Println(filepath.Base(`vids\自制捕蚊子陷阱.mp4`))
 }
