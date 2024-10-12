@@ -12,19 +12,26 @@ type token struct {
 	Data    tokenData `json:"data"`
 }
 
-type bangumiEpData struct {
-	Aid         int    `json:"aid"`
-	Cid         int    `json:"cid"`
-	BVid        string `json:"bvid"`
-	ID          int    `json:"id"`
-	EpID        int    `json:"ep_id"`
-	TitleFormat string `json:"titleFormat"`
-	LongTitle   string `json:"long_title"`
+type Interaction struct {
+	Interaction bool `json:"interaction"`
+}
+
+type EpVideoInfo struct {
+	Aid                           int         `json:"aid"`
+	Bvid                          string      `json:"bvid"`
+	Cid                           int         `json:"cid"`
+	DeliveryBusinessFragmentVideo bool        `json:"delivery_business_fragment_video"`
+	DeliveryFragmentVideo         bool        `json:"delivery_fragment_video"`
+	EpID                          int         `json:"ep_id"`
+	EpStatus                      int         `json:"ep_status"`
+	Interaction                   Interaction `json:"interaction"`
+	LongTitle                     string      `json:"long_title"`
+	Title                         string      `json:"title"`
 }
 
 type bangumiData struct {
-	EpInfo bangumiEpData   `json:"epInfo"`
-	EpList []bangumiEpData `json:"epList"`
+	EpInfo EpVideoInfo   `json:"epInfo"`
+	EpList []EpVideoInfo `json:"epList"`
 }
 
 type videoPagesData struct {

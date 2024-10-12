@@ -96,32 +96,26 @@ type bilibiliOptions struct {
 
 func extractBangumi(url, html string, extractOption extractors.Options) ([]*extractors.Data, error) {
 	dataString := utils.MatchOneOf(html, `<script\s+id="__NEXT_DATA__"\s+type="application/json"\s*>(.*?)</script\s*>`)[1]
-	epArrayString := utils.MatchOneOf(dataString, `"episodes"\s*:\s*(.+?)\s*,\s*"user_status"`)[1]
+	epArrayString := utils.MatchOneOf(dataString, `"episode_info"\s*:\s*(.+?)\s*,\s*"season_info"`)[1]
 	fullVideoIdString := utils.MatchOneOf(dataString, `"videoId"\s*:\s*"(ep|ss)(\d+)"`)
 	epSsString := fullVideoIdString[1] // "ep" or "ss"
 	videoIdString := fullVideoIdString[2]
 
-	var epArray []json.RawMessage
+	var epArray EpVideoInfo
 	err := json.Unmarshal([]byte(epArrayString), &epArray)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	var data bangumiData
-	for _, jsonByte := range epArray {
-		var epInfo bangumiEpData
-		err := json.Unmarshal(jsonByte, &epInfo)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-		videoId, err := strconv.ParseInt(videoIdString, 10, 0)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-		if epInfo.ID == int(videoId) || (epSsString == "ss" && epInfo.TitleFormat == "第1话") {
-			data.EpInfo = epInfo
-		}
-		data.EpList = append(data.EpList, epInfo)
+
+	videoId, err := strconv.ParseInt(videoIdString, 10, 0)
+	if err != nil {
+		return nil, errors.WithStack(err)
 	}
+	if epArray.EpID == int(videoId) || (epSsString == "ss" && epArray.Title == "第1话") {
+		data.EpInfo = epArray
+	}
+	data.EpList = append(data.EpList, epArray)
 
 	sort.Slice(data.EpList, func(i, j int) bool {
 		return data.EpList[i].EpID < data.EpList[j].EpID
@@ -130,14 +124,14 @@ func extractBangumi(url, html string, extractOption extractors.Options) ([]*extr
 	if !extractOption.Playlist {
 		aid := data.EpInfo.Aid
 		cid := data.EpInfo.Cid
-		bvid := data.EpInfo.BVid
-		titleFormat := data.EpInfo.TitleFormat
+		bvid := data.EpInfo.Bvid
+		titleFormat := data.EpInfo.Title
 		longTitle := data.EpInfo.LongTitle
 		if aid <= 0 || cid <= 0 || bvid == "" {
 			aid = data.EpList[0].Aid
 			cid = data.EpList[0].Cid
-			bvid = data.EpList[0].BVid
-			titleFormat = data.EpList[0].TitleFormat
+			bvid = data.EpList[0].Bvid
+			titleFormat = data.EpList[0].Title
 			longTitle = data.EpList[0].LongTitle
 		}
 		options := bilibiliOptions{
@@ -165,7 +159,7 @@ func extractBangumi(url, html string, extractOption extractors.Options) ([]*extr
 		wgp.Add()
 		id := u.EpID
 		if id == 0 {
-			id = u.ID
+			id = u.EpID
 		}
 		// html content can't be reused here
 		options := bilibiliOptions{
@@ -173,9 +167,9 @@ func extractBangumi(url, html string, extractOption extractors.Options) ([]*extr
 			bangumi: true,
 			aid:     u.Aid,
 			cid:     u.Cid,
-			bvid:    u.BVid,
+			bvid:    u.Bvid,
 
-			subtitle: fmt.Sprintf("%s %s", u.TitleFormat, u.LongTitle),
+			subtitle: fmt.Sprintf("%s %s", u.Title, u.LongTitle),
 		}
 		go func(index int, options bilibiliOptions, extractedData []*extractors.Data) {
 			defer wgp.Done()
