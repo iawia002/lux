@@ -406,36 +406,36 @@ func bilibiliDownload(options bilibiliOptions, extractOption extractors.Options)
 	if dashData.Streams.Audio != nil {
 		// Get audio part
 		var audioID int
-		audios := map[int]string{}
+		audios := map[int]dashStream{}
 		bandwidth := 0
 		for _, stream := range dashData.Streams.Audio {
 			if stream.Bandwidth > bandwidth {
 				audioID = stream.ID
 				bandwidth = stream.Bandwidth
 			}
-			audios[stream.ID] = stream.BaseURL
+			audios[stream.ID] = stream
 		}
-		s, err := request.Size(audios[audioID], referer)
-		if err != nil {
-			return extractors.EmptyData(options.url, err)
-		}
+		//s, err := request.Size(audios[audioID], referer)
+		//if err != nil {
+		//	return extractors.EmptyData(options.url, err)
+		//}
 		audioPart = &extractors.Part{
-			URL:  audios[audioID],
-			Size: s,
+			URL:  audios[audioID].BaseURL,
+			Size: audios[audioID].Size,
 			Ext:  "m4a",
 		}
 	}
 
 	streams := make(map[string]*extractors.Stream, len(dashData.Quality))
 	for _, stream := range dashData.Streams.Video {
-		s, err := request.Size(stream.BaseURL, referer)
-		if err != nil {
-			return extractors.EmptyData(options.url, err)
-		}
+		//s, err := request.Size(stream.BaseURL, referer)
+		//if err != nil {
+		//	return extractors.EmptyData(options.url, err)
+		//}
 		parts := make([]*extractors.Part, 0, 2)
 		parts = append(parts, &extractors.Part{
 			URL:  stream.BaseURL,
-			Size: s,
+			Size: stream.Size,
 			Ext:  getExtFromMimeType(stream.MimeType),
 		})
 		if audioPart != nil {
@@ -512,6 +512,7 @@ func bilibiliDownload(options bilibiliOptions, extractOption extractors.Options)
 			"subtitle": getSubTitleCaptionPart(options.aid, options.cid),
 		},
 		URL: options.url,
+		Raw: jsonString,
 	}
 }
 
