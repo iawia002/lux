@@ -96,7 +96,6 @@ type bilibiliOptions struct {
 
 func extractBangumi(url, html string, extractOption extractors.Options) ([]*extractors.Data, error) {
 	dataString := utils.MatchOneOf(html, `<script\s+id="__NEXT_DATA__"\s+type="application/json"\s*>(.*?)</script\s*>`)[1]
-	//epArrayString := utils.MatchOneOf(dataString, `"episodes"\s*:\s*(.+?)\s*,\s*"user_status"`)[1]
 	epArrayString := utils.MatchOneOf(dataString, `"episode_info"\s*:\s*(.+?)\s*,\s*"season_info"`)[1]
 	fullVideoIdString := utils.MatchOneOf(dataString, `"videoId"\s*:\s*"(ep|ss)(\d+)"`)
 	epSsString := fullVideoIdString[1] // "ep" or "ss"
@@ -105,13 +104,6 @@ func extractBangumi(url, html string, extractOption extractors.Options) ([]*extr
 	var epArray EpVideoInfo
 	err := json.Unmarshal([]byte(epArrayString), &epArray)
 	if err != nil {
-
-		if ute, ok := err.(*json.UnmarshalTypeError); ok {
-			fmt.Printf("UnmarshalTypeError %v - %v - %v\n", ute.Value, ute.Type, ute.Offset)
-		} else {
-			fmt.Println("Other error:", err)
-		}
-
 		return nil, errors.WithStack(err)
 	}
 	var data bangumiData
