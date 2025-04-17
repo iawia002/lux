@@ -158,6 +158,17 @@ type videoQualities struct {
 	Q2161 struct{ streamInfo } `json:"2161"`
 }
 
+type tarVideoQualities struct {
+	Q240  struct{ streamInfo } `json:"240"`
+	Q360  struct{ streamInfo } `json:"360"`
+	Q480  struct{ streamInfo } `json:"480"`
+	Q720  struct{ streamInfo } `json:"720"`
+	Q1080 struct{ streamInfo } `json:"1080"`
+	Q1440 struct{ streamInfo } `json:"1440"`
+	Q2160 struct{ streamInfo } `json:"2160"`
+	Q2161 struct{ streamInfo } `json:"2161"`
+}
+
 // Video payload for adaptive stream and different qualities
 type rumbleStreams struct {
 	FMp4 struct {
@@ -169,6 +180,7 @@ type rumbleStreams struct {
 	FHLS struct {
 		QAuto struct{ streamInfo } `json:"auto"`
 	} `json:"hls"`
+	FTAR map[string]streamInfo `json:"tar"`
 }
 
 // Unmarshall the video response
@@ -194,7 +206,9 @@ func (r *rumbleStreams) UnmarshalJSON(b []byte) error {
 	if v, ok := obj["hls"]; ok {
 		_ = json.Unmarshal(*v, &r.FHLS)
 	}
-
+	if v, ok := obj["tar"]; ok {
+		_ = json.Unmarshal(*v, &r.FTAR)
+	}
 	return nil
 }
 
@@ -267,6 +281,36 @@ func (rs *rumbleStreams) makeAllLiveStreams(m map[string]*extractors.Stream) err
 	return nil
 }
 
+func (rs *rumbleStreams) makeAllNewVodStreams(m map[string]*extractors.Stream) error {
+	for size, details := range rs.FTAR {
+		playlists, err := utils.M3u8URLs(details.URL)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		if len(playlists) == 0 {
+			return errors.WithStack(extractors.ErrURLParseFailed)
+		}
+
+		var parts []*extractors.Part
+		for _, x := range playlists {
+			part := &extractors.Part{
+				URL:  x,
+				Size: details.Meta.Size,
+				Ext:  "ts",
+			}
+			parts = append(parts, part)
+		}
+
+		m[size] = &extractors.Stream{
+			Parts:   parts,
+			Size:    details.Meta.Size,
+			Quality: strconv.Itoa(int(details.Meta.Height)),
+		}
+	}
+	return nil
+}
+
 // Request video formats and qualities
 func fetchVideoQuality(videoID string) (map[string]*extractors.Stream, error) {
 	reqURL := fmt.Sprintf(`https://rumble.com/embedJS/u3/?request=video&ver=2&v=%s&ext={"ad_count":null}&ad_wt=0`, videoID)
@@ -301,7 +345,7 @@ func fetchVideoQuality(videoID string) (map[string]*extractors.Stream, error) {
 	streams := make(map[string]*extractors.Stream, 9)
 	rs.makeAllVODStreams(streams)
 	_ = rs.makeAllLiveStreams(streams)
-
+	_ = rs.makeAllNewVodStreams(streams)
 	return streams, nil
 }
 
