@@ -158,17 +158,6 @@ type videoQualities struct {
 	Q2161 struct{ streamInfo } `json:"2161"`
 }
 
-type tarVideoQualities struct {
-	Q240  struct{ streamInfo } `json:"240"`
-	Q360  struct{ streamInfo } `json:"360"`
-	Q480  struct{ streamInfo } `json:"480"`
-	Q720  struct{ streamInfo } `json:"720"`
-	Q1080 struct{ streamInfo } `json:"1080"`
-	Q1440 struct{ streamInfo } `json:"1440"`
-	Q2160 struct{ streamInfo } `json:"2160"`
-	Q2161 struct{ streamInfo } `json:"2161"`
-}
-
 // Video payload for adaptive stream and different qualities
 type rumbleStreams struct {
 	FMp4 struct {
