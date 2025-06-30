@@ -1,6 +1,6 @@
 module github.com/iawia002/lux
 
-go 1.24.4
+go 1.24
 
 require (
 	github.com/EDDYCJY/fake-useragent v0.2.0
