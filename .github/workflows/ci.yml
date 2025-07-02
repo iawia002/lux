@@ -24,9 +24,9 @@ jobs:
           go version
           go env
       - name: Lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v5
         with:
-          version: v1.58.0
+          version: v1.64.7
           only-new-issues: true
       - name: Test
         env:
