@@ -274,6 +274,7 @@ func New() *cli.App {
 func download(c *cli.Context, videoURL string) error {
 	data, err := extractors.Extract(videoURL, extractors.Options{
 		Playlist:         c.Bool("playlist"),
+		AudioOnly:        c.Bool("audio-only"),
 		Items:            c.String("items"),
 		ItemStart:        int(c.Uint("start")),
 		ItemEnd:          int(c.Uint("end")),
