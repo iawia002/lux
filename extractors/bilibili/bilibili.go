@@ -95,7 +95,7 @@ type bilibiliOptions struct {
 }
 
 func extractBangumi(url, html string, extractOption extractors.Options) ([]*extractors.Data, error) {
-	dataString := utils.MatchOneOf(html, `<script\s+id="__NEXT_DATA__"\s+type="application/json"\s*>(.*?)</script\s*>`)[1]
+	dataString := utils.MatchOneOf(html, `const playurlSSRData = ({[\s\S]+})`)[1]
 	epArrayString := utils.MatchOneOf(dataString, `"episode_info"\s*:\s*(.+?)\s*,\s*"season_info"`)[1]
 	fullVideoIdString := utils.MatchOneOf(dataString, `"videoId"\s*:\s*"(ep|ss)(\d+)"`)
 	epSsString := fullVideoIdString[1] // "ep" or "ss"
