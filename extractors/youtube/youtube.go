@@ -127,12 +127,23 @@ func (e *extractor) youtubeDownload(url string, video *youtube.Video) *extractor
 		streams[itag] = stream
 	}
 
+	captions := make(map[string]*extractors.CaptionPart)
+	for _, c := range video.CaptionTracks {
+		captions[c.LanguageCode] = &extractors.CaptionPart{
+			Part: extractors.Part{
+				URL: c.BaseURL,
+				Ext: c.LanguageCode + ".xml",
+			},
+		}
+	}
+
 	return &extractors.Data{
-		Site:    "YouTube youtube.com",
-		Title:   video.Title,
-		Type:    "video",
-		Streams: streams,
-		URL:     url,
+		Site:     "YouTube youtube.com",
+		Title:    video.Title,
+		Type:     "video",
+		Streams:  streams,
+		Captions: captions,
+		URL:      url,
 	}
 }
 
