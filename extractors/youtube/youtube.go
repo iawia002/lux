@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/kkdai/youtube/v2"
 	"github.com/pkg/errors"
@@ -46,7 +47,19 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		return []*extractors.Data{e.youtubeDownload(url, video)}, nil
+		data := e.youtubeDownload(url, video)
+		if option.Items != "" {
+			// If it is not a playlist, we can use the Items option to filter the subtitles.
+			filteredCaptions := make(map[string]*extractors.CaptionPart)
+			items := strings.Split(option.Items, ",")
+			for k, v := range data.Captions {
+				if slices.Contains(items, k) {
+					filteredCaptions[k] = v
+				}
+			}
+			data.Captions = filteredCaptions
+		}
+		return []*extractors.Data{data}, nil
 	}
 
 	playlist, err := e.client.GetPlaylist(url)
