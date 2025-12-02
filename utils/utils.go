@@ -226,6 +226,20 @@ func ParseInputFile(r io.Reader, items string, itemStart, itemEnd int) []string 
 	return itemList
 }
 
+// ConvertXmlToSrt converts XML subtitles file to SRT format
+func ConvertXmlToSrt(xmlPath string) (string, error) {
+	content, err := os.ReadFile(xmlPath)
+	if err != nil {
+		return "", err
+	}
+	srtContent, err := ConvertXMLToSRT(content)
+	if err != nil {
+		return "", err
+	}
+	srtPath := xmlPath[:len(xmlPath)-len("xml")] + "srt"
+	return srtPath, os.WriteFile(srtPath, []byte(srtContent), 0644)
+}
+
 // GetNameAndExt return the name and ext of the URL
 // https://img9.bcyimg.com/drawer/15294/post/1799t/1f5a87801a0711e898b12b640777720f.jpg ->
 // 1f5a87801a0711e898b12b640777720f, jpg
