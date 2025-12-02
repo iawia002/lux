@@ -78,76 +78,79 @@ func MergeToMP4(paths []string, mergedFilePath string, filename string) error {
 	return runMergeCmd(cmd, paths, mergeFilePath)
 }
 
+// ISO 639-2 language code mapping
+var langToISO = map[string]string{
+	"zh": "chi", "en": "eng", "ja": "jpn", "ko": "kor",
+	"es": "spa", "fr": "fre", "de": "ger", "ru": "rus",
+	"pt": "por", "it": "ita", "nl": "nld", "sv": "swe",
+	"no": "nor", "fi": "fin", "da": "dan", "pl": "pol",
+}
+
+// toISO639 converts language code (e.g. "en-US") to ISO 639-2 (e.g. "eng")
+func toISO639(lang string) string {
+	base := strings.ToLower(lang)
+	if i := strings.IndexAny(base, "-_"); i != -1 {
+		base = base[:i]
+	}
+	if iso, ok := langToISO[base]; ok {
+		return iso
+	}
+	if len(base) == 3 {
+		return base
+	}
+	return "und"
+}
+
+// subtitleCodec returns the appropriate subtitle codec for the container format
+func subtitleCodec(ext string) string {
+	switch strings.ToLower(ext) {
+	case ".mp4":
+		return "mov_text"
+	case ".webm":
+		return "webvtt"
+	default:
+		return ""
+	}
+}
+
 // EmbedSubtitles embeds subtitles into the video.
 func EmbedSubtitles(videoPath string, subtitlePaths []string, langs []string) error {
-	tempOutput := videoPath + ".temp" + filepath.Ext(videoPath)
+	ext := filepath.Ext(videoPath)
+	tempOutput := videoPath + ".temp" + ext
 
-	cmds := []string{
-		"-y",
-		"-i", videoPath,
-	}
+	// Build ffmpeg command
+	cmds := []string{"-y", "-i", videoPath}
 	for _, subPath := range subtitlePaths {
 		cmds = append(cmds, "-i", subPath)
 	}
 
-	cmds = append(cmds, "-map", "0", "-dn", "-ignore_unknown")
-	cmds = append(cmds, "-c", "copy")
+	cmds = append(cmds,
+		"-map", "0", "-dn", "-ignore_unknown",
+		"-c", "copy",
+	)
 
-	ext := strings.ToLower(filepath.Ext(videoPath))
-	if ext == ".mp4" {
-		cmds = append(cmds, "-c:s", "mov_text")
-	} else if ext == ".webm" {
-		cmds = append(cmds, "-c:s", "webvtt")
+	if codec := subtitleCodec(ext); codec != "" {
+		cmds = append(cmds, "-c:s", codec)
 	}
 
-	// Don't copy the existing subtitles
+	// Exclude existing subtitles, then map new ones
 	cmds = append(cmds, "-map", "-0:s")
-
-	for i := range subtitlePaths {
-		cmds = append(cmds, "-map", fmt.Sprintf("%d:0", i+1))
-		if i < len(langs) {
-			lang := langs[i]
-			// Convert to ISO 639-2 (3-letter code) for MP4 compatibility
-			// Simple mapping for common languages
-			isoLang := "und"
-			baseLang := strings.ToLower(lang)
-			if strings.Contains(baseLang, "-") {
-				baseLang = strings.Split(baseLang, "-")[0]
-			}
-
-			switch baseLang {
-			case "zh":
-				isoLang = "chi"
-			case "en":
-				isoLang = "eng"
-			case "ja":
-				isoLang = "jpn"
-			case "ko":
-				isoLang = "kor"
-			case "es":
-				isoLang = "spa"
-			case "fr":
-				isoLang = "fre"
-			case "de":
-				isoLang = "ger"
-			case "ru":
-				isoLang = "rus"
-			default:
-				if len(baseLang) == 3 {
-					isoLang = baseLang
-				}
-			}
-
-			cmds = append(cmds, fmt.Sprintf("-metadata:s:s:%d", i), fmt.Sprintf("language=%s", isoLang))
-			cmds = append(cmds, fmt.Sprintf("-metadata:s:s:%d", i), fmt.Sprintf("handler_name=%s", lang))
-			cmds = append(cmds, fmt.Sprintf("-metadata:s:s:%d", i), fmt.Sprintf("title=%s", lang))
+	for i, lang := range langs {
+		if i >= len(subtitlePaths) {
+			break
 		}
+		iso := toISO639(lang)
+		cmds = append(cmds,
+			"-map", fmt.Sprintf("%d:0", i+1),
+			fmt.Sprintf("-metadata:s:s:%d", i), fmt.Sprintf("language=%s", iso),
+			fmt.Sprintf("-metadata:s:s:%d", i), fmt.Sprintf("handler_name=%s", lang),
+			fmt.Sprintf("-metadata:s:s:%d", i), fmt.Sprintf("title=%s", lang),
+		)
 	}
 
 	cmds = append(cmds, tempOutput)
 
-	err := runMergeCmd(exec.Command(findFFmpegExecutable(), cmds...), []string{videoPath}, "")
-	if err != nil {
+	if err := runMergeCmd(exec.Command(findFFmpegExecutable(), cmds...), []string{videoPath}, ""); err != nil {
 		return err
 	}
 	return os.Rename(tempOutput, videoPath)
