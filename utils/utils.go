@@ -20,36 +20,29 @@ import (
 	"github.com/iawia002/lux/request"
 )
 
-type timedText struct {
-	Body body `xml:"body"`
-}
-
-type body struct {
-	P []p `xml:"p"`
-}
-
-type p struct {
-	T    int    `xml:"t,attr"`
-	D    int    `xml:"d,attr"`
-	Text string `xml:",chardata"`
-	S    []s    `xml:"s"`
-}
-
-type s struct {
-	T    int    `xml:"t,attr"`
-	Text string `xml:",chardata"`
-}
-
 // ConvertXMLToSRT converts YouTube XML subtitles to SRT format
 func ConvertXMLToSRT(xmlContent []byte) (string, error) {
-	var tt timedText
-	if err := xml.Unmarshal(xmlContent, &tt); err != nil {
+	var data struct {
+		Body struct {
+			P []struct {
+				T    int    `xml:"t,attr"`
+				D    int    `xml:"d,attr"`
+				Text string `xml:",chardata"`
+				S    []struct {
+					T    int    `xml:"t,attr"`
+					Text string `xml:",chardata"`
+				} `xml:"s"`
+			} `xml:"p"`
+		} `xml:"body"`
+	}
+
+	if err := xml.Unmarshal(xmlContent, &data); err != nil {
 		return "", err
 	}
 
 	var srtBuilder strings.Builder
 	index := 1
-	for _, p := range tt.Body.P {
+	for _, p := range data.Body.P {
 		startTime := formatSRTTime(p.T)
 		endTime := formatSRTTime(p.T + p.D)
 
