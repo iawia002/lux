@@ -571,7 +571,11 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 #### Subtitle:
 
 ```
-  -C	Download captions
+  -C	Download subtitles
+  -C -items en,zh
+    	Download specific languages (YouTube only)
+  -C -items en,zh -embed 
+    	Embed subtitles into the video (YouTube only)
 ```
 
 #### Youku:
