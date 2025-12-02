@@ -119,6 +119,11 @@ func New() *cli.App {
 				Aliases: []string{"C"},
 				Usage:   "Download captions",
 			},
+			&cli.BoolFlag{
+				Name:    "embed-subtitle",
+				Aliases: []string{"embed"},
+				Usage:   "Embed subtitles into the video (requires ffmpeg)",
+			},
 
 			&cli.UintFlag{
 				Name:  "start",
@@ -311,6 +316,7 @@ func download(c *cli.Context, videoURL string) error {
 		OutputName:     c.String("output-name"),
 		FileNameLength: int(c.Uint("file-name-length")),
 		Caption:        c.Bool("caption"),
+		EmbedSubtitle:  c.Bool("embed-subtitle"),
 		MultiThread:    c.Bool("multi-thread"),
 		ThreadNumber:   int(c.Uint("thread")),
 		RetryTimes:     int(c.Uint("retry")),
