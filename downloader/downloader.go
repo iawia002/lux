@@ -621,7 +621,7 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 					subtitlePath, _ := utils.FilePath(title, v.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, true)
 					subtitleFilesToDelete = append(subtitleFilesToDelete, subtitlePath)
 					if strings.HasSuffix(v.Ext, "xml") {
-						if srtPath, err := utils.ConvertXmlToSrt(subtitlePath); err == nil {
+						if srtPath, err := utils.ConvertXMLFileToSRT(subtitlePath); err == nil {
 							subtitlePath = srtPath
 							subtitleFilesToDelete = append(subtitleFilesToDelete, srtPath)
 						}

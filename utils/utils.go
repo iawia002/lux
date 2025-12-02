@@ -75,6 +75,20 @@ func ConvertXMLToSRT(xmlContent []byte) (string, error) {
 	return srtBuilder.String(), nil
 }
 
+// ConvertXMLFileToSRT converts XML subtitles file to SRT format
+func ConvertXMLFileToSRT(xmlPath string) (string, error) {
+	content, err := os.ReadFile(xmlPath)
+	if err != nil {
+		return "", err
+	}
+	srtContent, err := ConvertXMLToSRT(content)
+	if err != nil {
+		return "", err
+	}
+	srtPath := xmlPath[:len(xmlPath)-len("xml")] + "srt"
+	return srtPath, os.WriteFile(srtPath, []byte(srtContent), 0644)
+}
+
 func formatSRTTime(ms int) string {
 	hours := ms / 3600000
 	ms %= 3600000
@@ -224,20 +238,6 @@ func ParseInputFile(r io.Reader, items string, itemStart, itemEnd int) []string 
 	}
 
 	return itemList
-}
-
-// ConvertXmlToSrt converts XML subtitles file to SRT format
-func ConvertXmlToSrt(xmlPath string) (string, error) {
-	content, err := os.ReadFile(xmlPath)
-	if err != nil {
-		return "", err
-	}
-	srtContent, err := ConvertXMLToSRT(content)
-	if err != nil {
-		return "", err
-	}
-	srtPath := xmlPath[:len(xmlPath)-len("xml")] + "srt"
-	return srtPath, os.WriteFile(srtPath, []byte(srtContent), 0644)
 }
 
 // GetNameAndExt return the name and ext of the URL
