@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/md5"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"net/url"
@@ -18,6 +19,78 @@ import (
 
 	"github.com/iawia002/lux/request"
 )
+
+// ConvertXMLToSRT converts YouTube XML subtitles to SRT format
+func ConvertXMLToSRT(xmlContent []byte) (string, error) {
+	var data struct {
+		Body struct {
+			P []struct {
+				T    int    `xml:"t,attr"`
+				D    int    `xml:"d,attr"`
+				Text string `xml:",chardata"`
+				S    []struct {
+					T    int    `xml:"t,attr"`
+					Text string `xml:",chardata"`
+				} `xml:"s"`
+			} `xml:"p"`
+		} `xml:"body"`
+	}
+
+	if err := xml.Unmarshal(xmlContent, &data); err != nil {
+		return "", err
+	}
+
+	var srtBuilder strings.Builder
+	index := 1
+	for _, p := range data.Body.P {
+		startTime := formatSRTTime(p.T)
+		endTime := formatSRTTime(p.T + p.D)
+
+		// Handle text content
+		var text string
+		if len(p.S) > 0 {
+			for _, s := range p.S {
+				text += s.Text
+			}
+		} else {
+			text = p.Text
+		}
+		text = strings.TrimSpace(text)
+
+		// Skip empty lines
+		if text == "" {
+			continue
+		}
+
+		srtBuilder.WriteString(fmt.Sprintf("%d\n%s --> %s\n%s\n\n", index, startTime, endTime, text))
+		index++
+	}
+	return srtBuilder.String(), nil
+}
+
+// ConvertXMLFileToSRT converts XML subtitles file to SRT format
+func ConvertXMLFileToSRT(xmlPath string) (string, error) {
+	content, err := os.ReadFile(xmlPath)
+	if err != nil {
+		return "", err
+	}
+	srtContent, err := ConvertXMLToSRT(content)
+	if err != nil {
+		return "", err
+	}
+	srtPath := xmlPath[:len(xmlPath)-len("xml")] + "srt"
+	return srtPath, os.WriteFile(srtPath, []byte(srtContent), 0644)
+}
+
+func formatSRTTime(ms int) string {
+	hours := ms / 3600000
+	ms %= 3600000
+	minutes := ms / 60000
+	ms %= 60000
+	seconds := ms / 1000
+	ms %= 1000
+	return fmt.Sprintf("%02d:%02d:%02d,%03d", hours, minutes, seconds, ms)
+}
 
 // MatchOneOf match one of the patterns
 func MatchOneOf(text string, patterns ...string) []string {

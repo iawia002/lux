@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -34,6 +35,7 @@ type Options struct {
 	OutputName     string
 	FileNameLength int
 	Caption        bool
+	EmbedSubtitle  bool
 
 	MultiThread  bool
 	ThreadNumber int
@@ -605,12 +607,28 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 	}
 
 	// download caption
+	var subtitlePaths []string
+	var subtitleLangs []string
+	var subtitleFilesToDelete []string
 	if downloader.option.Caption && data.Captions != nil {
 		fmt.Println("\nDownloading captions...")
 		for k, v := range data.Captions {
 			if v != nil {
 				fmt.Printf("Downloading %s ...\n", k)
-				downloader.caption(v.URL, title, v.Ext, v.Transform) // nolint
+				if err := downloader.caption(v.URL, title, v.Ext, v.Transform); err != nil {
+					// nolint
+				} else if downloader.option.EmbedSubtitle {
+					subtitlePath, _ := utils.FilePath(title, v.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, true)
+					subtitleFilesToDelete = append(subtitleFilesToDelete, subtitlePath)
+					if strings.HasSuffix(v.Ext, "xml") {
+						if srtPath, err := utils.ConvertXMLFileToSRT(subtitlePath); err == nil {
+							subtitlePath = srtPath
+							subtitleFilesToDelete = append(subtitleFilesToDelete, srtPath)
+						}
+					}
+					subtitlePaths = append(subtitlePaths, subtitlePath)
+					subtitleLangs = append(subtitleLangs, k)
+				}
 			}
 		}
 	}
@@ -652,6 +670,18 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 			return err
 		}
 		downloader.bar.Finish()
+
+		if downloader.option.EmbedSubtitle && len(subtitlePaths) > 0 {
+			if !downloader.option.Silent {
+				fmt.Println("Embedding subtitles...")
+			}
+			if err := utils.EmbedSubtitles(mergedFilePath, subtitlePaths, subtitleLangs); err != nil {
+				return err
+			}
+			for _, path := range subtitleFilesToDelete {
+				os.Remove(path)
+			}
+		}
 		return nil
 	}
 
@@ -706,7 +736,26 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 		fmt.Printf("Merging video parts into %s\n", mergedFilePath)
 	}
 	if stream.Ext != "mp4" || stream.NeedMux {
-		return utils.MergeFilesWithSameExtension(parts, mergedFilePath)
+		if err := utils.MergeFilesWithSameExtension(parts, mergedFilePath); err != nil {
+			return err
+		}
+	} else {
+		if err := utils.MergeToMP4(parts, mergedFilePath, title); err != nil {
+			return err
+		}
 	}
-	return utils.MergeToMP4(parts, mergedFilePath, title)
+
+	if downloader.option.EmbedSubtitle && len(subtitlePaths) > 0 {
+		if !downloader.option.Silent {
+			fmt.Println("Embedding subtitles...")
+		}
+		if err := utils.EmbedSubtitles(mergedFilePath, subtitlePaths, subtitleLangs); err != nil {
+			return err
+		}
+		for _, path := range subtitleFilesToDelete {
+			os.Remove(path)
+		}
+	}
+
+	return nil
 }

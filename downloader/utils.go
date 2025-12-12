@@ -51,7 +51,23 @@ func printStream(stream *extractors.Stream) {
 
 func printInfo(data *extractors.Data, sortedStreams []*extractors.Stream) {
 	printHeader(data)
-
+	if len(data.Captions) > 0 {
+		cyan.Printf(" Captions:  ") // nolint
+		languages := make([]string, 0, len(data.Captions))
+		for lang := range data.Captions {
+			languages = append(languages, lang)
+		}
+		sort.Strings(languages)
+		captionList := ""
+		for _, lang := range languages {
+			caption := data.Captions[lang]
+			if caption == nil {
+				continue
+			}
+			captionList += fmt.Sprintf("%s ", lang)
+		}
+		fmt.Println(captionList)
+	}
 	cyan.Printf(" Streams:   ") // nolint
 	fmt.Println("# All available quality")
 	for _, stream := range sortedStreams {

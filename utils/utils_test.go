@@ -531,3 +531,35 @@ func TestParsingFile(t *testing.T) {
 		}
 	})
 }
+
+func TestConvertXMLToSRT(t *testing.T) {
+	type args struct {
+		content []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "youtube test",
+			args: args{
+				content: []byte(`<?xml version="1.0" encoding="utf-8" ?><timedtext><body><p t="0" d="1000">Hello</p><p t="1000" d="2000">World</p></body></timedtext>`),
+			},
+			want: "1\n00:00:00,000 --> 00:00:01,000\nHello\n\n2\n00:00:01,000 --> 00:00:03,000\nWorld\n\n",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ConvertXMLToSRT(tt.args.content)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ConvertXMLToSRT() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ConvertXMLToSRT() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
