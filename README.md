@@ -565,7 +565,7 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
   -o string
     	Specify the output path
   -O string
-    	Specify the output file name
+    	Specify the output file name.  supports placeholder %author %date %title. 
 ```
 
 #### Subtitle:

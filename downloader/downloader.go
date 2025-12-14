@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/cheggaaa/pb/v3"
+	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"os"
@@ -15,9 +17,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/cheggaaa/pb/v3"
-	"github.com/pkg/errors"
 
 	"github.com/iawia002/lux/extractors"
 	"github.com/iawia002/lux/request"
@@ -560,9 +559,26 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 		return nil
 	}
 
+	/*title := downloader.option.OutputName
+	if title == "" {
+		title = data.Title
+	}*/
 	title := downloader.option.OutputName
 	if title == "" {
 		title = data.Title
+	} else {
+		// 创建占位符映射
+		placeholders := map[string]string{
+			"%title": data.Title,
+			// 可以根据需要添加更多占位符
+			"%author": data.Author,
+			"%date":   data.Date,
+		}
+
+		// 替换所有占位符
+		for placeholder, value := range placeholders {
+			title = strings.ReplaceAll(title, placeholder, value)
+		}
 	}
 	title = utils.FileName(title, "", downloader.option.FileNameLength)
 
