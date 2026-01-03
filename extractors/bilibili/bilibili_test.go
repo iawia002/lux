@@ -9,9 +9,10 @@ import (
 
 func TestBilibili(t *testing.T) {
 	tests := []struct {
-		name     string
-		args     test.Args
-		playlist bool
+		name      string
+		args      test.Args
+		playlist  bool
+		audioonly bool
 	}{
 		{
 			name: "normal test 1",
@@ -27,7 +28,8 @@ func TestBilibili(t *testing.T) {
 				URL:   "https://www.bilibili.com/video/av41301960",
 				Title: "【英雄联盟】2019赛季CG 《觉醒》",
 			},
-			playlist: false,
+			playlist:  false,
+			audioonly: true,
 		},
 		{
 			name: "bangumi test",
@@ -85,6 +87,13 @@ func TestBilibili(t *testing.T) {
 				_, err = New().Extract(tt.args.URL, extractors.Options{
 					Playlist:     true,
 					ThreadNumber: 9,
+				})
+				test.CheckError(t, err)
+			}
+			if tt.audioonly {
+				// for playlist, we don't check the data
+				_, err = New().Extract(tt.args.URL, extractors.Options{
+					AudioOnly: true,
 				})
 				test.CheckError(t, err)
 			} else {

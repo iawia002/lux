@@ -485,6 +485,17 @@ func bilibiliDownload(options bilibiliOptions, extractOption extractors.Options)
 		return extractors.EmptyData(options.url, err)
 	}
 	title := parser.Title(doc)
+	var author = strings.TrimSpace(doc.Find("a.up-name").Text())
+	var datePart = doc.Find("div.pubdate-ip-text").Text()
+	if len(strings.TrimSpace(datePart)) > 0 {
+		parts := strings.Split(datePart, " ")
+		// 获取第一部分，即年月日
+		if len(parts) > 0 {
+			datePart = parts[0]
+		}
+	}
+	//title = fmt.Sprintf("%s %s", datePart, title)
+	title = fmt.Sprintf("%s", title)
 	if options.subtitle != "" {
 		pageString := ""
 		if options.page > 0 {
@@ -500,6 +511,8 @@ func bilibiliDownload(options bilibiliOptions, extractOption extractors.Options)
 	return &extractors.Data{
 		Site:    "哔哩哔哩 bilibili.com",
 		Title:   title,
+		Date:    datePart,
+		Author:  author,
 		Type:    extractors.DataTypeVideo,
 		Streams: streams,
 		Captions: map[string]*extractors.CaptionPart{
