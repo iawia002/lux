@@ -127,10 +127,15 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	} else {
 		douyinType = extractors.DataTypeVideo
 		realURL := douyin.AwemeDetail.Video.PlayAddr.URLList[0]
-		totalSize, err = request.Size(realURL, url)
-		if err != nil {
-			return nil, errors.WithStack(err)
+
+		totalSize = int64(douyin.AwemeDetail.Video.PlayAddr.DataSize)
+		if totalSize == 0 {
+			totalSize, err = request.Size(realURL, url)
+			if err != nil {
+				return nil, errors.WithStack(err)
+			}
 		}
+
 		urlData = append(urlData, &extractors.Part{
 			URL:  realURL,
 			Size: totalSize,

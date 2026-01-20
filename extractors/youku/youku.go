@@ -41,6 +41,7 @@ type stream struct {
 	Segs      []segs `json:"segs"`
 	Type      string `json:"stream_type"`
 	AudioLang string `json:"audio_lang"`
+	M3u8Url   string `json:"m3u8_url"`
 }
 
 type youkuVideo struct {
@@ -203,6 +204,7 @@ func genData(youkuData data) map[string]*extractors.Stream {
 			Parts:   urls,
 			Size:    stream.Size,
 			Quality: quality,
+			M3u8Url: stream.M3u8Url,
 		}
 	}
 	return streams
