@@ -1,12 +1,37 @@
 package downloader
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/iawia002/lux/extractors"
 )
 
 func TestDownload(t *testing.T) {
+	// Use a local test server instead of external URLs that may become unavailable.
+	// See https://github.com/iawia002/lux/issues/1413
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/video.mp4":
+			w.Header().Set("Content-Type", "video/mp4")
+			w.Header().Set("Content-Length", "12")
+			w.Write([]byte("fake-video!!")) // nolint
+		case "/image1.jpg":
+			w.Header().Set("Content-Type", "image/jpeg")
+			w.Header().Set("Content-Length", "10")
+			w.Write([]byte("fake-img-1")) // nolint
+		case "/image2.jpg":
+			w.Header().Set("Content-Type", "image/jpeg")
+			w.Header().Set("Content-Length", "10")
+			w.Write([]byte("fake-img-2")) // nolint
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
 	testCases := []struct {
 		name string
 		data *extractors.Data
@@ -14,20 +39,21 @@ func TestDownload(t *testing.T) {
 		{
 			name: "normal test",
 			data: &extractors.Data{
-				Site:  "douyin",
+				Site:  "test",
 				Title: "test",
 				Type:  extractors.DataTypeVideo,
-				URL:   "https://www.douyin.com",
+				URL:   ts.URL,
 				Streams: map[string]*extractors.Stream{
 					"default": {
 						ID: "default",
 						Parts: []*extractors.Part{
 							{
-								URL:  "https://aweme.snssdk.com/aweme/v1/playwm/?video_id=v0200f9a0000bc117isuatl67cees890&line=0",
-								Size: 4927877,
+								URL:  ts.URL + "/video.mp4",
+								Size: 12,
 								Ext:  "mp4",
 							},
 						},
+						Size: 12,
 					},
 				},
 			},
@@ -35,32 +61,32 @@ func TestDownload(t *testing.T) {
 		{
 			name: "multi-stream test",
 			data: &extractors.Data{
-				Site:  "douyin",
+				Site:  "test",
 				Title: "test2",
 				Type:  extractors.DataTypeVideo,
-				URL:   "https://www.douyin.com",
+				URL:   ts.URL,
 				Streams: map[string]*extractors.Stream{
-					"miaopai": {
-						ID: "miaopai",
+					"stream-a": {
+						ID: "stream-a",
 						Parts: []*extractors.Part{
 							{
-								URL:  "https://txycdn.miaopai.com/stream/KwR26jUGh2ySnVjYbQiFmomNjP14LtMU3vi6sQ__.mp4?ssig=6594aa01a78e78f50c65c164d186ba9e&time_stamp=1537070910786",
-								Size: 4011590,
+								URL:  ts.URL + "/video.mp4",
+								Size: 12,
 								Ext:  "mp4",
 							},
 						},
-						Size: 4011590,
+						Size: 12,
 					},
-					"douyin": {
-						ID: "douyin",
+					"stream-b": {
+						ID: "stream-b",
 						Parts: []*extractors.Part{
 							{
-								URL:  "https://aweme.snssdk.com/aweme/v1/playwm/?video_id=v0200f9a0000bc117isuatl67cees890&line=0",
-								Size: 4927877,
+								URL:  ts.URL + "/video.mp4",
+								Size: 12,
 								Ext:  "mp4",
 							},
 						},
-						Size: 4927877,
+						Size: 12,
 					},
 				},
 			},
@@ -68,22 +94,22 @@ func TestDownload(t *testing.T) {
 		{
 			name: "image test",
 			data: &extractors.Data{
-				Site:  "bcy",
-				Title: "bcy image test",
+				Site:  "test",
+				Title: "test-image",
 				Type:  extractors.DataTypeImage,
-				URL:   "https://www.bcyimg.com",
+				URL:   ts.URL,
 				Streams: map[string]*extractors.Stream{
 					"default": {
 						ID: "default",
 						Parts: []*extractors.Part{
 							{
-								URL:  "http://img5.bcyimg.com/coser/143767/post/c0j7x/0d713eb41a614053ac6a3b146914f6bc.jpg/w650",
-								Size: 56107,
+								URL:  ts.URL + "/image1.jpg",
+								Size: 10,
 								Ext:  "jpg",
 							},
 							{
-								URL:  "http://img9.bcyimg.com/coser/143767/post/c0j7x/d17e9b8587794d939a1363c5f715014b.jpg/w650",
-								Size: 142100,
+								URL:  ts.URL + "/image2.jpg",
+								Size: 10,
 								Ext:  "jpg",
 							},
 						},
@@ -92,10 +118,20 @@ func TestDownload(t *testing.T) {
 			},
 		},
 	}
+
+	// Use a temp directory for downloads
+	tmpDir, err := os.MkdirTemp("", "lux-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
 	for _, testCase := range testCases {
-		err := New(Options{}).Download(testCase.data)
-		if err != nil {
-			t.Error(err)
-		}
+		t.Run(testCase.name, func(t *testing.T) {
+			err := New(Options{Silent: true, OutputPath: tmpDir}).Download(testCase.data)
+			if err != nil {
+				t.Errorf("%s: %v", testCase.name, err)
+			}
+		})
 	}
 }
