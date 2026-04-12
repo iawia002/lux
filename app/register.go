@@ -5,6 +5,7 @@ import (
 	_ "github.com/iawia002/lux/extractors/bcy"
 	_ "github.com/iawia002/lux/extractors/bilibili"
 	_ "github.com/iawia002/lux/extractors/bitchute"
+	_ "github.com/iawia002/lux/extractors/darkibox"
 	_ "github.com/iawia002/lux/extractors/douyin"
 	_ "github.com/iawia002/lux/extractors/douyu"
 	_ "github.com/iawia002/lux/extractors/eporner"
