@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 
 	"github.com/iawia002/lux/downloader"
@@ -17,10 +19,8 @@ import (
 	"github.com/iawia002/lux/utils"
 )
 
-// Name is the name of this app.
 const Name = "lux"
 
-// This value will be injected into the corresponding git tag value at build time using `-ldflags`.
 var version = "v0.0.0"
 
 func init() {
@@ -36,13 +36,60 @@ func init() {
 	}
 }
 
-// New returns the App instance.
+func initConfig(configPath string) error {
+	if configPath != "" {
+		viper.SetConfigFile(configPath)
+	} else {
+		// Search config in current dir or $HOME/.config/lux/config.yaml
+		home, _ := os.UserHomeDir()
+		viper.AddConfigPath(".")
+		viper.AddConfigPath(filepath.Join(home, ".config", "lux"))
+		viper.SetConfigName("config")
+		viper.SetConfigType("yaml")
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return err
+		}
+	}
+	return nil
+}
+
+// Priority: cmd args > config file > default value
+func getString(c *cli.Context, name string) string {
+	if c.IsSet(name) {
+		return c.String(name)
+	}
+	return viper.GetString(name)
+}
+
+func getBool(c *cli.Context, name string) bool {
+	if c.IsSet(name) {
+		return c.Bool(name)
+	}
+	return viper.GetBool(name)
+}
+
+func getUint(c *cli.Context, name string) uint {
+	if c.IsSet(name) {
+		return c.Uint(name)
+	}
+	return viper.GetUint(name)
+}
+
 func New() *cli.App {
 	app := &cli.App{
 		Name:    Name,
 		Usage:   "A fast and simple video downloader.",
 		Version: version,
 		Flags: []cli.Flag{
+			// Use config file to run lux
+			&cli.StringFlag{
+				Name:    "config",
+				Aliases: []string{"cfg"},
+				Usage:   "Path to config file",
+			},
 			&cli.BoolFlag{
 				Name:    "debug",
 				Aliases: []string{"d"},
@@ -209,20 +256,25 @@ func New() *cli.App {
 			},
 		},
 		Action: func(c *cli.Context) error {
+			// load config file
+			if err := initConfig(c.String("config")); err != nil {
+				return err
+			}
+
 			args := c.Args().Slice()
 
-			if c.Bool("debug") {
+			if getBool(c, "debug") {
 				cli.VersionPrinter(c)
 			}
 
-			if file := c.String("file"); file != "" {
+			if file := getString(c, "file"); file != "" {
 				f, err := os.Open(file)
 				if err != nil {
 					return err
 				}
 				defer f.Close() // nolint
 
-				fileItems := utils.ParseInputFile(f, c.String("items"), int(c.Uint("start")), int(c.Uint("end")))
+				fileItems := utils.ParseInputFile(f, getString(c, "items"), int(getUint(c, "start")), int(getUint(c, "end")))
 				args = append(args, fileItems...)
 			}
 
@@ -230,7 +282,7 @@ func New() *cli.App {
 				return errors.New("too few arguments")
 			}
 
-			cookie := c.String("cookie")
+			cookie := getString(c, "cookie")
 			if cookie != "" {
 				// If cookie is a file path, convert it to a string to ensure cookie is always string
 				if _, fileErr := os.Stat(cookie); fileErr == nil {
@@ -244,12 +296,12 @@ func New() *cli.App {
 			}
 
 			request.SetOptions(request.Options{
-				RetryTimes: int(c.Uint("retry")),
+				RetryTimes: int(getUint(c, "retry")),
 				Cookie:     cookie,
-				UserAgent:  c.String("user-agent"),
-				Refer:      c.String("refer"),
-				Debug:      c.Bool("debug"),
-				Silent:     c.Bool("silent"),
+				UserAgent:  getString(c, "user-agent"),
+				Refer:      getString(c, "refer"),
+				Debug:      getBool(c, "debug"),
+				Silent:     getBool(c, "silent"),
 			})
 
 			var isErr bool
@@ -278,16 +330,16 @@ func New() *cli.App {
 
 func download(c *cli.Context, videoURL string) error {
 	data, err := extractors.Extract(videoURL, extractors.Options{
-		Playlist:         c.Bool("playlist"),
-		Items:            c.String("items"),
-		ItemStart:        int(c.Uint("start")),
-		ItemEnd:          int(c.Uint("end")),
-		ThreadNumber:     int(c.Uint("thread")),
-		EpisodeTitleOnly: c.Bool("episode-title-only"),
-		Cookie:           c.String("cookie"),
-		YoukuCcode:       c.String("youku-ccode"),
-		YoukuCkey:        c.String("youku-ckey"),
-		YoukuPassword:    c.String("youku-password"),
+		Playlist:         getBool(c, "playlist"),
+		Items:            getString(c, "items"),
+		ItemStart:        int(getUint(c, "start")),
+		ItemEnd:          int(getUint(c, "end")),
+		ThreadNumber:     int(getUint(c, "thread")),
+		EpisodeTitleOnly: getBool(c, "episode-title-only"),
+		Cookie:           getString(c, "cookie"),
+		YoukuCcode:       getString(c, "youku-ccode"),
+		YoukuCkey:        getString(c, "youku-ckey"),
+		YoukuPassword:    getString(c, "youku-password"),
 	})
 	if err != nil {
 		// if this error occurs, it means that an error occurred before actually starting to extract data
@@ -295,7 +347,7 @@ func download(c *cli.Context, videoURL string) error {
 		return err
 	}
 
-	if c.Bool("json") {
+	if getBool(c, "json") {
 		e := json.NewEncoder(os.Stdout)
 		e.SetIndent("", "\t")
 		e.SetEscapeHTML(false)
@@ -307,24 +359,24 @@ func download(c *cli.Context, videoURL string) error {
 	}
 
 	defaultDownloader := downloader.New(downloader.Options{
-		Silent:         c.Bool("silent"),
-		InfoOnly:       c.Bool("info"),
-		Stream:         c.String("stream-format"),
-		AudioOnly:      c.Bool("audio-only"),
-		Refer:          c.String("refer"),
-		OutputPath:     c.String("output-path"),
-		OutputName:     c.String("output-name"),
-		FileNameLength: int(c.Uint("file-name-length")),
-		Caption:        c.Bool("caption"),
-		EmbedSubtitle:  c.Bool("embed-subtitle"),
-		MultiThread:    c.Bool("multi-thread"),
-		ThreadNumber:   int(c.Uint("thread")),
-		RetryTimes:     int(c.Uint("retry")),
-		ChunkSizeMB:    int(c.Uint("chunk-size")),
-		UseAria2RPC:    c.Bool("aria2"),
-		Aria2Token:     c.String("aria2-token"),
-		Aria2Method:    c.String("aria2-method"),
-		Aria2Addr:      c.String("aria2-addr"),
+		Silent:         getBool(c, "silent"),
+		InfoOnly:       getBool(c, "info"),
+		Stream:         getString(c, "stream-format"),
+		AudioOnly:      getBool(c, "audio-only"),
+		Refer:          getString(c, "refer"),
+		OutputPath:     getString(c, "output-path"),
+		OutputName:     getString(c, "output-name"),
+		FileNameLength: int(getUint(c, "file-name-length")),
+		Caption:        getBool(c, "caption"),
+		EmbedSubtitle:  getBool(c, "embed-subtitle"),
+		MultiThread:    getBool(c, "multi-thread"),
+		ThreadNumber:   int(getUint(c, "thread")),
+		RetryTimes:     int(getUint(c, "retry")),
+		ChunkSizeMB:    int(getUint(c, "chunk-size")),
+		UseAria2RPC:    getBool(c, "aria2"),
+		Aria2Token:     getString(c, "aria2-token"),
+		Aria2Method:    getString(c, "aria2-method"),
+		Aria2Addr:      getString(c, "aria2-addr"),
 	})
 	errors := make([]error, 0)
 	for _, item := range data {
