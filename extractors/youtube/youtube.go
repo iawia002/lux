@@ -81,6 +81,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 			defer wgp.Done()
 			video, err := e.client.VideoFromPlaylistEntry(entry)
 			if err != nil {
+				extractedData[index] = extractors.EmptyData(url, err)
 				return
 			}
 			extractedData[index] = e.youtubeDownload(url, video)
