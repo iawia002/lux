@@ -55,8 +55,13 @@ func Extract(u string, option Options) ([]*Data, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+	data := videos[:0]
 	for _, v := range videos {
+		if v == nil {
+			continue
+		}
 		v.FillUpStreamsData()
+		data = append(data, v)
 	}
-	return videos, nil
+	return data, nil
 }
