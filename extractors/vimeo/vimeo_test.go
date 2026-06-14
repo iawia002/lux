@@ -3,8 +3,8 @@ package vimeo
 import (
 	"testing"
 
-	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/test"
+	"github.com/OldBeLight/lux/extractors"
+	"github.com/OldBeLight/lux/test"
 )
 
 func TestDownload(t *testing.T) {

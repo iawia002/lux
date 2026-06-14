@@ -19,9 +19,9 @@ import (
 	"github.com/cheggaaa/pb/v3"
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/request"
-	"github.com/iawia002/lux/utils"
+	"github.com/OldBeLight/lux/extractors"
+	"github.com/OldBeLight/lux/request"
+	"github.com/OldBeLight/lux/utils"
 )
 
 // Options defines options used in downloading.
@@ -41,6 +41,7 @@ type Options struct {
 	ThreadNumber int
 	RetryTimes   int
 	ChunkSizeMB  int
+	Request      request.Options
 	// Aria2
 	UseAria2RPC bool
 	Aria2Token  string
@@ -98,7 +99,7 @@ func (downloader *Downloader) caption(url, fileName, ext string, transform func(
 	if refer == "" {
 		refer = url
 	}
-	body, err := request.GetByte(url, refer, nil)
+	body, err := request.GetByteWithOptions(url, refer, nil, downloader.option.Request)
 	if err != nil {
 		return err
 	}
@@ -127,7 +128,7 @@ func (downloader *Downloader) caption(url, fileName, ext string, transform func(
 }
 
 func (downloader *Downloader) writeFile(url string, file *os.File, headers map[string]string, tracker *progressTracker, partIndex, partCount int) (int64, error) {
-	res, err := request.Request(http.MethodGet, url, nil, headers)
+	res, err := request.RequestWithOptions(http.MethodGet, url, nil, headers, downloader.option.Request)
 	if err != nil {
 		return 0, err
 	}

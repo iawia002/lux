@@ -6,7 +6,7 @@ import (
 
 	"github.com/fatih/color"
 
-	"github.com/iawia002/lux/extractors"
+	"github.com/OldBeLight/lux/extractors"
 )
 
 var (
@@ -25,6 +25,11 @@ func genSortedStreams(streams map[string]*extractors.Stream) []*extractors.Strea
 		)
 	}
 	return sortedStreams
+}
+
+// SortedStreamsForLibrary returns streams in the same preferred order used by Download.
+func SortedStreamsForLibrary(streams map[string]*extractors.Stream) []*extractors.Stream {
+	return genSortedStreams(streams)
 }
 
 func printHeader(data *extractors.Data) {

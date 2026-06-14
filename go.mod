@@ -1,4 +1,4 @@
-module github.com/iawia002/lux
+module github.com/OldBeLight/lux
 
 go 1.24
 

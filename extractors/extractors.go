@@ -7,7 +7,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/utils"
+	"github.com/OldBeLight/lux/request"
+	"github.com/OldBeLight/lux/utils"
 )
 
 var lock sync.RWMutex
@@ -57,6 +58,20 @@ func Extract(u string, option Options) ([]*Data, error) {
 	}
 	for _, v := range videos {
 		v.FillUpStreamsData()
+	}
+	return videos, nil
+}
+
+// ExtractWithRequestOptions extracts data with request options scoped to this call.
+func ExtractWithRequestOptions(u string, option Options, requestOptions request.Options) ([]*Data, error) {
+	var videos []*Data
+	err := request.WithOptions(requestOptions, func() error {
+		var err error
+		videos, err = Extract(u, option)
+		return err
+	})
+	if err != nil {
+		return nil, err
 	}
 	return videos, nil
 }

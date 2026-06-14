@@ -11,7 +11,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/iawia002/lux/extractors"
+	"github.com/OldBeLight/lux/extractors"
+	"github.com/OldBeLight/lux/request"
 )
 
 func TestDownloadProgressSingleFile(t *testing.T) {
@@ -46,6 +47,43 @@ func TestDownloadProgressSingleFile(t *testing.T) {
 	}
 	if finished.PartIndex != 0 || finished.PartCount != 1 {
 		t.Fatalf("finished part context = %d/%d, want 0/1", finished.PartIndex, finished.PartCount)
+	}
+}
+
+func TestDownloadUsesRequestOptions(t *testing.T) {
+	body := []byte("hello library request options")
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("User-Agent") != "downloader-agent" {
+			t.Fatalf("User-Agent = %q, want downloader-agent", r.Header.Get("User-Agent"))
+		}
+		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+		_, _ = w.Write(body)
+	}))
+	defer server.Close()
+
+	err := New(Options{
+		Silent:     true,
+		OutputPath: t.TempDir(),
+		RetryTimes: 1,
+		Request: request.Options{
+			RetryTimes: 1,
+			UserAgent:  "downloader-agent",
+		},
+	}).Download(testDownloadData(server.URL, int64(len(body)), "mp4"))
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSortedStreamsForLibrary(t *testing.T) {
+	streams := map[string]*extractors.Stream{
+		"small": {ID: "small", Size: 1},
+		"large": {ID: "large", Size: 10},
+	}
+
+	sorted := SortedStreamsForLibrary(streams)
+	if len(sorted) != 2 || sorted[0].ID != "large" || sorted[1].ID != "small" {
+		t.Fatalf("sorted streams = %#v", sorted)
 	}
 }
 

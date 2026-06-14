@@ -17,7 +17,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/request"
+	"github.com/OldBeLight/lux/request"
 )
 
 // ConvertXMLToSRT converts YouTube XML subtitles to SRT format
