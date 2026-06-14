@@ -3,6 +3,7 @@ package request
 import (
 	"compress/flate"
 	"compress/gzip"
+	"context"
 	"crypto/tls"
 	"fmt"
 	"io"
@@ -29,6 +30,7 @@ var (
 	refer      string
 	proxy      string
 	debug      bool
+	ctx        context.Context
 	optionsMu  sync.Mutex
 	scopedMu   sync.Mutex
 )
@@ -36,6 +38,7 @@ var (
 // Options defines common request options.
 type Options struct {
 	RetryTimes int
+	Context    context.Context
 	Cookie     string
 	UserAgent  string
 	Refer      string
@@ -58,11 +61,13 @@ func setOptionsUnlocked(opt Options) {
 	refer = opt.Refer
 	proxy = opt.Proxy
 	debug = opt.Debug
+	ctx = opt.Context
 }
 
 func currentOptionsUnlocked() Options {
 	return Options{
 		RetryTimes: retryTimes,
+		Context:    ctx,
 		Cookie:     rawCookie,
 		UserAgent:  userAgent,
 		Refer:      refer,
@@ -130,7 +135,11 @@ func RequestWithOptions(method, url string, body io.Reader, headers map[string]s
 		Jar:       jar,
 	}
 
-	req, err := http.NewRequest(method, url, body)
+	ctx := opt.Context
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -176,7 +185,7 @@ func RequestWithOptions(method, url string, body io.Reader, headers map[string]s
 		} else if i+1 >= opt.RetryTimes {
 			var err error
 			if requestError != nil {
-				err = errors.Errorf("request error: %v", requestError)
+				err = errors.Wrap(requestError, "request error")
 			} else {
 				err = errors.Errorf("%s request error: HTTP %d", url, res.StatusCode)
 			}

@@ -1,6 +1,8 @@
 package extractors
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +12,28 @@ import (
 
 type libraryExtractor struct {
 	serverURL string
+}
+
+func TestExtractWithRequestOptionsUsesContext(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Fatal("request reached server after context was canceled")
+	}))
+	defer server.Close()
+
+	Register("context-example", libraryExtractor{serverURL: server.URL})
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := ExtractWithRequestOptions("http://context-example.com/watch", Options{}, request.Options{
+		RetryTimes: 1,
+		Context:    ctx,
+	})
+	if err == nil {
+		t.Fatal("ExtractWithRequestOptions() error = nil, want canceled context error")
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("ExtractWithRequestOptions() error = %v, want context.Canceled", err)
+	}
 }
 
 func (e libraryExtractor) Extract(u string, option Options) ([]*Data, error) {

@@ -1,6 +1,8 @@
 package downloader
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -47,6 +49,32 @@ func TestDownloadProgressSingleFile(t *testing.T) {
 	}
 	if finished.PartIndex != 0 || finished.PartCount != 1 {
 		t.Fatalf("finished part context = %d/%d, want 0/1", finished.PartIndex, finished.PartCount)
+	}
+}
+
+func TestDownloadUsesRequestContext(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Fatal("request reached server after context was canceled")
+	}))
+	defer server.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err := New(Options{
+		Silent:     true,
+		OutputPath: t.TempDir(),
+		RetryTimes: 1,
+		Request: request.Options{
+			RetryTimes: 1,
+			Context:    ctx,
+		},
+	}).Download(testDownloadData(server.URL, 1, "mp4"))
+	if err == nil {
+		t.Fatal("Download() error = nil, want canceled context error")
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Download() error = %v, want context.Canceled", err)
 	}
 }
 
