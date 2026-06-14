@@ -3,9 +3,9 @@ package universal
 import (
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/request"
-	"github.com/iawia002/lux/utils"
+	"github.com/OldBeLight/lux/extractors"
+	"github.com/OldBeLight/lux/request"
+	"github.com/OldBeLight/lux/utils"
 )
 
 func init() {

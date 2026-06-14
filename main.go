@@ -6,7 +6,7 @@ import (
 
 	"github.com/fatih/color"
 
-	"github.com/iawia002/lux/app"
+	"github.com/OldBeLight/lux/app"
 )
 
 func main() {

@@ -3,6 +3,7 @@ package youtube
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -10,9 +11,9 @@ import (
 	"github.com/kkdai/youtube/v2"
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/request"
-	"github.com/iawia002/lux/utils"
+	"github.com/OldBeLight/lux/extractors"
+	"github.com/OldBeLight/lux/request"
+	"github.com/OldBeLight/lux/utils"
 )
 
 func init() {
@@ -42,12 +43,17 @@ func New() extractors.Extractor {
 
 // Extract is the main function to extract the data.
 func (e *extractor) Extract(url string, option extractors.Options) ([]*extractors.Data, error) {
+	client, err := e.clientWithOptions(request.CurrentOptions())
+	if err != nil {
+		return nil, err
+	}
+
 	if !option.Playlist {
-		video, err := e.client.GetVideo(url)
+		video, err := client.GetVideo(url)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
-		data := e.youtubeDownload(url, video)
+		data := e.youtubeDownload(client, url, video)
 		if option.Items != "" {
 			// If it is not a playlist, we can use the Items option to filter the subtitles.
 			filteredCaptions := make(map[string]*extractors.CaptionPart)
@@ -62,7 +68,7 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		return []*extractors.Data{data}, nil
 	}
 
-	playlist, err := e.client.GetPlaylist(url)
+	playlist, err := client.GetPlaylist(url)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -79,11 +85,11 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 		wgp.Add()
 		go func(index int, entry *youtube.PlaylistEntry, extractedData []*extractors.Data) {
 			defer wgp.Done()
-			video, err := e.client.VideoFromPlaylistEntry(entry)
+			video, err := client.VideoFromPlaylistEntry(entry)
 			if err != nil {
 				return
 			}
-			extractedData[index] = e.youtubeDownload(url, video)
+			extractedData[index] = e.youtubeDownload(client, url, video)
 		}(dataIndex, videoEntry, extractedData)
 		dataIndex++
 	}
@@ -91,8 +97,36 @@ func (e *extractor) Extract(url string, option extractors.Options) ([]*extractor
 	return extractedData, nil
 }
 
+func (e *extractor) clientWithOptions(opt request.Options) (*youtube.Client, error) {
+	if opt.Proxy == "" {
+		return e.client, nil
+	}
+	proxyURL, err := parseProxy(opt.Proxy)
+	if err != nil {
+		return nil, err
+	}
+	return &youtube.Client{
+		HTTPClient: &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyURL(proxyURL),
+			},
+		},
+	}, nil
+}
+
+func parseProxy(raw string) (*url.URL, error) {
+	if !strings.Contains(raw, "://") {
+		raw = "http://" + raw
+	}
+	proxyURL, err := url.Parse(raw)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return proxyURL, nil
+}
+
 // youtubeDownload download function for single url
-func (e *extractor) youtubeDownload(url string, video *youtube.Video) *extractors.Data {
+func (e *extractor) youtubeDownload(client *youtube.Client, url string, video *youtube.Video) *extractors.Data {
 	streams := make(map[string]*extractors.Stream, len(video.Formats))
 	audioCache := make(map[string]*extractors.Part)
 
@@ -104,7 +138,7 @@ func (e *extractor) youtubeDownload(url string, video *youtube.Video) *extractor
 			quality = fmt.Sprintf("%s %s", f.QualityLabel, f.MimeType)
 		}
 
-		part, err := e.genPartByFormat(video, f)
+		part, err := e.genPartByFormat(client, video, f)
 		if err != nil {
 			return extractors.EmptyData(url, err)
 		}
@@ -129,7 +163,7 @@ func (e *extractor) youtubeDownload(url string, video *youtube.Video) *extractor
 				if err != nil {
 					return extractors.EmptyData(url, err)
 				}
-				audioPart, err = e.genPartByFormat(video, audio)
+				audioPart, err = e.genPartByFormat(client, video, audio)
 				if err != nil {
 					return extractors.EmptyData(url, err)
 				}
@@ -160,9 +194,9 @@ func (e *extractor) youtubeDownload(url string, video *youtube.Video) *extractor
 	}
 }
 
-func (e *extractor) genPartByFormat(video *youtube.Video, f *youtube.Format) (*extractors.Part, error) {
+func (e *extractor) genPartByFormat(client *youtube.Client, video *youtube.Video, f *youtube.Format) (*extractors.Part, error) {
 	ext := getStreamExt(f.MimeType)
-	url, err := e.client.GetStreamURL(video, f)
+	url, err := client.GetStreamURL(video, f)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

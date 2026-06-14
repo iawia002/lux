@@ -19,9 +19,9 @@ import (
 	"github.com/cheggaaa/pb/v3"
 	"github.com/pkg/errors"
 
-	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/request"
-	"github.com/iawia002/lux/utils"
+	"github.com/OldBeLight/lux/extractors"
+	"github.com/OldBeLight/lux/request"
+	"github.com/OldBeLight/lux/utils"
 )
 
 // Options defines options used in downloading.
@@ -41,17 +41,36 @@ type Options struct {
 	ThreadNumber int
 	RetryTimes   int
 	ChunkSizeMB  int
+	Request      request.Options
 	// Aria2
 	UseAria2RPC bool
 	Aria2Token  string
 	Aria2Method string
 	Aria2Addr   string
+
+	Progress func(ProgressEvent)
 }
 
 // Downloader is the default downloader.
 type Downloader struct {
 	Bar    *pb.ProgressBar
 	option Options
+}
+
+type progressWriter struct {
+	writer    io.Writer
+	tracker   *progressTracker
+	url       string
+	partIndex int
+	partCount int
+}
+
+func (writer *progressWriter) Write(p []byte) (int, error) {
+	n, err := writer.writer.Write(p)
+	if n > 0 {
+		writer.tracker.add(int64(n), ProgressDownloading, writer.url, writer.partIndex, writer.partCount)
+	}
+	return n, err
 }
 
 const (
@@ -80,7 +99,7 @@ func (downloader *Downloader) caption(url, fileName, ext string, transform func(
 	if refer == "" {
 		refer = url
 	}
-	body, err := request.GetByte(url, refer, nil)
+	body, err := request.GetByteWithOptions(url, refer, nil, downloader.option.Request)
 	if err != nil {
 		return err
 	}
@@ -108,24 +127,34 @@ func (downloader *Downloader) caption(url, fileName, ext string, transform func(
 	return nil
 }
 
-func (downloader *Downloader) writeFile(url string, file *os.File, headers map[string]string) (int64, error) {
-	res, err := request.Request(http.MethodGet, url, nil, headers)
+func (downloader *Downloader) writeFile(url string, file *os.File, headers map[string]string, tracker *progressTracker, partIndex, partCount int) (int64, error) {
+	res, err := request.RequestWithOptions(http.MethodGet, url, nil, headers, downloader.option.Request)
 	if err != nil {
 		return 0, err
 	}
 	defer res.Body.Close() // nolint
 
 	barWriter := downloader.Bar.NewProxyWriter(file)
+	writer := io.Writer(barWriter)
+	if tracker != nil {
+		writer = &progressWriter{
+			writer:    barWriter,
+			tracker:   tracker,
+			url:       url,
+			partIndex: partIndex,
+			partCount: partCount,
+		}
+	}
 	// Note that io.Copy reads 32kb(maximum) from input and writes them to output, then repeats.
 	// So don't worry about memory.
-	written, copyErr := io.Copy(barWriter, res.Body)
+	written, copyErr := io.Copy(writer, res.Body)
 	if copyErr != nil && copyErr != io.EOF {
 		return written, errors.Errorf("file copy error: %s", copyErr)
 	}
 	return written, nil
 }
 
-func (downloader *Downloader) save(part *extractors.Part, refer, fileName string) error {
+func (downloader *Downloader) save(part *extractors.Part, refer, fileName string, tracker *progressTracker, partIndex, partCount int) error {
 	filePath, err := utils.FilePath(fileName, part.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, false)
 	if err != nil {
 		return err
@@ -138,6 +167,7 @@ func (downloader *Downloader) save(part *extractors.Part, refer, fileName string
 	// TODO: Live video URLs will not return the size
 	if exists && fileSize == part.Size {
 		downloader.Bar.Add64(fileSize)
+		tracker.add(fileSize, ProgressSkipped, part.URL, partIndex, partCount)
 		return nil
 	}
 
@@ -158,6 +188,7 @@ func (downloader *Downloader) save(part *extractors.Part, refer, fileName string
 		headers["Range"] = fmt.Sprintf("bytes=%d-", tempFileSize)
 		file, fileError = os.OpenFile(tempFilePath, os.O_APPEND|os.O_WRONLY, 0644)
 		downloader.Bar.Add64(tempFileSize)
+		tracker.add(tempFileSize, ProgressDownloading, part.URL, partIndex, partCount)
 	} else {
 		file, fileError = os.Create(tempFilePath)
 	}
@@ -193,7 +224,7 @@ func (downloader *Downloader) save(part *extractors.Part, refer, fileName string
 			headers["Range"] = fmt.Sprintf("bytes=%d-%d", start, end)
 			temp := start
 			for i := 0; ; i++ {
-				written, err := downloader.writeFile(part.URL, file, headers)
+				written, err := downloader.writeFile(part.URL, file, headers, tracker, partIndex, partCount)
 				if err == nil {
 					break
 				} else if i+1 >= downloader.option.RetryTimes {
@@ -208,7 +239,7 @@ func (downloader *Downloader) save(part *extractors.Part, refer, fileName string
 	} else {
 		temp := tempFileSize
 		for i := 0; ; i++ {
-			written, err := downloader.writeFile(part.URL, file, headers)
+			written, err := downloader.writeFile(part.URL, file, headers, tracker, partIndex, partCount)
 			if err == nil {
 				break
 			} else if i+1 >= downloader.option.RetryTimes {
@@ -223,7 +254,7 @@ func (downloader *Downloader) save(part *extractors.Part, refer, fileName string
 	return nil
 }
 
-func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, fileName string) error {
+func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, fileName string, tracker *progressTracker, partIndex, partCount int) error {
 	filePath, err := utils.FilePath(fileName, dataPart.Ext, downloader.option.FileNameLength, downloader.option.OutputPath, false)
 	if err != nil {
 		return err
@@ -237,6 +268,7 @@ func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, 
 	// TODO: Live video URLs will not return the size
 	if exists && fileSize == dataPart.Size {
 		downloader.Bar.Add64(fileSize)
+		tracker.add(fileSize, ProgressSkipped, dataPart.URL, partIndex, partCount)
 		return nil
 	}
 	tmpFilePath := filePath + DOWNLOAD_FILE_EXT
@@ -247,6 +279,7 @@ func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, 
 	if tmpExists {
 		if tmpFileSize == dataPart.Size {
 			downloader.Bar.Add64(dataPart.Size)
+			tracker.add(dataPart.Size, ProgressDownloading, dataPart.URL, partIndex, partCount)
 			return os.Rename(tmpFilePath, filePath)
 		}
 
@@ -332,8 +365,9 @@ func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, 
 	}
 	if savedSize > 0 {
 		downloader.Bar.Add64(savedSize)
+		tracker.add(savedSize, ProgressDownloading, dataPart.URL, partIndex, partCount)
 		if savedSize == dataPart.Size {
-			return mergeMultiPart(filePath, parts)
+			return downloader.mergeMultiPart(filePath, parts, tracker, dataPart.URL, partIndex, partCount)
 		}
 	}
 
@@ -380,7 +414,7 @@ func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, 
 				headers["Range"] = fmt.Sprintf("bytes=%d-%d", part.Cur, end)
 				temp := part.Cur
 				for i := 0; ; i++ {
-					written, err := downloader.writeFile(dataPart.URL, file, headers)
+					written, err := downloader.writeFile(dataPart.URL, file, headers, tracker, partIndex, partCount)
 					if err == nil {
 						remainingSize -= chunkSize
 						break
@@ -401,7 +435,12 @@ func (downloader *Downloader) multiThreadSave(dataPart *extractors.Part, refer, 
 	if len(errs) > 0 {
 		return errs[0]
 	}
-	return mergeMultiPart(filePath, parts)
+	return downloader.mergeMultiPart(filePath, parts, tracker, dataPart.URL, partIndex, partCount)
+}
+
+func (downloader *Downloader) mergeMultiPart(filepath string, parts []*FilePartMeta, tracker *progressTracker, url string, partIndex, partCount int) error {
+	tracker.emit(ProgressMerging, url, partIndex, partCount)
+	return mergeMultiPart(filepath, parts)
 }
 
 func filePartPath(filepath string, part *FilePartMeta) string {
@@ -643,6 +682,8 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 	if err != nil {
 		return err
 	}
+	tracker := newProgressTracker(downloader.option.Progress, mergedFilePath, stream.Size)
+	tracker.emit(ProgressPreparing, "", 0, len(stream.Parts))
 	_, mergedFileExists, err := utils.FileSize(mergedFilePath)
 	if err != nil {
 		return err
@@ -650,6 +691,8 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 	// After the merge, the file size has changed, so we do not check whether the size matches
 	if mergedFileExists {
 		fmt.Printf("%s: file already exists, skipping\n", mergedFilePath)
+		tracker.setDownloaded(stream.Size, ProgressSkipped, "", 0, len(stream.Parts))
+		tracker.emit(ProgressFinished, "", 0, len(stream.Parts))
 		return nil
 	}
 
@@ -661,12 +704,13 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 		// only one fragment
 		var err error
 		if downloader.option.MultiThread {
-			err = downloader.multiThreadSave(stream.Parts[0], data.URL, title)
+			err = downloader.multiThreadSave(stream.Parts[0], data.URL, title, tracker, 0, 1)
 		} else {
-			err = downloader.save(stream.Parts[0], data.URL, title)
+			err = downloader.save(stream.Parts[0], data.URL, title, tracker, 0, 1)
 		}
 
 		if err != nil {
+			tracker.emit(ProgressError, stream.Parts[0].URL, 0, 1)
 			return err
 		}
 		downloader.Bar.Finish()
@@ -676,12 +720,14 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 				fmt.Println("Embedding subtitles...")
 			}
 			if err := utils.EmbedSubtitles(mergedFilePath, subtitlePaths, subtitleLangs); err != nil {
+				tracker.emit(ProgressError, stream.Parts[0].URL, 0, 1)
 				return err
 			}
 			for _, path := range subtitleFilesToDelete {
 				os.Remove(path)
 			}
 		}
+		tracker.emit(ProgressFinished, stream.Parts[0].URL, 0, 1)
 		return nil
 	}
 
@@ -711,11 +757,12 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 			defer wgp.Done()
 			var err error
 			if downloader.option.MultiThread {
-				err = downloader.multiThreadSave(part, data.URL, fileName)
+				err = downloader.multiThreadSave(part, data.URL, fileName, tracker, index, len(stream.Parts))
 			} else {
-				err = downloader.save(part, data.URL, fileName)
+				err = downloader.save(part, data.URL, fileName, tracker, index, len(stream.Parts))
 			}
 			if err != nil {
+				tracker.emit(ProgressError, part.URL, index, len(stream.Parts))
 				lock.Lock()
 				errs = append(errs, err)
 				lock.Unlock()
@@ -729,18 +776,22 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 	downloader.Bar.Finish()
 
 	if data.Type != extractors.DataTypeVideo || downloader.option.AudioOnly {
+		tracker.emit(ProgressFinished, "", 0, len(stream.Parts))
 		return nil
 	}
 
 	if !downloader.option.Silent {
 		fmt.Printf("Merging video parts into %s\n", mergedFilePath)
 	}
+	tracker.emit(ProgressMerging, "", 0, len(stream.Parts))
 	if stream.Ext != "mp4" || stream.NeedMux {
 		if err := utils.MergeFilesWithSameExtension(parts, mergedFilePath); err != nil {
+			tracker.emit(ProgressError, "", 0, len(stream.Parts))
 			return err
 		}
 	} else {
 		if err := utils.MergeToMP4(parts, mergedFilePath, title); err != nil {
+			tracker.emit(ProgressError, "", 0, len(stream.Parts))
 			return err
 		}
 	}
@@ -750,6 +801,7 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 			fmt.Println("Embedding subtitles...")
 		}
 		if err := utils.EmbedSubtitles(mergedFilePath, subtitlePaths, subtitleLangs); err != nil {
+			tracker.emit(ProgressError, "", 0, len(stream.Parts))
 			return err
 		}
 		for _, path := range subtitleFilesToDelete {
@@ -757,5 +809,6 @@ func (downloader *Downloader) Download(data *extractors.Data) error {
 		}
 	}
 
+	tracker.emit(ProgressFinished, "", 0, len(stream.Parts))
 	return nil
 }

@@ -11,10 +11,10 @@ import (
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 
-	"github.com/iawia002/lux/downloader"
-	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/request"
-	"github.com/iawia002/lux/utils"
+	"github.com/OldBeLight/lux/downloader"
+	"github.com/OldBeLight/lux/extractors"
+	"github.com/OldBeLight/lux/request"
+	"github.com/OldBeLight/lux/utils"
 )
 
 // Name is the name of this app.
@@ -30,8 +30,8 @@ func init() {
 		fmt.Fprintf(
 			color.Output,
 			"\n%s: version %s, A fast and simple video downloader.\n\n",
-			cyan.Sprintf(Name),
-			blue.Sprintf(c.App.Version),
+			cyan.Sprint(Name),
+			blue.Sprint(c.App.Version),
 		)
 	}
 }
@@ -321,6 +321,7 @@ func download(c *cli.Context, videoURL string) error {
 		ThreadNumber:   int(c.Uint("thread")),
 		RetryTimes:     int(c.Uint("retry")),
 		ChunkSizeMB:    int(c.Uint("chunk-size")),
+		Request:        request.CurrentOptions(),
 		UseAria2RPC:    c.Bool("aria2"),
 		Aria2Token:     c.String("aria2-token"),
 		Aria2Method:    c.String("aria2-method"),

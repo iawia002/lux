@@ -578,6 +578,21 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
     	Embed subtitles into the video (YouTube only)
 ```
 
+### Go library progress callback
+
+Go callers can receive structured aggregate progress from the downloader without using the CLI progress bar:
+
+```go
+d := downloader.New(downloader.Options{
+	Progress: func(event downloader.ProgressEvent) {
+		fmt.Printf("%s %d/%d bytes\n", event.Status, event.DownloadedBytes, event.TotalBytes)
+	},
+})
+err := d.Download(data)
+```
+
+`DownloadedBytes` and `TotalBytes` describe the selected output as a whole. `PartIndex` and `PartCount` are only context for the currently active part. `URL` is the raw part URL when available and may include query parameters.
+
 #### Youku:
 
 ```
