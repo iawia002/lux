@@ -34,6 +34,7 @@
 - [Getting Started](#getting-started)
   - [Download a video](#download-a-video)
   - [Download anything else](#download-anything-else)
+  - [Download X videos through Xquik](#download-x-videos-through-xquik)
   - [Download playlist](#download-playlist)
   - [Multiple inputs](#multiple-inputs)
   - [Resume a download](#resume-a-download)
@@ -201,6 +202,21 @@ lux doesn't support this URL right now, but it will try to download it directly
 
  1.00 MiB / 1.00 MiB [===================================] 100.00% 1.21 MiB/s 0s
 ```
+
+### Download X videos through Xquik
+
+Lux can use Xquik when X blocks page metadata or a link uses `x.com`. Create an
+[Xquik API key](https://docs.xquik.com/api-reference/authentication), then set it
+before running Lux:
+
+```console
+$ export XQUIK_API_KEY="xq_..."
+$ lux "https://x.com/fasc1nate/status/1742731788961853831"
+```
+
+The lookup can consume Xquik credits. PowerShell users can set the variable with
+`$env:XQUIK_API_KEY = "xq_..."`. Unset it to use Lux's built-in Twitter
+extractor.
 
 ### Download playlist
 
@@ -627,7 +643,7 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 | 微博             | <https://weibo.com>                                                       | ✓        |          |         |            |                  | [![weibo](https://github.com/iawia002/lux/actions/workflows/stream_weibo.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_weibo.yml)                      |
 | Instagram        | <https://www.instagram.com>                                               | ✓        | ✓        |         |            |                  | [![instagram](https://github.com/iawia002/lux/actions/workflows/stream_instagram.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_instagram.yml)          |
 | Threads        | <https://www.threads.net>                                               | ✓        | ✓        |         |            |                  | [![threads](https://github.com/iawia002/lux/actions/workflows/stream_threads.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_threads.yml)          |
-| Twitter          | <https://twitter.com>                                                     | ✓        |          |         |            |                  | [![twitter](https://github.com/iawia002/lux/actions/workflows/stream_twitter.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_twitter.yml)                |
+| X (Twitter)      | <https://x.com>, <https://twitter.com>                                    | ✓        |          |         |            |                  | [![twitter](https://github.com/iawia002/lux/actions/workflows/stream_twitter.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_twitter.yml)                |
 | 腾讯视频         | <https://v.qq.com>                                                        | ✓        |          |         |            |                  | [![qq](https://github.com/iawia002/lux/actions/workflows/stream_qq.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_qq.yml)                               |
 | 网易云音乐       | <https://music.163.com>                                                   | ✓        |          |         |            |                  | [![netease](https://github.com/iawia002/lux/actions/workflows/stream_netease.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_netease.yml)                |
 | 音悦台           | <https://yinyuetai.com>                                                   | ✓        |          |         |            |                  | [![yinyuetai](https://github.com/iawia002/lux/actions/workflows/stream_yinyuetai.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_yinyuetai.yml)          |
