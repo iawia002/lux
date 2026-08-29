@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/iawia002/lux/extractors"
@@ -220,6 +221,36 @@ func TestXquikHTTPErrorDoesNotExposeAPIKey(t *testing.T) {
 	}
 	if strings.Contains(err.Error(), apiKey) {
 		t.Fatalf("Extract() exposed the API key: %v", err)
+	}
+}
+
+func TestXquikRedirectDoesNotForwardAPIKey(t *testing.T) {
+	const apiKey = "test-api-key"
+	t.Setenv(xquikAPIKeyEnv, apiKey)
+
+	var targetCalled atomic.Bool
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		targetCalled.Store(true)
+		if got := r.Header.Get("x-api-key"); got != "" {
+			t.Errorf("redirect target received x-api-key %q", got)
+		}
+		http.Error(w, "unexpected redirect", http.StatusBadRequest)
+	}))
+	t.Cleanup(target.Close)
+
+	redirect := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, target.URL, http.StatusFound)
+	}))
+	t.Cleanup(redirect.Close)
+
+	e := New().(*extractor)
+	e.xquikEndpoint = redirect.URL + "/api/v1/x/tweets/%s"
+	_, err := e.Extract("https://x.com/user/status/1742731788961853831", extractors.Options{})
+	if err == nil || !strings.Contains(err.Error(), "HTTP 302") {
+		t.Fatalf("Extract() error = %v, want HTTP 302", err)
+	}
+	if targetCalled.Load() {
+		t.Fatal("redirect target was called")
 	}
 }
 
