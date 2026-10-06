@@ -606,6 +606,10 @@ $ lux -j "https://www.bilibili.com/video/av20203945"
 
 ## Supported Sites
 
+Alipay public video shares are supported via `https://ur.lepudding.com/...` links
+and Alipay URLs containing `contentId`. Available qualities are listed with
+`lux -i URL` and can be selected with `lux -f 1080P_h265 URL`.
+
 | Site             | URL                                                                       | 🎬 Videos | 🌁 Images | 🔊 Audio | 📚 Playlist | 🍪 VIP adaptation | Build Status                                                                                                                                                                      |
 | ---------------- | ------------------------------------------------------------------------- | -------- | -------- | ------- | ---------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 抖音             | <https://www.douyin.com>                                                  | ✓        | ✓        |         |            |                  | [![douyin](https://github.com/iawia002/lux/actions/workflows/stream_douyin.yml/badge.svg)](https://github.com/iawia002/lux/actions/workflows/stream_douyin.yml)                   |
