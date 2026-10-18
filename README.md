@@ -25,7 +25,7 @@
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
   - [Install via `go install`](#install-via-go-install)
-  - [Homebrew (macOS only)](#homebrew-macos-only)
+  - [Homebrew (macOS and Linux only)](#homebrew-macos-and-linux-only)
   - [Arch Linux](#arch-linux)
   - [Void Linux](#void-linux)
   - [Scoop on Windows](#scoop-on-windows)
@@ -82,9 +82,9 @@ To install Lux, use `go install`, or download the binary file from [Releases](ht
 $ go install github.com/iawia002/lux@latest
 ```
 
-### Homebrew (macOS only)
+### Homebrew (macOS and Linux only)
 
-For macOS users, you can install `lux` via:
+For macOS and Linux users, you can install `lux` via:
 
 ```bash
 $ brew install lux
