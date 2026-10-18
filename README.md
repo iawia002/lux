@@ -25,7 +25,7 @@
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
   - [Install via `go install`](#install-via-go-install)
-  - [Homebrew (macOS and Linux only)](#homebrew-macos-only)
+  - [Homebrew (macOS and Linux only)](#homebrew-macos-and-linux-only)
   - [Arch Linux](#arch-linux)
   - [Void Linux](#void-linux)
   - [Scoop on Windows](#scoop-on-windows)
